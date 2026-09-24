@@ -8,10 +8,10 @@ Module: foundations · Prereqs: none · Core · Status: outline
 
 1. **Item response data.** People (or other units) respond to probes; the data are the responses. Understanding the data is separate from judging the items or the construct, but never forget those.
 2. **The IRW.** Open, harmonized item response data: over 1,000 tables, with metadata and, for many, item text; R and Python packages.
-3. **The data standard.** Three essential columns (`id`, `item`, `resp`), with responses coded to be treated as ordinal. Data are stored long; extra columns (`rt`, `wave`, `treat`, `cov_*`) ride along. Why long? *(major)*
+3. **The data standard.** Three essential columns (`id`, `item`, `resp`), with responses coded to be treated as ordinal: dichotomous (0/1) or polytomous (e.g. a 1–5 Likert scale). Data are stored long; extra columns (`rt`, `wave`, `treat`, `cov_*`) ride along. Why long? *(major)*
 4. **Long to wide.** One row per person; missing cells; people with no responses. *(major)*
-5. **A first look.** Missingness and categories per item; item means; the sum-score distribution; item–total correlations, and why each is worth computing. *(major)*
-6. **Items aren't always questions.** Trials in a perception task, with response times; an RCT with treatment, waves and clusters; item text.
+5. **A first look.** Missingness and categories per item; item means; the sum-score distribution; item–total correlations, and why each is worth computing. The same descriptives read differently for 0/1 and for Likert responses (a mean is a proportion only for 0/1). *(major)*
+6. **More than responses.** Many tables carry more than `resp`: response times (`rt`), design (`treat`, `wave`), covariates, and item text. Response time is the first example: how long someone took is data too. Items also aren't always questions: in a perception task they are conditions, repeated as trials.
 
 ## Picks up
 
@@ -31,9 +31,11 @@ Module: foundations · Prereqs: none · Core · Status: outline
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `verbagg` | main example | Complete and dichotomous (316 × 24). Item means range from 0.09 (S3DoShout) to 0.79 (S2WantCurse): cursing is endorsed more than shouting, and "want" more than "do" (0.53 vs. 0.42). | — |
-| `rr98_accuracy` | contrast | Items are conditions and each is answered many times (30 people, 33 conditions, 12,205 responses, with `rt`), so "one row per person" needs a decision about repeats. | candidate for `trials` (deliberate reuse as a thread?) |
-| `gilbert_meta_56` | contrast | An RCT: `treat`, `wave`, `cluster_id` and covariates; 2,712 students and 4 items. Most children (2,307 of 2,712) appear in both waves, so a naive reshape mixes them. | — (`ctt-reliability` uses `gilbert_meta_1`) |
+| `verbagg` | main example (dichotomous) | Complete and 0/1 (316 × 24). Item means range from 0.09 (S3DoShout) to 0.79 (S2WantCurse): cursing is endorsed more than shouting, and "want" more than "do" (0.53 vs. 0.42). | — |
+| `manolika_2021_mini_ipip` | contrast (polytomous) | The Mini-IPIP: 20 items, 1–5 Likert, 386 people, with `cov_gender` and `cov_age`, and item text (IPIP items are public domain). Item means run from 3.0 to 4.5. Items marked `R` arrive already reverse-scored ("Am not really interested in others" averages 4.5), which is worth knowing before summing. | — |
+| `rr98_accuracy` | contrast (response time) | A perception task with `rt` beside `resp`: 12,205 responses to 33 conditions, answered many times each. Errors are slower than correct responses (median 0.65 vs. 0.56 s). Repeated trials mean "one row per person" needs a decision. | candidate for `trials` (a thread?) |
+
+Design columns (`treat`, `wave`, `cluster_id`) get a paragraph and a pointer to `gilbert_meta_1` in `ctt-reliability`, rather than a fourth table.
 
 `chess_lnirt` moves out of this lesson (#12); it stays in `likelihood` and `rasch`.
 
@@ -43,6 +45,7 @@ Module: foundations · Prereqs: none · Core · Status: outline
 - Long ↔ wide: click a row in the long table and see its cell in the wide one (ideas 3, 4).
 - Missingness map: a person × item grid for a small table (idea 4).
 - Match the histogram: four item-mean histograms, four tables (idea 5).
+- Response time: rr98's RT distributions for correct and incorrect responses, overlaid (idea 6).
 
 **Predict-then-check:** in verbagg, which is endorsed more, "I would want to curse" or "I would curse", and which verb is endorsed least? Answered by the item means.
 
@@ -52,7 +55,7 @@ Module: foundations · Prereqs: none · Core · Status: outline
 1. Derivation: the item–total correlation includes the item itself. Show how much that inflates it on a short test; compute the corrected version.
 2. Real data with a twist (PS1#3a): take an IRW table with response times; for each item, compare mean RT for correct and incorrect responses. What complicates the inference?
 3. Judgment: when is wide format the better store? What does long format make easy?
-4. Design: you have your own dataset; map its columns to the IRW standard.
+4. Design: you have your own Likert dataset with some reverse-worded items; map it to the IRW standard, and say how you record keying.
 5. Real data (PS1#3c): pick a table and report the four descriptives plus one question they raise.
 6. Challenge (open, PS1#3b): an item-text table; relate a feature of the wording to the item means.
 
@@ -62,5 +65,5 @@ Module: foundations · Prereqs: none · Core · Status: outline
 
 ## Open questions
 
-- Item text (#63): ideas 2 and 6 and problem 6 want item text. With a Redivis login it works (`irw_itemtext`); with no token it doesn't. Depends on #63.
+- Item text (#63): ideas 2 and 6 and problem 6 want item text. With a Redivis login it works (`irw_itemtext`); with no token it doesn't. The Mini-IPIP makes this easy: IPIP items are public domain. Depends on #63.
 - Access route: lessons read tokenless CSVs; the 252 code uses `irw::irw_fetch` (needs a Redivis login). Teach both, with the CSV as the default?
