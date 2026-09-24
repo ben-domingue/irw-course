@@ -8,6 +8,18 @@ course <- read_course()
 check_course(course)
 ```
 
+```{=html}
+<div style="border:3px solid #c2410c;border-radius:8px;background:#fff7ed;padding:1.2rem 1.5rem;margin:1.2rem 0 1.8rem 0">
+  <div style="font-size:2.2rem;font-weight:800;letter-spacing:0.12em;color:#c2410c;line-height:1">DRAFT</div>
+  <div style="margin-top:0.6rem;font-size:1.05rem">
+    This course is under construction and is not ready for teaching. Most lessons are
+    still outlines or stubs, the few drafted ones will change, and nothing here has been
+    checked by anyone but its authors. Please don't cite, assign, or circulate it yet.
+    Comments are very welcome: <a href="mailto:bdomingue@stanford.edu">bdomingue@stanford.edu</a>.
+  </div>
+</div>
+```
+
 These are stand-alone lessons on psychometrics, each built around open data from the
 [Item Response Warehouse](https://itemresponsewarehouse.org). You can teach them in
 sequence as a full course or pick out individual lessons. The core lessons make a
@@ -15,10 +27,6 @@ first course in psychometrics; lessons marked optional go further. Each lesson l
 assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to
 Psychometrics) at Stanford.
 
-::: {.callout-warning appearance="simple"}
-**Work in progress.** The lesson list and prerequisites are a first draft, and most
-lessons are still stubs.
-:::
 
 ## Lessons by module
 
