@@ -54,6 +54,11 @@ prerequisites) are made at the outline stage, not while drafting.
 - **Broad data, always cited.** Draw on a broad swathe of the IRW rather than a few
   familiar tables, and always cite and link the original data source, not only the
   IRW table (§5).
+- **Gentle about the data.** Never be especially critical of the empirical data we
+  use. These datasets were shared by people who did the hard work of collecting
+  them. Note issues (missing responses, a keying problem, an item the model doesn't
+  describe) plainly and gently, as facts about fit or design, not as faults in the
+  data or its authors. A "failure case" is a case where the *model* fails.
 - **Show, don't assert.** When the text says
   what software does ("`mirt` fixes the mean ability at 0"), show it in a small example.
   When it mentions a result from the literature (the 1.7 scaling constant), cite and
@@ -271,6 +276,8 @@ A lesson moves to `status: done` only when every box is ticked.
 - [ ] 6 problems covering the mix; 6 worked solutions in `solutions/<id>.qmd`.
 - [ ] 0–2 depth callouts, collapsible, self-contained.
 - [ ] Every claim in With real data matches the rendered output.
+- [ ] Issues with the data are noted gently, never as criticism of the data or its
+      authors.
 - [ ] Software behaviour and literature results are shown or cited, not just asserted.
      
 
