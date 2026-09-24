@@ -63,6 +63,13 @@ prerequisites) are made at the outline stage, not while drafting.
   what software does ("`mirt` fixes the mean ability at 0"), show it in a small example.
   When it mentions a result from the literature (the 1.7 scaling constant), cite and
   link the source.
+- **Be extremely generous with citations.** Cite, inline and with a link (DOI where
+  there is one), every idea, result, method, figure, instrument, quotation, dataset and
+  R package the lesson uses, including the classics everyone "just knows" (Cronbach
+  1951, Lord & Novick 1968) and the source of any example borrowed from slides or
+  papers. When in doubt, cite. *Going further* adds reading; it doesn't replace inline
+  citations. Verify every reference (Crossref, the publisher, or IRW biblio for data),
+  never from memory, and say so in the outline when a source is still unverified.
 - **Written in Ben's voice** (§6).
 
 ---
@@ -317,6 +324,9 @@ A lesson moves to `status: done` only when every box is ticked.
 - [ ] Issues with the data are noted gently, never as criticism of the data or its
       authors.
 - [ ] Software behaviour and literature results are shown or cited, not just asserted.
+- [ ] Citations are generous: every idea, result, method, figure, instrument, quotation
+      and package the lesson uses is cited inline with a link, and every reference has
+      been verified (none from memory).
 
 **Voice** **[pending #3]**
 - [ ] At least one first-person verdict; none of the banned words; every size word
