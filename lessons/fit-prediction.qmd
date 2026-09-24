@@ -22,5 +22,10 @@ lesson_header("fit-prediction")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("fit-prediction")
+```
+
 ## For instructors
 

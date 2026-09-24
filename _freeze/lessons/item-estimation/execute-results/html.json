@@ -1,8 +1,8 @@
 {
-  "hash": "0a1a22039641a7a656ea5dbc1cd68658",
+  "hash": "07bbd7f39d002ca0364c001bdb6b3ec7",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Estimating item parameters: JML and EM\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory (optional: beyond a first course)  \n**Before this:** [Estimating abilities: MLE and EAP](ability-estimation.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** slides c5; problem sets PS5#1; code [`c5/EM-coins.R`](https://github.com/ben-domingue/252/blob/main/c5/EM-coins.R), [`c5/EM-example.R`](https://github.com/ben-domingue/252/blob/main/c5/EM-example.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Estimating item parameters: JML and EM\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory (optional: beyond a first course)  \n**Before this:** [Estimating abilities: MLE and EAP](ability-estimation.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** slides c5; problem sets PS5#1; code [`c5/EM-coins.R`](https://github.com/ben-domingue/252/blob/main/c5/EM-coins.R), [`c5/EM-example.R`](https://github.com/ben-domingue/252/blob/main/c5/EM-example.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

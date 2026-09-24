@@ -1,8 +1,8 @@
 {
-  "hash": "b5ff0ada8d0945cbaca6f255cbca55e9",
+  "hash": "9aa779431fc38e9afec38e6e44124ba5",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Information, precision, and short forms\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Before this:** [The Rasch model](rasch.qmd)  \n**Builds toward:** [Item banks and adaptive testing](item-banks-cat.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c3, c4; problem sets PS3#1, PS4#1, PS6#3; code [`c4/info.R`](https://github.com/ben-domingue/252/blob/main/c4/info.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Information, precision, and short forms\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Before this:** [The Rasch model](rasch.qmd)  \n**Builds toward:** [Item banks and adaptive testing](item-banks-cat.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c3, c4; problem sets PS3#1, PS4#1, PS6#3; code [`c4/info.R`](https://github.com/ben-domingue/252/blob/main/c4/info.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

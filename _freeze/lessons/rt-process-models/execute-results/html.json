@@ -1,8 +1,8 @@
 {
-  "hash": "1524399bf4b6d766c81285c0c82f072e",
+  "hash": "67312e654d72d8588f363ee796a60047",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Process models for response time: drift diffusion and race models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Beyond the standard models (optional: beyond a first course)  \n**Before this:** [Response time and the speed-accuracy tradeoff](response-time.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Process models for response time: drift diffusion and race models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Beyond the standard models (optional: beyond a first course)  \n**Before this:** [Response time and the speed-accuracy tradeoff](response-time.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

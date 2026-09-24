@@ -22,5 +22,10 @@ lesson_header("cdm")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("cdm")
+```
+
 ## For instructors
 
