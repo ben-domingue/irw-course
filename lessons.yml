@@ -18,6 +18,16 @@
 #   optional  true for lessons beyond a first course (default: core). A core
 #             lesson may not list an optional one as a prerequisite.
 #
+# Threads (the `threads:` list at the end) record ideas introduced in one lesson
+# and returned to in later ones (PROTOCOL.md §4). Each has
+#   id          slug
+#   idea        short phrase, shown in the header box of every lesson it touches
+#   introduced  lesson id
+#   returns     list of {lesson, how}: `how` says in a clause what the later
+#               lesson does with the idea (tests it, relaxes it, shows it failing)
+# check_course() fails on an unknown lesson, a missing field, or a return to the
+# introducing lesson or one of its prerequisites.
+#
 # 2026-09-24: six lessons added and core/optional set after the landscape
 # analysis in notes/landscape-2026-09-24.md.
 # DRAFT 2026-09-24: lesson boundaries and prerequisites are a first cut for Ben to
@@ -383,3 +393,11 @@ paths:
               fit-prediction, guessing-priors, item-banks-cat, equating, invariance-experience,
               explanatory-irt, cdm, polytomous, irtrees, unfolding-nominal, response-time,
               trials, ai-psychometrics]
+
+# Filled in by the cross-check passes over the outlines (#9). Example:
+#   - id: specific-objectivity
+#     idea: Specific objectivity
+#     introduced: rasch
+#     returns:
+#       - {lesson: 1pl-to-4pl, how: crossing ICCs in the chess data break it}
+threads: []
