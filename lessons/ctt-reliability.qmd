@@ -206,16 +206,6 @@ CTT also offers the simplest tools for looking at individual items. For each ite
 
 That last point is subtler than it sounds. CTT assumes every item is coded so that a higher response means more of the construct. Many scales deliberately include items worded in the opposite direction, and those have to be **reverse-keyed** before any of this makes sense. How do we know which ones? We will see below that the data can't always tell us, and that the only reliable answer is to read the items.
 
-```{ojs}
-//| echo: false
-predict({
-  q: "The Mach IV measures Machiavellianism on a 0–5 agreement scale. Half its items are worded so that agreeing is the *less* Machiavellian answer (e.g., 'Most people are basically good and kind'). If we compute alpha *without* reverse-keying them, roughly what do we get? (Keyed properly, alpha is 0.70.)",
-  choices: ["About 0.70", "About 0.55", "About 0.35", "Below 0"],
-  answer: "About 0.35",
-  reveal: "Alpha is 0.37 unkeyed. Items pulling in opposite directions cancel each other in the total, so the covariances that alpha relies on shrink. It is not negative because the two halves of the scale are each internally consistent."
-})
-```
-
 ## Simulate
 
 Here is the lower-bound result from the proof above, on simulated data where we know the true scores. The code generates a six-item test from the classical model, then compares the true reliability, $\text{cor}(X, T)^2$, with alpha. It is base R only, so it starts quickly.
@@ -277,6 +267,16 @@ Most items correlate 0.4 to 0.6 with the rest of the test, as a healthy reading 
 The red curve is the raw correlation between halves; the black curve steps each one up with Spearman–Brown. Any single split could give you something noticeably above or below alpha, but they average out to alpha (the dashed line), just as the theory says.
 
 ### Reverse keying: the Mach IV
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The Mach IV measures Machiavellianism on a 0–5 agreement scale. Half its items are worded so that agreeing is the *less* Machiavellian answer (e.g., 'Most people are basically good and kind'). If we compute alpha *without* reverse-keying them, roughly what do we get? (Keyed properly, alpha is 0.70.)",
+  choices: ["About 0.70", "About 0.55", "About 0.35", "Below 0"],
+  answer: "About 0.35",
+  reveal: "Alpha is 0.37 unkeyed. Items pulling in opposite directions cancel each other in the total, so the covariances that alpha relies on shrink. It is not negative because the two halves of the scale are each internally consistent."
+})
+```
 
 ```{r mach-raw}
 #| echo: true

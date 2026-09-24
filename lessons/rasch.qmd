@@ -352,6 +352,16 @@ Because `mirt` fixes the mean ability at 0, the mean difficulty tells us how har
 
 Does the model fit? A common first look is the infit and outfit statistics: mean squared standardized residuals, which should be near 1 if the model is right. Values well below 1 mean an item is *more* predictable than the Rasch model expects (typically an item that discriminates better than average); values well above 1 mean it is noisier.
 
+```{ojs}
+//| echo: false
+predict({
+  q: "Chess problems differ a lot in how sharply they separate strong players from weak ones, but the Rasch model gives every item the same slope. Among the chess items that fit worst, what do you expect to see?",
+  choices: ["Mostly overfit (outfit well below 1)", "Mostly underfit (outfit well above 1)", "About as many of each", "No misfit: every outfit near 1"],
+  answer: "Mostly overfit (outfit well below 1)",
+  reveal: "Most of the worst-fitting items overfit: they discriminate more sharply than the common slope allows, so their responses are *more* predictable than the model expects. One item, Y15, goes the other way, with an outfit above 2."
+})
+```
+
 ```{r itemfit-chess}
 #| echo: true
 #| code-fold: show
