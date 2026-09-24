@@ -1,4 +1,13 @@
 # Settings for every lesson page. They sit here rather than in _quarto.yml so they
 # travel with lessons/ when it moves into irw_site/course/.
+engine: knitr
+filters:
+  - webr
+# Lesson code readers can download (and the in-browser setup, webr/build_repo.R).
+resources:
+  - code/*.R
+# Empirical sections fetch IRW data and fit models at render time; freeze keeps
+# those results until the lesson's source changes.
+freeze: auto
 execute:
   echo: false

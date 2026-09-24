@@ -1,0 +1,8 @@
+Package: qs2
+Version: 99.0.0
+Title: Browser Stub for 'qs2'
+Description: Placeholder so that mirt (via SimDesign) loads in webR, where the
+    real 'qs2' cannot be built. Its functions stop with an explanation. Used only
+    in the course's in-browser simulations; local R installs the real package.
+License: GPL-3
+Authors@R: person("Ben", "Domingue", role = c("aut", "cre"), email = "bdomingue@stanford.edu")
