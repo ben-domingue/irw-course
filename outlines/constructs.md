@@ -30,6 +30,7 @@ Module: ctt · Prereqs: measurement · Core · Status: outline
 - Latent classes → `cdm`; mixture/latent-class item response models otherwise unpaid.
 - The construct suggests an intervention → `validity-causal` (Borsboom's causal view), `invariance-experience`.
 - Blueprints and domain sampling → `validity-argument` (content evidence), `g-theory` (items as a facet).
+- A scale meant to measure one thing, and how consistently it does → `ctt-reliability`.
 
 ## Tables
 

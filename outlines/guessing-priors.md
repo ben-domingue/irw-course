@@ -2,7 +2,7 @@
 
 # Guessing and priors (`guessing-priors`)
 
-Module: irt · Prereqs: 1pl-to-4pl, fit-prediction · Optional · Status: outline
+Module: irt · Prereqs: ability-estimation, fit-prediction · Optional · Status: outline
 
 ## Core ideas
 
@@ -20,11 +20,12 @@ Crossref-checked 09-24 unless marked.
 - Out-of-sample prediction for comparing models (from `fit-prediction`).
 - The likelihood, and the Bayesian reading of it (from `likelihood`).
 - Response times as data beside responses (from `irw-data`).
+- Priors on abilities; EAP and shrinkage (from `ability-estimation`).
+- Information, and where guessing costs it (from `information`).
 
 ## Promises / leaves open
 
-- Priors on abilities: EAP → `ability-estimation`.
-- Estimation machinery (EM, with or without priors) → `item-estimation`.
+- Estimation machinery (EM, with or without priors) → `item-estimation` (an optional sibling; each restates what it needs).
 - Response times modelled jointly with accuracy → `response-time`.
 - Skipped responses carry information (ENEM coded missing as wrong) → `irtrees`.
 - Guessing as a latent class of responders → unpaid (mixture models).

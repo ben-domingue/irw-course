@@ -130,7 +130,7 @@ lessons:
   - id: information
     title: Information, precision, and short forms
     module: irt
-    prereqs: [rasch]
+    prereqs: [1pl-to-4pl]
     origin: {slides: [c3, c4], ps: ["PS3#1", "PS4#1", "PS6#3"], code: [c4/info.R]}
     tables: [bialowolski_2024_financial_literacy, christensen_2018_wsssf_5831]
     status: stub
@@ -138,7 +138,7 @@ lessons:
   - id: ability-estimation
     title: "Estimating abilities: MLE and EAP"
     module: irt
-    prereqs: [rasch]
+    prereqs: [information]
     origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
     tables: [c19prc_uk_mcbride_2021_wordsum]
     status: stub
@@ -181,7 +181,7 @@ lessons:
   - id: guessing-priors
     title: Guessing and priors
     module: irt
-    prereqs: [1pl-to-4pl, fit-prediction]
+    prereqs: [ability-estimation, fit-prediction]
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical, vocabulary_iq]
     status: stub
@@ -190,7 +190,7 @@ lessons:
   - id: dimensionality
     title: Dimensionality and multidimensional IRT
     module: irt
-    prereqs: [1pl-to-4pl]
+    prereqs: [fa-confirmatory]
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
     tables: [florida_twins_dweck, florida_twins_grit]
     status: stub
@@ -251,7 +251,7 @@ lessons:
   - id: polytomous
     title: Models for polytomous responses
     module: irt
-    prereqs: [1pl-to-4pl]
+    prereqs: [information]
     origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
     tables: [promis1wave1_pain, science_ltm]
     status: stub
@@ -322,7 +322,7 @@ lessons:
   - id: g-theory
     title: "Many sources of error: generalizability theory"
     module: ctt
-    prereqs: [ctt-reliability]
+    prereqs: [instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
     status: stub
@@ -330,7 +330,7 @@ lessons:
   - id: fa-exploratory
     title: "Factor analysis I: exploring dimensionality"
     module: fa
-    prereqs: [ctt-reliability]
+    prereqs: [instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [bfi2_zhang_2025]
     status: draft

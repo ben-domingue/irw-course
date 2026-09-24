@@ -17,10 +17,11 @@ Module: irt · Prereqs: ability-estimation · Optional · Status: outline
 - Ability estimation with items known; no MLE for perfect patterns; priors (from `ability-estimation`).
 - The Rasch model and sufficiency (from `rasch`; conditional ML is its payoff).
 - The likelihood, `optim`, Newton steps (from `likelihood`).
+- The 2PL and 3PL, whose item parameters EM estimates too (from `1pl-to-4pl`).
 
 ## Promises / leaves open
 
-- Estimating item parameters for the 2PL/3PL, where priors on items help → `1pl-to-4pl`, `guessing-priors`.
+- Priors on item parameters, where the 3PL needs them → `guessing-priors`.
 - Many-item, sparse designs (each person sees some items) → `equating`, `item-banks-cat`.
 - Latent regression (a prior that depends on covariates) → `explanatory-irt`.
 - Crossed random effects as an alternative estimator (`glmer`) → `explanatory-irt`, `trials`.

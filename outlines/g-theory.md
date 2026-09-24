@@ -2,7 +2,7 @@
 
 # Many sources of error: generalizability theory (`g-theory`)
 
-Module: ctt · Prereqs: ctt-reliability · Core · Status: outline
+Module: ctt · Prereqs: instrument-building · Core · Status: outline
 
 ## Core ideas
 
@@ -17,10 +17,11 @@ Module: ctt · Prereqs: ctt-reliability · Core · Status: outline
 - $X = T + E$, reliability, SEM, alpha, Spearman–Brown (from `ctt-reliability`).
 - Raters and constructed-response scoring (from `instrument-building`, if taught first; not a prerequisite).
 - Reliability is a property of scores in a population (from `ctt-reliability`).
+- Blueprints and domain sampling: items as a facet (from `constructs`).
 
 ## Promises / leaves open
 
-- Raters as a facet in item response models → unpaid (rater models, many-facet Rasch); flag for `beyond`.
+- Raters as a facet in item response models → unpaid (rater models, many-facet Rasch); flag for the Beyond module.
 - Random-effects models for item responses → `explanatory-irt` (items and persons as random effects).
 - Occasions as a facet → `invariance-experience`; ESM data otherwise unpaid.
 - Absolute error for decisions against a cut score → `score-meaning`.

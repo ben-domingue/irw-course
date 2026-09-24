@@ -20,6 +20,7 @@ Crossref-checked 09-24 unless marked. Choosing among these models by out-of-samp
 - The slope slider in the Rasch ICC widget, and D ≈ 1.7 with Camilli (1994) (from `rasch`).
 - Logistic regression; items differ in how strongly Elo predicts success (from `likelihood`).
 - Item–sum curves with different steepness (from `ctt-limits`).
+- Item–total correlations as a first look at discrimination (from `irw-data`).
 
 ## Promises / leaves open
 
@@ -31,6 +32,9 @@ Crossref-checked 09-24 unless marked. Choosing among these models by out-of-samp
 - Slopes as factor loadings → `fa-confirmatory`.
 - The slip parameter returns in cognitive diagnosis → `cdm`.
 - How much do slopes vary across the IRW? → deep dive #21.
+- Weighted scores: ability estimates under the 2PL → `ability-estimation`.
+- Slopes and thresholds for ordered categories → `polytomous`.
+- Multidimensional 2PL → `dimensionality`.
 
 ## Tables
 

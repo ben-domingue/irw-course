@@ -26,6 +26,8 @@ Module: foundations · Prereqs: none · Core · Status: outline
 - Polytomous responses (ordinal coding) → `polytomous`.
 - Missing responses by design → `equating`, `item-banks-cat`; otherwise unpaid.
 - Finding tables by metadata (`irw_filter`) → deep dives (#18–26).
+- Long format: one row per response, as `glm` wants → `likelihood`.
+- Very fast responses as a sign of guessing → `guessing-priors`.
 
 ## Tables
 

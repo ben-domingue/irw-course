@@ -28,6 +28,8 @@ Module: foundations · Prereqs: irw-data · Core · Status: outline
 - Priors → `ability-estimation` (EAP), `guessing-priors`.
 - Comparing models by likelihood → `fit-prediction`.
 - Logit vs. probit → `rasch` (D ≈ 1.7, Camilli 1994).
+- Logistic regression of an item on the sum score → `ctt-limits`.
+- Maximizing numerically (`optim`, Newton steps) → `item-estimation`.
 
 ## Tables
 

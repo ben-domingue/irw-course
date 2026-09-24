@@ -20,6 +20,7 @@ All references above were checked on Crossref (09-24).
 - Alpha ≤ reliability, tau-equivalence (thread from `ctt-reliability`).
 - The 2PL, slopes and intercepts (from `1pl-to-4pl`).
 - Wording direction as a second dimension (from `instrument-building`).
+- Unidimensionality as a Rasch assumption (from `rasch`).
 
 ## Promises / leaves open
 

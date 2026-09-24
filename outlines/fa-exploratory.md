@@ -2,7 +2,7 @@
 
 # Factor analysis I: exploring dimensionality (`fa-exploratory`)
 
-Module: fa · Prereqs: ctt-reliability · Core · Status: outline (page is a draft)
+Module: fa · Prereqs: instrument-building · Core · Status: outline (page is a draft)
 
 ## Core ideas
 
@@ -23,7 +23,7 @@ Articles checked on Crossref (09-24); Thurstone (1947) is a book, still to verif
 
 - Confirmatory models, fit indices, omega → `fa-confirmatory`.
 - Ordered categories as a coarsened continuous variable (polychorics) → `fa-confirmatory` (ordinal FA ≡ GRM), `polytomous`.
-- The scale of a factor is arbitrary (rotation, like the Rasch origin) → `rasch` (thread: the scale has no origin).
+- The scale of a factor is arbitrary (rotation), as the Rasch scale has no origin; a cross-reference with `rasch` both ways, since neither is a prerequisite of the other.
 - Dimensionality in IRT → `dimensionality`; deep dive #23 (how often unidimensionality holds).
 - Response formats as an experiment (problem 4) → `invariance-experience`, unpaid otherwise.
 - The "unusually clean" claim needs a baseline (TODO in the page, #3) → the dimensionality vignette.
