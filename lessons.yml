@@ -353,6 +353,16 @@ lessons:
     status: stub
     optional: true
 
+  # 2026-09-24: added at Ben's suggestion (#66); module placement is a first guess.
+  - id: scale-properties
+    title: "Scale properties: is the scale equal-interval?"
+    module: uses
+    prereqs: [measurement, rasch]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+    optional: true
+
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
   - id: first-course
