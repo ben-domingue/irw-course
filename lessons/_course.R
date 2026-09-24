@@ -157,7 +157,8 @@ ask_claude <- function(id, about) {
     "::: {.callout-tip appearance=\"simple\" icon=\"false\"}\n",
     "**Stuck, or curious about something this lesson doesn't cover?** ",
     "[Ask Claude about this lesson](", href, "){target=\"_blank\" .btn .btn-outline-primary .btn-sm} ",
-    "opens a new conversation that already knows what the lesson is about; add your question at the end.\n",
+    "opens a new conversation that already knows what the lesson is about; add your question at the end. ",
+    "Claude shows a caution notice on any prompt that arrives through a link; that's expected.\n",
     ":::\n\n", sep = ""
   )
 }
