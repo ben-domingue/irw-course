@@ -125,16 +125,18 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 - **At most 3** IRW tables per lesson, each with a job (main example, contrast or
   failure case) given in one sentence where the table is introduced.
 - **Breadth.** A table appears in one lesson only, unless the reuse is deliberate (a
-  thread returning to the same data) and recorded. `check_tables.R` flags reuse.
-  **[pending #12: the reuse check is not yet implemented]**
+  thread returning to the same data) and recorded: the later lesson lists the table
+  under `reuses:` in `lessons.yml`. `Rscript check_tables.R` flags any other reuse.
 - **Tokenless CSV only.** Use only tables with a tokenless CSV on their IRW landing
   page. Redivis serves those only under 100 MB; larger datasets need a teaching
   subsample published as an ordinary IRW table (#15).
 - **Citation.** Always cite and link the original data: every table is cited where it
   is introduced, with the DOI or URL of the original source from IRW biblio
   (`get_citation`), never from memory, plus a link to its IRW landing page. A
-  generated **Data sources** block closes each lesson. **[pending #12: generator not
-  yet written]**
+  generated **Data sources** block (`data_sources("<id>")`, just before *For
+  instructors*) closes each lesson. After adding a table, run `Rscript check_tables.R`
+  to refresh `lessons/_citations.yml` and commit it; a lesson whose table has no
+  cached citation fails to render.
 
 ### Quizzes (#1)
 
