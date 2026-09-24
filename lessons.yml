@@ -218,7 +218,7 @@ lessons:
     module: uses
     prereqs: [information]
     origin: {slides: [c6, c10], ps: [], code: []}
-    tables: []
+    tables: [choi_2026_cmsce_2020_1, promis1wave1_depression]
     status: stub
     optional: true
 
@@ -227,7 +227,7 @@ lessons:
     module: uses
     prereqs: [1pl-to-4pl]
     origin: {slides: [c6], ps: ["PS6#4"], code: [c6/equate-irt.R, c6/equate-obsscore.R, c6/concurrent.R, ps6/equating.R, ps6/equating_simstudy.R]}
-    tables: [enem_2013_1mil_lc, enem_2014_1mil_mt]
+    tables: [cdm_timss11, pirlsmissing_sirt]
     status: stub
 
   - id: explanatory-irt
@@ -358,7 +358,7 @@ lessons:
     module: uses
     prereqs: [ctt-reliability]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [c19prc_uk_mcbride_2021_phq9, coroiu_2018_phq9]
     status: stub
 
   # 2026-09-24: sem and rt-process-models added at Ben's suggestion; both optional (#64, #65).
@@ -388,7 +388,7 @@ lessons:
     module: uses
     prereqs: [measurement, rasch]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [project_kids_wj_lwid_wave]
     status: stub
     optional: true
 
