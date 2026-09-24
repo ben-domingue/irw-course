@@ -120,12 +120,15 @@ check_course <- function(course = read_course()) {
     if (!file.exists(page))
       problems <- c(problems, sprintf("%s: no page at lessons/%s.qmd", l$id, l$id))
   }
-  opt <- ids[vapply(course$lessons, function(l) isTRUE(l$optional), TRUE)]
-  for (l in course$lessons) if (!isTRUE(l$optional)) {
-    bad <- intersect(unlist(l$prereqs), opt)
-    if (length(bad))
-      problems <- c(problems, sprintf("%s: core lesson requires optional '%s'", l$id, bad))
-  }
+  # Tranches (Ben, 09-24): a lesson may not require one from a later tranche.
+  tranches <- c("preliminary", "core", "extension")
+  tr <- setNames(vapply(course$lessons, function(l) if (is.null(l$tranche)) NA_character_ else l$tranche, ""), ids)
+  for (id in ids[!tr %in% tranches])
+    problems <- c(problems, sprintf("%s: tranche must be one of %s", id, paste(tranches, collapse = ", ")))
+  rank <- setNames(match(tr, tranches), ids)
+  for (l in course$lessons) for (p in intersect(unlist(l$prereqs), ids))
+    if (isTRUE(rank[[p]] > rank[[l$id]]))
+      problems <- c(problems, sprintf("%s (%s) requires '%s' (%s), from a later tranche", l$id, tr[[l$id]], p, tr[[p]]))
   for (p in course$paths) {
     bad <- setdiff(unlist(p$lessons), ids)
     if (length(bad))
@@ -220,7 +223,8 @@ lesson_header <- function(id) {
   )
   cat(
     "::: {.callout-note appearance=\"simple\"}\n",
-    "**Module:** ", mod, if (isTRUE(l$optional)) " (optional: beyond a first course)", "  \n",
+    "**Module:** ", mod, "  \n",
+    "**Tranche:** ", switch(l$tranche, preliminary = "preliminary (sets up the course)", core = "core (a first course)", extension = "extension (beyond a first course)"), "  \n",
     "**Before this:** ", links(unlist(l$prereqs)), "  \n",
     "**Builds toward:** ", links(next_ids), "  \n",
     thread_rows,

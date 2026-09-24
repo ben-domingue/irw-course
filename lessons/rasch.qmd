@@ -270,7 +270,7 @@ md`${so_cross === null ? "With equal slopes the curves never cross: whoever you 
   "The slopes differ, so the curves cross somewhere—but outside the range plotted. Push the slope further from 1 to bring the crossing into view."}`
 ```
 
-This is why partisans of the Rasch model feel so strongly about it: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like. The catch is that the model has to fit. <!-- TODO (Ben): first-person verdict on equal slopes here, e.g. 'My view is that...'; see notes/voice-audit-2026-09-24.md, Pattern A. -->
+This is why partisans of the Rasch model feel so strongly about it: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like. The catch is that the model has to fit.
 Consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
 
 ```{ojs}

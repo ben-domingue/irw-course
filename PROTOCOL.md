@@ -18,19 +18,29 @@ checklist that a lesson must pass before its `status` in `lessons.yml` becomes `
 ## 1. Workflow
 
 1. **Outline.** Every lesson gets an outline, `outlines/<id>.md`, before any lesson is
-   drafted (optional lessons too). Copy `outlines/_template.md`; `outlines/rasch.md` is
-   the worked example. Ben reviews outlines module by module (#8).
-2. **Cross-check.** Iterative passes over all the outlines: every hook paid off or
-   flagged unpaid; every pick-up introduced in an earlier lesson; duplication; gaps.
-   One report per pass for Ben; repeat until clean (#9). A **depth pass** ranks the
-   Go deeper candidates by how many lessons pick them up; Ben cuts the short list (#10).
-3. **Record threads.** The agreed cross-lesson connections go into `lessons.yml` as
-   `threads:` (§4). The build checks them.
-4. **Draft.** Draft from the outline, after reading every thread that touches the
-   lesson (§4). Mark the lesson `status: draft`.
+   drafted (extensions too). Copy `outlines/_template.md`; `outlines/rasch.md` is
+   the worked example. Ben's answers to the outline questions are in
+   `notes/open-questions.md`, and each outline carries them before drafting starts.
+2. **Draft in tranche order, in waves (Ben, 09-24).** Lessons come in three tranches
+   (`tranche:` in `lessons.yml`): *preliminary*, *core*, *extension*. Draft a tranche
+   before the next. Within a tranche, a wave is the lessons whose prerequisites are
+   already drafted; each lesson in a wave is drafted by its own session, in its own
+   worktree, with its own PR. Before drafting, read the *drafted text* of every
+   prerequisite (not only its outline) and every thread that touches the lesson (§4).
+   Mark the lesson `status: draft`.
+3. **Cross-check each wave, front to back.** After a wave, one pass reads the new
+   drafts against the lessons before them: each later lesson uses what the earlier
+   ones actually say (Recalls point at real text; nothing is re-taught; nothing is
+   assumed that wasn't taught), and the outlines of the next wave are updated to
+   match. `python3 tools/crosscheck.py` gives the mechanical part.
+4. **Record threads as lessons are drafted.** A drafting session adds the threads
+   its lesson starts or picks up to `lessons.yml` (§4). The build checks them.
 5. **Review.** Run the checklist (§9). Anything only Ben can decide goes into pinned
    issue #62 with the `needs-ben` label. Mark the lesson `done` when the checklist passes
    and Ben has signed off.
+
+**The lesson list is frozen (Ben, 09-24).** No new lessons, splits or merges without an
+explicit decision from Ben.
 
 Curriculum changes (splitting a lesson, moving an idea between lessons, changing
 prerequisites) are made at the outline stage, not while drafting.
@@ -39,8 +49,8 @@ prerequisites) are made at the outline stage, not while drafting.
 
 ## 2. Principles
 
-- **A first course.** Core lessons stay at first-course level. Deeper material is
-  either an optional lesson or a collapsible callout.
+- **A first course.** Preliminary and core lessons stay at first-course level. Deeper
+  material is either an extension lesson or a collapsible callout.
 - **Widgets, then simulation, then data.** Each lesson moves from interactive widgets
   (build intuition) to a simulation in webR (generate data from the model and recover
   it) to real IRW data (see what happens when the model meets the world).
@@ -59,6 +69,11 @@ prerequisites) are made at the outline stage, not while drafting.
   them. Note issues (missing responses, a keying problem, an item the model doesn't
   describe) plainly and gently, as facts about fit or design, not as faults in the
   data or its authors. A "failure case" is a case where the *model* fails.
+- **No criticism of other researchers' models (Ben, 09-24).** The course is public.
+  Where a slide dismisses a model ("I don't much like this model"), the lesson instead
+  asks what the model assumes and lets the data say whether the assumptions hold.
+  First-person verdicts (§6, rule A) are about the choice a practitioner faces, not
+  about whose model is better.
 - **Show, don't assert.** When the text says
   what software does ("`mirt` fixes the mean ability at 0"), show it in a small example.
   When it mentions a result from the literature (the 1.7 scaling constant), cite and
@@ -120,6 +135,9 @@ specific objectivity, introduced in `rasch`, shown failing in `1pl-to-4pl`).
 - **Drafting rule.** Before writing a lesson, read every thread that touches it. Pay
   off each thread it owes with a **Recall** callout that links back to where the idea
   was introduced. Register any new assumption or promise as a thread.
+- **Lessons that aren't ancestors (digest E2).** A lesson may recall a lesson outside its
+  prerequisite chain only briefly, as "if you've done X", restating what it needs.
+  Such Recalls aren't threads and don't appear in the header box.
 
 Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-checks
 (#9) settle the final list.
@@ -313,7 +331,18 @@ From what broke while building the pilots and the draft site. Source:
   easiness): say so where the code converts.
 
 **Render and publish**
-- `freeze: auto` caches the empirical results in `_freeze/`, which is committed.
+- `freeze: auto` caches the empirical results in `_freeze/`, which is committed. The
+  publish workflow has no R, so **every page must have an up-to-date `_freeze/` entry**:
+  render any page you add or edit (and every page, after editing `lessons.yml`, since
+  the header boxes come from it) and commit its `_freeze/` directory. `python3
+  tools/check_freeze.py` fails on a missing or stale entry (a missing one broke the
+  publish on 09-24, run 36051532494).
+- **Preview for Ben.** One local server serves every worktree:
+  `python3 -m http.server 4400 --bind 127.0.0.1 --directory ~/worktrees` (start it if
+  it isn't running). After rendering, the PR description links the page at
+  `http://127.0.0.1:4400/<worktree-dir>/_site/lessons/<id>.html`. Widgets, quizzes and
+  webR need a server: a self-contained HTML opened from disk shows text, math, code and
+  the real-data output, but Quarto disables the widgets and webR on `file://` pages.
   Render with no IRW token. The first render fetches data, and a transient network
   error (`Error in scan()`) can fail it: re-run.
 - Publishing is by hand, never on push: the **Run workflow** button on
@@ -386,6 +415,7 @@ A lesson moves to `status: done` only when every box is ticked.
       state matches the widget or the output.
 - [ ] The downloadable `code/<id>-sim.R` and `code/<id>-irw.R` run unchanged in local
       R and give the numbers the page shows.
+- [ ] `python3 tools/check_freeze.py` passes, and the PR links the preview (§7).
 - [ ] `check_course()`, `Rscript check_tables.R` and `Rscript check_links.R` pass. The
       last checks every IRW vignette and table link in the lessons (#72).
 

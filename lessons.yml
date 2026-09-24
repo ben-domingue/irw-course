@@ -15,8 +15,10 @@
 #   reuses    tables in `tables` that an earlier lesson already uses, returned to
 #             deliberately (a thread). check_tables.R flags any other reuse.
 #   status    stub | draft | done
-#   optional  true for lessons beyond a first course (default: core). A core
-#             lesson may not list an optional one as a prerequisite.
+#   tranche   preliminary | core | extension (Ben, 09-24). Preliminary lessons set
+#             up the course; core lessons make a first course; extensions go
+#             further. A lesson may not list a prerequisite from a later tranche.
+#             Draft in tranche order.
 #
 # Threads (the `threads:` list at the end) record ideas introduced in one lesson
 # and returned to in later ones (PROTOCOL.md §4). Each has
@@ -60,6 +62,7 @@ lessons:
     origin: {slides: [c1], ps: ["PS1#4"], code: []}
     tables: []
     status: stub
+    tranche: preliminary
 
   - id: irw-data
     title: Item response data and the IRW
@@ -68,6 +71,7 @@ lessons:
     origin: {slides: [c1], ps: ["PS1#3"], code: [c1/irw_data_exploration.R]}
     tables: [verbagg, manolika_2021_mini_ipip, rr98_accuracy]
     status: stub
+    tranche: preliminary
 
   - id: likelihood
     title: The likelihood and logistic regression
@@ -76,6 +80,7 @@ lessons:
     origin: {slides: [c1], ps: ["PS1#1", "PS1#2", "PS1#5"], code: [c1/likelihood.R, ps1/ps1-like.R, ps1/ll_logreg.R, ps1/ps1-chess.R]}
     tables: [chess_lnirt]
     status: done
+    tranche: preliminary
 
   - id: constructs
     title: Constructs and construct maps
@@ -84,6 +89,7 @@ lessons:
     origin: {slides: [c2], ps: [], code: []}
     tables: [himmelstein-number_series-2025]
     status: stub
+    tranche: core
 
   - id: ctt-reliability
     title: Classical test theory and reliability
@@ -92,6 +98,7 @@ lessons:
     origin: {slides: [c2], ps: ["PS2#1", "PS2#2", "PS2#3"], code: [c2/alpha.R, ps2/itemanalysis.R, ps2/parallel_tests.R]}
     tables: [gilbert_meta_1, lessR_Mach4]
     status: draft
+    tranche: core
 
   - id: ctt-limits
     title: "Where CTT breaks: toward item response models"
@@ -100,14 +107,16 @@ lessons:
     origin: {slides: [c2], ps: ["PS2#4", "PS2#5"], code: [ps2/ctt_failures.R, ps2/towards_irt.R]}
     tables: [4thgrade_math_sirt, andrich_mudfold]
     status: stub
+    tranche: core
 
   - id: validity-argument
     title: Validity as an argument
     module: validity
-    prereqs: [constructs]
+    prereqs: [constructs, ctt-reliability]
     origin: {slides: [c3], ps: [], code: []}
     tables: [silk_2019_inattentive, silk_2019_hyperactive]
     status: stub
+    tranche: core
 
   - id: validity-causal
     title: "Validity as causation: Borsboom's view"
@@ -116,7 +125,7 @@ lessons:
     origin: {slides: [c4], ps: [], code: []}
     tables: [vocab_assessment_3_to_8_year_old_children, robison_2026_retesting_stroop]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: rasch
     title: The Rasch model
@@ -126,6 +135,7 @@ lessons:
     tables: [chess_lnirt, wirs]
     reuses: [chess_lnirt]
     status: draft
+    tranche: core
 
   - id: information
     title: Information, precision, and short forms
@@ -134,6 +144,7 @@ lessons:
     origin: {slides: [c3, c4], ps: ["PS3#1", "PS4#1", "PS6#3"], code: [c4/info.R]}
     tables: [bialowolski_2024_financial_literacy, christensen_2018_wsssf_5831]
     status: stub
+    tranche: core
 
   - id: ability-estimation
     title: "Estimating abilities: MLE and EAP"
@@ -142,6 +153,7 @@ lessons:
     origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
     tables: [c19prc_uk_mcbride_2021_wordsum]
     status: stub
+    tranche: core
 
   - id: item-estimation
     title: "Estimating item parameters: JML and EM"
@@ -150,7 +162,7 @@ lessons:
     origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
     tables: [enders_2022_science_literacy]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: 1pl-to-4pl
     title: From the 1PL to the 4PL
@@ -160,6 +172,7 @@ lessons:
     tables: [wilmer-rmet-normative-data-set-2022, chess_lnirt]
     reuses: [chess_lnirt]
     status: stub
+    tranche: core
 
   - id: parameter-invariance
     title: Parameter invariance
@@ -168,7 +181,7 @@ lessons:
     origin: {slides: [c4], ps: [], code: []}
     tables: [wilmer-mrmet-normative-data-set-2022]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: fit-prediction
     title: Model fit and out-of-sample prediction
@@ -177,6 +190,7 @@ lessons:
     origin: {slides: [c6], ps: ["PS3#3", "PS3#4", "PS4#2"], code: [ps3/fit.R, ps3/different-links.R, ps4/prediction.R, c6/enem_imv.R]}
     tables: [gilbert_meta_2, gilbert_meta_14]
     status: stub
+    tranche: core
 
   - id: guessing-priors
     title: Guessing and priors
@@ -185,7 +199,7 @@ lessons:
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical, vocabulary_iq]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: dimensionality
     title: Dimensionality and multidimensional IRT
@@ -194,7 +208,7 @@ lessons:
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
     tables: [florida_twins_dweck, florida_twins_grit]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: dif
     title: Differential item functioning
@@ -203,6 +217,7 @@ lessons:
     origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
     tables: [gilbert_meta_11, alexandrowicz_2018_cesd]
     status: stub
+    tranche: core
 
   - id: invariance-experience
     title: Measurement invariance under treatment and life events
@@ -211,16 +226,16 @@ lessons:
     origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
     tables: [gilbert_meta_20, gilbert_meta_37]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: item-banks-cat
     title: Item banks and adaptive testing
     module: uses
-    prereqs: [information]
+    prereqs: [information, ability-estimation, polytomous]
     origin: {slides: [c6, c10], ps: [], code: []}
     tables: [choi_2026_cmsce_2020_1, promis1wave1_depression]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: equating
     title: Linking and equating
@@ -229,6 +244,7 @@ lessons:
     origin: {slides: [c6], ps: ["PS6#4"], code: [c6/equate-irt.R, c6/equate-obsscore.R, c6/concurrent.R, ps6/equating.R, ps6/equating_simstudy.R]}
     tables: [cdm_timss11, pirlsmissing_sirt]
     status: stub
+    tranche: core
 
   - id: explanatory-irt
     title: "What is an item? Explanatory item response models"
@@ -238,7 +254,7 @@ lessons:
     tables: [verbagg, trog_brinchmann_2019, imps2025_hf]
     reuses: [verbagg]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: cdm
     title: Cognitive diagnostic models
@@ -247,7 +263,7 @@ lessons:
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
     tables: [frac20, cdm_ecpe]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: polytomous
     title: Models for polytomous responses
@@ -256,6 +272,7 @@ lessons:
     origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
     tables: [promis1wave1_pain, science_ltm]
     status: stub
+    tranche: core
 
   - id: irtrees
     title: IRTree models
@@ -264,7 +281,7 @@ lessons:
     origin: {slides: [c8], ps: ["PS8#4"], code: [c8/irtree.R, c8/irtree2.R, c8/irtree_sim.R, ps8/fast.R]}
     tables: [bfi_goldberg_1992_conscientiousness, introversion_extroversion]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: unfolding
     title: Unfolding models
@@ -274,7 +291,7 @@ lessons:
     tables: [andrich_mudfold, eurpar2_mudfold]
     reuses: [andrich_mudfold]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: nominal
     title: Nominal response and multiple-choice models
@@ -284,7 +301,7 @@ lessons:
     tables: [wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
     reuses: [wilmer-rmet-normative-data-set-2022]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: response-time
     title: Response time and the speed-accuracy tradeoff
@@ -294,7 +311,7 @@ lessons:
     tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed, rapm_poulton_2022_untimed]
     reuses: [roar_lexical]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: trials
     title: "Trials as items: tasks, shots, and rotations"
@@ -304,16 +321,16 @@ lessons:
     tables: [rr98_accuracy, mentalrotation_wolf_2024, enkavi_2019_stroop]
     reuses: [rr98_accuracy]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: ai-psychometrics
     title: AI and psychometrics
     module: beyond
-    prereqs: [1pl-to-4pl]
+    prereqs: [1pl-to-4pl, explanatory-irt]
     origin: {slides: [c10], ps: [], code: [c10/model.R]}
     tables: [himmelstein-impossible_question-2025, gpt4mcq_young_2025, genpsych_russell_2024_gpt4o]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: instrument-building
     title: "From construct map to items: building an instrument"
@@ -322,6 +339,7 @@ lessons:
     origin: {slides: [c2], ps: [], code: []}
     tables: [song_2023_rses]
     status: stub
+    tranche: core
 
   - id: g-theory
     title: "Many sources of error: generalizability theory"
@@ -330,6 +348,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
     status: stub
+    tranche: core
 
   - id: fa-exploratory
     title: "Factor analysis I: exploring dimensionality"
@@ -338,6 +357,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [bfi2_zhang_2025]
     status: draft
+    tranche: core
 
   - id: fa-confirmatory
     title: "Factor analysis II: confirmatory models, omega, and IRT as factor analysis"
@@ -346,22 +366,25 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [grit, neurodegenerative_huizinga_2019_dass]
     status: stub
+    tranche: core
 
   - id: validity-evidence
     title: Gathering validity evidence
     module: validity
-    prereqs: [validity-argument, ctt-reliability]
+    prereqs: [validity-argument, ctt-reliability, instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [de_vries_2022_hexaco_self, de_vries_2022_hexaco_other, ieswriting_molloy_2022]
     status: stub
+    tranche: core
 
   - id: score-meaning
     title: "What does a score mean? Norms, error bands, and cut scores"
     module: uses
-    prereqs: [ctt-reliability]
+    prereqs: [ctt-reliability, information]
     origin: {slides: [], ps: [], code: []}
     tables: [c19prc_uk_mcbride_2021_phq9, coroiu_2018_phq9]
     status: stub
+    tranche: core
 
   # 2026-09-24: sem and rt-process-models added at Ben's suggestion; both optional (#64, #65).
   - id: sem
@@ -372,17 +395,17 @@ lessons:
     tables: [florida_twins_grit, florida_twins_panas]
     reuses: [florida_twins_grit]
     status: stub
-    optional: true
+    tranche: extension
 
   - id: rt-process-models
     title: "Process models for response time: drift diffusion and race models"
     module: beyond
-    prereqs: [response-time]
+    prereqs: [response-time, 1pl-to-4pl]
     origin: {slides: [], ps: [], code: []}
     tables: [mturkddm_lexical, motion, credentialform_lnirt]
     reuses: [credentialform_lnirt]
     status: stub
-    optional: true
+    tranche: extension
 
   # 2026-09-24: added at Ben's suggestion (#66); module placement is a first guess.
   - id: scale-properties
@@ -392,7 +415,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [project_kids_wj_lwid_wave]
     status: stub
-    optional: true
+    tranche: extension
 
   # 2026-09-24: added at Ben's request (#86); module and optional status are a first guess.
   # Competition tables come from the IRW competition standard (source = "comp").
@@ -403,12 +426,12 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [nba_2012-2018, friedman2019_risk_harm, friedman2019_risk_disaster]
     status: stub
-    optional: true
+    tranche: extension
 
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
   - id: first-course
-    title: "A first course (core lessons only)"
+    title: "A first course (preliminary and core lessons)"
     lessons: [measurement, irw-data, likelihood, constructs, instrument-building, ctt-reliability,
               g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
               information, ability-estimation, 1pl-to-4pl, fa-confirmatory, polytomous,

@@ -296,7 +296,6 @@ Alpha nearly doubles, to 0.70, and the item-rest correlations now look like a sc
 
 ### Limitations worth remembering
 
-<!-- TODO (Ben): open with a first-person verdict on alpha (would you report it? rely on it?); see notes/voice-audit-2026-09-24.md, Pattern A. -->
 Many of these were known to Cronbach himself. Alpha is a lower bound only under uncorrelated errors, and there are better lower bounds (the greatest lower bound, "glb") and model-based alternatives such as **omega**, which we meet in [Factor analysis II](fa-confirmatory.qmd). Alpha is not a measure of unidimensionality. And reliability is a property of scores *in a population*: estimate it in a sample that is a poor proxy for the people you care about and the number may not mean much. For a clear example of that last point, see the IRW vignette on [the reliability paradox in cognitive-control tasks](https://itemresponsewarehouse.org/vignettes/hf_reliability_paradox.html), where tasks that produce robust experimental effects yield unreliable individual differences.
 
 Finally, the limitation that motivates the rest of the course: CTT says nothing about individual item responses. It treats a test as a single score with a single error variance, the same for everyone. That is the assumption item response theory drops; [Where CTT breaks](ctt-limits.qmd) shows what it costs.
