@@ -114,6 +114,7 @@ lessons:
     prereqs: [ctt-limits]
     origin: {slides: [c3], ps: [], code: [c3/rasch0.R, c3/rasch1.R, c3/rasch2.R]}
     tables: [chess_lnirt, wirs]
+    reuses: [chess_lnirt]
     status: draft
 
   - id: information
@@ -259,6 +260,7 @@ lessons:
     prereqs: [polytomous]
     origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
     tables: [andrich_mudfold, preference_inventory]
+    reuses: [andrich_mudfold]
     status: stub
     optional: true
 
