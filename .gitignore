@@ -13,3 +13,6 @@ _site/
 .Rhistory
 
 **/*.quarto_ipynb
+
+# Held-back solutions (Ben shares selectively; never published)
+solutions/
