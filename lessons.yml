@@ -235,7 +235,8 @@ lessons:
     module: beyond
     prereqs: [rasch]
     origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
-    tables: [imps2025_hf]
+    tables: [verbagg, trog_brinchmann_2019, imps2025_hf]
+    reuses: [verbagg]
     status: stub
     optional: true
 
