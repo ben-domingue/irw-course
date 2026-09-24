@@ -63,6 +63,6 @@ Two tables from one study count as one data source; the lesson says so.
 
 - `florida_twins_grit` is also listed for `dimensionality` (IRT module, not yet outlined). Settle at that pass: either `dimensionality` takes another table or `sem` records it under `reuses:`. `check_tables.R` flags it until then.
 
-- #64 asks whether SEM is core or optional, and where `lavaan` first appears. Proposed: optional, with `lavaan` introduced in `fa-confirmatory`.
+- Optional (Ben, 09-24, #64). Still open: `lavaan` is introduced in `fa-confirmatory`, not here. Agree?
 - Keying: confirm the Florida twins grit response scale against the source before drafting (see the finding above).
 - Twins are clustered in families; is a family id available in the source data? If not, the lesson says the standard errors are too small, gently.
