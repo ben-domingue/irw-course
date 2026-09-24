@@ -23,9 +23,13 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Classical test theory treats a test as measuring one thing. Many instruments are built to measure several: a personality inventory with five domains, a quality-of-life scale with physical and emotional subscales, a math test with separate strands for geometry and algebra. Even an instrument meant to measure one thing may not. **Factor analysis** is the family of tools for asking what, and how many, underlying dimensions account for the correlations among a set of items. It is one of the oldest ideas in psychometrics—Spearman proposed it in 1904 to explain why children who did well in one school subject tended to do well in others—and it remains the workhorse for studying the internal structure of a scale.
+How many things does a set of items measure? Classical test theory mostly assumes the answer is one, and a high alpha doesn't check that assumption. Many instruments are built to measure several things at once: a personality inventory with five domains, a quality-of-life scale with physical and emotional subscales. And an instrument meant to measure one thing may not, as the reverse-worded items in [the instrument-building lesson](instrument-building.qmd) showed. **Factor analysis** is the family of tools for asking what, and how many, underlying dimensions account for the correlations among a set of items. It is one of the oldest ideas in psychometrics. [Spearman (1904)](https://doi.org/10.2307/1412107) proposed it to explain why children who did well in one school subject tended to do well in others, and it remains the workhorse for studying the internal structure of a scale.
 
-This lesson is about the *exploratory* version: we let the data suggest a structure. [Factor analysis II](fa-confirmatory.qmd) takes up the *confirmatory* version, where we state a structure in advance and test it, and shows that factor analysis and item response theory are closer relatives than they first appear.
+::: {.callout-tip appearance="simple"}
+**Recall** from [From construct map to items](instrument-building.qmd): reverse-worded items guard against acquiescence, but they can cluster together by the direction they're worded in, so a scale written for one construct can show two dimensions.
+:::
+
+This lesson is about the *exploratory* version: we let the data suggest a structure. [Factor analysis II](fa-confirmatory.qmd) takes up the *confirmatory* version, where we state a structure in advance and test it; it also asks whether a structure holds across groups, and shows that factor analysis and item response theory are closer relatives than they first appear.
 
 ## Goals
 
@@ -34,6 +38,7 @@ By the end of this lesson you should be able to:
 - write down the common factor model and explain how it reproduces a correlation matrix;
 - decide how many factors to extract, using eigenvalues and parallel analysis, and explain why common rules of thumb disagree;
 - explain what rotation does (and what it does not do) and choose between orthogonal and oblique rotations;
+- say why Likert items call for polychoric correlations, and how factor analysis differs from principal components;
 - run an exploratory factor analysis on real item responses and read the output.
 
 ## Core ideas
@@ -42,7 +47,7 @@ By the end of this lesson you should be able to:
 
 The data for factor analysis is a correlation matrix. The **common factor model** says that each standardized item $x_i$ is a weighted combination of a small number of common factors plus something unique to that item:
 $$x_i = \lambda_{i1} f_1 + \lambda_{i2} f_2 + \dots + \lambda_{im} f_m + u_i.$$
-The weights $\lambda$ are the **loadings**. The unique part $u_i$ bundles measurement error with anything specific to the item, and it is assumed to be uncorrelated with the factors and with the other items' unique parts. That last assumption is doing the real work: it says that everything the items have *in common* runs through the factors.
+The weights $\lambda$ are the **loadings**. The unique part $u_i$ bundles measurement error with anything specific to the item, and it is assumed to be uncorrelated with the factors and with the other items' unique parts. That last assumption carries the model: it says that everything the items have *in common* runs through the factors. Spearman's version had one factor; [Thurstone (1931)](https://doi.org/10.1037/h0069792) extended it to several, and his *Multiple-factor analysis* (Thurstone, 1947; see the [review by Cattell, 1948](https://doi.org/10.1007/bf02289082)) set out most of what follows.
 
 With a single factor, the model makes a strong prediction. The correlation between items $i$ and $j$ is just the product of their loadings,
 $$\text{cor}(x_i, x_j) = \lambda_i \lambda_j,$$
@@ -71,7 +76,7 @@ Plot.plot({
 })
 ```
 
-Note two things. The item with the weakest loading has the weakest correlations with everything. And the pattern is rigid: the ratio of item 1's correlations with items 3 and 4 is the same as the ratio of item 2's. If real data didn't have that rigid pattern, one factor would not be enough—which is exactly how factor analysis detects that a second dimension is needed.
+You should see two things. The item with the weakest loading has the weakest correlations with everything. And the pattern is rigid: the ratio of item 1's correlations with items 3 and 4 is the same as the ratio of item 2's. If real data didn't have that rigid pattern, one factor would not be enough, which is how factor analysis detects that a second dimension is needed. Spearman turned the rigid pattern into a test, the vanishing "tetrad differences" ([Spearman & Holzinger, 1924](https://doi.org/10.1111/j.2044-8295.1924.tb00158.x); problem 1).
 
 ```{ojs}
 //| echo: false
@@ -85,13 +90,19 @@ quiz({
 })
 ```
 
-A useful quantity falls out of this: an item's **communality**, $h_i^2 = \sum_k \lambda_{ik}^2$, is the share of its variance explained by the common factors. The remainder, $1 - h_i^2$, is its **uniqueness**. An item with loading 0.3 on a single factor has a communality of 0.09; more than 90% of what it does is its own business.
+A useful quantity falls out of this: an item's **communality**, $h_i^2 = \sum_k \lambda_{ik}^2$, is the share of its variance explained by the common factors. The remainder, $1 - h_i^2$, is its **uniqueness**. An item with loading 0.3 on a single factor has a communality of $0.3^2 = 0.09$; more than 90% of what it does is its own business.
+
+A one-factor model is what "the items are **unidimensional**" means in factor-analytic terms, and it is a claim the data can reject.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): alpha is not a measure of unidimensionality, and it equals reliability only when the items are tau-equivalent. In the language of this lesson, tau-equivalence is a one-factor model with equal loadings (problem 2).
+:::
 
 ### How many factors?
 
 This is the question exploratory factor analysis is most often used to answer, and it has no single correct procedure. The usual starting point is the **eigenvalues** of the correlation matrix. Loosely, each eigenvalue says how much of the total variance (which, for $p$ standardized items, is $p$) a dimension can account for, taken in decreasing order. A few large eigenvalues followed by a flat tail suggests a few factors.
 
-Two classic rules of thumb read this list. The **Kaiser rule** keeps every factor with an eigenvalue above 1. The **scree plot** looks for the "elbow" where the eigenvalues level off. Both have a problem: even data with *no* factor structure produce eigenvalues above 1, purely from sampling variability, and more so in small samples. **Parallel analysis** fixes this by comparing the observed eigenvalues with those from random data of the same size, and keeping factors only while the observed ones are larger. Among the simple methods, it is the one I would reach for first.
+Two classic rules of thumb read this list. The **Kaiser rule** keeps every factor with an eigenvalue above 1 ([Guttman, 1954](https://doi.org/10.1007/BF02289162); [Kaiser, 1960](https://doi.org/10.1177/001316446002000116)). The **scree plot** looks for the "elbow" where the eigenvalues level off ([Cattell, 1966](https://doi.org/10.1207/s15327906mbr0102_10)). Both have a problem: even data with *no* factor structure produce eigenvalues above 1, purely from sampling variability, and more so in small samples. **Parallel analysis** ([Horn, 1965](https://doi.org/10.1007/bf02289447)) fixes this by comparing the observed eigenvalues with those from random data of the same size, and keeping factors only while the observed ones are larger. Among the simple methods, it is the one I would reach for first.
 
 #### Try it: eigenvalues and parallel analysis
 
@@ -131,7 +142,7 @@ Plot.plot({
 md`True number of factors: **${pa_k}**. Parallel analysis suggests **${pa.nPA}**; the eigenvalue-greater-than-one rule suggests **${pa.nKaiser}**.`
 ```
 
-Push the loadings down to 0.3 with 100 people, and even parallel analysis starts to miss factors; push the sample up and the Kaiser rule keeps over-extracting a little, while parallel analysis settles on the truth. The practical lesson is that the number of factors is an *estimate*, with its own uncertainty, and the choice should also make substantive sense.
+At the starting settings (two factors, loadings of 0.5, 150 people), parallel analysis finds two factors and the Kaiser rule four. Raise the sample to 500 and both find two. Now drop the loadings to 0.3: the Kaiser rule says four or five even with 1,000 people, and with 100 people parallel analysis goes wrong too, in either direction depending on the number of factors. The number of factors is an *estimate*, with its own uncertainty, and the choice should also make substantive sense.
 
 ```{ojs}
 //| echo: false
@@ -139,7 +150,7 @@ quiz({
   q: "With 100 respondents and 20 items that have no common factors at all, the largest eigenvalue of their correlation matrix will be about…",
   options: [
     {text: "1, since each standardized item has variance 1", correct: false, why: "That is the *average* eigenvalue. Sampling noise spreads them out, so the largest is well above 1."},
-    {text: "Well above 1 (around 2)", correct: true, why: "Random correlations in a finite sample push the leading eigenvalues above 1. That is why the Kaiser rule over-extracts, and why parallel analysis compares against random data instead."},
+    {text: "Well above 1 (a little under 2)", correct: true, why: "Random correlations in a finite sample push the leading eigenvalues above 1 (in 200 simulated datasets of this size, the largest eigenvalue had a median of 1.9). That is why the Kaiser rule over-extracts, and why parallel analysis compares against random data instead."},
     {text: "0, since there is no common factor", correct: false, why: "Eigenvalues of a correlation matrix are never all zero; they always sum to the number of items."}
   ]
 })
@@ -147,7 +158,7 @@ quiz({
 
 ### Rotation
 
-Which set of loadings is the right one? The data cannot say. Once we have more than one factor, the loadings are not unique. Any rotation of the factors reproduces the correlation matrix *exactly* as well as any other, so the data cannot choose among them. What rotation does is pick, from this infinite family of equally good solutions, one that is easy to interpret—ideally **simple structure**, where each item loads strongly on one factor and near zero on the rest.
+Once we have more than one factor, which set of loadings is the right one? The data cannot say. With two or more factors the loadings are not unique: any rotation of the factors reproduces the correlation matrix *exactly* as well as any other. What rotation does is pick, from this infinite family of equally good solutions, one that is easy to interpret, ideally one with **simple structure** (Thurstone, 1947), where each item loads strongly on one factor and near zero on the rest.
 
 #### Try it: rotating two factors
 
@@ -183,7 +194,26 @@ Plot.plot({
 md`Largest change in any implied correlation: **${rot.d.toExponential(1)}** (i.e., none). Simplicity of the loadings (average gap between each item's two loadings): **${rot.simple.toFixed(2)}**${Math.abs(rot_a) < 3 ? " — near its best: each item loads on one factor." : "."}`
 ```
 
-Rotations come in two kinds. **Orthogonal** rotations (varimax is the famous one) keep the factors uncorrelated. **Oblique** rotations (oblimin, promax, geomin) let them correlate. In psychology and education, constructs are almost always correlated with one another—anxious people tend to be less extraverted, strong readers tend to be strong at math—so forcing factors to be uncorrelated is an assumption we have no reason to make. My default is oblique; if the factors turn out to be nearly uncorrelated, the two approaches will agree anyway.
+The points swing around the origin as a rigid body, and the implied correlations never change. Only the simplicity score moves, and it is largest near an angle of 0, where each item sits close to one axis.
+
+::: {.callout-note collapse="true"}
+## Go deeper: why the data can't choose a rotation
+
+**Assumptions:** the common factor model with $m \ge 2$ factors, loadings in a $p \times m$ matrix $\Lambda$, factor correlations $\Phi$ (the identity for uncorrelated factors), and unique variances in a diagonal matrix $\Psi$.
+
+**The implied correlations.** Stacking the model for all $p$ items gives $x = \Lambda f + u$, and so
+$$\text{cor}(x) = \Lambda \Phi \Lambda^\top + \Psi.$$
+
+**Orthogonal rotation.** Let $T$ be any orthogonal $m \times m$ matrix ($T T^\top = I$), and take new loadings $\Lambda^* = \Lambda T$ with $\Phi = I$. Then
+$$\Lambda^* \Lambda^{*\top} = \Lambda T T^\top \Lambda^\top = \Lambda \Lambda^\top,$$
+so every implied correlation is unchanged. The widget's $T$ is the $2 \times 2$ rotation by the slider's angle.
+
+**Oblique rotation.** Let $T$ be any invertible matrix, and take $\Lambda^* = \Lambda (T^{\top})^{-1}$ and $\Phi^* = T^\top \Phi T$. Then $\Lambda^* \Phi^* \Lambda^{*\top} = \Lambda (T^{\top})^{-1} T^\top \Phi T\, T^{-1} \Lambda^\top = \Lambda \Phi \Lambda^\top$. (With the factor variances held at 1, $T$ must keep the diagonal of $\Phi^*$ at 1.)
+
+**What it means.** The likelihood, the residuals and every fit statistic depend on the data only through the implied correlations, so they cannot prefer one $T$ over another. A rotation criterion (varimax, oblimin, …) is an extra rule for choosing $T$, and it is a choice about description. The same indeterminacy reappears when a confirmatory model has to fix loadings to be identified ([Factor analysis II](fa-confirmatory.qmd)) and in multidimensional item response models ([Dimensionality and multidimensional IRT](dimensionality.qmd)). If you've done [the Rasch lesson](rasch.qmd), it is a cousin of the scale's missing origin: the data fix differences, not the frame they are described in.
+:::
+
+Rotations come in two kinds ([Browne, 2001](https://doi.org/10.1207/s15327906mbr3601_05), reviews both). **Orthogonal** rotations keep the factors uncorrelated; varimax ([Kaiser, 1958](https://doi.org/10.1007/bf02289233)) is the best known. **Oblique** rotations let them correlate: oblimin (in R's default form, direct quartimin; [Jennrich & Sampson, 1966](https://doi.org/10.1007/bf02289465)), promax ([Hendrickson & White, 1964](https://doi.org/10.1111/j.2044-8317.1964.tb00244.x)) and others. In psychology and education, constructs tend to correlate with one another, so forcing factors to be uncorrelated is an assumption we seldom have reason to make. My default is oblique. If the factors turn out to be nearly uncorrelated, the two approaches will agree anyway, and we'll see below how far from zero the BFI-2's factor correlations sit.
 
 ```{ojs}
 //| echo: false
@@ -199,13 +229,13 @@ quiz({
 
 ### Two practical notes
 
-**Likert items are not continuous.** Pearson correlations between 5-point items understate the relationship between the underlying continuous tendencies, and they are distorted when items are skewed. The standard fix is to factor-analyze **polychoric** correlations, which estimate the correlation between the continuous variables that the ordered categories are assumed to coarsen. We use them below. This idea—an ordered response as a coarsened continuous one—is also the bridge to item response theory; see [Factor analysis II](fa-confirmatory.qmd).
+**Likert items are not continuous.** Pearson correlations between 5-point items understate the relationship between the underlying continuous tendencies, and they are distorted when items are skewed. The standard fix is to factor-analyze **polychoric** correlations ([Olsson, 1979](https://doi.org/10.1007/bf02296207)), which estimate the correlation between the continuous variables that the ordered categories are assumed to coarsen. We use them below. This idea, an ordered response as a coarsened continuous one, is also the bridge to item response theory; see [Factor analysis II](fa-confirmatory.qmd).
 
-**Factor analysis is not principal components analysis.** PCA finds weighted sums of the items that capture as much of their *total* variance as possible; it has no unique parts and no model of measurement error. Factor analysis models only the *shared* variance. For summarizing data the two often look similar; for asking what constructs an instrument measures, factor analysis is the right tool.
+**Factor analysis is not principal components analysis.** PCA ([Pearson, 1901](https://doi.org/10.1080/14786440109462720); [Hotelling, 1933](https://doi.org/10.1037/h0071325)) finds weighted sums of the items that capture as much of their *total* variance as possible; it has no unique parts and no model of measurement error. Factor analysis models only the *shared* variance. For summarizing data the two often look similar ([Velicer & Jackson, 1990](https://doi.org/10.1207/s15327906mbr2501_1)); for asking what constructs an instrument measures, factor analysis is the right tool ([Fabrigar et al., 1999](https://doi.org/10.1037/1082-989x.4.3.272)). Problem 6 compares the two on real data.
 
 ## Simulate
 
-The code below builds a questionnaire with a known structure (by default, two correlated factors with five items each), runs parallel analysis, fits an oblique exploratory factor analysis, and prints the loadings for comparison with the truth. It runs in your browser; the first run takes a little while as `psych` loads.
+The code below builds a questionnaire with a known structure (by default, two correlated factors with five items each), runs parallel analysis, fits an oblique exploratory factor analysis, and prints the loadings for comparison with the truth. It uses the `psych` package ([Revelle, 2026](https://CRAN.R-project.org/package=psych)), with rotations from `GPArotation` ([Bernaards & Jennrich, 2005](https://doi.org/10.1177/0013164404272507)), and estimates by minimum residuals ([Harman & Jones, 1966](https://doi.org/10.1007/BF02289468)). It runs in your browser; the first run takes a little while as `psych` loads.
 
 Things to try: set `loading` to 0.4 or `np` to 100 and see whether parallel analysis still finds the right number of factors; set `phi` to 0.7 and ask whether two factors are still worth distinguishing; set `n_factors` to 3.
 
@@ -213,7 +243,7 @@ Things to try: set `loading` to 0.4 or `np` to 100 and see whether parallel anal
 {{< include code/fa-exploratory-sim.R >}}
 ```
 
-With these settings the estimated factor correlation comes out somewhat below the true 0.3—that is sampling variability with 400 people, and a reminder that factor correlations are estimated with less precision than loadings. [Download this code](code/fa-exploratory-sim.R).
+With the seed as written, the estimated factor correlation comes out at 0.18 against a true 0.3. That is sampling variability with 400 people, and a reminder that factor correlations are estimated with less precision than loadings. [Download this code](code/fa-exploratory-sim.R).
 
 ## With real data
 
@@ -222,17 +252,30 @@ With these settings the estimated factor correlation comes out somewhat below th
 knitr::read_chunk("code/fa-exploratory-irw.R")
 ```
 
-We use [bfi2_zhang_2025](https://itemresponsewarehouse.org/tables/bfi2_zhang_2025/): responses from 1,335 university students to the 60-item Big Five Inventory-2 (BFI-2; Soto & John, 2017), which measures five broad domains of personality with 12 items each. The data come from a study by Zhang, Huang, Sun and Savalei (2025) that randomly assigned people to one of four response formats; we pool across formats here and return to that design in the problems. [Download the code](code/fa-exploratory-irw.R).
+We use [bfi2_zhang_2025](https://itemresponsewarehouse.org/tables/bfi2_zhang_2025/), our main example: responses from 1,335 university students to the 60-item Big Five Inventory-2 (BFI-2; [Soto & John, 2017](https://doi.org/10.1037/pspp0000096)), which measures five broad domains of personality with 12 items each. The data come from [Zhang, Huang, Sun and Savalei (2025)](https://doi.org/10.1080/00223891.2025.2531187), who randomly assigned students to one of four response formats; we pool across formats here and return to that design in problem 4. [Download the code](code/fa-exploratory-irw.R).
 
 ```{r fetch}
 #| echo: true
 #| code-fold: show
 ```
 
+A few responses are missing, scattered across items and respondents; we keep the 1,199 students who answered all 60.
+
 ```{r domains}
 #| echo: true
 #| code-fold: show
 ```
+
+Responses run from 1 to 5, and they arrive keyed: the BFI-2's reverse-worded items have already been reversed, so a higher response always means more of the item's domain (for Negative Emotionality, more negative emotion). Neither the table's metadata nor its processing code says so, and the data can only suggest it. If the reverse-worded items were still raw, many pairs of items from the same domain would correlate negatively. The lowest of these correlations is essentially zero:
+
+```{r keying}
+#| echo: true
+#| code-fold: show
+```
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): the Mach IV arrives *unkeyed*, and there the data couldn't tell us which items to reverse; we had to read them. Here the check is reassuring, but the published key (Soto & John, 2017) is what settles it.
+:::
 
 ### The correlation matrix
 
@@ -245,7 +288,7 @@ Before fitting anything, look at the correlations with the items sorted by the d
 #| fig-height: 6.5
 ```
 
-Five blocks along the diagonal, and fairly pale off-diagonal regions: this is what an instrument with five largely distinct dimensions looks like. The one band of blue belongs to Negative Emotionality (the fourth block, since the domains are sorted alphabetically), whose items correlate weakly and negatively with most of the others. (All the within-block correlations are positive because the BFI-2's reverse-worded items arrive already reverse-keyed in these data—a point to check, never assume, when you pick up a new dataset. Compare the Mach IV in [the reliability lesson](ctt-reliability.qmd).)
+Five blocks along the diagonal, and pale regions between them: the median correlation is 0.35 between two items of the same domain and 0.04 between items of different domains. The one band of blue belongs to Negative Emotionality (the fourth block, since the domains are sorted alphabetically), whose items correlate weakly and negatively with many of the others.
 
 ### How many factors?
 
@@ -255,7 +298,7 @@ predict({
   q: "The BFI-2 was designed around five domains, each with three facets. How many factors do you think parallel analysis will suggest for these 60 items?",
   choices: ["5", "9", "12", "15"],
   answer: "9",
-  reveal: "Parallel analysis suggests 9, and the eigenvalue-greater-than-one rule suggests 12. With over a thousand people, the data have enough power to pick up some of the finer facet structure within domains. Neither answer is 'wrong': the question 'how many factors?' depends on the level of detail you care about."
+  reveal: "Parallel analysis suggests 9, and the eigenvalue-greater-than-one rule suggests 12. With about 1,200 respondents, the data have enough power to pick up some of the finer facet structure within domains. Neither answer is 'wrong': how many factors depends on the level of detail you care about."
 })
 ```
 
@@ -266,7 +309,11 @@ predict({
 #| fig-height: 4.5
 ```
 
-This is typical of large samples with well-developed instruments: the formal criteria find more structure than the design intended, because each domain is itself made of related facets. The five-domain structure is still the one the instrument is built to score, so that is what we fit. The choice is ours; the data inform it but do not make it.
+Parallel analysis says 9, the Kaiser rule 12, against a design of five domains and 15 facets. Is that unusual? Across the IRW it is the norm. The IRW's [dimensionality vignette](https://itemresponsewarehouse.org/vignettes/dimensionality.html) ran parallel analysis on 810 tables and found exactly one factor in only 3% of them; for the older 25-item Big Five Inventory in `psychtools_bfi`, built for five traits, it suggests six. Nor is it an artifact of the polychoric correlations, which [Garrido, Abad and Ponsoda (2013)](https://doi.org/10.1037/a0030005) recommend for parallel analysis with ordinal items: on Pearson correlations the answer is 9 again. The formal criteria find more structure than the design names, because each domain is itself made of related facets.
+
+The same vignette gives a baseline for how multidimensional the BFI-2 is. The ratio of the first to the second eigenvalue, 1.7 here, is a rough index of how far a scale is from a single dimension (larger means closer to one). The vignette's 57 personality tables have a median ratio of 3.26, and the 25-item BFI's is 1.91. The vignette's tables have at most 40 items, so the comparison is rough, but by the IRW's standard the BFI-2 is clearly multidimensional, as it was built to be.
+
+The five-domain structure is still the one the instrument is built to score, so that is what we fit. The choice is ours; the data inform it but do not make it.
 
 ### Five factors
 
@@ -275,14 +322,14 @@ This is typical of large samples with well-developed instruments: the formal cri
 #| code-fold: show
 ```
 
-Every one of the 60 items loads most strongly on the factor for its own domain, which reflects the care that went into building the BFI-2. The factor correlations are modest; the largest is between Negative Emotionality and Conscientiousness (more emotionally volatile people describe themselves as a little less organized and dependable).
+Every one of the 60 items loads most strongly on the factor for its own domain. That is clean by the standard of the design: the median item's loading on its own factor is 0.57, and its largest loading on any other factor is 0.16. The factor correlations sit fairly close to zero; the largest in size is −0.22, between Negative Emotionality and Conscientiousness (students higher in negative emotionality describe themselves as a little less organized and dependable).
 
 ```{r loadings}
 #| echo: true
 #| code-fold: show
 ```
 
-Within a domain, items differ a good deal. Some Extraversion items load above 0.75; one (item 26) loads below 0.3 and splits its variance with other factors. Items like that are candidates for a closer look at their wording.
+Within a domain, items differ a good deal. Three Extraversion items (1, 16 and 46) load above 0.75; item 26 loads 0.27 and shares its variance with Conscientiousness about equally. Item 6 loads −0.33 on the Agreeableness factor as well as 0.48 on its own. Items like these are the ones to read closely (problem 5): an item can belong to a domain and still pull in part of a neighbouring one.
 
 Finally, the rotation point from above, on real data:
 
@@ -291,29 +338,31 @@ Finally, the rotation point from above, on real data:
 #| code-fold: show
 ```
 
-Identical root-mean-square residuals: the orthogonal and oblique solutions fit exactly as well, because they are the same model.
+Identical root-mean-square residuals: the orthogonal and oblique solutions fit exactly as well, because they are the same model described in two frames. Rotation is a choice about how to read the factors, never about how well they fit.
 
 ## Problems
 
-1. **One factor.** Show that under a one-factor model with standardized items and factor, $\text{cor}(x_i, x_j) = \lambda_i\lambda_j$ for $i \ne j$. Then show that, for any four items, $\text{cor}(x_1,x_3)\,\text{cor}(x_2,x_4) = \text{cor}(x_1,x_4)\,\text{cor}(x_2,x_3)$. (These "tetrad" constraints were Spearman's original test for a single factor.)
-2. **Reliability, revisited.** In a one-factor model, what is the correlation between the sum of the items and the factor? Use your answer to explain why items with low loadings contribute little to reliability, and connect it to the proof that alpha is a lower bound in [the reliability lesson](ctt-reliability.qmd). What does "tau-equivalence" mean in terms of loadings?
-3. **Choosing the number of factors.** Using the simulation above, find settings (loading, number of people) under which parallel analysis gets the number of factors wrong at least half the time across ten seeds. What does this suggest about using a single rule in small samples?
-4. **Formats.** The BFI-2 data come from four randomly assigned response formats (`itemcov_format`: Likert `L`, Expanded `E`, and two item-specific versions `ISF` and `ISL`). Fit the five-factor model separately in each format. Do the same items load on the same factors? Are the loadings noticeably stronger in any format? What would a difference tell you about the formats—and why does random assignment matter for that inference? (Zhang et al., 2025, is the place to compare notes.)
-5. **A weak item.** Find the three BFI-2 items with the lowest communalities in the five-factor solution. Look them up in Soto and John (2017) (the item wording is published there). Would you drop them? What might they be measuring instead?
-6. **Challenge: PCA versus FA.** Run `principal()` (PCA) and `fa()` with five components or factors on the BFI-2. Compare the loadings. Which are systematically larger, and why?
+1. **One factor.** Show that under a one-factor model with standardized items and factor, $\text{cor}(x_i, x_j) = \lambda_i\lambda_j$ for $i \ne j$. Then show that, for any four items, $\text{cor}(x_1,x_3)\,\text{cor}(x_2,x_4) = \text{cor}(x_1,x_4)\,\text{cor}(x_2,x_3)$. (These "tetrad" constraints were Spearman's test for a single factor; Spearman & Holzinger, 1924.)
+2. **Reliability, revisited.** In a one-factor model, what is the correlation between the sum of the items and the factor? Use your answer to explain why items with low loadings contribute little to reliability, and connect it to the proof that alpha is a lower bound in [the reliability lesson](ctt-reliability.qmd). What does tau-equivalence mean in terms of loadings?
+3. **Planning a pilot.** You are piloting a new 15-item scale written for three factors, and you expect loadings of about 0.5 and factor correlations of about 0.3. Using the simulation, find the smallest sample (to the nearest 50) at which parallel analysis finds three factors in at least 9 of 10 seeds. How does your answer change if the loadings are 0.4? What does this suggest about relying on one rule in a small pilot?
+4. **Formats.** The BFI-2 data come from four randomly assigned response formats (`itemcov_format`: Likert `L`, Expanded `E`, and two item-specific versions, `ISF` and `ISL`). Fit the five-factor model separately in each format. Do the same items load on the same factors? Are the loadings noticeably stronger in any format? What would a difference tell you about the formats, and why does random assignment matter for that inference? (Zhang et al., 2025, is the place to compare notes; [Factor analysis II](fa-confirmatory.qmd) gives the formal test of whether a structure holds across groups.)
+5. **A weak item.** Find the three BFI-2 items with the lowest communalities in the five-factor solution. Look them up in Soto and John (2017), where the item wording is published. Would you drop them? What might they be measuring instead?
+6. **Challenge: PCA versus FA.** Run `principal()` (PCA) and `fa()` with five components or factors on the BFI-2. Compare the loadings. Which are systematically larger, and why? Is there a number of items per domain at which the difference stops mattering?
 
 ```{r}
 #| output: asis
-ask_claude("fa-exploratory", "It covers exploratory factor analysis: the common factor model, communalities, choosing the number of factors (eigenvalues, the Kaiser rule, scree plots, parallel analysis), rotation (orthogonal and oblique), polychoric correlations for Likert items, and a five-factor analysis of the BFI-2 with the psych package in R.")
+ask_claude("fa-exploratory", "It covers exploratory factor analysis: the common factor model, communalities, choosing the number of factors (eigenvalues, the Kaiser rule, scree plots, parallel analysis), rotation (orthogonal and oblique) and why it cannot change fit, polychoric correlations for Likert items, factor analysis versus principal components, and a five-factor analysis of the BFI-2 with the psych package in R.")
 ```
 
 ## Going further
 
-- Fabrigar, L. R., Wegener, D. T., MacCallum, R. C., & Strahan, E. J. (1999). Evaluating the use of exploratory factor analysis in psychological research. *Psychological Methods*, 4(3), 272–299. Still the clearest practical guide.
-- Horn, J. L. (1965). A rationale and test for the number of factors in factor analysis. *Psychometrika*, 30(2), 179–185. The origin of parallel analysis.
-- Soto, C. J., & John, O. P. (2017). The next Big Five Inventory (BFI-2). *Journal of Personality and Social Psychology*, 113(1), 117–143.
-- Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. *Journal of Personality Assessment*. <https://doi.org/10.1080/00223891.2025.2531187>. The source of the data.
-- From the IRW: [how often unidimensionality holds](https://itemresponsewarehouse.org/vignettes/dimensionality.html) across hundreds of datasets, and a [CFA walkthrough with lavaan](https://itemresponsewarehouse.org/vignettes/cfa.html) that previews the next lesson.
+- Fabrigar, L. R., Wegener, D. T., MacCallum, R. C., & Strahan, E. J. (1999). Evaluating the use of exploratory factor analysis in psychological research. *Psychological Methods*, 4(3), 272–299. <https://doi.org/10.1037/1082-989x.4.3.272>. Still the clearest practical guide.
+- Horn, J. L. (1965). A rationale and test for the number of factors in factor analysis. *Psychometrika*, 30(2), 179–185. <https://doi.org/10.1007/bf02289447>. The origin of parallel analysis.
+- Browne, M. W. (2001). An overview of analytic rotation in exploratory factor analysis. *Multivariate Behavioral Research*, 36(1), 111–150. <https://doi.org/10.1207/s15327906mbr3601_05>. What each rotation criterion is trying to do, and how to choose.
+- Garrido, L. E., Abad, F. J., & Ponsoda, V. (2013). A new look at Horn's parallel analysis with ordinal variables. *Psychological Methods*, 18(4), 454–474. <https://doi.org/10.1037/a0030005>. When parallel analysis works on Likert items, and which correlations to give it.
+- Soto, C. J., & John, O. P. (2017). The next Big Five Inventory (BFI-2): Developing and assessing a hierarchical model with 15 facets to enhance bandwidth, fidelity, and predictive power. *Journal of Personality and Social Psychology*, 113(1), 117–143. <https://doi.org/10.1037/pspp0000096>. The instrument, its facets and its item wording.
+- Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. *Journal of Personality Assessment*, 108(2), 250–271. <https://doi.org/10.1080/00223891.2025.2531187>. The source of the data, and of the format comparison in problem 4.
+- From the IRW: [how often unidimensionality holds](https://itemresponsewarehouse.org/vignettes/dimensionality.html) across hundreds of datasets (the baseline used above), and a [CFA walkthrough with lavaan](https://itemresponsewarehouse.org/vignettes/cfa.html) that previews the next lesson.
 
 ```{r}
 #| output: asis
@@ -323,6 +372,8 @@ data_sources("fa-exploratory")
 ## For instructors
 
 - **Source:** new material; EDUC 252 did not cover factor analysis directly (dimensionality appeared in c4 and c6, and PS6#1 fit two-factor IRT models to grit and growth-mindset items). Added after the landscape analysis in `notes/landscape-2026-09-24.md`, where exploratory factor analysis appeared in 8 of 11 first-course syllabi.
-- **Placement:** after [Classical test theory and reliability](ctt-reliability.qmd); a natural companion to [Constructs and construct maps](constructs.qmd).
+- **Timing:** the core ideas and widgets take about 50 minutes; the BFI-2 analysis works as a 25-minute lab (the polychoric correlations and parallel analysis take a minute or so locally).
+- **Placement:** after [From construct map to items](instrument-building.qmd), which supplies the wording-direction example; [Factor analysis II](fa-confirmatory.qmd) follows, with confirmatory models, fit indices, omega, invariance across groups, and IRT as factor analysis.
+- **Held back:** confirmatory models, fit indices and omega (in [Factor analysis II](fa-confirmatory.qmd)); multidimensional IRT (in [Dimensionality and multidimensional IRT](dimensionality.qmd)); response formats as an experiment (problem 4) returns in [Measurement invariance under treatment and life events](invariance-experience.qmd).
 - **Data:** the BFI-2 item wording is published (Soto & John, 2017) but is not reproduced here; item text in the IRW carries no licence to reproduce an instrument.
-- **Solutions:** not yet written.
+- **Solutions:** held back in `solutions/fa-exploratory.qmd` (not published).
