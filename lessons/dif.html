@@ -176,6 +176,34 @@ ul.task-list li input[type="checkbox"] {
 </section>
 
 </main> <!-- /main -->
+<script>
+// quarto-webr attaches each Run button's handler immediately, but the code editor
+// it reads from (Monaco, loaded asynchronously from a CDN) can arrive later. A
+// click in that window calls getValue() on an editor that doesn't exist yet and is
+// silently lost (irw-course#13). This catches such clicks and replays them once
+// the editor is ready. Remove it if quarto-webr fixes the race upstream.
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest && e.target.closest(".qwebr-button-run");
+  if (!btn || btn.disabled) return;
+  var id = btn.id.replace("qwebr-button-run-", "");
+  var ready = globalThis.qwebrEditorInstances && globalThis.qwebrEditorInstances[id];
+  if (ready) return;
+  e.stopImmediatePropagation();
+  e.preventDefault();
+  if (btn.dataset.qwebrWaiting) return;
+  btn.dataset.qwebrWaiting = "1";
+  var label = btn.innerHTML;
+  btn.innerHTML = "<span>Starting editor…</span>";
+  var timer = setInterval(function () {
+    if (globalThis.qwebrEditorInstances && globalThis.qwebrEditorInstances[id]) {
+      clearInterval(timer);
+      btn.innerHTML = label;
+      delete btn.dataset.qwebrWaiting;
+      btn.click();
+    }
+  }, 250);
+}, true);
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
