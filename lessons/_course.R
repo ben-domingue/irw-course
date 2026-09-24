@@ -142,6 +142,34 @@ check_course <- function(course = read_course()) {
   if (length(setdiff(ids, done)))
     problems <- c(problems, paste("prerequisite cycle among:",
                                   paste(setdiff(ids, done), collapse = ", ")))
+  # Threads: each names lessons that exist, and never returns to the lesson that
+  # introduces it or to one of that lesson's prerequisites (direct or indirect).
+  ancestors <- function(id, seen = character()) {
+    for (p in setdiff(pre[[id]], seen)) seen <- ancestors(p, c(seen, p))
+    seen
+  }
+  tids <- vapply(course$threads, function(t) if (length(t$id)) t$id else "", "")
+  dup <- unique(tids[duplicated(tids)])
+  if (length(dup)) problems <- c(problems, paste("duplicate thread id:", dup))
+  for (t in course$threads) {
+    miss <- setdiff(c("id", "idea", "introduced", "returns"), names(t))
+    if (length(miss)) {
+      problems <- c(problems, sprintf("thread %s: missing %s", t$id %||% "?", paste(miss, collapse = ", ")))
+      next
+    }
+    back <- vapply(t$returns, function(r) if (length(r$lesson)) r$lesson else "", "")
+    bad <- setdiff(c(t$introduced, back), ids)
+    if (length(bad))
+      problems <- c(problems, sprintf("thread %s: unknown lesson '%s'", t$id, bad))
+    for (r in t$returns) if (!length(r$how))
+      problems <- c(problems, sprintf("thread %s: return to %s has no `how`", t$id, r$lesson))
+    if (t$introduced %in% ids && !length(setdiff(ids, done))) {
+      early <- intersect(back, c(t$introduced, ancestors(t$introduced)))
+      if (length(early))
+        problems <- c(problems, sprintf("thread %s: returns to %s, which comes before %s (where it is introduced)",
+                                        t$id, early, t$introduced))
+    }
+  }
   if (length(problems)) stop("lessons.yml:\n  ", paste(problems, collapse = "\n  "))
   invisible(TRUE)
 }
@@ -175,6 +203,15 @@ lesson_header <- function(id) {
   tables_md <- if (length(tables))
     paste(sprintf("[`%s`](%s%s/)", tables, TABLE_BASE, tolower(tables)), collapse = ", ")
   else "none"
+  # Threads this lesson starts (and where each goes next), and threads it picks up
+  # (and where each began). A row appears only when the lesson has such threads.
+  starts <- vapply(Filter(function(t) t$introduced == id, course$threads), function(t)
+    paste0(t$idea, " (→ ", links(vapply(t$returns, `[[`, "", "lesson")), ")"), "")
+  picks <- vapply(Filter(function(t) id %in% vapply(t$returns, `[[`, "", "lesson"), course$threads),
+                  function(t) paste0(t$idea, " (from ", links(t$introduced), ")"), "")
+  thread_rows <- c(
+    if (length(starts)) paste0("**Starts threads:** ", paste(starts, collapse = "; "), "  \n"),
+    if (length(picks)) paste0("**Picks up threads:** ", paste(picks, collapse = "; "), "  \n"))
   code <- unlist(l$origin$code)
   origin <- c(
     if (length(l$origin$slides)) paste("slides", paste(unlist(l$origin$slides), collapse = ", ")),
@@ -186,6 +223,7 @@ lesson_header <- function(id) {
     "**Module:** ", mod, if (isTRUE(l$optional)) " (optional: beyond a first course)", "  \n",
     "**Before this:** ", links(unlist(l$prereqs)), "  \n",
     "**Builds toward:** ", links(next_ids), "  \n",
+    thread_rows,
     "**IRW tables:** ", tables_md, "  \n",
     "**From EDUC 252:** ", if (length(origin)) paste(origin, collapse = "; ") else "n/a", "  \n",
     "**Status:** ", l$status, "\n",
