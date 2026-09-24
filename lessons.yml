@@ -264,13 +264,22 @@ lessons:
     status: stub
     optional: true
 
-  - id: unfolding-nominal
-    title: Unfolding and nominal response models
+  - id: unfolding
+    title: Unfolding models
     module: beyond
     prereqs: [polytomous]
-    origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
-    tables: [andrich_mudfold, wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
+    origin: {slides: [c9], ps: ["PS9#3"], code: [ps9/unfold.R]}
+    tables: [andrich_mudfold, eurpar2_mudfold]
     reuses: [andrich_mudfold]
+    status: stub
+    optional: true
+
+  - id: nominal
+    title: Nominal response and multiple-choice models
+    module: beyond
+    prereqs: [polytomous, guessing-priors]
+    origin: {slides: [c9], ps: [], code: [c9/nominal.R]}
+    tables: [wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
     status: stub
     optional: true
 
@@ -393,7 +402,7 @@ paths:
               validity-argument, rasch, information, ability-estimation, validity-causal,
               1pl-to-4pl, parameter-invariance, dimensionality, dif, item-estimation,
               fit-prediction, guessing-priors, item-banks-cat, equating, invariance-experience,
-              explanatory-irt, cdm, polytomous, irtrees, unfolding-nominal, response-time,
+              explanatory-irt, cdm, polytomous, irtrees, unfolding, nominal, response-time,
               trials, ai-psychometrics]
 
 # Filled in by the cross-check passes over the outlines (#9). Example:

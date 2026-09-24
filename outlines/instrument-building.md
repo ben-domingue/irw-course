@@ -22,7 +22,7 @@ Module: ctt · Prereqs: constructs, ctt-reliability · Core · Status: outline
 - Raters and constructed-response scoring → `g-theory`.
 - Wording direction as a second dimension → `fa-exploratory`, `dimensionality`.
 - Response styles (acquiescence, extreme responding) → `irtrees`; careless responding otherwise unpaid.
-- Distractors carry information → `unfolding-nominal` (nominal response model).
+- Distractors carry information → `nominal` (nominal response and multiple-choice models).
 - Item text predicts difficulty → `explanatory-irt`, `ai-psychometrics`.
 - Items that work differently for different groups → `dif`.
 - Content evidence for validity → `validity-evidence`.
