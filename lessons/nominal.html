@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Estimating item parameters: JML and EM – Psychometrics with the IRW</title>
+<title>Nominal response and multiple-choice models – Psychometrics with the IRW</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -154,7 +154,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Estimating item parameters: JML and EM</h1>
+<h1 class="title">Nominal response and multiple-choice models</h1>
 </div>
 
 
@@ -177,12 +177,12 @@ ul.task-list li input[type="checkbox"] {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Module:</strong> Item response theory<br>
+<p><strong>Module:</strong> Beyond the standard models<br>
 <strong>Tranche:</strong> extension (beyond a first course)<br>
-<strong>Before this:</strong> <a href="../lessons/ability-estimation.html">Estimating abilities: MLE and EAP</a><br>
+<strong>Before this:</strong> <a href="../lessons/polytomous.html">Models for polytomous responses</a> · <a href="../lessons/guessing-priors.html">Guessing and priors</a><br>
 <strong>Builds toward:</strong> none<br>
-<strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/enders_2022_science_literacy/"><code>enders_2022_science_literacy</code></a><br>
-<strong>From EDUC 252:</strong> slides c5; problem sets PS5#1; code <a href="https://github.com/ben-domingue/252/blob/main/c5/EM-coins.R"><code>c5/EM-coins.R</code></a>, <a href="https://github.com/ben-domingue/252/blob/main/c5/EM-example.R"><code>c5/EM-example.R</code></a><br>
+<strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/wilmer-rmet-normative-data-set-2022/"><code>wilmer-rmet-normative-data-set-2022</code></a>, <a href="https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_pbt/"><code>borges_brazil_residency_2024_pbt</code></a><br>
+<strong>From EDUC 252:</strong> slides c9; code <a href="https://github.com/ben-domingue/252/blob/main/c9/nominal.R"><code>c9/nominal.R</code></a><br>
 <strong>Status:</strong> stub<br>
 <strong>Authorship:</strong> Written largely by Claude (Anthropic), from Ben Domingue’s EDUC 252 materials and under Ben’s direction. Ben reviews each lesson before it is marked done.</p>
 </div>
@@ -211,7 +211,8 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
 <p>Data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a> (each table name links to its IRW page); references from IRW biblio.</p>
 <ul>
-<li><a href="https://itemresponsewarehouse.org/tables/enders_2022_science_literacy/"><code>enders_2022_science_literacy</code></a>: Enders AM, Uscinski JE, Klofstad C, Stoler J (2022). On the relationship between conspiracy theory beliefs, misinformation, and vaccine hesitancy. PLOS ONE 17(10): e0276082. <a href="https://doi.org/10.1371/journal.pone.0276082" class="uri">https://doi.org/10.1371/journal.pone.0276082</a>. Licence: CC0 1.0.</li>
+<li><a href="https://itemresponsewarehouse.org/tables/wilmer-rmet-normative-data-set-2022/"><code>wilmer-rmet-normative-data-set-2022</code></a>: Kim, H.A., Kaduthodil, J., Strong, R.W. et al.&nbsp;Multiracial Reading the Mind in the Eyes Test (MRMET): An inclusive version of an influential measure. Behav Res 56, 5900–5917 (2024). <a href="https://doi.org/10.3758/s13428-023-02323-x" class="uri">https://doi.org/10.3758/s13428-023-02323-x</a>. Licence: CC BY 4.0.</li>
+<li><a href="https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_pbt/"><code>borges_brazil_residency_2024_pbt</code></a>: Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro, P. S., Fonseca, P. C., … &amp; Ricz, H. M. A. (2024). Increased accessibility of computer-based testing for residency application to a hospital in Brazil with item characteristics comparable to paper-based testing: a psychometric study. Journal of Educational Evaluation for Health Professions, 21, 32. <a href="https://doi.org/10.3352/jeehp.2024.21.32" class="uri">https://doi.org/10.3352/jeehp.2024.21.32</a>. Licence: CC0 1.0.</li>
 </ul>
 </section>
 <section id="for-instructors" class="level2">

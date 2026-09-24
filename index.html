@@ -152,7 +152,8 @@ ul.task-list li input[type="checkbox"] {
     Comments are very welcome: <a href="mailto:bdomingue@stanford.edu">bdomingue@stanford.edu</a>.
   </div>
 </div>
-<p>These are stand-alone lessons on psychometrics, each built around open data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a>. You can teach them in sequence as a full course or pick out individual lessons. The core lessons make a first course in psychometrics; lessons marked optional go further. Each lesson lists what it assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to Psychometrics) at Stanford.</p>
+<p>These are stand-alone lessons on psychometrics, each built around open data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a>. You can teach them in sequence as a full course or pick out individual lessons. The lessons come in three tranches: <em>preliminary</em> lessons set up the course, <em>core</em> lessons make a first course in psychometrics, and <em>extensions</em> go further. Each lesson lists what it assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to Psychometrics) at Stanford.</p>
+<p>The lessons were written largely by Claude (Anthropic), an AI model, working from the EDUC 252 materials and under Ben Domingue’s direction. Ben reviews each lesson before it is marked done; until then, read its text, code and interpretations as a draft.</p>
 <section id="lessons-by-module" class="level2">
 <h2 class="anchored" data-anchor-id="lessons-by-module">Lessons by module</h2>
 <p>Lessons in blue have a draft to read. Lessons in grey are still stubs: a placeholder page with no content yet.</p>
@@ -162,7 +163,7 @@ ul.task-list li input[type="checkbox"] {
 .module-card { border: 1px solid #dee2e6; border-left: 4px solid #2780e3; border-radius: 6px; padding: 1rem 1.3rem; background: #fff; }
 .module-card h3 { font-size: 1.05rem; margin-top: 0; }
 .module-card ol { margin-bottom: 0; padding-left: 1.2rem; }
-.lesson-optional { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; }
+.lesson-tranche { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; }
 .lesson-status { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; }
 /* Stubs have a page but no content yet: grey them out so drafts stand out. */
 a.lesson-stub { color: #adb5bd; }
@@ -172,9 +173,9 @@ a.lesson-stub:hover { color: #6c757d; }
 <section id="foundations" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="foundations">Foundations</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a> <span class="lesson-tranche">preliminary</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a> <span class="lesson-tranche">preliminary</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a> <span class="lesson-tranche">preliminary</span></li>
 </ol>
 </section>
 <section id="classical-test-theory" class="level3 module-card">
@@ -192,14 +193,14 @@ a.lesson-stub:hover { color: #6c757d; }
 <ol type="1">
 <li><a href="./lessons/fa-exploratory.html">Factor analysis I: exploring dimensionality</a> <span class="lesson-status">draft</span></li>
 <li><a href="./lessons/fa-confirmatory.html" class="lesson-stub">Factor analysis II: confirmatory models, omega, and IRT as factor analysis</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/sem.html" class="lesson-stub">Structural equation modeling with lavaan</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/sem.html" class="lesson-stub">Structural equation modeling with lavaan</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="validity" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="validity">Validity</h3>
 <ol type="1">
 <li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/validity-causal.html" class="lesson-stub">Validity as causation: Borsboom’s view</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/validity-causal.html" class="lesson-stub">Validity as causation: Borsboom’s view</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/validity-evidence.html" class="lesson-stub">Gathering validity evidence</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
@@ -209,12 +210,12 @@ a.lesson-stub:hover { color: #6c757d; }
 <li><a href="./lessons/rasch.html">The Rasch model</a> <span class="lesson-status">draft</span></li>
 <li><a href="./lessons/information.html" class="lesson-stub">Information, precision, and short forms</a> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/ability-estimation.html" class="lesson-stub">Estimating abilities: MLE and EAP</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/item-estimation.html" class="lesson-stub">Estimating item parameters: JML and EM</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/item-estimation.html" class="lesson-stub">Estimating item parameters: JML and EM</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/1pl-to-4pl.html" class="lesson-stub">From the 1PL to the 4PL</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/parameter-invariance.html" class="lesson-stub">Parameter invariance</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/parameter-invariance.html" class="lesson-stub">Parameter invariance</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/fit-prediction.html" class="lesson-stub">Model fit and out-of-sample prediction</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/guessing-priors.html" class="lesson-stub">Guessing and priors</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/dimensionality.html" class="lesson-stub">Dimensionality and multidimensional IRT</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/guessing-priors.html" class="lesson-stub">Guessing and priors</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/dimensionality.html" class="lesson-stub">Dimensionality and multidimensional IRT</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/polytomous.html" class="lesson-stub">Models for polytomous responses</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
@@ -222,36 +223,38 @@ a.lesson-stub:hover { color: #6c757d; }
 <h3 class="anchored" data-anchor-id="fairness-and-invariance">Fairness and invariance</h3>
 <ol type="1">
 <li><a href="./lessons/dif.html" class="lesson-stub">Differential item functioning</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/invariance-experience.html" class="lesson-stub">Measurement invariance under treatment and life events</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/invariance-experience.html" class="lesson-stub">Measurement invariance under treatment and life events</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="using-calibrated-items" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="using-calibrated-items">Using calibrated items</h3>
 <ol type="1">
-<li><a href="./lessons/item-banks-cat.html" class="lesson-stub">Item banks and adaptive testing</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/item-banks-cat.html" class="lesson-stub">Item banks and adaptive testing</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/equating.html" class="lesson-stub">Linking and equating</a> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/score-meaning.html" class="lesson-stub">What does a score mean? Norms, error bands, and cut scores</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/scale-properties.html" class="lesson-stub">Scale properties: is the scale equal-interval?</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/scale-properties.html" class="lesson-stub">Scale properties: is the scale equal-interval?</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="beyond-the-standard-models" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="beyond-the-standard-models">Beyond the standard models</h3>
 <ol type="1">
-<li><a href="./lessons/explanatory-irt.html" class="lesson-stub">What is an item? Explanatory item response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/cdm.html" class="lesson-stub">Cognitive diagnostic models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/irtrees.html" class="lesson-stub">IRTree models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/unfolding-nominal.html" class="lesson-stub">Unfolding and nominal response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/response-time.html" class="lesson-stub">Response time and the speed-accuracy tradeoff</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/trials.html" class="lesson-stub">Trials as items: tasks, shots, and rotations</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/ai-psychometrics.html" class="lesson-stub">AI and psychometrics</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/rt-process-models.html" class="lesson-stub">Process models for response time: drift diffusion and race models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/explanatory-irt.html" class="lesson-stub">What is an item? Explanatory item response models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/cdm.html" class="lesson-stub">Cognitive diagnostic models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/irtrees.html" class="lesson-stub">IRTree models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/unfolding.html" class="lesson-stub">Unfolding models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/nominal.html" class="lesson-stub">Nominal response and multiple-choice models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/response-time.html" class="lesson-stub">Response time and the speed-accuracy tradeoff</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/trials.html" class="lesson-stub">Trials as items: tasks, shots, and rotations</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/ai-psychometrics.html" class="lesson-stub">AI and psychometrics</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/rt-process-models.html" class="lesson-stub">Process models for response time: drift diffusion and race models</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/competitions.html" class="lesson-stub">Competitions and paired comparisons: Bradley-Terry and Elo</a> <span class="lesson-tranche">extension</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 </div>
 </section>
 <section id="how-the-lessons-connect" class="level2">
 <h2 class="anchored" data-anchor-id="how-the-lessons-connect">How the lessons connect</h2>
-<p>An arrow from A to B means B assumes A. Lessons with a dashed border are optional: they go beyond a first course. Click a lesson to open it.</p>
+<p>An arrow from A to B means B assumes A. Extensions (beyond a first course) have a dashed border. Click a lesson to open it.</p>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -267,18 +270,18 @@ a.lesson-stub:hover { color: #6c757d; }
   L04["Constructs and construct maps"]:::ctt
   L05["Classical test theory and reliability"]:::ctt
   L06["Where CTT breaks: toward item response models"]:::ctt
-  L30["From construct map to items: building an instrument"]:::ctt
-  L31["Many sources of error: generalizability theory"]:::ctt
+  L31["From construct map to items: building an instrument"]:::ctt
+  L32["Many sources of error: generalizability theory"]:::ctt
   classDef ctt_opt fill:#dcfce7,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   classDef fa fill:#ccfbf1,stroke:#6c757d,color:#212529
-  L32["Factor analysis I: exploring dimensionality"]:::fa
-  L33["Factor analysis II: confirmatory models, omega, and IRT as factor analysis"]:::fa
-  L36["Structural equation modeling with lavaan"]:::fa
+  L33["Factor analysis I: exploring dimensionality"]:::fa
+  L34["Factor analysis II: confirmatory models, omega, and IRT as factor analysis"]:::fa
+  L37["Structural equation modeling with lavaan"]:::fa
   classDef fa_opt fill:#ccfbf1,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   classDef validity fill:#fef9c3,stroke:#6c757d,color:#212529
   L07["Validity as an argument"]:::validity
   L08["Validity as causation: Borsboom's view"]:::validity
-  L34["Gathering validity evidence"]:::validity
+  L35["Gathering validity evidence"]:::validity
   classDef validity_opt fill:#fef9c3,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   classDef irt fill:#fce7f3,stroke:#6c757d,color:#212529
   L09["The Rasch model"]:::irt
@@ -299,18 +302,20 @@ a.lesson-stub:hover { color: #6c757d; }
   classDef uses fill:#ffedd5,stroke:#6c757d,color:#212529
   L20["Item banks and adaptive testing"]:::uses
   L21["Linking and equating"]:::uses
-  L35["What does a score mean? Norms, error bands, and cut scores"]:::uses
-  L38["Scale properties: is the scale equal-interval?"]:::uses
+  L36["What does a score mean? Norms, error bands, and cut scores"]:::uses
+  L39["Scale properties: is the scale equal-interval?"]:::uses
   classDef uses_opt fill:#ffedd5,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   classDef beyond fill:#e0f2fe,stroke:#6c757d,color:#212529
   L22["What is an item? Explanatory item response models"]:::beyond
   L23["Cognitive diagnostic models"]:::beyond
   L25["IRTree models"]:::beyond
-  L26["Unfolding and nominal response models"]:::beyond
-  L27["Response time and the speed-accuracy tradeoff"]:::beyond
-  L28["Trials as items: tasks, shots, and rotations"]:::beyond
-  L29["AI and psychometrics"]:::beyond
-  L37["Process models for response time: drift diffusion and race models"]:::beyond
+  L26["Unfolding models"]:::beyond
+  L27["Nominal response and multiple-choice models"]:::beyond
+  L28["Response time and the speed-accuracy tradeoff"]:::beyond
+  L29["Trials as items: tasks, shots, and rotations"]:::beyond
+  L30["AI and psychometrics"]:::beyond
+  L38["Process models for response time: drift diffusion and race models"]:::beyond
+  L40["Competitions and paired comparisons: Bradley-Terry and Elo"]:::beyond
   classDef beyond_opt fill:#e0f2fe,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   class L08 validity_opt
   class L12 irt_opt
@@ -326,9 +331,11 @@ a.lesson-stub:hover { color: #6c757d; }
   class L27 beyond_opt
   class L28 beyond_opt
   class L29 beyond_opt
-  class L36 fa_opt
-  class L37 beyond_opt
-  class L38 uses_opt
+  class L30 beyond_opt
+  class L37 fa_opt
+  class L38 beyond_opt
+  class L39 uses_opt
+  class L40 beyond_opt
   L02 --&gt; L03
   L01 --&gt; L04
   L04 --&gt; L05
@@ -336,44 +343,54 @@ a.lesson-stub:hover { color: #6c757d; }
   L05 --&gt; L06
   L03 --&gt; L06
   L04 --&gt; L07
+  L05 --&gt; L07
   L07 --&gt; L08
   L06 --&gt; L09
-  L09 --&gt; L10
-  L09 --&gt; L11
+  L13 --&gt; L10
+  L10 --&gt; L11
   L11 --&gt; L12
   L09 --&gt; L13
   L13 --&gt; L14
   L13 --&gt; L15
-  L13 --&gt; L16
+  L11 --&gt; L16
   L15 --&gt; L16
-  L13 --&gt; L17
+  L34 --&gt; L17
   L13 --&gt; L18
   L07 --&gt; L18
   L18 --&gt; L19
   L10 --&gt; L20
+  L11 --&gt; L20
+  L24 --&gt; L20
   L13 --&gt; L21
   L09 --&gt; L22
   L22 --&gt; L23
-  L13 --&gt; L24
+  L10 --&gt; L24
   L24 --&gt; L25
   L22 --&gt; L25
   L24 --&gt; L26
-  L22 --&gt; L27
+  L24 --&gt; L27
+  L16 --&gt; L27
   L22 --&gt; L28
-  L13 --&gt; L29
-  L04 --&gt; L30
-  L05 --&gt; L30
+  L22 --&gt; L29
+  L13 --&gt; L30
+  L22 --&gt; L30
+  L04 --&gt; L31
   L05 --&gt; L31
-  L05 --&gt; L32
-  L32 --&gt; L33
-  L13 --&gt; L33
-  L07 --&gt; L34
-  L05 --&gt; L34
+  L31 --&gt; L32
+  L31 --&gt; L33
+  L33 --&gt; L34
+  L13 --&gt; L34
+  L07 --&gt; L35
   L05 --&gt; L35
-  L33 --&gt; L36
-  L27 --&gt; L37
-  L01 --&gt; L38
-  L09 --&gt; L38
+  L31 --&gt; L35
+  L05 --&gt; L36
+  L10 --&gt; L36
+  L34 --&gt; L37
+  L28 --&gt; L38
+  L13 --&gt; L38
+  L01 --&gt; L39
+  L09 --&gt; L39
+  L09 --&gt; L40
   click L01 href "lessons/measurement.html"
   click L02 href "lessons/irw-data.html"
   click L03 href "lessons/likelihood.html"
@@ -399,19 +416,21 @@ a.lesson-stub:hover { color: #6c757d; }
   click L23 href "lessons/cdm.html"
   click L24 href "lessons/polytomous.html"
   click L25 href "lessons/irtrees.html"
-  click L26 href "lessons/unfolding-nominal.html"
-  click L27 href "lessons/response-time.html"
-  click L28 href "lessons/trials.html"
-  click L29 href "lessons/ai-psychometrics.html"
-  click L30 href "lessons/instrument-building.html"
-  click L31 href "lessons/g-theory.html"
-  click L32 href "lessons/fa-exploratory.html"
-  click L33 href "lessons/fa-confirmatory.html"
-  click L34 href "lessons/validity-evidence.html"
-  click L35 href "lessons/score-meaning.html"
-  click L36 href "lessons/sem.html"
-  click L37 href "lessons/rt-process-models.html"
-  click L38 href "lessons/scale-properties.html"
+  click L26 href "lessons/unfolding.html"
+  click L27 href "lessons/nominal.html"
+  click L28 href "lessons/response-time.html"
+  click L29 href "lessons/trials.html"
+  click L30 href "lessons/ai-psychometrics.html"
+  click L31 href "lessons/instrument-building.html"
+  click L32 href "lessons/g-theory.html"
+  click L33 href "lessons/fa-exploratory.html"
+  click L34 href "lessons/fa-confirmatory.html"
+  click L35 href "lessons/validity-evidence.html"
+  click L36 href "lessons/score-meaning.html"
+  click L37 href "lessons/sem.html"
+  click L38 href "lessons/rt-process-models.html"
+  click L39 href "lessons/scale-properties.html"
+  click L40 href "lessons/competitions.html"
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -423,12 +442,12 @@ a.lesson-stub:hover { color: #6c757d; }
 <section id="paths-through-the-course" class="level2">
 <h2 class="anchored" data-anchor-id="paths-through-the-course">Paths through the course</h2>
 <p>A path is one order for teaching the lessons. Add your own to <code>lessons.yml</code>.</p>
-<section id="a-first-course-core-lessons-only" class="level3">
-<h3 class="anchored" data-anchor-id="a-first-course-core-lessons-only">A first course (core lessons only)</h3>
+<section id="a-first-course-preliminary-and-core-lessons" class="level3">
+<h3 class="anchored" data-anchor-id="a-first-course-preliminary-and-core-lessons">A first course (preliminary and core lessons)</h3>
 <ol type="1">
 <li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
 <li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
-<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a></li>
+<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
 <li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
 <li><a href="./lessons/instrument-building.html" class="lesson-stub">From construct map to items: building an instrument</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
@@ -454,7 +473,7 @@ a.lesson-stub:hover { color: #6c757d; }
 <ol type="1">
 <li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
 <li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
-<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a></li>
+<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
 <li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
 <li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a></li>
@@ -477,7 +496,8 @@ a.lesson-stub:hover { color: #6c757d; }
 <li><a href="./lessons/cdm.html" class="lesson-stub">Cognitive diagnostic models</a></li>
 <li><a href="./lessons/polytomous.html" class="lesson-stub">Models for polytomous responses</a></li>
 <li><a href="./lessons/irtrees.html" class="lesson-stub">IRTree models</a></li>
-<li><a href="./lessons/unfolding-nominal.html" class="lesson-stub">Unfolding and nominal response models</a></li>
+<li><a href="./lessons/unfolding.html" class="lesson-stub">Unfolding models</a></li>
+<li><a href="./lessons/nominal.html" class="lesson-stub">Nominal response and multiple-choice models</a></li>
 <li><a href="./lessons/response-time.html" class="lesson-stub">Response time and the speed-accuracy tradeoff</a></li>
 <li><a href="./lessons/trials.html" class="lesson-stub">Trials as items: tasks, shots, and rotations</a></li>
 <li><a href="./lessons/ai-psychometrics.html" class="lesson-stub">AI and psychometrics</a></li>

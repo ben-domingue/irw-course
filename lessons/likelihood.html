@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -104,8 +139,1592 @@ ul.task-list li input[type="checkbox"] {
   });
 })();
 </script>
+<script type="module" src="../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
 <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
 
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = [''];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = true;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.6.0/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"# Simulate data from a logistic regression, trace the log likelihood over the\n# slope, and check that optim() and glm() find the same maximum. Base R only.\n# Adapted from ben-domingue/252: c1/likelihood.R and ps1/ll_logreg.R.\nset.seed(252)\nn  <- 500    # number of observations (try 50, then 5000)\nb0 <- 0      # true intercept\nb1 <- 0.5    # true slope\n\nx <- rnorm(n)\ny <- rbinom(n, 1, plogis(b0 + b1 * x))\n\nloglik <- function(b, x, y) {\n  p <- plogis(b[1] + b[2] * x)\n  sum(y * log(p) + (1 - y) * log(1 - p))\n}\n\n# The log likelihood over a grid of slopes (intercept fixed at its true value,\n# so the surface is a curve we can draw).\ngrid <- seq(-1, 2, length.out = 301)\nll <- sapply(grid, function(s) loglik(c(b0, s), x, y))\nplot(grid, ll, type = \"l\", lwd = 2, col = \"#2780e3\",\n     xlab = \"Candidate slope\", ylab = \"Log likelihood\", main = paste(\"n =\", n))\nabline(v = b1, lty = 2, col = \"#999\")\n\n# Two routes to the maximum likelihood estimate.\nopt <- optim(c(0, 0), function(b) -loglik(b, x, y))\nfit <- glm(y ~ x, family = binomial)\nround(rbind(optim = opt$par, glm = coef(fit), truth = c(b0, b1)), 3)\ncat(\"glm standard error of the slope:\", round(summary(fit)$coefficients[2, 2], 3), \"\\n\")","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"include":"true","label":"unnamed-chunk-16","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -151,6 +1770,290 @@ ul.task-list li input[type="checkbox"] {
     
 <!-- main -->
 <main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -178,32 +2081,730 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <div class="callout-body-container">
 <p><strong>Module:</strong> Foundations<br>
+<strong>Tranche:</strong> preliminary (sets up the course)<br>
 <strong>Before this:</strong> <a href="../lessons/irw-data.html">Item response data and the IRW</a><br>
 <strong>Builds toward:</strong> <a href="../lessons/ctt-limits.html">Where CTT breaks: toward item response models</a><br>
 <strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/chess_lnirt/"><code>chess_lnirt</code></a><br>
 <strong>From EDUC 252:</strong> slides c1; problem sets PS1#1, PS1#2, PS1#5; code <a href="https://github.com/ben-domingue/252/blob/main/c1/likelihood.R"><code>c1/likelihood.R</code></a>, <a href="https://github.com/ben-domingue/252/blob/main/ps1/ps1-like.R"><code>ps1/ps1-like.R</code></a>, <a href="https://github.com/ben-domingue/252/blob/main/ps1/ll_logreg.R"><code>ps1/ll_logreg.R</code></a>, <a href="https://github.com/ben-domingue/252/blob/main/ps1/ps1-chess.R"><code>ps1/ps1-chess.R</code></a><br>
-<strong>Status:</strong> stub</p>
+<strong>Status:</strong> done<br>
+<strong>Authorship:</strong> Written largely by Claude (Anthropic), from Ben Domingue’s EDUC 252 materials and under Ben’s direction. Ben reviews each lesson before it is marked done.</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="13" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 12;"><span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {grid<span class="op">,</span> logistic<span class="op">,</span> rng<span class="op">,</span> palette} <span class="im">from</span> <span class="st">"./widgets/irt.js"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {quiz<span class="op">,</span> predict} <span class="im">from</span> <span class="st">"./widgets/quiz.js"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-2" data-nodetype="declaration">
+
+</div>
 </div>
 </div>
 </div>
 <section id="what-this-is-for" class="level2">
 <h2 class="anchored" data-anchor-id="what-this-is-for">What this is for</h2>
-<p><em>To be written.</em></p>
+<p>Almost every model in this course is fit the same way: write down the probability of the responses we saw, as a function of unknown parameters, and find the parameter values that make those responses most probable. That function is the <strong>likelihood</strong>, and it will be an object of keen interest from here on. It gives us estimates, it tells us how precise they are, and it lets us compare models. This lesson builds it up from coin flips, uses it to fit a logistic regression, and then points it at real item responses: 40 chess problems and the Elo ratings of the players who tried them. By the end, one small change to that logistic regression leaves us looking at the Rasch model.</p>
 </section>
 <section id="goals" class="level2">
 <h2 class="anchored" data-anchor-id="goals">Goals</h2>
+<p>By the end of this lesson you should be able to:</p>
+<ul>
+<li>write down the likelihood for a set of independent observations and say what is fixed and what varies;</li>
+<li>explain why we work with the log likelihood, and read a likelihood surface;</li>
+<li>connect the curvature of the log likelihood to the standard error of an estimate;</li>
+<li>derive the log likelihood of a logistic regression and its derivative, and find the maximum with <code>optim()</code> and with <code>glm()</code>;</li>
+<li>fit logistic regressions to item responses in long format, and explain why giving items their own intercepts changes the slope.</li>
+</ul>
 </section>
 <section id="core-ideas" class="level2">
 <h2 class="anchored" data-anchor-id="core-ideas">Core ideas</h2>
+<section id="the-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="the-likelihood">The likelihood</h3>
+<p>Suppose we flip a coin 10 times and see 7 heads. What is the probability of heads, <span class="math inline">\(p\)</span>? We don’t know, but we can ask a sharper question: for each candidate value of <span class="math inline">\(p\)</span>, how probable is the sequence we actually observed? For independent flips that probability is a product, <span class="math display">\[L(p \mid y) = \prod_{i=1}^{n} p^{y_i}(1-p)^{1-y_i} = p^{k}(1-p)^{n-k},\]</span> where <span class="math inline">\(y_i = 1\)</span> for heads and <span class="math inline">\(k\)</span> is the number of heads. Read as a function of the data, this is a probability. Read as a function of <span class="math inline">\(p\)</span> with the data held fixed, it is the <strong>likelihood</strong> (Fisher, 1922). Nothing about the data changes as we move along it; we are asking which values of the parameter the data favour.</p>
+<p>Note that the likelihood is not a probability distribution for <span class="math inline">\(p\)</span>: it needn’t integrate to 1. In the frequentist reading, <span class="math inline">\(p\)</span> is fixed but unknown, and the likelihood ranks candidate values. In a Bayesian reading, <span class="math inline">\(p\)</span> gets a prior distribution, and the likelihood is what turns the prior into a posterior. We use the first reading here and return to priors in <a href="../lessons/ability-estimation.html">Estimating abilities</a>.</p>
+<section id="try-it-the-likelihood-for-a-coin" class="level4">
+<h4 class="anchored" data-anchor-id="try-it-the-likelihood-for-a-coin">Try it: the likelihood for a coin</h4>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="45" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 44;"><span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>viewof cf_n <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">200</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Flips (n)"</span>})</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>viewof cf_k0 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">200</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">7</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Heads (k)"</span>})</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>viewof cf_log <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">toggle</span>({<span class="dt">label</span><span class="op">:</span> <span class="st">"Show the log likelihood"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> <span class="kw">false</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="52" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 51;"><span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>cf_k <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">min</span>(cf_k0<span class="op">,</span> cf_n)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>cf_data <span class="op">=</span> <span class="fu">grid</span>(<span class="fl">0.001</span><span class="op">,</span> <span class="fl">0.999</span><span class="op">,</span> <span class="dv">400</span>)<span class="op">.</span><span class="fu">map</span>(p <span class="kw">=&gt;</span> {</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> ll <span class="op">=</span> cf_k <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(p) <span class="op">+</span> (cf_n <span class="op">-</span> cf_k) <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(<span class="dv">1</span> <span class="op">-</span> p)<span class="op">;</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {p<span class="op">,</span> ll<span class="op">,</span> <span class="dt">L</span><span class="op">:</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(ll)}<span class="op">;</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>cf_max <span class="op">=</span> cf_data<span class="op">.</span><span class="fu">reduce</span>((a<span class="op">,</span> b) <span class="kw">=&gt;</span> (b<span class="op">.</span><span class="at">ll</span> <span class="op">&gt;</span> a<span class="op">.</span><span class="at">ll</span> <span class="op">?</span> b <span class="op">:</span> a))</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">300</span><span class="op">,</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Candidate p"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]}<span class="op">,</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> cf_log <span class="op">?</span> <span class="st">"Log likelihood"</span> <span class="op">:</span> <span class="st">"Likelihood"</span><span class="op">,</span> <span class="op">...</span>(cf_log <span class="op">?</span> {<span class="dt">domain</span><span class="op">:</span> [cf_max<span class="op">.</span><span class="at">ll</span> <span class="op">-</span> <span class="dv">25</span><span class="op">,</span> cf_max<span class="op">.</span><span class="at">ll</span> <span class="op">+</span> <span class="dv">1</span>]} <span class="op">:</span> {})}<span class="op">,</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([cf_k <span class="op">/</span> cf_n]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> palette<span class="op">.</span><span class="at">guide</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"4,3"</span>})<span class="op">,</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(cf_data<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> <span class="op">!</span>cf_log <span class="op">||</span> d<span class="op">.</span><span class="at">ll</span> <span class="op">&gt;</span> cf_max<span class="op">.</span><span class="at">ll</span> <span class="op">-</span> <span class="dv">25</span>)<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"p"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> cf_log <span class="op">?</span> <span class="st">"ll"</span> <span class="op">:</span> <span class="st">"L"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> palette<span class="op">.</span><span class="at">main</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">2.5</span>})</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-3-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-3-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-3-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-3-4" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb4" data-startfrom="70" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 69;"><span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="fu">md</span><span class="vs">`With </span><span class="sc">${</span>cf_k<span class="sc">}</span><span class="vs"> heads in </span><span class="sc">${</span>cf_n<span class="sc">}</span><span class="vs"> flips, the likelihood peaks at p = </span><span class="sc">${</span>(cf_k <span class="op">/</span> cf_n)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">, the proportion of heads. Its height there is </span><span class="sc">${</span>cf_max<span class="op">.</span><span class="at">L</span><span class="op">.</span><span class="fu">toExponential</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">.`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-4" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<p>Move the sliders and note two things. The peak always sits at <span class="math inline">\(k/n\)</span>: the proportion of heads is the <strong>maximum likelihood estimate</strong> (MLE). And the height of the peak collapses as <span class="math inline">\(n\)</span> grows. With 200 flips even the most probable sequence is wildly improbable, because any particular sequence of 200 flips is. The height means nothing on its own; the shape is what we use.</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="77" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 76;"><span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="fu">quiz</span>({</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"In the likelihood $L(p </span><span class="sc">\\</span><span class="st">mid y)$, what is held fixed and what varies?"</span><span class="op">,</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>  <span class="dt">options</span><span class="op">:</span> [</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The data are fixed; the parameter $p$ varies"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"We observed one set of flips. The likelihood asks how probable that set is under each candidate $p$."</span>}<span class="op">,</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The parameter is fixed; the data vary"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"That is the probability model read forwards: for a known $p$, how probable is each possible dataset? The likelihood reads it backwards."</span>}<span class="op">,</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"Both vary"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"If both varied we'd be back to a joint probability. The likelihood fixes what we saw."</span>}</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-5" data-nodetype="expression">
+
+</div>
+</div>
+</div>
 </section>
-<section id="worked-example" class="level2">
-<h2 class="anchored" data-anchor-id="worked-example">Worked example</h2>
+</section>
+<section id="work-on-the-log-scale" class="level3">
+<h3 class="anchored" data-anchor-id="work-on-the-log-scale">Work on the log scale</h3>
+<p>Products of many probabilities are tiny numbers, small enough that a computer’s arithmetic eventually loses them: the likelihood of a few thousand flips is smaller than the smallest number a double-precision float can hold. So in practice we work with the <strong>log likelihood</strong>, <span class="math display">\[\ell(p) = \log L(p) = k\log p + (n-k)\log(1-p).\]</span> The log turns the product into a sum, which is also far easier to differentiate. And because the log is monotone, whatever maximizes <span class="math inline">\(\ell\)</span> also maximizes <span class="math inline">\(L\)</span>. Turn on the log likelihood in the widget above: the peak doesn’t move.</p>
+</section>
+<section id="the-likelihood-surface-and-its-curvature" class="level3">
+<h3 class="anchored" data-anchor-id="the-likelihood-surface-and-its-curvature">The likelihood surface and its curvature</h3>
+<p>How sure should we be about the estimate? The likelihood answers that too. Here are log likelihoods for the same proportion of heads from three sample sizes, each shifted so its peak sits at zero.</p>
+<section id="try-it-more-data-sharper-peak" class="level4">
+<h4 class="anchored" data-anchor-id="try-it-more-data-sharper-peak">Try it: more data, sharper peak</h4>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="101" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 100;"><span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>viewof cv_phat <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="fl">0.9</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.7</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Proportion of heads"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb7" data-startfrom="107" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 106;"><span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>cv_ns <span class="op">=</span> [<span class="dv">20</span><span class="op">,</span> <span class="dv">200</span><span class="op">,</span> <span class="dv">2000</span>]</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>cv_data <span class="op">=</span> cv_ns<span class="op">.</span><span class="fu">flatMap</span>(n <span class="kw">=&gt;</span> <span class="fu">grid</span>(<span class="fl">0.01</span><span class="op">,</span> <span class="fl">0.99</span><span class="op">,</span> <span class="dv">400</span>)<span class="op">.</span><span class="fu">map</span>(p <span class="kw">=&gt;</span> ({</span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>  p<span class="op">,</span> <span class="dt">n</span><span class="op">:</span> <span class="vs">`n = </span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">`</span><span class="op">,</span></span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>  <span class="dt">rel</span><span class="op">:</span> n <span class="op">*</span> (cv_phat <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(p <span class="op">/</span> cv_phat) <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> cv_phat) <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>((<span class="dv">1</span> <span class="op">-</span> p) <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> cv_phat)))</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>})))<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">rel</span> <span class="op">&gt;</span> <span class="op">-</span><span class="dv">6</span>)</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">300</span><span class="op">,</span></span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Candidate p"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Log likelihood (peak at 0)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span><span class="dv">6</span><span class="op">,</span> <span class="fl">0.2</span>]}<span class="op">,</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> {<span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> cv_ns<span class="op">.</span><span class="fu">map</span>(n <span class="kw">=&gt;</span> <span class="vs">`n = </span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">`</span>)<span class="op">,</span> <span class="dt">range</span><span class="op">:</span> [palette<span class="op">.</span><span class="at">light</span><span class="op">,</span> palette<span class="op">.</span><span class="at">main</span><span class="op">,</span> palette<span class="op">.</span><span class="at">contrast</span>]}<span class="op">,</span></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="op">-</span><span class="dv">2</span>]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> palette<span class="op">.</span><span class="at">rule</span>})<span class="op">,</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(cv_data<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"p"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"rel"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"n"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">2.5</span>})</span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-7-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-7-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-7-3" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb8" data-startfrom="124" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 123;"><span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>Inputs<span class="op">.</span><span class="fu">table</span>(cv_ns<span class="op">.</span><span class="fu">map</span>(n <span class="kw">=&gt;</span> ({n<span class="op">,</span> <span class="st">"standard error of p̂"</span><span class="op">:</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(cv_phat <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> cv_phat) <span class="op">/</span> n)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)}))<span class="op">,</span> {<span class="dt">layout</span><span class="op">:</span> <span class="st">"auto"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-8" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<p>The peak is in the same place each time, but with more data it is narrower: the log likelihood falls away faster as we move from the estimate, so fewer values of <span class="math inline">\(p\)</span> remain plausible. That <strong>curvature</strong> is the precision of the estimate. For the coin, the second derivative of <span class="math inline">\(\ell\)</span> at the peak is <span class="math inline">\(-n/(\hat p(1-\hat p))\)</span>, and one over the square root of its negative is the familiar standard error, <span class="math inline">\(\sqrt{\hat p(1-\hat p)/n}\)</span>, shown in the table. This link between curvature and precision runs through the whole course: it becomes <strong>information</strong> in <a href="../lessons/information.html">Information, precision, and short forms</a> and the standard error of an ability estimate in <a href="../lessons/ability-estimation.html">Estimating abilities</a>.</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb9" data-startfrom="131" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 130;"><span id="cb9-131"><a href="#cb9-131" aria-hidden="true" tabindex="-1"></a><span class="fu">quiz</span>({</span>
+<span id="cb9-132"><a href="#cb9-132" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"You flip the coin four times as often and see the same proportion of heads. What happens to the standard error of $</span><span class="sc">\\</span><span class="st">hat p$?"</span><span class="op">,</span></span>
+<span id="cb9-133"><a href="#cb9-133" aria-hidden="true" tabindex="-1"></a>  <span class="dt">options</span><span class="op">:</span> [</span>
+<span id="cb9-134"><a href="#cb9-134" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"It halves"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"The curvature of the log likelihood grows in proportion to $n$, so the standard error, one over its square root, shrinks by $</span><span class="sc">\\</span><span class="st">sqrt{4} = 2$."</span>}<span class="op">,</span></span>
+<span id="cb9-135"><a href="#cb9-135" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"It falls to a quarter"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"The curvature quadruples, but the standard error goes with its square root."</span>}<span class="op">,</span></span>
+<span id="cb9-136"><a href="#cb9-136" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"It stays the same, because the proportion is the same"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"The estimate stays the same; its precision doesn't. More flips give a sharper peak."</span>}</span>
+<span id="cb9-137"><a href="#cb9-137" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb9-138"><a href="#cb9-138" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-9" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="logistic-regression-by-likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-by-likelihood">Logistic regression by likelihood</h3>
+<p>Now let the probability depend on a predictor. Recall logistic regression (we write its coefficients as <span class="math inline">\(\beta\)</span>s, keeping <span class="math inline">\(b\)</span> for item difficulty from the Rasch model on): for a binary outcome <span class="math inline">\(y_i\)</span> and a predictor <span class="math inline">\(x_i\)</span>, <span class="math display">\[p_i = \Pr(y_i = 1 \mid x_i) = \frac{\exp(\beta_0 + \beta_1 x_i)}{1 + \exp(\beta_0 + \beta_1 x_i)}.\]</span> Each observation has its own <span class="math inline">\(p_i\)</span>, but the likelihood is built exactly as for the coin: <span class="math display">\[\ell(\beta_0, \beta_1) = \sum_{i=1}^{n} \Big[\, y_i \log p_i + (1 - y_i)\log(1 - p_i) \,\Big].\]</span> We know the <span class="math inline">\(y_i\)</span> and <span class="math inline">\(x_i\)</span>; the <span class="math inline">\(p_i\)</span> depend on the unknown <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. Differentiating (problem 1 asks you to) gives a pleasingly simple result: <span class="math display">\[\frac{\partial \ell}{\partial \beta_1} = \sum_i (y_i - p_i)\,x_i, \qquad \frac{\partial \ell}{\partial \beta_0} = \sum_i (y_i - p_i).\]</span> At the maximum both derivatives are zero. The second equation merits emphasis: at the MLE, the model’s predicted number of successes equals the observed number.</p>
+<section id="try-it-fit-a-logistic-regression-by-hand" class="level4">
+<h4 class="anchored" data-anchor-id="try-it-fit-a-logistic-regression-by-hand">Try it: fit a logistic regression by hand</h4>
+<p>Sixty simulated observations. Move the intercept and slope to make the curve fit the points, and watch the log likelihood and the two derivatives.</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb10" data-startfrom="158" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 157;"><span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a>lg_sample <span class="op">=</span> {</span>
+<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> r <span class="op">=</span> <span class="fu">rng</span>(<span class="dv">7</span>)<span class="op">;</span></span>
+<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> <span class="dv">60</span>}<span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> x <span class="op">=</span> r<span class="op">.</span><span class="fu">norm</span>()<span class="op">;</span></span>
+<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {x<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> r<span class="op">.</span><span class="fu">unif</span>() <span class="op">&lt;</span> <span class="fu">logistic</span>(<span class="op">-</span><span class="fl">0.3</span> <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> x) <span class="op">?</span> <span class="dv">1</span> <span class="op">:</span> <span class="dv">0</span>}<span class="op">;</span></span>
+<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-165"><a href="#cb10-165" aria-hidden="true" tabindex="-1"></a>lg_ll <span class="op">=</span> (b0<span class="op">,</span> b1) <span class="kw">=&gt;</span> lg_sample<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span> d) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-166"><a href="#cb10-166" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> p <span class="op">=</span> <span class="fu">logistic</span>(b0 <span class="op">+</span> b1 <span class="op">*</span> d<span class="op">.</span><span class="at">x</span>)<span class="op">;</span></span>
+<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> s <span class="op">+</span> (d<span class="op">.</span><span class="at">y</span> <span class="op">?</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(p) <span class="op">:</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(<span class="dv">1</span> <span class="op">-</span> p))<span class="op">;</span></span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a>}<span class="op">,</span> <span class="dv">0</span>)</span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a>lg_mle <span class="op">=</span> {</span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> b0 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> b1 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// Newton-Raphson</span></span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> it <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> it <span class="op">&lt;</span> <span class="dv">30</span><span class="op">;</span> it<span class="op">++</span>) {</span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> g0 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> g1 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> h00 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> h01 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> h11 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">const</span> d <span class="kw">of</span> lg_sample) {</span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> p <span class="op">=</span> <span class="fu">logistic</span>(b0 <span class="op">+</span> b1 <span class="op">*</span> d<span class="op">.</span><span class="at">x</span>)<span class="op">,</span> w <span class="op">=</span> p <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p)<span class="op">;</span></span>
+<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a>      g0 <span class="op">+=</span> d<span class="op">.</span><span class="at">y</span> <span class="op">-</span> p<span class="op">;</span> g1 <span class="op">+=</span> (d<span class="op">.</span><span class="at">y</span> <span class="op">-</span> p) <span class="op">*</span> d<span class="op">.</span><span class="at">x</span><span class="op">;</span></span>
+<span id="cb10-176"><a href="#cb10-176" aria-hidden="true" tabindex="-1"></a>      h00 <span class="op">+=</span> w<span class="op">;</span> h01 <span class="op">+=</span> w <span class="op">*</span> d<span class="op">.</span><span class="at">x</span><span class="op">;</span> h11 <span class="op">+=</span> w <span class="op">*</span> d<span class="op">.</span><span class="at">x</span> <span class="op">*</span> d<span class="op">.</span><span class="at">x</span><span class="op">;</span></span>
+<span id="cb10-177"><a href="#cb10-177" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-178"><a href="#cb10-178" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> det <span class="op">=</span> h00 <span class="op">*</span> h11 <span class="op">-</span> h01 <span class="op">*</span> h01<span class="op">;</span></span>
+<span id="cb10-179"><a href="#cb10-179" aria-hidden="true" tabindex="-1"></a>    b0 <span class="op">+=</span> (h11 <span class="op">*</span> g0 <span class="op">-</span> h01 <span class="op">*</span> g1) <span class="op">/</span> det<span class="op">;</span></span>
+<span id="cb10-180"><a href="#cb10-180" aria-hidden="true" tabindex="-1"></a>    b1 <span class="op">+=</span> (h00 <span class="op">*</span> g1 <span class="op">-</span> h01 <span class="op">*</span> g0) <span class="op">/</span> det<span class="op">;</span></span>
+<span id="cb10-181"><a href="#cb10-181" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-182"><a href="#cb10-182" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {b0<span class="op">,</span> b1}<span class="op">;</span></span>
+<span id="cb10-183"><a href="#cb10-183" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-184"><a href="#cb10-184" aria-hidden="true" tabindex="-1"></a>viewof lg_b0 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="op">-</span><span class="dv">2</span><span class="op">,</span> <span class="dv">2</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Intercept β0"</span>})</span>
+<span id="cb10-185"><a href="#cb10-185" aria-hidden="true" tabindex="-1"></a>viewof lg_b1 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="op">-</span><span class="dv">1</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Slope β1"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-10-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-10-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-10-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-10-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-10-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb11" data-startfrom="189" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 188;"><span id="cb11-189"><a href="#cb11-189" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb11-190"><a href="#cb11-190" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">280</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"x"</span>}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"y, and P(y = 1)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span><span class="fl">0.08</span><span class="op">,</span> <span class="fl">1.08</span>]}<span class="op">,</span></span>
+<span id="cb11-191"><a href="#cb11-191" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb11-192"><a href="#cb11-192" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>(lg_sample<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> (d<span class="op">,</span> i) <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">y</span> <span class="op">+</span> ((i <span class="op">*</span> <span class="dv">37</span>) <span class="op">%</span> <span class="dv">11</span> <span class="op">-</span> <span class="dv">5</span>) <span class="op">*</span> <span class="fl">0.012</span><span class="op">,</span> <span class="dt">r</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> palette<span class="op">.</span><span class="at">guide</span>})<span class="op">,</span></span>
+<span id="cb11-193"><a href="#cb11-193" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(<span class="fu">grid</span>(<span class="op">-</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span>)<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> ({x<span class="op">,</span> <span class="dt">p</span><span class="op">:</span> <span class="fu">logistic</span>(lg_b0 <span class="op">+</span> lg_b1 <span class="op">*</span> x)}))<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"p"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> palette<span class="op">.</span><span class="at">main</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">2.5</span>})</span>
+<span id="cb11-194"><a href="#cb11-194" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb11-195"><a href="#cb11-195" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-11" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb12" data-startfrom="201" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 200;"><span id="cb12-201"><a href="#cb12-201" aria-hidden="true" tabindex="-1"></a>lg_curve <span class="op">=</span> <span class="fu">grid</span>(<span class="op">-</span><span class="dv">1</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">201</span>)<span class="op">.</span><span class="fu">map</span>(b1 <span class="kw">=&gt;</span> ({b1<span class="op">,</span> <span class="dt">ll</span><span class="op">:</span> <span class="fu">lg_ll</span>(lg_b0<span class="op">,</span> b1)}))</span>
+<span id="cb12-202"><a href="#cb12-202" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">220</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Slope β1 (intercept held at the slider value)"</span>}<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Log likelihood"</span>}<span class="op">,</span></span>
+<span id="cb12-204"><a href="#cb12-204" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb12-205"><a href="#cb12-205" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(lg_curve<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"b1"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"ll"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> palette<span class="op">.</span><span class="at">main</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span>})<span class="op">,</span></span>
+<span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>([{<span class="dt">b1</span><span class="op">:</span> lg_b1<span class="op">,</span> <span class="dt">ll</span><span class="op">:</span> <span class="fu">lg_ll</span>(lg_b0<span class="op">,</span> lg_b1)}]<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> <span class="st">"b1"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"ll"</span><span class="op">,</span> <span class="dt">r</span><span class="op">:</span> <span class="dv">6</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> palette<span class="op">.</span><span class="at">contrast</span>})</span>
+<span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-12-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-12-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb13" data-startfrom="213" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 212;"><span id="cb13-213"><a href="#cb13-213" aria-hidden="true" tabindex="-1"></a>lg_score <span class="op">=</span> lg_sample<span class="op">.</span><span class="fu">reduce</span>((s<span class="op">,</span> d) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-214"><a href="#cb13-214" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> r <span class="op">=</span> d<span class="op">.</span><span class="at">y</span> <span class="op">-</span> <span class="fu">logistic</span>(lg_b0 <span class="op">+</span> lg_b1 <span class="op">*</span> d<span class="op">.</span><span class="at">x</span>)<span class="op">;</span></span>
+<span id="cb13-215"><a href="#cb13-215" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {<span class="dt">s0</span><span class="op">:</span> s<span class="op">.</span><span class="at">s0</span> <span class="op">+</span> r<span class="op">,</span> <span class="dt">s1</span><span class="op">:</span> s<span class="op">.</span><span class="at">s1</span> <span class="op">+</span> r <span class="op">*</span> d<span class="op">.</span><span class="at">x</span>}<span class="op">;</span></span>
+<span id="cb13-216"><a href="#cb13-216" aria-hidden="true" tabindex="-1"></a>}<span class="op">,</span> {<span class="dt">s0</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">s1</span><span class="op">:</span> <span class="dv">0</span>})</span>
+<span id="cb13-217"><a href="#cb13-217" aria-hidden="true" tabindex="-1"></a><span class="fu">md</span><span class="vs">`Log likelihood: **</span><span class="sc">${</span><span class="fu">lg_ll</span>(lg_b0<span class="op">,</span> lg_b1)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">**. Derivatives: Σ(y − p) = </span><span class="sc">${</span>lg_score<span class="op">.</span><span class="at">s0</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">, Σ(y − p)x = </span><span class="sc">${</span>lg_score<span class="op">.</span><span class="at">s1</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">. The maximum is at β0 = </span><span class="sc">${</span>lg_mle<span class="op">.</span><span class="at">b0</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">, β1 = </span><span class="sc">${</span>lg_mle<span class="op">.</span><span class="at">b1</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">, where the log likelihood is </span><span class="sc">${</span><span class="fu">lg_ll</span>(lg_mle<span class="op">.</span><span class="at">b0</span><span class="op">,</span> lg_mle<span class="op">.</span><span class="at">b1</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs"> and both derivatives are zero.`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-13-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-13-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+<p>Push the slope above its best value and <span class="math inline">\(\sum (y-p)x\)</span> turns negative: the curve now predicts too many successes where <span class="math inline">\(x\)</span> is large. Push it below and the sign flips. The derivative always points uphill, which is what a numerical optimizer uses. (The widget finds the maximum with Newton’s method, which follows the derivative and the curvature together.)</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb14" data-startfrom="223" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 222;"><span id="cb14-223"><a href="#cb14-223" aria-hidden="true" tabindex="-1"></a><span class="fu">quiz</span>({</span>
+<span id="cb14-224"><a href="#cb14-224" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"A logistic regression with an intercept has been fit by maximum likelihood to 1,000 observations, 380 of them successes. What is the sum of the fitted probabilities $</span><span class="sc">\\</span><span class="st">sum_i </span><span class="sc">\\</span><span class="st">hat p_i$?"</span><span class="op">,</span></span>
+<span id="cb14-225"><a href="#cb14-225" aria-hidden="true" tabindex="-1"></a>  <span class="dt">options</span><span class="op">:</span> [</span>
+<span id="cb14-226"><a href="#cb14-226" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"Exactly 380"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"The derivative with respect to the intercept, $</span><span class="sc">\\</span><span class="st">sum_i (y_i - p_i)$, is zero at the maximum, so the fitted probabilities add up to the observed number of successes."</span>}<span class="op">,</span></span>
+<span id="cb14-227"><a href="#cb14-227" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"About 380, give or take sampling error"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"It's exact, not approximate: it's the equation that defines the maximum."</span>}<span class="op">,</span></span>
+<span id="cb14-228"><a href="#cb14-228" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"500, since the model is symmetric"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"Nothing forces the fitted probabilities toward 0.5; the intercept moves them to match the data."</span>}</span>
+<span id="cb14-229"><a href="#cb14-229" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb14-230"><a href="#cb14-230" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-14" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Go deeper: the score equation and the standard error
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Assumptions:</strong> independent binary observations <span class="math inline">\(y_i\)</span>; <span class="math inline">\(p_i = \text{logit}^{-1}(\beta_0 + \beta_1 x_i)\)</span>. For simplicity, treat <span class="math inline">\(\beta_0\)</span> as known and write <span class="math inline">\(\eta_i = \beta_0 + \beta_1 x_i\)</span>.</p>
+<p><strong>The derivative.</strong> Since <span class="math inline">\(\partial p_i/\partial \eta_i = p_i(1-p_i)\)</span> and <span class="math inline">\(\partial \eta_i/\partial \beta_1 = x_i\)</span>, <span class="math display">\[\frac{\partial \ell}{\partial \beta_1} = \sum_i \left[\frac{y_i}{p_i} - \frac{1-y_i}{1-p_i}\right] p_i(1-p_i)\,x_i = \sum_i \big(y_i(1-p_i) - (1-y_i)p_i\big)x_i = \sum_i (y_i - p_i)\,x_i.\]</span> Setting it to zero gives the <strong>score equation</strong>. It has no closed-form solution, which is why we need <code>optim()</code> or Newton’s method.</p>
+<p><strong>The curvature.</strong> Differentiating again, <span class="math display">\[\frac{\partial^2 \ell}{\partial \beta_1^2} = -\sum_i p_i(1-p_i)\,x_i^2.\]</span> This is always negative, so the log likelihood has a single peak. Its negative is the <strong>Fisher information</strong> for <span class="math inline">\(\beta_1\)</span>, and the standard error of <span class="math inline">\(\hat\beta_1\)</span> is approximately <span class="math display">\[SE(\hat\beta_1) \approx \frac{1}{\sqrt{\sum_i p_i(1-p_i)\,x_i^2}}.\]</span> Two features of this formula recur throughout the course. Observations with <span class="math inline">\(p_i\)</span> near 0 or 1 contribute almost nothing, because <span class="math inline">\(p_i(1-p_i)\)</span> is tiny there. And the standard error shrinks as observations accumulate. With both parameters unknown, the same calculation gives a <span class="math inline">\(2\times 2\)</span> information matrix, and the standard errors come from its inverse; that’s what <code>glm()</code> reports.</p>
+<p><strong>When there is no maximum.</strong> If some value of <span class="math inline">\(x\)</span> perfectly separates the successes from the failures, <span class="math inline">\(\ell\)</span> keeps increasing as <span class="math inline">\(\beta_1 \to \infty\)</span> and the MLE doesn’t exist (Albert &amp; Anderson, 1984). A respondent who answers every item correctly is the item-response version of this problem; see <a href="../lessons/ability-estimation.html">Estimating abilities</a>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="maximizing-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="maximizing-in-practice">Maximizing in practice</h3>
+<p>For logistic regression, <code>glm()</code> does the maximizing for us (it uses a version of Newton’s method). But nothing about the likelihood needs <code>glm()</code>: write <span class="math inline">\(\ell\)</span> as an R function and hand it to a general optimizer such as <code>optim()</code>, and you get the same answer. The simulation below does exactly that. Later lessons use the same move for models <code>glm()</code> can’t fit, and <a href="../lessons/item-estimation.html">Estimating item parameters</a> opens up the machinery.</p>
+</section>
+<section id="item-responses-as-a-logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="item-responses-as-a-logistic-regression">Item responses as a logistic regression</h3>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Recall</strong> from <a href="../lessons/irw-data.html">Item response data and the IRW</a>: IRW tables are <em>long</em>, with one row per respondent–item response and extra columns (such as a respondent covariate) alongside.</p>
+</div>
+</div>
+</div>
+<p>One row per response is the shape a logistic regression wants: each row is one binary outcome. So if we have a predictor for each respondent, we can regress responses on it directly. That is what we do with the chess data below: each row is one player’s attempt at one problem, and the predictor is the player’s Elo rating. What makes item responses different from a generic binary outcome is that they come from <em>different items</em>, and items differ. How we account for that matters a great deal.</p>
+</section>
+</section>
+<section id="simulate" class="level2">
+<h2 class="anchored" data-anchor-id="simulate">Simulate</h2>
+<p>The code below simulates data from a logistic regression, traces the log likelihood over the slope, and finds the maximum two ways: with <code>optim()</code> on our own log-likelihood function, and with <code>glm()</code>. It’s base R, so it runs in a second or two.</p>
+<p>Try <code>n &lt;- 50</code>, then <code>n &lt;- 5000</code>. How does the curve change, and what happens to the standard error? (With the seed as written, the standard error of the slope is about 0.43 at <span class="math inline">\(n = 50\)</span>, 0.10 at <span class="math inline">\(n = 500\)</span> and 0.03 at <span class="math inline">\(n = 5000\)</span>: each tenfold increase in data cuts it by about <span class="math inline">\(\sqrt{10} \approx 3\)</span>.)</p>
+<div class="cell">
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+<p><a href="code/likelihood-sim.R">Download this code</a> to run it in your own R session.</p>
+</section>
+<section id="with-real-data" class="level2">
+<h2 class="anchored" data-anchor-id="with-real-data">With real data</h2>
+<p>We use <a href="https://itemresponsewarehouse.org/tables/chess_lnirt/">chess_lnirt</a>: 40 chess problems attempted by 256 players, from the Amsterdam Chess Test (van der Maas &amp; Wagenmakers, 2005). Each player also has an <strong>Elo rating</strong>, the standard measure of playing strength from tournament results, stored in <code>cov_elo</code> and standardized to mean 0 and SD 1. Elo gives us something rare in item response data: an outside measure of each respondent’s skill. <a href="code/likelihood-irw.R">Download the code</a>; it needs only base R.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Each IRW table has a landing page (itemresponsewarehouse.org/tables/&lt;name&gt;/)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># with a CSV download. This link is pinned to one version of the data.</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>chess_url <span class="ot">&lt;-</span> <span class="st">"https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v57_0.chess_lnirt/rows?format=csv"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(chess_url)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">is.na</span>(df<span class="sc">$</span>resp), ]          <span class="co"># drop the rows with no response</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df[, <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"item"</span>, <span class="st">"resp"</span>, <span class="st">"cov_elo"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">id</th>
+<th style="text-align: left;">item</th>
+<th style="text-align: right;">resp</th>
+<th style="text-align: right;">cov_elo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">42</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y17</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">43</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y26</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">44</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y37</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">45</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y39</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">46</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">47</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Y36</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">responses =</span> <span class="fu">nrow</span>(df), <span class="at">players =</span> <span class="fu">length</span>(<span class="fu">unique</span>(df<span class="sc">$</span>id)), <span class="at">problems =</span> <span class="fu">length</span>(<span class="fu">unique</span>(df<span class="sc">$</span>item)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>responses   players  problems 
+    10240       256        40 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cov_elo is the player's Elo rating, standardized (mean 0, SD 1 across players).</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>elo <span class="ot">&lt;-</span> <span class="fu">tapply</span>(df<span class="sc">$</span>cov_elo, df<span class="sc">$</span>id, <span class="cf">function</span>(x) x[<span class="dv">1</span>])</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(elo), <span class="at">sd =</span> <span class="fu">sd</span>(elo)), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean   sd 
+   0    1 </code></pre>
+</div>
+</div>
+<section id="does-elo-predict-success" class="level3">
+<h3 class="anchored" data-anchor-id="does-elo-predict-success">Does Elo predict success?</h3>
+<p>Start with the simplest model: one logistic regression for all 10,240 responses.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One logistic regression for all 10,240 responses: does Elo predict success?</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">glm</span>(resp <span class="sc">~</span> cov_elo, <span class="at">family =</span> binomial, <span class="at">data =</span> df)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">summary</span>(m0)<span class="sc">$</span>coefficients, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Estimate Std. Error z value Pr(&gt;|z|)
+(Intercept)    -0.14      0.020    -7.1        0
+cov_elo         0.50      0.021    23.3        0</code></pre>
+</div>
+</div>
+<p>It does, clearly. A player one SD above the mean in Elo has log odds of solving a problem 0.50 higher, so the odds are multiplied by <span class="math inline">\(e^{0.50} \approx 1.6\)</span>. The standard error, 0.021, is small because we have over ten thousand responses. The same slope falls out of the likelihood directly:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The same slope by brute force: the log likelihood as a function of b1, with the</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># intercept held at its estimate, and the maximum found by optim().</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(b, x, y) {</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">plogis</span>(b[<span class="dv">1</span>] <span class="sc">+</span> b[<span class="dv">2</span>] <span class="sc">*</span> x)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(y <span class="sc">*</span> <span class="fu">log</span>(p) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>b1_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span>, <span class="at">length.out =</span> <span class="dv">201</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>ll <span class="ot">&lt;-</span> <span class="fu">sapply</span>(b1_grid, <span class="cf">function</span>(b1) <span class="fu">loglik</span>(<span class="fu">c</span>(<span class="fu">coef</span>(m0)[<span class="dv">1</span>], b1), df<span class="sc">$</span>cov_elo, df<span class="sc">$</span>resp))</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b1_grid, ll, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#2780e3"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Candidate slope (beta1)"</span>, <span class="at">ylab =</span> <span class="st">"Log likelihood"</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">coef</span>(m0)[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#999"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="likelihood_files/figure-html/surface-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="cf">function</span>(b) <span class="sc">-</span><span class="fu">loglik</span>(b, df<span class="sc">$</span>cov_elo, df<span class="sc">$</span>resp))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">optim =</span> opt<span class="sc">$</span>par, <span class="at">glm =</span> <span class="fu">coef</span>(m0)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>      (Intercept) cov_elo
+optim       -0.14     0.5
+glm         -0.14     0.5</code></pre>
+</div>
+</div>
+<p>The log likelihood peaks at the <code>glm()</code> estimate, and <code>optim()</code> on our own function lands in the same place.</p>
+</section>
+<section id="items-differ" class="level3">
+<h3 class="anchored" data-anchor-id="items-differ">Items differ</h3>
+<p>That pooled regression ignores something we know: some chess problems are far harder than others. What happens if each problem gets its own intercept?</p>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb25" data-startfrom="320" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 319;"><span id="cb25-320"><a href="#cb25-320" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
+<span id="cb25-321"><a href="#cb25-321" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"Every player attempted all 40 problems, so Elo is unrelated to which problem was asked. When we give each problem its own intercept, what happens to the Elo slope (0.50 pooled)?"</span><span class="op">,</span></span>
+<span id="cb25-322"><a href="#cb25-322" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"It gets smaller"</span><span class="op">,</span> <span class="st">"It stays about the same"</span><span class="op">,</span> <span class="st">"It gets larger"</span>]<span class="op">,</span></span>
+<span id="cb25-323"><a href="#cb25-323" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"It gets larger"</span><span class="op">,</span></span>
+<span id="cb25-324"><a href="#cb25-324" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"It rises to 0.83. This isn't confounding: Elo and problem are unrelated here. A logistic slope is a *conditional* effect, the effect for a given problem, and averaging easy and hard problems together flattens it. The average of many steep S-curves at different locations is a shallower S-curve. This is called non-collapsibility (Gail, Wieand &amp; Piantadosi, 1984; Mood, 2010)."</span></span>
+<span id="cb25-325"><a href="#cb25-325" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-15" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chess problems differ a lot in difficulty. Give each its own intercept.</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(resp <span class="sc">~</span> cov_elo <span class="sc">+</span> <span class="fu">factor</span>(item), <span class="at">family =</span> binomial, <span class="at">data =</span> df)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">pooled =</span> <span class="fu">coef</span>(m0)[[<span class="st">"cov_elo"</span>]], <span class="at">with_item_intercepts =</span> <span class="fu">coef</span>(m1)[[<span class="st">"cov_elo"</span>]]), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>              pooled with_item_intercepts 
+                0.50                 0.83 </code></pre>
+</div>
+</div>
+<p>The slope rises from 0.50 to 0.83. In a linear regression, adding a predictor that is unrelated to <span class="math inline">\(x\)</span> leaves the slope on <span class="math inline">\(x\)</span> alone; in a logistic regression it doesn’t. The pooled slope answers a different question, the effect of Elo averaged over problems, and it understates how steeply success rises with skill on any particular problem. My rule, for this reason: never pool item responses into one logistic regression without giving the items their own intercepts. The items are not interchangeable, and the model should say so.</p>
+</section>
+<section id="items-differ-in-more-than-difficulty" class="level3">
+<h3 class="anchored" data-anchor-id="items-differ-in-more-than-difficulty">Items differ in more than difficulty</h3>
+<p>Go one step further and fit a separate regression for each problem.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Finally, a separate logistic regression for each problem.</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">split</span>(df, df<span class="sc">$</span>item), <span class="cf">function</span>(d)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coef</span>(<span class="fu">glm</span>(resp <span class="sc">~</span> cov_elo, <span class="at">family =</span> binomial, <span class="at">data =</span> d))[[<span class="st">"cov_elo"</span>]])</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> <span class="fu">sort</span>(slopes)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="fu">head</span>(slopes, <span class="dv">3</span>), <span class="fu">tail</span>(slopes, <span class="dv">3</span>)), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> Y15  Y31   Y3  Y30  Y26  Y29 
+0.03 0.04 0.13 1.66 1.85 2.02 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportion of players solving the problems discussed in the text.</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">tapply</span>(df<span class="sc">$</span>resp, df<span class="sc">$</span>item, mean)[<span class="fu">c</span>(<span class="st">"Y31"</span>, <span class="st">"Y15"</span>, <span class="st">"Y29"</span>)], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> Y31  Y15  Y29 
+0.98 0.08 0.07 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(slopes, <span class="fu">seq_along</span>(slopes), <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"#2780e3"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Slope on Elo (logit per SD of Elo)"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">seq_along</span>(slopes), <span class="at">labels =</span> <span class="fu">names</span>(slopes), <span class="at">las =</span> <span class="dv">1</span>, <span class="at">cex.axis =</span> <span class="fl">0.6</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">coef</span>(m1)[[<span class="st">"cov_elo"</span>]], <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"#999"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="likelihood_files/figure-html/peritem-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The slopes run from essentially zero to about 2. Two of the flat ones are flat for different reasons. Y31 is the easiest problem in the test (98% of players solve it), and when nearly everyone succeeds there is little room for Elo to matter. Y15 is another matter. It is about as hard as Y29 (8% and 7% of players solve them), yet success on Y29 rises steeply with Elo and success on Y15 barely moves. Hold on to Y15: when we fit the Rasch model to these data in <a href="../lessons/rasch.html">The Rasch model</a>, it is the item that fits worst. Slopes that differ from item to item are the subject of <a href="../lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a>.</p>
+<p>Finally, a question to carry forward. Elo is an unusually good predictor, and most item response data come with nothing like it. What if we had no Elo at all, and instead gave each <em>player</em> an unknown parameter of their own, estimated from their responses alongside the problems’ intercepts? That is a logistic regression with nothing observed on the right-hand side, and it is <a href="../lessons/rasch.html">the Rasch model</a>.</p>
+</section>
 </section>
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>
+<ol type="1">
+<li><strong>The derivative.</strong> Starting from <span class="math inline">\(\ell = \sum_i [y_i \log p_i + (1-y_i)\log(1-p_i)]\)</span> with <span class="math inline">\(p_i = e^{\beta x_i}/(1+e^{\beta x_i})\)</span> (no intercept), show that <span class="math inline">\(\partial \ell/\partial \beta = \sum_i (y_i - p_i) x_i\)</span>. Then use the simulation with true slopes of 0.5 and 2 and plot this derivative against candidate values of <span class="math inline">\(\beta\)</span> for each. How does the shape of the derivative change as the true <span class="math inline">\(\beta\)</span> grows, and what does that mean for how precisely <span class="math inline">\(\beta\)</span> is estimated? (PS1#5)</li>
+<li><strong>A normal likelihood.</strong> Draw 100 values from a normal distribution with unknown mean and SD 1. Plot the likelihood for the mean over a grid of candidate values; then repeat with 10 and with 1,000 draws. Describe how the surface changes, measure its curvature at the peak, and compare <span class="math inline">\(1/\sqrt{\text{curvature}}\)</span> with the usual standard error of a mean. (PS1#1)</li>
+<li><strong>Chess, your way.</strong> Using <code>chess_lnirt</code>, fit logistic regressions of <code>resp</code> on <code>cov_elo</code> with (a) no item terms, (b) item intercepts, and (c) item intercepts and item-specific slopes (<code>resp ~ factor(item) * cov_elo</code>). Compare the log likelihoods (<code>logLik()</code>). Which step improves the fit more, and is either worth its extra parameters? (PS1#2)</li>
+<li><strong>Two readings.</strong> A colleague looks at the pooled Elo slope and its standard error and says “there is a 95% chance the slope is between 0.46 and 0.54.” What would a frequentist say about that sentence? What would a Bayesian need to add before saying it?</li>
+<li><strong>No maximum.</strong> Construct a dataset of six observations for which the logistic regression MLE doesn’t exist, run <code>glm()</code> on it, and describe what R reports. Then change one observation so that the MLE exists. What is the item-response analogue of your first dataset?</li>
+<li><strong>Challenge: from Elo to the Rasch model.</strong> Fit <code>glmer(resp ~ 0 + factor(item) + (1 | id), family = binomial)</code> from the <code>lme4</code> package to the chess data: item intercepts plus a random effect for each player instead of Elo. Correlate the estimated player effects (<code>ranef()</code>) with Elo. How close are they, and where do they disagree? What model have you fit?</li>
+</ol>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Stuck, or curious about something this lesson doesn’t cover?</strong> <a href="https://claude.ai/new?q=I%27m%20working%20through%20a%20lesson%20called%20%22The%20likelihood%20and%20logistic%20regression%22%20in%20an%20open%20psychometrics%20course%20built%20on%20the%20Item%20Response%20Warehouse%20%28IRW%29.%20It%20covers%20the%20likelihood%20and%20log%20likelihood%2C%20likelihood%20surfaces%20and%20how%20their%20curvature%20gives%20standard%20errors%2C%20fitting%20logistic%20regression%20by%20maximum%20likelihood%20%28with%20optim%28%29%20and%20glm%28%29%20in%20R%29%2C%20and%20logistic%20regressions%20of%20chess%20item%20responses%20on%20Elo%20ratings%2C%20including%20why%20giving%20items%20their%20own%20intercepts%20changes%20the%20slope.%20Please%20act%20as%20a%20patient%20tutor%3A%20answer%20my%20questions%2C%20check%20my%20reasoning%2C%20and%20prefer%20small%20worked%20examples%20in%20R.%20If%20data%20would%20help%2C%20IRW%20tables%20are%20described%20at%20https%3A%2F%2Fitemresponsewarehouse.org%2Fllms.txt.%20My%20first%20question%20is%3A%20" class="btn btn-outline-primary btn-sm" target="_blank">Ask Claude about this lesson</a> opens a new conversation that already knows what the lesson is about; add your question at the end. Claude shows a caution notice on any prompt that arrives through a link; that’s expected.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="going-further" class="level2">
 <h2 class="anchored" data-anchor-id="going-further">Going further</h2>
+<ul>
+<li>Fisher, R. A. (1922). On the mathematical foundations of theoretical statistics. <em>Philosophical Transactions of the Royal Society of London, Series A</em>, 222, 309–368. <a href="https://doi.org/10.1098/rsta.1922.0009" class="uri">https://doi.org/10.1098/rsta.1922.0009</a>. Where maximum likelihood gets its name and its rationale.</li>
+<li>Pawitan, Y. (2001). <em>In all likelihood: Statistical modelling and inference using likelihood</em>. Oxford University Press. <a href="https://doi.org/10.1093/oso/9780198507659.001.0001" class="uri">https://doi.org/10.1093/oso/9780198507659.001.0001</a>. A patient book-length treatment of everything in this lesson, and a good deal more.</li>
+<li>Mood, C. (2010). Logistic regression: Why we cannot do what we think we can do, and what we can do about it. <em>European Sociological Review</em>, 26(1), 67–82. <a href="https://doi.org/10.1093/esr/jcp006" class="uri">https://doi.org/10.1093/esr/jcp006</a>. The clearest account of why logistic slopes change when you add unrelated predictors.</li>
+<li>Gail, M. H., Wieand, S., &amp; Piantadosi, S. (1984). Biased estimates of treatment effect in randomized experiments with nonlinear regressions and omitted covariates. <em>Biometrika</em>, 71(3), 431–444. <a href="https://doi.org/10.1093/biomet/71.3.431" class="uri">https://doi.org/10.1093/biomet/71.3.431</a>. The same phenomenon in randomized trials.</li>
+<li>Albert, A., &amp; Anderson, J. A. (1984). On the existence of maximum likelihood estimates in logistic regression models. <em>Biometrika</em>, 71(1), 1–10. <a href="https://doi.org/10.1093/biomet/71.1.1" class="uri">https://doi.org/10.1093/biomet/71.1.1</a>. When the MLE doesn’t exist (problem 5).</li>
+<li>van der Maas, H. L. J., &amp; Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. <em>American Journal of Psychology</em>, 118(1), 29–60. <a href="https://doi.org/10.2307/30039042" class="uri">https://doi.org/10.2307/30039042</a>. The Amsterdam Chess Test, and how it relates to Elo.</li>
+</ul>
 </section>
 <section id="data-sources" class="level2">
 <h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
@@ -214,6 +2815,13 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="for-instructors" class="level2">
 <h2 class="anchored" data-anchor-id="for-instructors">For instructors</h2>
+<ul>
+<li><strong>Source:</strong> EDUC 252 class 1 (slides c1, “Probabilistic models for item responses” through “The likelihood surface”), problem set 1 (#1, #2, #5), and the code in <code>ben-domingue/252</code>: <code>c1/likelihood.R</code>, <code>ps1/ps1-like.R</code>, <code>ps1/ll_logreg.R</code>, <code>ps1/ps1-chess.R</code>.</li>
+<li><strong>Timing:</strong> the core ideas and widgets take about 50 minutes; the chess analysis works as a 25-minute lab. Students who have seen logistic regression can move quickly through the first half.</li>
+<li><strong>Changed from 252:</strong> the 252 class opened with the normal-mean likelihood. This lesson uses coin flips for the widgets, where the curvature–SE link is exact and simple, and keeps the normal mean for problem 2. The Elo analysis (PS1#2) is worked through in the lesson, including the non-collapsibility result, rather than left as a question.</li>
+<li><strong>Held back:</strong> priors and posterior estimates (in <a href="../lessons/ability-estimation.html">Estimating abilities</a>), Fisher information in IRT (in <a href="../lessons/information.html">Information</a>), and comparing models by likelihood (in <a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a>).</li>
+<li><strong>Solutions:</strong> held back in <code>solutions/likelihood.qmd</code> (not published).</li>
+</ul>
 
 
 </section>
@@ -246,6 +2854,17 @@ document.addEventListener("click", function (e) {
     }
   }, 250);
 }, true);
+</script>
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7Z3JpZCwgbG9naXN0aWMsIHJuZywgcGFsZXR0ZX0gZnJvbSBcIi4vd2lkZ2V0cy9pcnQuanNcIlxuaW1wb3J0IHtxdWl6LCBwcmVkaWN0fSBmcm9tIFwiLi93aWRnZXRzL3F1aXouanNcIlxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoidmlld29mIGNmX24gPSBJbnB1dHMucmFuZ2UoWzEsIDIwMF0sIHt2YWx1ZTogMTAsIHN0ZXA6IDEsIGxhYmVsOiBcIkZsaXBzIChuKVwifSlcbnZpZXdvZiBjZl9rMCA9IElucHV0cy5yYW5nZShbMCwgMjAwXSwge3ZhbHVlOiA3LCBzdGVwOiAxLCBsYWJlbDogXCJIZWFkcyAoaylcIn0pXG52aWV3b2YgY2ZfbG9nID0gSW5wdXRzLnRvZ2dsZSh7bGFiZWw6IFwiU2hvdyB0aGUgbG9nIGxpa2VsaWhvb2RcIiwgdmFsdWU6IGZhbHNlfSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMyIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImNmX2sgPSBNYXRoLm1pbihjZl9rMCwgY2ZfbilcbmNmX2RhdGEgPSBncmlkKDAuMDAxLCAwLjk5OSwgNDAwKS5tYXAocCA9PiB7XG4gIGNvbnN0IGxsID0gY2ZfayAqIE1hdGgubG9nKHApICsgKGNmX24gLSBjZl9rKSAqIE1hdGgubG9nKDEgLSBwKTtcbiAgcmV0dXJuIHtwLCBsbCwgTDogTWF0aC5leHAobGwpfTtcbn0pXG5jZl9tYXggPSBjZl9kYXRhLnJlZHVjZSgoYSwgYikgPT4gKGIubGwgPiBhLmxsID8gYiA6IGEpKVxuUGxvdC5wbG90KHtcbiAgd2lkdGg6IDcwMCwgaGVpZ2h0OiAzMDAsXG4gIHg6IHtsYWJlbDogXCJDYW5kaWRhdGUgcFwiLCBkb21haW46IFswLCAxXX0sXG4gIHk6IHtsYWJlbDogY2ZfbG9nID8gXCJMb2cgbGlrZWxpaG9vZFwiIDogXCJMaWtlbGlob29kXCIsIC4uLihjZl9sb2cgPyB7ZG9tYWluOiBbY2ZfbWF4LmxsIC0gMjUsIGNmX21heC5sbCArIDFdfSA6IHt9KX0sXG4gIG1hcmtzOiBbXG4gICAgUGxvdC5ydWxlWChbY2ZfayAvIGNmX25dLCB7c3Ryb2tlOiBwYWxldHRlLmd1aWRlLCBzdHJva2VEYXNoYXJyYXk6IFwiNCwzXCJ9KSxcbiAgICBQbG90LmxpbmUoY2ZfZGF0YS5maWx0ZXIoZCA9PiAhY2ZfbG9nIHx8IGQubGwgPiBjZl9tYXgubGwgLSAyNSksIHt4OiBcInBcIiwgeTogY2ZfbG9nID8gXCJsbFwiIDogXCJMXCIsIHN0cm9rZTogcGFsZXR0ZS5tYWluLCBzdHJva2VXaWR0aDogMi41fSlcbiAgXVxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6Im1kYFdpdGggJHtjZl9rfSBoZWFkcyBpbiAke2NmX259IGZsaXBzLCB0aGUgbGlrZWxpaG9vZCBwZWFrcyBhdCBwID0gJHsoY2ZfayAvIGNmX24pLnRvRml4ZWQoMil9LCB0aGUgcHJvcG9ydGlvbiBvZiBoZWFkcy4gSXRzIGhlaWdodCB0aGVyZSBpcyAke2NmX21heC5MLnRvRXhwb25lbnRpYWwoMil9LmBcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InF1aXooe1xuICBxOiBcIkluIHRoZSBsaWtlbGlob29kICRMKHAgXFxcXG1pZCB5KSQsIHdoYXQgaXMgaGVsZCBmaXhlZCBhbmQgd2hhdCB2YXJpZXM/XCIsXG4gIG9wdGlvbnM6IFtcbiAgICB7dGV4dDogXCJUaGUgZGF0YSBhcmUgZml4ZWQ7IHRoZSBwYXJhbWV0ZXIgJHAkIHZhcmllc1wiLCBjb3JyZWN0OiB0cnVlLCB3aHk6IFwiV2Ugb2JzZXJ2ZWQgb25lIHNldCBvZiBmbGlwcy4gVGhlIGxpa2VsaWhvb2QgYXNrcyBob3cgcHJvYmFibGUgdGhhdCBzZXQgaXMgdW5kZXIgZWFjaCBjYW5kaWRhdGUgJHAkLlwifSxcbiAgICB7dGV4dDogXCJUaGUgcGFyYW1ldGVyIGlzIGZpeGVkOyB0aGUgZGF0YSB2YXJ5XCIsIGNvcnJlY3Q6IGZhbHNlLCB3aHk6IFwiVGhhdCBpcyB0aGUgcHJvYmFiaWxpdHkgbW9kZWwgcmVhZCBmb3J3YXJkczogZm9yIGEga25vd24gJHAkLCBob3cgcHJvYmFibGUgaXMgZWFjaCBwb3NzaWJsZSBkYXRhc2V0PyBUaGUgbGlrZWxpaG9vZCByZWFkcyBpdCBiYWNrd2FyZHMuXCJ9LFxuICAgIHt0ZXh0OiBcIkJvdGggdmFyeVwiLCBjb3JyZWN0OiBmYWxzZSwgd2h5OiBcIklmIGJvdGggdmFyaWVkIHdlJ2QgYmUgYmFjayB0byBhIGpvaW50IHByb2JhYmlsaXR5LiBUaGUgbGlrZWxpaG9vZCBmaXhlcyB3aGF0IHdlIHNhdy5cIn1cbiAgXVxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InZpZXdvZiBjdl9waGF0ID0gSW5wdXRzLnJhbmdlKFswLjEsIDAuOV0sIHt2YWx1ZTogMC43LCBzdGVwOiAwLjA1LCBsYWJlbDogXCJQcm9wb3J0aW9uIG9mIGhlYWRzXCJ9KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC03IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiY3ZfbnMgPSBbMjAsIDIwMCwgMjAwMF1cbmN2X2RhdGEgPSBjdl9ucy5mbGF0TWFwKG4gPT4gZ3JpZCgwLjAxLCAwLjk5LCA0MDApLm1hcChwID0+ICh7XG4gIHAsIG46IGBuID0gJHtufWAsXG4gIHJlbDogbiAqIChjdl9waGF0ICogTWF0aC5sb2cocCAvIGN2X3BoYXQpICsgKDEgLSBjdl9waGF0KSAqIE1hdGgubG9nKCgxIC0gcCkgLyAoMSAtIGN2X3BoYXQpKSlcbn0pKSkuZmlsdGVyKGQgPT4gZC5yZWwgPiAtNilcblBsb3QucGxvdCh7XG4gIHdpZHRoOiA3MDAsIGhlaWdodDogMzAwLFxuICB4OiB7bGFiZWw6IFwiQ2FuZGlkYXRlIHBcIiwgZG9tYWluOiBbMCwgMV19LCB5OiB7bGFiZWw6IFwiTG9nIGxpa2VsaWhvb2QgKHBlYWsgYXQgMClcIiwgZG9tYWluOiBbLTYsIDAuMl19LFxuICBjb2xvcjoge2xlZ2VuZDogdHJ1ZSwgZG9tYWluOiBjdl9ucy5tYXAobiA9PiBgbiA9ICR7bn1gKSwgcmFuZ2U6IFtwYWxldHRlLmxpZ2h0LCBwYWxldHRlLm1haW4sIHBhbGV0dGUuY29udHJhc3RdfSxcbiAgbWFya3M6IFtcbiAgICBQbG90LnJ1bGVZKFstMl0sIHtzdHJva2U6IHBhbGV0dGUucnVsZX0pLFxuICAgIFBsb3QubGluZShjdl9kYXRhLCB7eDogXCJwXCIsIHk6IFwicmVsXCIsIHN0cm9rZTogXCJuXCIsIHN0cm9rZVdpZHRoOiAyLjV9KVxuICBdXG59KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC04IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiSW5wdXRzLnRhYmxlKGN2X25zLm1hcChuID0+ICh7biwgXCJzdGFuZGFyZCBlcnJvciBvZiBwzIJcIjogTWF0aC5zcXJ0KGN2X3BoYXQgKiAoMSAtIGN2X3BoYXQpIC8gbikudG9GaXhlZCgzKX0pKSwge2xheW91dDogXCJhdXRvXCJ9KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC05IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoicXVpeih7XG4gIHE6IFwiWW91IGZsaXAgdGhlIGNvaW4gZm91ciB0aW1lcyBhcyBvZnRlbiBhbmQgc2VlIHRoZSBzYW1lIHByb3BvcnRpb24gb2YgaGVhZHMuIFdoYXQgaGFwcGVucyB0byB0aGUgc3RhbmRhcmQgZXJyb3Igb2YgJFxcXFxoYXQgcCQ/XCIsXG4gIG9wdGlvbnM6IFtcbiAgICB7dGV4dDogXCJJdCBoYWx2ZXNcIiwgY29ycmVjdDogdHJ1ZSwgd2h5OiBcIlRoZSBjdXJ2YXR1cmUgb2YgdGhlIGxvZyBsaWtlbGlob29kIGdyb3dzIGluIHByb3BvcnRpb24gdG8gJG4kLCBzbyB0aGUgc3RhbmRhcmQgZXJyb3IsIG9uZSBvdmVyIGl0cyBzcXVhcmUgcm9vdCwgc2hyaW5rcyBieSAkXFxcXHNxcnR7NH0gPSAyJC5cIn0sXG4gICAge3RleHQ6IFwiSXQgZmFsbHMgdG8gYSBxdWFydGVyXCIsIGNvcnJlY3Q6IGZhbHNlLCB3aHk6IFwiVGhlIGN1cnZhdHVyZSBxdWFkcnVwbGVzLCBidXQgdGhlIHN0YW5kYXJkIGVycm9yIGdvZXMgd2l0aCBpdHMgc3F1YXJlIHJvb3QuXCJ9LFxuICAgIHt0ZXh0OiBcIkl0IHN0YXlzIHRoZSBzYW1lLCBiZWNhdXNlIHRoZSBwcm9wb3J0aW9uIGlzIHRoZSBzYW1lXCIsIGNvcnJlY3Q6IGZhbHNlLCB3aHk6IFwiVGhlIGVzdGltYXRlIHN0YXlzIHRoZSBzYW1lOyBpdHMgcHJlY2lzaW9uIGRvZXNuJ3QuIE1vcmUgZmxpcHMgZ2l2ZSBhIHNoYXJwZXIgcGVhay5cIn1cbiAgXVxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMTAiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJsZ19zYW1wbGUgPSB7XG4gIGNvbnN0IHIgPSBybmcoNyk7XG4gIHJldHVybiBBcnJheS5mcm9tKHtsZW5ndGg6IDYwfSwgKCkgPT4ge1xuICAgIGNvbnN0IHggPSByLm5vcm0oKTtcbiAgICByZXR1cm4ge3gsIHk6IHIudW5pZigpIDwgbG9naXN0aWMoLTAuMyArIDEuMiAqIHgpID8gMSA6IDB9O1xuICB9KTtcbn1cbmxnX2xsID0gKGIwLCBiMSkgPT4gbGdfc2FtcGxlLnJlZHVjZSgocywgZCkgPT4ge1xuICBjb25zdCBwID0gbG9naXN0aWMoYjAgKyBiMSAqIGQueCk7XG4gIHJldHVybiBzICsgKGQueSA/IE1hdGgubG9nKHApIDogTWF0aC5sb2coMSAtIHApKTtcbn0sIDApXG5sZ19tbGUgPSB7XG4gIGxldCBiMCA9IDAsIGIxID0gMDsgLy8gTmV3dG9uLVJhcGhzb25cbiAgZm9yIChsZXQgaXQgPSAwOyBpdCA8IDMwOyBpdCsrKSB7XG4gICAgbGV0IGcwID0gMCwgZzEgPSAwLCBoMDAgPSAwLCBoMDEgPSAwLCBoMTEgPSAwO1xuICAgIGZvciAoY29uc3QgZCBvZiBsZ19zYW1wbGUpIHtcbiAgICAgIGNvbnN0IHAgPSBsb2dpc3RpYyhiMCArIGIxICogZC54KSwgdyA9IHAgKiAoMSAtIHApO1xuICAgICAgZzAgKz0gZC55IC0gcDsgZzEgKz0gKGQueSAtIHApICogZC54O1xuICAgICAgaDAwICs9IHc7IGgwMSArPSB3ICogZC54OyBoMTEgKz0gdyAqIGQueCAqIGQueDtcbiAgICB9XG4gICAgY29uc3QgZGV0ID0gaDAwICogaDExIC0gaDAxICogaDAxO1xuICAgIGIwICs9IChoMTEgKiBnMCAtIGgwMSAqIGcxKSAvIGRldDtcbiAgICBiMSArPSAoaDAwICogZzEgLSBoMDEgKiBnMCkgLyBkZXQ7XG4gIH1cbiAgcmV0dXJuIHtiMCwgYjF9O1xufVxudmlld29mIGxnX2IwID0gSW5wdXRzLnJhbmdlKFstMiwgMl0sIHt2YWx1ZTogMCwgc3RlcDogMC4wNSwgbGFiZWw6IFwiSW50ZXJjZXB0IM6yMFwifSlcbnZpZXdvZiBsZ19iMSA9IElucHV0cy5yYW5nZShbLTEsIDNdLCB7dmFsdWU6IDAsIHN0ZXA6IDAuMDUsIGxhYmVsOiBcIlNsb3BlIM6yMVwifSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMTEiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJQbG90LnBsb3Qoe1xuICB3aWR0aDogNzAwLCBoZWlnaHQ6IDI4MCwgeDoge2xhYmVsOiBcInhcIn0sIHk6IHtsYWJlbDogXCJ5LCBhbmQgUCh5ID0gMSlcIiwgZG9tYWluOiBbLTAuMDgsIDEuMDhdfSxcbiAgbWFya3M6IFtcbiAgICBQbG90LmRvdChsZ19zYW1wbGUsIHt4OiBcInhcIiwgeTogKGQsIGkpID0+IGQueSArICgoaSAqIDM3KSAlIDExIC0gNSkgKiAwLjAxMiwgcjogMywgZmlsbDogcGFsZXR0ZS5ndWlkZX0pLFxuICAgIFBsb3QubGluZShncmlkKC0zLCAzKS5tYXAoeCA9PiAoe3gsIHA6IGxvZ2lzdGljKGxnX2IwICsgbGdfYjEgKiB4KX0pKSwge3g6IFwieFwiLCB5OiBcInBcIiwgc3Ryb2tlOiBwYWxldHRlLm1haW4sIHN0cm9rZVdpZHRoOiAyLjV9KVxuICBdXG59KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0xMiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImxnX2N1cnZlID0gZ3JpZCgtMSwgMywgMjAxKS5tYXAoYjEgPT4gKHtiMSwgbGw6IGxnX2xsKGxnX2IwLCBiMSl9KSlcblBsb3QucGxvdCh7XG4gIHdpZHRoOiA3MDAsIGhlaWdodDogMjIwLCB4OiB7bGFiZWw6IFwiU2xvcGUgzrIxIChpbnRlcmNlcHQgaGVsZCBhdCB0aGUgc2xpZGVyIHZhbHVlKVwifSwgeToge2xhYmVsOiBcIkxvZyBsaWtlbGlob29kXCJ9LFxuICBtYXJrczogW1xuICAgIFBsb3QubGluZShsZ19jdXJ2ZSwge3g6IFwiYjFcIiwgeTogXCJsbFwiLCBzdHJva2U6IHBhbGV0dGUubWFpbiwgc3Ryb2tlV2lkdGg6IDJ9KSxcbiAgICBQbG90LmRvdChbe2IxOiBsZ19iMSwgbGw6IGxnX2xsKGxnX2IwLCBsZ19iMSl9XSwge3g6IFwiYjFcIiwgeTogXCJsbFwiLCByOiA2LCBmaWxsOiBwYWxldHRlLmNvbnRyYXN0fSlcbiAgXVxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMTMiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJsZ19zY29yZSA9IGxnX3NhbXBsZS5yZWR1Y2UoKHMsIGQpID0+IHtcbiAgY29uc3QgciA9IGQueSAtIGxvZ2lzdGljKGxnX2IwICsgbGdfYjEgKiBkLngpO1xuICByZXR1cm4ge3MwOiBzLnMwICsgciwgczE6IHMuczEgKyByICogZC54fTtcbn0sIHtzMDogMCwgczE6IDB9KVxubWRgTG9nIGxpa2VsaWhvb2Q6ICoqJHtsZ19sbChsZ19iMCwgbGdfYjEpLnRvRml4ZWQoMil9KiouIERlcml2YXRpdmVzOiDOoyh5IOKIkiBwKSA9ICR7bGdfc2NvcmUuczAudG9GaXhlZCgyKX0sIM6jKHkg4oiSIHApeCA9ICR7bGdfc2NvcmUuczEudG9GaXhlZCgyKX0uIFRoZSBtYXhpbXVtIGlzIGF0IM6yMCA9ICR7bGdfbWxlLmIwLnRvRml4ZWQoMil9LCDOsjEgPSAke2xnX21sZS5iMS50b0ZpeGVkKDIpfSwgd2hlcmUgdGhlIGxvZyBsaWtlbGlob29kIGlzICR7bGdfbGwobGdfbWxlLmIwLCBsZ19tbGUuYjEpLnRvRml4ZWQoMil9IGFuZCBib3RoIGRlcml2YXRpdmVzIGFyZSB6ZXJvLmBcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMTQiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJxdWl6KHtcbiAgcTogXCJBIGxvZ2lzdGljIHJlZ3Jlc3Npb24gd2l0aCBhbiBpbnRlcmNlcHQgaGFzIGJlZW4gZml0IGJ5IG1heGltdW0gbGlrZWxpaG9vZCB0byAxLDAwMCBvYnNlcnZhdGlvbnMsIDM4MCBvZiB0aGVtIHN1Y2Nlc3Nlcy4gV2hhdCBpcyB0aGUgc3VtIG9mIHRoZSBmaXR0ZWQgcHJvYmFiaWxpdGllcyAkXFxcXHN1bV9pIFxcXFxoYXQgcF9pJD9cIixcbiAgb3B0aW9uczogW1xuICAgIHt0ZXh0OiBcIkV4YWN0bHkgMzgwXCIsIGNvcnJlY3Q6IHRydWUsIHdoeTogXCJUaGUgZGVyaXZhdGl2ZSB3aXRoIHJlc3BlY3QgdG8gdGhlIGludGVyY2VwdCwgJFxcXFxzdW1faSAoeV9pIC0gcF9pKSQsIGlzIHplcm8gYXQgdGhlIG1heGltdW0sIHNvIHRoZSBmaXR0ZWQgcHJvYmFiaWxpdGllcyBhZGQgdXAgdG8gdGhlIG9ic2VydmVkIG51bWJlciBvZiBzdWNjZXNzZXMuXCJ9LFxuICAgIHt0ZXh0OiBcIkFib3V0IDM4MCwgZ2l2ZSBvciB0YWtlIHNhbXBsaW5nIGVycm9yXCIsIGNvcnJlY3Q6IGZhbHNlLCB3aHk6IFwiSXQncyBleGFjdCwgbm90IGFwcHJveGltYXRlOiBpdCdzIHRoZSBlcXVhdGlvbiB0aGF0IGRlZmluZXMgdGhlIG1heGltdW0uXCJ9LFxuICAgIHt0ZXh0OiBcIjUwMCwgc2luY2UgdGhlIG1vZGVsIGlzIHN5bW1ldHJpY1wiLCBjb3JyZWN0OiBmYWxzZSwgd2h5OiBcIk5vdGhpbmcgZm9yY2VzIHRoZSBmaXR0ZWQgcHJvYmFiaWxpdGllcyB0b3dhcmQgMC41OyB0aGUgaW50ZXJjZXB0IG1vdmVzIHRoZW0gdG8gbWF0Y2ggdGhlIGRhdGEuXCJ9XG4gIF1cbn0pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTE1IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoicHJlZGljdCh7XG4gIHE6IFwiRXZlcnkgcGxheWVyIGF0dGVtcHRlZCBhbGwgNDAgcHJvYmxlbXMsIHNvIEVsbyBpcyB1bnJlbGF0ZWQgdG8gd2hpY2ggcHJvYmxlbSB3YXMgYXNrZWQuIFdoZW4gd2UgZ2l2ZSBlYWNoIHByb2JsZW0gaXRzIG93biBpbnRlcmNlcHQsIHdoYXQgaGFwcGVucyB0byB0aGUgRWxvIHNsb3BlICgwLjUwIHBvb2xlZCk/XCIsXG4gIGNob2ljZXM6IFtcIkl0IGdldHMgc21hbGxlclwiLCBcIkl0IHN0YXlzIGFib3V0IHRoZSBzYW1lXCIsIFwiSXQgZ2V0cyBsYXJnZXJcIl0sXG4gIGFuc3dlcjogXCJJdCBnZXRzIGxhcmdlclwiLFxuICByZXZlYWw6IFwiSXQgcmlzZXMgdG8gMC44My4gVGhpcyBpc24ndCBjb25mb3VuZGluZzogRWxvIGFuZCBwcm9ibGVtIGFyZSB1bnJlbGF0ZWQgaGVyZS4gQSBsb2dpc3RpYyBzbG9wZSBpcyBhICpjb25kaXRpb25hbCogZWZmZWN0LCB0aGUgZWZmZWN0IGZvciBhIGdpdmVuIHByb2JsZW0sIGFuZCBhdmVyYWdpbmcgZWFzeSBhbmQgaGFyZCBwcm9ibGVtcyB0b2dldGhlciBmbGF0dGVucyBpdC4gVGhlIGF2ZXJhZ2Ugb2YgbWFueSBzdGVlcCBTLWN1cnZlcyBhdCBkaWZmZXJlbnQgbG9jYXRpb25zIGlzIGEgc2hhbGxvd2VyIFMtY3VydmUuIFRoaXMgaXMgY2FsbGVkIG5vbi1jb2xsYXBzaWJpbGl0eSAoR2FpbCwgV2llYW5kICYgUGlhbnRhZG9zaSwgMTk4NDsgTW9vZCwgMjAxMCkuXCJcbn0pXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ2NmX24nKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnY2ZfazAnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnY2ZfbG9nJykifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ2N2X3BoYXQnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnbGdfYjAnKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnbGdfYjEnKSJ9XX0=
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../lessons";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -648,6 +3267,122 @@ document.addEventListener("click", function (e) {
   });
   </script>
 </div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
 
 
 
