@@ -2,7 +2,7 @@
 
 # Where CTT breaks: toward item response models (`ctt-limits`)
 
-Module: ctt · Prereqs: ctt-reliability, likelihood · Core · Status: outline
+Module: ctt · Prereqs: ctt-reliability, likelihood · Core · Status: draft
 
 ## Core ideas
 
@@ -66,3 +66,13 @@ Numbers from the 09-24 outline pass (not recomputed). No other IRW unfolding tab
 ## Open questions
 
 - None. Settled: the simulation stays in the main line (C5); `andrich_mudfold` returns in `unfolding` as a recorded reuse.
+
+## Drafting notes (09-24, #32)
+
+What the draft changed from this outline, all numbers recomputed from IRW v59.0 CSVs:
+
+- **Idea 2 (the generator).** KR-20 in the PS2#4 generator depends only on the item variances (about 12 for 50 items) and the variance of the total, so it can land far *above* the built-in reliability as well as below (reliability 0.18, KR-20 0.61 at true-score variance 5, error variance 25). The draft says so and explains it through the proof's uncorrelated-errors assumption: the shared error E correlates item errors positively, the fixed total negatively. The widget holds reliability fixed and varies the variance of the total, rather than varying reliability.
+- **Idea 5 / `andrich_mudfold`.** The unkeyed sum of agreements isn't a measure of attitude (KR-20 = −0.85), so the draft keys the three "against" statements and plots the two middle statements (DONTBELIEV, WISHNOTNEC) against a keyed score on the six end statements. The outline's LIFESACRED numbers (against the unkeyed total) are not used. Predict-then-check: DONTBELIEV's item-rest correlation is near zero either way (−0.09 / 0.09).
+- **Idea 3.** Straight-line fits added (MA1 predicts 1.06 at r = 30; MB4 −0.23 at r = 1) to deliver the hand-off `rasch` opens on. The part-whole promise points to `rasch`'s `wirs` table (r = 0 and r = 6 agree by construction).
+- **Widgets:** three (coins; the generator; item vs. sum score on the real math data via `ojs_define`). No Go deeper.
+- **Item wording** for WISHNOTNEC and DONTBELIEV is from the mudfold package's `ANDRICH` help page, not checked against Andrich (1988) itself.

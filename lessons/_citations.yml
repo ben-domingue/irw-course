@@ -4,39 +4,39 @@
     R package version 3.12-66, https://CRAN.R-project.org/package=sirt.'
   link: https://cran.r-project.org/web/packages/sirt/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 alexandrowicz_2018_cesd:
   reference: Alexandrowicz, R.; Jahn, R.; Wancata, J. (2018). Assessing the dimensionality
     of the CES-D using multi-dimensional multi-level Rasch models. PLOS ONE, 13(5),
     e0197908. https://doi.org/10.1371/journal.pone.0197908
   link: https://doi.org/10.1371/journal.pone.0197908
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 andrich_mudfold:
   reference: Andrich, D. (1988). The application of an unfolding model of the PIRT
     type to the measurement of attitude. Applied psychological measurement, 12(1),
     33-51.
   link: https://doi.org/10.1177/014662168801200105
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 bfi_goldberg_1992_conscientiousness:
   reference: 'Goldberg, Lewis R. "The development of markers for the Big-Five factor
     structure." Psychological assessment 4.1 (1992): 26.'
   link: https://doi.org/10.1037/1040-3590.4.1.26
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 bfi2_zhang_2025:
   reference: Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement
     of the Big Five via alternative formats for the BFI-2. PubMed, 1–22. https://doi.org/10.1080/00223891.2025.2531187
   link: https://doi.org/10.1080/00223891.2025.2531187
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 bialowolski_2024_financial_literacy:
   reference: Bialowolski, P. (2024). Financial literacy in a gendered language context
     [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/MTQGSF
   link: https://doi.org/10.7910/DVN/MTQGSF
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 borges_brazil_residency_2024_pbt:
   reference: 'Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro,
     P. S., Fonseca, P. C., ... & Ricz, H. M. A. (2024). Increased accessibility of
@@ -45,7 +45,7 @@ borges_brazil_residency_2024_pbt:
     Journal of Educational Evaluation for Health Professions, 21, 32.'
   link: https://doi.org/10.3352/jeehp.2024.21.32
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 c19prc_uk_mcbride_2021_phq9:
   reference: 'Bentall, Richard and Shevlin, Mark and McBride, Orla and Murphy, Jamie
     and Hartman, Todd K and Levita, Liat and Gibson-Miller, Jilly and Mason, Liam
@@ -53,7 +53,7 @@ c19prc_uk_mcbride_2021_phq9:
     2020-2021. [Data Collection]. Colchester, Essex: UK Data Service. 10.5255/UKDA-SN-855552'
   link: https://osf.io/v2zur/
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 c19prc_uk_mcbride_2021_wordsum:
   reference: 'Bentall, Richard and Shevlin, Mark and McBride, Orla and Murphy, Jamie
     and Hartman, Todd K and Levita, Liat and Gibson-Miller, Jilly and Mason, Liam
@@ -61,27 +61,27 @@ c19prc_uk_mcbride_2021_wordsum:
     2020-2021. [Data Collection]. Colchester, Essex: UK Data Service. 10.5255/UKDA-SN-855552'
   link: https://osf.io/v2zur/
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 cdm_ecpe:
   reference: 'Templin, J., & Hoffman, L. (2013). Obtaining diagnostic classification
     model estimates using Mplus. Educational Measurement: Issues and Practice, 32,
     37-50.'
   link: https://doi.org/10.1111/emip.12010
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 cdm_timss11:
   reference: George, A. C., & Robitzsch, A. (2014). Multiple group cognitive diagnosis
     models, with an emphasis on differential item functioning. Psychological Test
     and Assessment Modeling, 56(4), 405-432
   link: https://cran.r-project.org/web/packages/CDM/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 chess_lnirt:
   reference: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis
     of chess expertise. The American journal of psychology, 118(1), 29-60.
   link: https://doi.org/10.2307/30039042
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 choi_2026_cmsce_2020_1:
   reference: 'Choi, J., Jung, S.-S., Choi, E. K., Kim, K. S., & Seo, D. G. (2026).
     Feasibility of applying computerized adaptive testing to the Clinical Medical
@@ -89,46 +89,46 @@ choi_2026_cmsce_2020_1:
     Dataverse. https://doi.org/10.7910/DVN/TQZQ6L'
   link: https://doi.org/10.7910/DVN/TQZQ6L
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 christensen_2018_wsssf_5831:
   reference: 'Christensen, A.P., Kenett, Y.N., Aste, T. et al. Network structure of
     the Wisconsin Schizotypy Scales–Short Forms: Examining psychometric network filtering
     approaches. Behav Res 50, 2531–2550 (2018).'
   link: https://doi.org/10.3758/s13428-018-1032-9
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 coroiu_2018_phq9:
   reference: 'Coroiu A, Kwakkenbos L, Moran C, Thombs B, Albani C, Bourkas S, et al.
     (2018). Structural validation of the Self-Compassion Scale with a German general
     population sample. PLOS ONE 13(2): e0190771.'
   link: https://doi.org/10.1371/journal.pone.0190771
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 credentialform_lnirt:
   reference: 'Cizek, G. J., & Wollack, J. A. (Eds.). (2016). Handbook of quantitative
     methods for detecting cheating on tests. Abingdon, England: Routledge.'
   link: https://cran.r-project.org/web/packages/LNIRT/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 de_vries_2022_hexaco_other:
   reference: 'de Vries A, et al. (2022) Self-, other-, and meta-perceptions of personality:
     Relations with burnout symptoms and eudaimonic workplace well-being. PLOS ONE'
   link: https://doi.org/10.1371/journal.pone.0272095
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 de_vries_2022_hexaco_self:
   reference: 'de Vries A, et al. (2022) Self-, other-, and meta-perceptions of personality:
     Relations with burnout symptoms and eudaimonic workplace well-being. PLOS ONE'
   link: https://doi.org/10.1371/journal.pone.0272095
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 enders_2022_science_literacy:
   reference: 'Enders AM, Uscinski JE, Klofstad C, Stoler J (2022). On the relationship
     between conspiracy theory beliefs, misinformation, and vaccine hesitancy. PLOS
     ONE 17(10): e0276082.'
   link: https://doi.org/10.1371/journal.pone.0276082
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 enkavi_2019_stroop:
   reference: Enkavi, A. Z., Eisenberg, I. W., Bissett, P. G., Mazza, G. L., MacKinnon,
     D. P., Marsch, L. A., & Poldrack, R. A. (2019). Large-scale analysis of test-retest
@@ -136,52 +136,52 @@ enkavi_2019_stroop:
     of Sciences, 116(12), 5472-5477. https://doi.org/10.1073/pnas.1818430116
   link: https://doi.org/10.1073/pnas.1818430116
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 eurpar2_mudfold:
   reference: 'Schuur, H. V. (1984). Structure in political beliefs: A new model for
     stochastic unfolding with application to European party activists (Doctoral dissertation,
     Rijksuniversiteit te Groningen).'
   link: https://cran.r-project.org/web/packages/mudfold/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 florida_twins_dweck:
   reference: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave
     2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec
   link: https://doi.org/10.33009/ldbase.1624481381.d9ec
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 florida_twins_grit:
   reference: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave
     2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec
   link: https://doi.org/10.33009/ldbase.1624481381.d9ec
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 florida_twins_panas:
   reference: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave
     2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec
   link: https://doi.org/10.33009/ldbase.1624481381.d9ec
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 Forthmann-2024-cleverness_ratings:
   reference: Forthmann, Boris, and Nils Myszkowski. 2024. “Analysis of a Divergent
     Thinking Dataset.” OSF. April 22. osf.io/a9qnc.
   link: https://doi.org/No DOI
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 frac20:
   reference: 'Tatsuoka, C. (2002). Data analytic methods for latent partially ordered
     classification models. Journal of the Royal Statistical Society: Series C (Applied
     Statistics), 51(3), 337-350.'
   link: https://doi.org/10.1111/1467-9876.00272
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 genpsych_russell_2024_gpt4o:
   reference: 'Russell-Lasalandra, L. L., Christensen, A. P., & Golino, H. (2024, September
     12). Generative Psychometrics via AI-GENIE: Automatic Item Generation and Validation
     via Network-Integrated Evaluation. https://doi.org/10.31234/osf.io/fgbj4'
   link: https://doi.org/10.31234/osf.io/fgbj4
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_1:
   reference: 'Gilbert, J. B., Kim, J. S., & Miratrix, L. W. (2023). Modeling item-level
     heterogeneous treatment effects with the explanatory item response model: Leveraging
@@ -193,7 +193,7 @@ gilbert_meta_1:
     Harvard Dataverse, V2, UNF:6:r+hUHhEPWWtUbcqXyELTJw== [fileUNF]'
   link: https://doi.org/10.7910/DVN/QARRYT
   license: CC BY-NC-SA 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_11:
   reference: 'Kim, J. S., Relyea, J. E., Burkhauser, M. A., Scherer, E., & Rich, P.
     (2021). Improving elementary grade students’ science and social studies vocabulary
@@ -206,7 +206,7 @@ gilbert_meta_11:
     [fileUNF]'
   link: https://doi.org/10.7910/DVN/HQEMN6
   license: CC BY-NC-SA 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_12:
   reference: 'Kim, J. S., Relyea, J. E., Burkhauser, M. A., Scherer, E., & Rich, P.
     (2021). Improving elementary grade students’ science and social studies vocabulary
@@ -219,7 +219,7 @@ gilbert_meta_12:
     [fileUNF]'
   link: https://doi.org/10.7910/DVN/HQEMN6
   license: CC BY-NC-SA 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_14:
   reference: 'Romero, M., Sandefur, J., & Sandholtz, W. A. (2020). Outsourcing education:
     Experimental evidence from Liberia. American Economic Review, 110(2), 364-400.
@@ -227,7 +227,7 @@ gilbert_meta_14:
     for Liberia", https://doi.org/10.7910/DVN/5OPIYU, Harvard Dataverse, V4'
   link: https://doi.org/10.7910/DVN/5OPIYU
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_15:
   reference: 'Romero, M., Sandefur, J., & Sandholtz, W. A. (2020). Outsourcing education:
     Experimental evidence from Liberia. American Economic Review, 110(2), 364-400.
@@ -235,7 +235,7 @@ gilbert_meta_15:
     for Liberia", https://doi.org/10.7910/DVN/5OPIYU, Harvard Dataverse, V4'
   link: https://doi.org/10.7910/DVN/5OPIYU
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_2:
   reference: 'Kim, J. S., Burkhauser, M. A., Relyea, J. E., Gilbert, J. B., Scherer,
     E., Fitzgerald, J., ... & McIntyre, J. (2023). A longitudinal randomized trial
@@ -249,7 +249,7 @@ gilbert_meta_2:
     [fileUNF]'
   link: https://doi.org/10.7910/DVN/LAWFFU
   license: CC BY-NC-SA 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_20:
   reference: 'Jayanthi, M., Gersten, R., Schumacher, R. F., Dimino, J., Smolkowski,
     K., & Spallone, S. (2021). Improving struggling fifth-grade students’ understanding
@@ -260,7 +260,7 @@ gilbert_meta_20:
     Harvard Dataverse, V1, UNF:6:8pMQK/5+cfpvcr4ACTvAmQ== [fileUNF]'
   link: https://doi.org/10.7910/DVN/Z4WMFE
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gilbert_meta_37:
   reference: 'Carpena, F. (2024). Entertainment-Education for Better Health: Insights
     from a Field Experiment in India. The Journal of Development Studies, 60(5), 745-762.
@@ -269,21 +269,21 @@ gilbert_meta_37:
     Harvard Dataverse, V1, UNF:6:pX0ZhtBxkRpvQC6AOfVg4g== [fileUNF]'
   link: https://doi.org/10.7910/DVN/EJ03JR
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 gpt4mcq_young_2025:
   reference: Young, R., Courtney, E., Kah, A., Wilkerson, M., & Chen, Y.-H. (2025).
     Content and Item Response Theory Analysis of ChatGPT-4-Generated Multiple-Choice
     Items. Teaching of Psychology, 0(0). https://doi.org/10.1177/00986283241311220
   link: https://doi.org/10.1177/00986283241311220
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 grit:
   reference: 'Duckworth, A. L., Peterson, C., Matthews, M. D., & Kelly, D. R. (2007).
     Grit: perseverance and passion for long-term goals. Journal of personality and
     social psychology, 92(6), 1087.'
   link: https://doi.org/10.1037/0022-3514.92.6.1087
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 himmelstein-impossible_question-2025:
   reference: 'Himmelstein, Mark, Sophie Ma Zhu, Nikolay Petrov, Ezra Karger, Jessica
     Helmer, Sivan Livnat, Amory Bennett, Page Hedley, and Phil Tetlock. “The Forecasting
@@ -291,7 +291,7 @@ himmelstein-impossible_question-2025:
     November 23, 2025. doi:10.31234/osf.io/a7kdx_v8.'
   link: https://doi.org/10.31234/osf.io/a7kdx_v8
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 himmelstein-number_series-2025:
   reference: 'Himmelstein, Mark, Sophie Ma Zhu, Nikolay Petrov, Ezra Karger, Jessica
     Helmer, Sivan Livnat, Amory Bennett, Page Hedley, and Phil Tetlock. “The Forecasting
@@ -299,13 +299,13 @@ himmelstein-number_series-2025:
     November 23, 2025. doi:10.31234/osf.io/a7kdx_v8.'
   link: https://doi.org/10.31234/osf.io/a7kdx_v8
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 ieswriting_molloy_2022:
   reference: Educational Testing Service. (n.d.). IES Writing Achievement Study Data.
     GitHub. Retrieved January 6, 2025, from https://github.com/EducationalTestingService/ies-writing-achievement-study-data
   link: https://github.com/EducationalTestingService/ies-writing-achievement-study-data
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 imps2025_hf:
   reference: 'Obradović, J., Sulik, M. J., Finch, J. E., & Tirado-Strayer, N. (2018).
     Assessing students’ executive functions in the classroom: Validating a scalable
@@ -319,46 +319,46 @@ imps2025_hf:
 
     10.1080/10409289.2025.2578816
   license: Permission via Email
-  irw_version: IRW v414
+  irw_version: IRW v418
 introversion_extroversion:
   reference: Development of the Multidimensional Introversion-Extraversion ScalesX
     [dataset and codebook]. http://openpsychometrics.org/_rawdata/MIES_Dev_Data.zip
   link: http://openpsychometrics.org/_rawdata/
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 lessR_Mach4:
   reference: 'Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian
     beliefs and personality: Construct invalidity of the Machiavellianism dimension.
     Journal of personality and social psychology, 43(6), 1293.'
   link: https://doi.org/10.1037/0022-3514.43.6.1293
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 manolika_2021_mini_ipip:
   reference: 'Manolika, M. (2021). The Big Five and Beyond: Which Personality Traits
     Do Predict Movie and Reading Preferences? [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/23NDKX'
   link: https://doi.org/10.7910/DVN/23NDKX
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 mentalrotation_wolf_2024:
   reference: Wolf, J. E., & Larsen, M. (2024). A New Procedure and Stimulus Set for
     Examining Cross-Modality Mental Rotation. Journal of Open Psychology Data, 12(1).
   link: https://doi.org/10.5334/jopd.99
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 motion:
   reference: 'O’Brien, G., & Yeatman, J. D. (2021). Bridging sensory and language
     theories of dyslexia: Toward a multifactorial model. Developmental Science, 24(3),
     e13039.'
   link: https://doi.org/10.1111/desc.13039
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 mturkddm_lexical:
   reference: Ratcliff, R., Hendrickson, A.T. Do data from mechanical Turk subjects
     replicate accuracy, response time, and diffusion modeling results?. Behav Res
     53, 2302–2325 (2021). https://doi.org/10.3758/s13428-021-01573-x
   link: https://doi.org/10.3758/s13428-021-01573-x
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 neurodegenerative_huizinga_2019_dass:
   reference: 'Huizinga, F., Heutink, J., de Haan, G. A., van der Lijn, I., van der
     Feen, F. E., Vrijling, A. C., ... & Koerts, J. (2020). The development of the
@@ -367,19 +367,19 @@ neurodegenerative_huizinga_2019_dass:
     15(4), e0232232.'
   link: https://doi.org/10.1371/journal.pone.0232232
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 pirlsmissing_sirt:
   reference: 'Robitzsch A (2022). sirt: Supplementary Item Response Theory Models.
     R package version 3.12-66, https://CRAN.R-project.org/package=sirt.'
   link: https://cran.r-project.org/web/packages/sirt/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 project_kids_wj_lwid_wave:
   reference: Hart, S. A., Otaiba, S. A., Connor, C., & Norris, C. U. (2021). Project
     KIDS Item level Data. LDbase. https://doi.org/10.33009/ldbase.1620837890.bcf8
   link: https://doi.org/10.33009/ldbase.1620837890.bcf8
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 promis1wave1_depression:
   reference: 'Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S.,
     ... & Hays, R. (2010). Initial adult health item banks and first wave testing
@@ -389,7 +389,7 @@ promis1wave1_depression:
     UNF:6:sXYqKDzGWfX7QuTXNGpjGQ== [fileUNF]'
   link: https://doi.org/10.7910/DVN/0NGAKG
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 promis1wave1_pain:
   reference: 'Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S.,
     ... & Hays, R. (2010). Initial adult health item banks and first wave testing
@@ -399,7 +399,7 @@ promis1wave1_pain:
     UNF:6:sXYqKDzGWfX7QuTXNGpjGQ== [fileUNF]'
   link: https://doi.org/10.7910/DVN/0NGAKG
   license: CC0 1.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 rapm_poulton_2022_timed:
   reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
     G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
@@ -407,7 +407,7 @@ rapm_poulton_2022_timed:
     44(1), 73-84.
   link: https://doi.org/10.1080/13803395.2022.2080185
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 rapm_poulton_2022_untimed:
   reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
     G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
@@ -415,14 +415,14 @@ rapm_poulton_2022_untimed:
     44(1), 73-84.
   link: https://doi.org/10.1080/13803395.2022.2080185
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 roar_lexical:
   reference: Yeatman, J. D., Tang, K. A., Donnelly, P. M., Yablonski, M., Ramamurthy,
     M., Karipidis, I. I., ... & Domingue, B. W. (2021). Rapid online assessment of
     reading ability. Scientific reports, 11(1), 6396.
   link: https://doi.org/10.1038/s41598-021-85907-x
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 robison_2026_retesting_stroop:
   reference: 'Robison, M. K., Campbell, S., Garner, L. D., Sibley, C., & Coyne, J.
     (2026). A comprehensive psychometrics of cognitive ability measures: Reliability,
@@ -430,34 +430,34 @@ robison_2026_retesting_stroop:
     Behavior Research Methods, 58(2), Article 56. https://doi.org/10.3758/s13428-025-02897-8'
   link: https://doi.org/10.3758/s13428-025-02897-8
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 rr98_accuracy:
   reference: Ratcliff, R., & Rouder, J. N. (1998). Modeling Response Times for Two-Choice
     Decisions. Psychological Science, 9(5), 347-356. http://doi.org/10.1111/1467-9280.00067
   link: https://doi.org/10.1111/1467-9280.00067
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 science_ltm:
   reference: 'Karlheinz, R. and Melich, A. (1992) Euro-Barometer 38.1: Consumer Protection
     and Perceptions of Science and Technology. INRA (Europe), Brussels. [computer
     file]'
   link: https://cran.r-project.org/web/packages/ltm/index.html
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 silk_2019_hyperactive:
   reference: 'Silk TJ, Malpas CB, Beare R, Efron D, Anderson V, et al. (2019) A network
     analysis approach to ADHD symptoms: More than the sum of its parts. PLOS ONE 14(1):
     e0211053. https://doi.org/10.1371/journal.pone.0211053'
   link: https://doi.org/10.1371/journal.pone.0211053
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 silk_2019_inattentive:
   reference: 'Silk TJ, Malpas CB, Beare R, Efron D, Anderson V, et al. (2019) A network
     analysis approach to ADHD symptoms: More than the sum of its parts. PLOS ONE 14(1):
     e0211053. https://doi.org/10.1371/journal.pone.0211053'
   link: https://doi.org/10.1371/journal.pone.0211053
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 song_2023_rses:
   reference: Song Y, Sznajder K, Bai Q, Xu Y, Dong Y, Yang X (2023). English as a
     foreign language writing anxiety and its relationship with self-esteem and mobile
@@ -465,7 +465,7 @@ song_2023_rses:
     PLOS ONE, 18(4), e0284335. https://doi.org/10.1371/journal.pone.0284335
   link: https://doi.org/10.1371/journal.pone.0284335
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 teacherjudgements_lohmann_2026_essayratings:
   reference: 'Lohmann, J. F., Lötscher, F., Junge, F., Keller, S., Jansen, T., Fleckenstein,
     J., & Möller, J. (2026). Testing teacher judgments comprehensively: Accuracy,
@@ -473,49 +473,49 @@ teacherjudgements_lohmann_2026_essayratings:
     assessments of student essays.Journal of Educational Psychology, 118(6), 941–960.'
   link: https://doi.org/10.1037/edu0000969
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 trog_brinchmann_2019:
   reference: Brinchmann, E. I., Braeken, J., & Lyster, S.-A. H. (2019). Is there a
     direct relation between the development of vocabulary and grammar? Developmental
     Science, 22(1), e12709. https://doi.org/10.1111/desc.12709
   link: https://doi.org/10.1111/desc.12709
   license: GPL-2.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 verbagg:
   reference: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer.
   link: https://doi.org/10.1007/978-1-4757-3990-9
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 vocab_assessment_3_to_8_year_old_children:
   reference: 'Bohn, M., Prein, J. C., Delikaya, B., Haun, D. B. M., & Gagarina, N.
     (2022, August 24). oREV: an Item Response Theory based open receptive vocabulary
     task for 3 to 8-year-old children. https://doi.org/10.31234/osf.io/4z86w'
   link: https://doi.org/10.31234/osf.io/4z86w
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 vocabulary_iq:
   reference: (2018). Vocabulary IQ Test [dataset and codebook]. http://openpsychometrics.org/_rawdata/VIQT_data.zip
   link: http://openpsychometrics.org/_rawdata/
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 wilmer-mrmet-normative-data-set-2022:
   reference: 'Kim, H.A., Kaduthodil, J., Strong, R.W. et al. Multiracial Reading the
     Mind in the Eyes Test (MRMET): An inclusive version of an influential measure.
     Behav Res 56, 5900–5917 (2024). https://doi.org/10.3758/s13428-023-02323-x'
   link: https://doi.org/10.3758/s13428-023-02323-x
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 wilmer-rmet-normative-data-set-2022:
   reference: 'Kim, H.A., Kaduthodil, J., Strong, R.W. et al. Multiracial Reading the
     Mind in the Eyes Test (MRMET): An inclusive version of an influential measure.
     Behav Res 56, 5900–5917 (2024). https://doi.org/10.3758/s13428-023-02323-x'
   link: https://doi.org/10.3758/s13428-023-02323-x
   license: CC BY 4.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 wirs:
   reference: Bartholomew, D. (1998) Scaling unobservable constructs in social science.
     Applied Statistics, 47, 1–13.
   link: https://doi.org/10.1111/1467-9876.00094
   license: GPL-3.0
-  irw_version: IRW v414
+  irw_version: IRW v418
 

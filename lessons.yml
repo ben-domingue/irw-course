@@ -106,7 +106,7 @@ lessons:
     prereqs: [ctt-reliability, likelihood]
     origin: {slides: [c2], ps: ["PS2#4", "PS2#5"], code: [ps2/ctt_failures.R, ps2/towards_irt.R]}
     tables: [4thgrade_math_sirt, andrich_mudfold]
-    status: stub
+    status: draft
     tranche: core
 
   - id: validity-argument
