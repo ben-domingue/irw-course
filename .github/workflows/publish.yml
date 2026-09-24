@@ -1,0 +1,23 @@
+name: Publish site
+
+on:
+  workflow_dispatch:   # manual "Run workflow" button only; no deploy on push
+
+permissions:
+  contents: write      # lets it push to the gh-pages branch
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      # Relies on the committed _freeze/: render locally and commit it after
+      # editing a lesson, since this runner has no R.
+      - uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
