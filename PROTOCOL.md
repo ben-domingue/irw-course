@@ -264,6 +264,9 @@ Write as Ben (see the `domingue-voice` skill). The six rules below come from
 - **F. No softeners.** No *honest(ly), genuinely, truly*. At most one "worth
   [verb]ing" per lesson.
 
+**Prose rules.** What the prose may quote, borrow and say about techniques is in
+`PROSE.md` **[pending: draft, Ben to review]**.
+
 Already in voice, keep: verdict-first openings; the fair setup followed by a blunt
 landing; "merits comment"; at most one wry aside per lesson; one concrete anchor per
 lesson (chess, the Mach IV, a reading RCT, the BFI-2).
