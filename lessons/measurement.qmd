@@ -8,19 +8,372 @@ source("_course.R")
 lesson_header("measurement")
 ```
 
+```{ojs}
+//| echo: false
+import {grid, normalQuantiles, rescaleExp, stdGap, pnorm, palette} from "./widgets/irt.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+A vocabulary program for second graders raised scores on a 24-item test by about two-thirds of a standard deviation. Is that a fact about the children's vocabulary, or partly a fact about how we chose to count points on the test? Every model in this course produces numbers. Before building any, we should ask what would make those numbers *measurements*, and which conclusions survive when we aren't sure they are. This lesson takes them up with thermometers, a box of minerals and two randomized trials from the IRW. Model fitting starts in [The likelihood and logistic regression](likelihood.qmd).
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- distinguish a latent construct from a manifest attribute, and say what probes, items and stimuli are;
+- state two definitions of measurement and what each asks of a scale;
+- place a scale at the nominal, ordinal or interval level, and say which claims each level licenses;
+- show, with data, how an order-preserving rescaling changes a difference in group means;
+- check whether one group's scores sit above another's everywhere, and say why that decides whether the sign of a mean difference is safe.
+
 ## Core ideas
 
-## Worked example
+### Constructs, probes and responses
+
+Height is **manifest**: we can put a tape measure against it. Anxiety, reading comprehension and the disposition to argue are **latent**: nobody observes them directly. Psychometrics is largely the business of measuring latent attributes. The attribute under study is a **construct**, a postulated trait that shows up, imperfectly, in what people do ([Cronbach & Meehl, 1955](https://doi.org/10.1037/h0040957)); [Constructs and construct maps](constructs.qmd) says more.
+
+Since we can't see the construct, we ask people to do things that depend on it:
+
+- a **probe** is anything presented to a respondent to draw out a response that bears on the construct: a question, a task, a statement to agree or disagree with;
+- an **item** is a probe whose response is recorded and scored (a spelling word, a chess position, a survey statement rated 1 to 5); the scored response, $x_{ij}$ for respondent $j$ on item $i$, is the datum;
+- a **stimulus** is the material an item is built on: a reading passage, a picture. Several items can share one stimulus, as when five questions follow one passage.
+
+From here on the course says "item". The data every later lesson analyses are the responses to items ([Item response data and the IRW](irw-data.qmd) shows how the IRW stores them). Probes are also **standardized**: the same items, given under the same conditions and scored by the same rules, so that differences in responses reflect differences between respondents rather than in how they were asked.
+
+### Two definitions of measurement
+
+What is measurement? One answer comes from the physical sciences. To measure an attribute is to estimate how large a magnitude of it is relative to a unit of the same attribute: a board is 2.4 metres long because it is 2.4 times the length of the metre ([Michell, 1997](https://doi.org/10.1111/j.2044-8295.1997.tb02641.x); [1999](https://doi.org/10.1017/CBO9780511490040)). This assumes that the attribute is *quantitative* (its magnitudes stand in ratios to one another, as lengths do) and that we have a unit. Both are claims about the world, and both can be false.
+
+The other answer, from [Stevens (1946)](https://doi.org/10.1126/science.103.2684.677), makes measurement the assignment of numbers to objects or events by a rule. Any consistent rule counts, and the kind of rule decides what we may do with the numbers. This asks for much less. It describes what a test publisher does when it scores a test, and it supplies the vocabulary of the next section.
+
+The two part company on one question: is a number a measurement because the attribute has a structure the number reflects, or because a rule produced it? Take temperature. A thermoscope, a bulb of liquid feeding a glass tube, shows that one bath is warmer than another: the liquid rises. Mark the tube at melting ice and at boiling water, divide the space between into 100 equal steps, and you have numbers. Are they measurements? Only if equal steps along the tube are equal steps of temperature, and nothing about the tube tells you that.
+
+#### Try it: two thermometers
+
+Two tubes hold different liquids. Both are marked at melting ice (0) and boiling water (100), and the space between is divided evenly. Liquid A expands evenly with temperature; liquid B expands unevenly, by an amount the first slider sets. The picture is stylized, not data on real liquids.
+
+```{ojs}
+//| echo: false
+viewof th_c = Inputs.range([-0.6, 0.6], {value: 0.3, step: 0.05, label: "How unevenly B expands"})
+viewof th_a = Inputs.range([0, 100], {value: 50, step: 1, label: "Tube A reads"})
+```
+
+```{ojs}
+//| echo: false
+th_b = a => { const s = a / 100; return 100 * (s + th_c * s * (1 - s)); }
+th_line = grid(0, 100, 101).map(a => ({a, b: th_b(a)}))
+Plot.plot({
+  width: 520, height: 360,
+  x: {label: "Reading on tube A", domain: [0, 100]}, y: {label: "Reading on tube B", domain: [0, 100]},
+  marks: [
+    Plot.line([{a: 0, b: 0}, {a: 100, b: 100}], {x: "a", y: "b", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(th_line, {x: "a", y: "b", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.dot([{a: th_a, b: th_b(th_a)}], {x: "a", y: "b", r: 6, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Where tube A reads ${th_a}, tube B reads ${th_b(th_a).toFixed(1)}. They differ by ${Math.abs(th_b(th_a) - th_a).toFixed(1)} degrees here, and by nothing at 0 and 100.`
+```
+
+The thermometers agree at the marks and disagree between them, and nothing in either tube says which is right. Both put every bath in the same order; they differ only in spacing. Early thermometry faced exactly this problem. Making the two marks reliable was hard work in itself ([Chang, 2004, ch. 1](https://doi.org/10.1093/0195171276.003.0001)), and settling on a numerical scale between them, which meant deciding which liquid (if any) expands evenly, took more than a century of argument and experiment ([Chang, 2004, ch. 2](https://doi.org/10.1093/0195171276.003.0002)). Temperature was there all along. What took work was the theory that says what an equal step of temperature is.
+
+That is the sense in which measurement is a discovery: whether an attribute can be measured depends on the attribute and on how well we understand it. This course takes the first definition as the aim, and works, most days, with numbers that meet only the second. Whether a psychological attribute is quantitative at all is a question [Scale properties](scale-properties.qmd) and [Validity as causation](validity-causal.qmd) return to.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two thermometers agree at melting ice and boiling water but differ by 7 degrees in a bath halfway between. What would settle which one is right?",
+  options: [
+    {text: "Average the two readings", correct: false, why: "Averaging gives a third scale with no better claim than the first two. Nothing says the truth lies between them."},
+    {text: "Use the one with finer markings", correct: false, why: "Finer marks give more precise readings on that scale, but the question is whether its steps are equal, and precision doesn't answer it."},
+    {text: "Evidence, from theory or experiment, that equal steps on one tube are equal steps of temperature", correct: true, why: "The disagreement is about spacing, and only an account of what an equal step of temperature is can settle spacing."}
+  ]
+})
+```
+
+### Levels of measurement
+
+Stevens paired his definition with a classification that is still in use: scales are **nominal**, **ordinal**, **interval** or **ratio**, and each is defined by the transformations that leave it intact ([Stevens, 1946](https://doi.org/10.1126/science.103.2684.677)). Rocks illustrate them.
+
+- **Nominal.** Igneous, sedimentary, metamorphic. The labels sort rocks into kinds; any relabelling that keeps the kinds apart will do. We can count rocks of each kind.
+- **Ordinal.** Mohs hardness orders minerals by which scratches which: talc is 1, gypsum 2, calcite 3, and so on up to diamond at 10. Any relabelling that keeps the order (any increasing function) will do. We can say quartz (7) is harder than apatite (5), but not that the step from calcite to fluorite equals the step from fluorite to apatite: an order-preserving relabelling can make those steps anything we like. Indentation hardness, measured on the Mohs minerals themselves, doesn't rise evenly with the Mohs number ([Broz, Cook & Whitney, 2006](https://doi.org/10.2138/am.2006.1844)).
+- **Interval.** A unit means the same thing anywhere on the scale. Only linear relabellings, $\beta_0 + \beta_1 x$ with $\beta_1 > 0$, are allowed, and differences can be compared. A ratio scale adds a true zero, so ratios ("twice as long") mean something too.
+
+Each level licenses more claims than the one before, because it allows fewer relabellings. A statement is safe at a level if it stays true under every relabelling that level allows. Test one. Suppose I haphazardly assemble a box of minerals from the geology department's collection and announce that their hardness is uniformly distributed. Would the geologists accept that?
+
+#### Try it: a box of minerals
+
+The box holds three of each Mohs mineral, so on the Mohs numbers it is uniform. The slider applies an order-preserving relabelling that keeps talc at 1 and diamond at 10.
+
+```{ojs}
+//| echo: false
+viewof mh_k = Inputs.range([-4, 4], {value: 0, step: 0.25, label: "Relabelling (0 = Mohs numbers)"})
+```
+
+```{ojs}
+//| echo: false
+mh_names = ["talc", "gypsum", "calcite", "fluorite", "apatite", "orthoclase", "quartz", "topaz", "corundum", "diamond"]
+mh_g = h => mh_k === 0 ? h : 1 + 9 * (Math.exp(mh_k * (h - 1) / 9) - 1) / (Math.exp(mh_k) - 1)
+mh_min = mh_names.map((name, i) => ({name, mohs: i + 1, h: mh_g(i + 1)}))
+mh_box = mh_min.flatMap(m => [m, m, m])
+mh_mean = mh_box.reduce((s, m) => s + m.h, 0) / mh_box.length
+mh_below = mh_min.filter(m => m.h <= mh_mean).at(-1)
+mh_above = mh_min.find(m => m.h > mh_mean)
+Plot.plot({
+  width: 700, height: 280, marginTop: 50,
+  x: {label: "Hardness on the relabelled scale", domain: [0.5, 10.5]}, y: {label: "Minerals in the box"},
+  marks: [
+    Plot.rectY(mh_box, Plot.binX({y: "count"}, {x: "h", thresholds: grid(0.5, 10.5, 11), fill: palette.light, inset: 1})),
+    Plot.ruleX([mh_mean], {stroke: palette.contrast, strokeWidth: 2}),
+    Plot.tickX(mh_min, {x: "h", stroke: palette.main, strokeWidth: 2}),
+    Plot.text(mh_min, {x: "h", frameAnchor: "top", dy: -34, text: "name", rotate: -30, fontSize: 10, fill: palette.ink}),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Bars count the minerals in ten equal-width bins of the relabelled scale; blue ticks mark the ten minerals, the orange line the box's mean. The mean hardness is ${mh_mean.toFixed(2)}, between ${mh_below.name} and ${mh_above ? mh_above.name : "diamond"}. The median mineral is always between apatite and orthoclase.`
+```
+
+At 0 the bars are flat. Move the slider either way and the same thirty minerals pile up at one end, and the mean moves from mineral to mineral while the median stays put. On an ordinal scale, "uniformly distributed" is a claim about the labels, not the minerals, and the geologists would be right to object. Medians and orderings survive every relabelling; means and the shape of a distribution do not.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "On the Mohs scale calcite is 3, fluorite 4, apatite 5 and quartz 7. Which statement does an ordinal scale license?",
+  options: [
+    {text: "Quartz is harder than apatite", correct: true, why: "Order is what an ordinal scale records, and every order-preserving relabelling keeps it."},
+    {text: "The step from calcite to fluorite equals the step from fluorite to apatite", correct: false, why: "Equal steps are an interval claim. An order-preserving relabelling can make the two steps any sizes we like."},
+    {text: "Quartz is more than twice as hard as calcite", correct: false, why: "Ratios need a ratio scale, with a unit and a true zero. Relabel with any increasing function and the ratio changes."}
+  ]
+})
+```
+
+### What hangs on an equal unit
+
+Test scores raise the thermometers' question. A sum score gives every correct answer one point. Is the step from 3 to 4 correct the same amount of vocabulary as the step from 20 to 21? Nothing in the scoring rule says so. [Bond and Lang (2013)](https://doi.org/10.1162/rest_a_00370) point out that test scores are typically treated as interval scales although the scales they are reported on are only ordinal. If a score is only ordinal, any order-preserving rescaling of it is as legitimate as the original, and the question becomes: does our conclusion survive them?
+
+For a difference in group means, the answer can be no. Bond and Lang rescaled the Black–White reading gap from kindergarten entry to third grade with plausible order-preserving transformations. In one of their two national surveys the growth of the gap reversed, and in the other it shrank a great deal.
+
+#### Try it: rescale the scores
+
+Control scores are normal with mean 0 and SD 1; treated scores are normal with the mean and SD the sliders set. The rescaling is $f_k(z) = (e^{kz} - 1)/k$ (just $z$ at $k = 0$): negative $k$ compresses the top of the scale and stretches the bottom, positive $k$ the reverse. Every $f_k$ keeps every respondent's rank. The gap is the treated-minus-control difference in means after restandardizing.
+
+```{ojs}
+//| echo: false
+viewof rs_shift = Inputs.range([0, 1], {value: 0.3, step: 0.05, label: "Treated mean"})
+viewof rs_ratio = Inputs.range([0.5, 2], {value: 1, step: 0.05, label: "Treated SD"})
+viewof rs_k = Inputs.range([-4, 4], {value: 0, step: 0.1, label: "Rescaling k"})
+```
+
+```{ojs}
+//| echo: false
+rs_c = normalQuantiles(400, 0, 1)
+rs_t = normalQuantiles(400, rs_shift, rs_ratio)
+rs_gap = k => stdGap(rs_t.map(z => rescaleExp(z, k)), rs_c.map(z => rescaleExp(z, k)))
+rs_curve = grid(-4, 4, 81).map(k => ({k, gap: rs_gap(k)}))
+rs_now = rs_gap(rs_k)
+rs_min = Math.min(...rs_curve.map(d => d.gap))
+rs_max = Math.max(...rs_curve.map(d => d.gap))
+Plot.plot({
+  width: 700, height: 250,
+  x: {label: "Rescaling k (negative compresses the top)"}, y: {label: "Gap (SD units)"},
+  marks: [
+    Plot.ruleY([0], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(rs_curve, {x: "k", y: "gap", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.dot([{k: rs_k, gap: rs_now}], {x: "k", y: "gap", r: 6, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+rs_surv = grid(-3.5, 4.5, 161).flatMap(x => [
+  {x: rescaleExp(x, rs_k), share: 1 - pnorm(x), group: "control"},
+  {x: rescaleExp(x, rs_k), share: 1 - pnorm((x - rs_shift) / rs_ratio), group: "treated"}
+])
+Plot.plot({
+  width: 700, height: 250,
+  x: {label: "Score on the rescaled scale"}, y: {label: "Share scoring at or above", domain: [0, 1]},
+  color: {legend: true, domain: ["control", "treated"], range: [palette.guide, palette.main]},
+  marks: [Plot.line(rs_surv, {x: "x", y: "share", stroke: "group", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`At k = ${rs_k.toFixed(1)} the gap is **${rs_now.toFixed(2)}** SD. Across k from −4 to 4 it runs from ${rs_min.toFixed(2)} to ${rs_max.toFixed(2)}: ${rs_min > 0 ? "it changes size but never changes sign" : rs_max < 0 ? "negative throughout" : "on some rescalings the treated group is ahead, on others the control group is"}.`
+```
+
+With equal SDs, move $k$: the gap changes size but stays positive, and in the lower plot the treated curve lies above the control curve everywhere. Now set the treated SD to 1.5. The treated group has more high and more low scorers, the curves cross, and stretching the bottom ($k$ well below 0) puts the control group ahead. A rescaling slides the curves sideways but never up or down, so whether they cross doesn't depend on the scale.
+
+The lower plot carries the argument: for each score, the share of each group at or above it. If the treated share is at least the control share at every score, the treated group **stochastically dominates** the control group, and then the treated mean is at least the control mean on *every* order-preserving rescaling. If the curves cross anywhere, some rescaling reverses the sign. So on an ordinal scale, the sign of a mean difference is safe exactly when one distribution sits above the other everywhere, and its size is never safe. The callout below proves it.
+
+::: {.callout-note collapse="true"}
+## Go deeper: when a mean difference survives every rescaling
+
+**Assumptions:** scores take finitely many values $s_0 < s_1 < \dots < s_m$ (a sum score does). $X$ is a treated respondent's score and $Y$ a control respondent's, each with its own distribution. A rescaling is any nondecreasing function $g$; the rescaled gap is $E[g(X)] - E[g(Y)]$. (Restandardizing divides the gap by a positive SD, which can't change its sign.)
+
+**Claim.** $E[g(X)] \ge E[g(Y)]$ for every nondecreasing $g$ if and only if $\Pr(X \ge s_k) \ge \Pr(Y \ge s_k)$ for every $k$.
+
+**Write the score as a sum of steps.** For any $g$,
+$$g(X) = g(s_0) + \sum_{k=1}^{m} \big[g(s_k) - g(s_{k-1})\big]\,\mathbf{1}\{X \ge s_k\},$$
+because the sum adds up exactly the steps at or below $X$'s value. Take expectations of this and of the same expression for $Y$, and subtract:
+$$E[g(X)] - E[g(Y)] = \sum_{k=1}^{m} \Delta_k \big[\Pr(X \ge s_k) - \Pr(Y \ge s_k)\big], \qquad \Delta_k = g(s_k) - g(s_{k-1}) \ge 0.$$
+
+**If.** When every bracket is $\ge 0$, every term is $\ge 0$, so the gap is $\ge 0$ whatever the step sizes $\Delta_k$.
+
+**Only if.** Suppose $\Pr(X \ge s_j) < \Pr(Y \ge s_j)$ for some $j$. Take $g(s) = s + M\,\mathbf{1}\{s \ge s_j\}$, which is strictly increasing for any $M > 0$. Its gap is the original gap plus $M$ times the negative bracket at $j$, so for $M$ large enough it is negative.
+
+**What follows.** A rescaling is a choice of step sizes $\Delta_k$, and the gap is a weighted sum of the vertical distances between the two curves in the widget, with the step sizes as weights. If the distances all have one sign, no weighting can change the sign of the sum; if they don't, enough weight on one step will. The same result holds for continuous scores, where it is stated as $X$ being larger than $Y$ in the *usual stochastic order* ([Shaked & Shanthikumar, 2007, ch. 1](https://doi.org/10.1007/978-0-387-34675-5_1)). [Ho (2009)](https://doi.org/10.3102/1076998609332755) builds gap statistics from the two distributions as wholes rather than from their means, so that they don't change under any monotone rescaling. In a sample both curves carry sampling error, so a crossing smaller than that error is weak evidence that the populations cross.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In a trial, the treated group's mean score is higher, but the treated group also has more respondents at the very bottom of the scale. Is there an order-preserving rescaling on which the control group is ahead?",
+  options: [
+    {text: "Yes: one that stretches the bottom of the scale enough", correct: true, why: "More treated respondents at the bottom means the share-at-or-above curves cross near the floor. A rescaling that puts enough weight on the lowest step counts those respondents heavily and reverses the sign."},
+    {text: "No: rescaling keeps everyone's rank, so it can't change who is ahead", correct: false, why: "It keeps every respondent's rank, but group means depend on spacing too. Only if one group sat above the other at every score would the sign be safe."},
+    {text: "Only if the test is not an interval scale", correct: false, why: "The rescaling exists either way; what an interval scale would add is a reason to prefer the original spacing over the others."}
+  ]
+})
+```
+
+Is there a way out other than dominance? Later lessons take up two routes to a unit. One makes the unit a consequence of a model: if respondents and items combine additively, the model fixes the spacing. The Lexile Framework for Reading takes this route, modelling comprehension as the difference between a reader measure and a text measure ([Stenner, Burdick, Sanford & Burdick, 2006](https://pubmed.ncbi.nlm.nih.gov/16807496/)); [The Rasch model](rasch.qmd) and [Scale properties](scale-properties.qmd) say what such a model licenses. The other route borrows the unit of an outside quantity: [Bond and Lang (2018)](https://doi.org/10.3368/jhr.53.4.0916.8242r) rescale each test score by the average years of education eventually completed by students with that score. Problem 3 weighs the two.
+
+### What we want from a psychological measure
+
+An equal unit is one thing to want from a measure. My list has three more, and much of the course serves them. First, a measure should be insensitive to attributes other than the one it targets: a mathematics test shouldn't also be a test of reading English ([Differential item functioning](dif.qmd), [Validity as an argument](validity-argument.qmd)). Second, it should be calibrated to its task: sometimes covering a wide range of development, sometimes making fine distinctions near one point, such as a cut score. Third, it should give precise information quickly, with few items ([Information, precision, and short forms](information.qmd), [Item banks and adaptive testing](item-banks-cat.qmd)).
+
+## Simulate
+
+The code below draws two groups on a latent scale, reports their scores through five order-preserving rescalings and prints the standardized gap under each. It then checks dominance at 99 cut points. It is base R and runs in a second.
+
+With the seed as written and equal SDs (`ratio <- 1.0`), the gap is 0.28 as simulated and between 0.19 and 0.28 under every rescaling, and the smallest difference in shares is 0.006: the treated group sits above the control group at every cut point. Now set `ratio <- 1.5`. The smallest difference in shares turns negative (−0.065), and compressing the top gives −0.16: the control group is ahead. Try other values of `shift` and `ratio`, and add rescalings of your own. Can you reverse the gap while the smallest difference stays positive?
+
+```{webr}
+{{< include code/measurement-sim.R >}}
+```
+
+[Download this code](code/measurement-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/measurement-irw.R")
+```
+
+The main example is [gilbert_meta_12](https://itemresponsewarehouse.org/tables/gilbert_meta_12/): a vocabulary test given to second graders in a cluster-randomized trial of a content literacy program, in which teachers in treated schools taught thematic science and social studies lessons ([Kim, Relyea, Burkhauser, Scherer & Rich, 2021](https://doi.org/10.1007/s10648-021-09609-6); data at [doi:10.7910/DVN/HQEMN6](https://doi.org/10.7910/DVN/HQEMN6)). Its job here is to show a treatment effect whose sign survives rescaling. The IRW table comes from a collection of item-level trial data assembled by [Gilbert, Himmelsbach, Soland, Joshi & Domingue (2025)](https://doi.org/10.1002/pam.70025). It has one outcome occasion (no `wave` column), a baseline score (`std_baseline`) that we don't use, and 24 items scored 1 for correct, so higher means more vocabulary. [Download the code](code/measurement-irw.R); it needs only base R.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+```{r helpers}
+#| echo: true
+#| code-fold: show
+```
+
+The test has two 12-item parts, science and social studies, and 305 respondents have responses to one part only, more of them treated. We keep the 2,303 who answered all 24 items: fine for a point about scales, though not for an impact estimate.
+
+```{r vocab}
+#| echo: true
+#| code-fold: show
+```
+
+```{r vocab-effect}
+#| echo: true
+#| code-fold: show
+```
+
+On the standardized sum score, the treated group is 0.68 SD ahead. Kim et al. report effects from models that account for schools and baseline scores; ignoring both doesn't matter for the point about scales. Now rescale.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Apply rescalings that compress the top of the vocabulary score scale (and stretch the bottom). What happens to the 0.68 SD treatment effect?",
+  choices: ["It grows", "It stays about the same", "It shrinks"],
+  answer: "It shrinks",
+  reveal: "It falls steadily as the top is compressed, to 0.16 at $k = -4$. Treated respondents pile up near the top of the scale (right panel below), so squeezing the top squeezes the differences the program made."
+})
+```
+
+```{r vocab-rescale}
+#| echo: true
+#| code-fold: show
+#| fig-width: 9
+#| fig-height: 3.8
+```
+
+Across rescalings from $k = -4$ to $k = 4$, the effect runs from 0.16 to 0.71 SD. Compressing the top shrinks it most, because the treated scores are piled toward the top (right panel). Stretching the top raises it a little, then lowers it as the few highest scores come to dominate both means. None of these rescalings is more correct than the sum score; without an argument for its spacing, "0.68 SD" is one member of a family of answers.
+
+Is the sign as fragile as the size? The dominance check answers without trying rescalings one at a time.
+
+```{r vocab-dominance}
+#| echo: true
+#| code-fold: show
+```
+
+At every score from 2 to 24, a larger share of the treated group than of the control group scores at or above it, by as much as 0.30. The very bottom has a wrinkle. One respondent in each group scored 0, and the treated group is smaller, so the treated share scoring 1 or more falls short of the control share by about 0.0001. By the Go deeper callout, some rescaling therefore reverses the sign: one that makes the step from 0 to 1 correct worth about 38,000 other steps. That turns on one child in each group, and I read it as sampling noise, not a crossing. On any spacing a reasonable person would entertain, the program raised vocabulary scores.
+
+For contrast, a table whose job is to show a small effect whose distributions cross: [gilbert_meta_15](https://itemresponsewarehouse.org/tables/gilbert_meta_15/), 10 Raven's matrices items from the evaluation of Partnership Schools for Liberia, in which randomly selected public schools were handed to private operators to manage ([Romero, Sandefur & Sandholtz, 2020](https://doi.org/10.1257/aer.20181478); data at [doi:10.7910/DVN/5OPIYU](https://doi.org/10.7910/DVN/5OPIYU)). It is from the same collection: one outcome occasion, items scored 1 for correct. We drop 129 respondents with no recorded treatment status.
+
+```{r raven}
+#| echo: true
+#| code-fold: show
+```
+
+The effect is 0.05 SD, and the curves cross near the top: at 9 correct, the treated share falls below the control share.
+
+```{r raven-top}
+#| echo: true
+#| code-fold: show
+```
+
+```{r raven-flip}
+#| echo: true
+#| code-fold: show
+```
+
+About 4.2% of treated children scored 9 or 10, against 4.7% of control children. Making the step from 8 to 9 correct worth 21 ordinary steps ($M = 20$) puts the control group ahead; the vocabulary test needed about 38,000. The smooth rescalings never reverse this effect (it stays between 0.012 and 0.052), because none puts its weight on that one step. The crossing, a difference of 0.005 with a standard error of 0.007, is well within sampling noise, and so is the effect itself.
+
+Both effects are positive on the sum score, but they are not equally robust. So what should you report? My rule: whenever I report a group difference on a test score, I check dominance first. If one group sits above the other everywhere (up to noise), I report the sign with confidence and the size as one member of a family. If the curves cross, I say that the sign depends on the scale's spacing and give the shares at or above the scores that matter. Only an argument for the unit earns more.
 
 ## Problems
 
+1. **Reverse a gap.** Construct two groups of five scores each and an increasing function $g$ such that group A has the higher mean before applying $g$ and group B after. What must be true of the groups for this to be possible?
+2. **Halve it, then reverse it.** In `gilbert_meta_12`, find an order-preserving rescaling of the sum score that halves the treatment effect (0.68 SD). Then find a new rescaling that reverses the `gilbert_meta_15` effect. Use the dominance checks to explain why the second task is so much easier.
+3. **Two routes to a unit.** The Lexile Framework defines its unit through a model of reader and text ([Stenner et al., 2006](https://pubmed.ncbi.nlm.nih.gov/16807496/)); [Bond and Lang (2018)](https://doi.org/10.3368/jhr.53.4.0916.8242r) anchor test scores to years of education eventually completed. Make the strongest case for each and name what each assumes. Which would you use to compare two reading programs? (PS1#4)
+4. **The box of minerals.** What evidence would a geologist need before accepting that a box of minerals has a uniform distribution of hardness? Design a study that could provide it, and say what scale of hardness it would use.
+5. **Your measure.** Pick a measure you know well. At what level of measurement does it operate, on what evidence? How does it fare on the three desiderata?
+6. **Challenge: a thermometer for reading.** Temperature took more than a century to go from ordered to measured. What would a thermometer for reading comprehension require: what plays the fixed points, the liquid, and the theory that says equal steps are equal? This is open; say how far you think we are.
+
+```{r}
+#| output: asis
+ask_claude("measurement", "It covers latent constructs and probes, two definitions of measurement (Michell's and Stevens's), levels of measurement, how order-preserving rescalings change a difference in group means, and why the sign of a mean difference survives every rescaling only when one group's score distribution stochastically dominates the other's, shown on two randomized trials.")
+```
+
 ## Going further
+
+- Michell, J. (1997). Quantitative science and the definition of measurement in psychology. *British Journal of Psychology*, 88(3), 355–383. <https://doi.org/10.1111/j.2044-8295.1997.tb02641.x>. The case for the first definition.
+- Stevens, S. S. (1946). On the theory of scales of measurement. *Science*, 103(2684), 677–680. <https://doi.org/10.1126/science.103.2684.677>. The levels of measurement, in four pages.
+- Chang, H. (2004). *Inventing temperature: Measurement and scientific progress*. Oxford University Press. <https://doi.org/10.1093/0195171276.001.0001>. How temperature became measurable.
+- Sherry, D. (2011). Thermoscopes, thermometers, and the foundations of measurement. *Studies in History and Philosophy of Science Part A*, 42(4), 509–524. <https://doi.org/10.1016/j.shpsa.2011.07.001>. The thermoscope as a lesson about measurement in general.
+- Maul, A., Torres Irribarra, D., & Wilson, M. (2016). On the philosophical foundations of psychological measurement. *Measurement*, 79, 311–320. <https://doi.org/10.1016/j.measurement.2015.11.001>. A map of the philosophical positions.
+- Briggs, D. C. (2021). *Historical and conceptual foundations of measurement in the human sciences: Credos and controversies*. Routledge. <https://doi.org/10.1201/9780429275326>. The history behind this lesson, at book length.
+- Bond, T. N., & Lang, K. (2013). The evolution of the Black-White test score gap in grades K–3: The fragility of results. *Review of Economics and Statistics*, 95(5), 1468–1479. <https://doi.org/10.1162/rest_a_00370>. Rescaling applied to a question that matters.
+- Ho, A. D. (2009). A nonparametric framework for comparing trends and gaps across tests. *Journal of Educational and Behavioral Statistics*, 34(2), 201–228. <https://doi.org/10.3102/1076998609332755>. Gap statistics that don't depend on the scale.
+- Thurstone, L. L. (1928). Attitudes can be measured. *American Journal of Sociology*, 33(4), 529–554. <https://doi.org/10.1086/214483>. An early, confident case that attitudes can be measured.
 
 ```{r}
 #| output: asis
@@ -29,3 +382,8 @@ data_sources("measurement")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 1 (slides c1, "What is psychometrics" through the desiderata) and problem set 1 (#4). The rescaling analyses of the two trials are new.
+- **Timing:** about 50 minutes for the core ideas and widgets; the real-data section works as a 20-minute lab, extended by problem 2.
+- **Changed from 252:** the slides leave the interval question as foreshadowing; this lesson answers part of it with the rescaling demonstration and the dominance result, following [Bond & Lang (2013)](https://doi.org/10.1162/rest_a_00370). Michell and Stevens are paraphrased, not quoted.
+- **Held back:** conjoint measurement, what the Rasch model licenses, gains and vertical scales (in [Scale properties](scale-properties.qmd)).
+- **Solutions:** held back in `solutions/measurement.qmd` (not published).

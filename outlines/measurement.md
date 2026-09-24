@@ -2,7 +2,7 @@
 
 # What is measurement? (`measurement`)
 
-Module: foundations · Prereqs: none · Preliminary · Status: outline
+Module: foundations · Prereqs: none · Preliminary · Status: draft (#27)
 
 ## Core ideas
 
@@ -68,3 +68,12 @@ Sanity: none (no model is fitted).
 ## Open questions
 
 - None. Item text (#63, A5) doesn't arise: idea 1 uses generic probes, and the vocabulary items aren't shown.
+
+## Drafting notes (#27, 09-24)
+
+- **Numbers recomputed** (IRW v59_0 CSVs). `gilbert_meta_12`: 0.68 SD; 0.16 to 0.71 across $k \in [-4, 4]$. Dominance is *not* exact: one respondent in each group scored 0, so the treated share scoring 1 or more is 0.0001 below the control share. A rescaling that weights the 0→1 step about 38,000 times the others reverses the sign. The lesson reports this and reads it as sampling noise. `gilbert_meta_15`: 0.05 SD; crossing at 9+ (−0.005, SE 0.007). The smooth $e^{kz}$ family does not reverse it (0.012 to 0.052); a step rescaling ($+M$ at 9 or more, $M = 20$) does. The outline's "flips under a rescaling that stretches the top" is kept in that form.
+- **Data notes:** both tables come from the Gilbert et al. (2025, doi:10.1002/pam.70025) collection (`data/gilbertmeta.R`, `data/gilbert_hte/postprocessing.R` in ben-domingue/irw). They have one outcome occasion (no `wave`), `std_baseline` is the pretest, and items are scored 1 = correct. In `gilbert_meta_12`, 305 respondents took only one 12-item subtest (207 treated); complete cases are kept. In `gilbert_meta_15`, 129 respondents have no `treat`.
+- **Kim et al. (2021)** sampled grades 1 and 2 in 30 schools; the IRW table is grade 2 (IRW description; 30 clusters).
+- **Hardness widget:** absolute hardness values dropped (Broz et al. 2006 is closed access, so the values couldn't be checked). The widget instead relabels a box of minerals that is uniform on the Mohs scale. Broz et al. are cited only for their abstract's finding.
+- **Anchoring:** Cunha & Heckman not used (not checked against PS1#4's source); only Bond & Lang (2018).
+- **Go deeper:** the discrete proof (a sum of steps), with Shaked & Shanthikumar (2007, ch. 1, doi:10.1007/978-0-387-34675-5_1) for the continuous case, and Ho (2009).

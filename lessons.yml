@@ -61,7 +61,7 @@ lessons:
     prereqs: []
     origin: {slides: [c1], ps: ["PS1#4"], code: []}
     tables: [gilbert_meta_12, gilbert_meta_15]
-    status: stub
+    status: draft
     tranche: preliminary
 
   - id: irw-data

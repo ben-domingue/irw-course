@@ -160,3 +160,17 @@ export function corMatrix(X) {
   }
   return R;
 }
+
+// An order-preserving rescaling: (exp(k z) - 1) / k, and z itself at k = 0.
+// k < 0 compresses the top of the scale and stretches the bottom; k > 0 the reverse.
+export const rescaleExp = (z, k) => (k === 0 ? z : (Math.exp(k * z) - 1) / k);
+
+// Standardized mean difference between two samples, using the SD of the two
+// pooled together (as when scores are standardized on the whole sample).
+export function stdGap(treated, control) {
+  const all = treated.concat(control), n = all.length;
+  const m = all.reduce((u, v) => u + v, 0) / n;
+  const sd = Math.sqrt(all.reduce((u, v) => u + (v - m) ** 2, 0) / (n - 1));
+  const mean = (x) => x.reduce((u, v) => u + v, 0) / x.length;
+  return (mean(treated) - mean(control)) / sd;
+}
