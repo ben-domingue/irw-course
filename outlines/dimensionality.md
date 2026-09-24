@@ -68,5 +68,5 @@ A worthwhile comparison from the 252 slides (c6 slide 20): on ENEM (booklet 175)
 
 - Grit keying (settled 09-24, consistent with `sem`): the response scale runs 1 = "Very much like me" to 5 = "Not like me at all" (IRW option text). PS6#1 reverses the six consistency-of-interest items and then dichotomizes ≤3 as "like me", which ends with 1 = gritty. For polytomous analyses the course keys the other way round, reversing the six perseverance items so that higher = more grit. That is what `sem` does. Both routes agree on which items move together; the lesson should state its direction once.
 - qgrit11: after keying, it loads negatively (−0.37) and its item-rest correlation is −0.08. Ben's PS6#1 flagged it too. The lesson should say so gently. Is it keyed right?
-- Twins are clustered in families (as in `sem`).
+- Twins are clustered in families: family = `id %/% 100` (see `sem`).
 - Settled (Ben, 09-24): no ENEM here. The c6 slide 20 result (IMV −0.002 for a second dimension on ENEM) can be quoted as a citation to the slide's analysis, not rerun.

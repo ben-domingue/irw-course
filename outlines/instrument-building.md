@@ -32,7 +32,7 @@ Module: ctt · Prereqs: constructs, ctt-reliability · Core · Status: outline
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `song_2023_rses` | main example | The Rosenberg Self-Esteem Scale, 10 items, 1–4, 1,238 people, keyed (alpha 0.86). Items split into two clusters that match wording direction: correlations of 0.5–0.8 within a cluster, about 0.2 between; second eigenvalue 2.3. | — |
+| `song_2023_rses` | main example | The Rosenberg Self-Esteem Scale, 10 items, 1–4, 1,238 people, keyed (alpha 0.86). Items split into two clusters that match wording direction: correlations of 0.5–0.8 within a cluster, about 0.2 between; second eigenvalue 2.3. The negatively worded block is items 3, 5, 9 and 10; the fifth negatively worded item (8) goes its own way. | — |
 
 One table: the pilot's data are the case study; the rest of the lesson is design.
 
@@ -61,6 +61,6 @@ One table: the pilot's data are the case study; the rest of the lesson is design
 
 ## Open questions
 
-- **Item-text alignment (#63).** In `song_2023_rses`, the item ids don't follow the standard Rosenberg numbering. The IRW's item text for this table puts "I wish I could have more respect for myself" on RSES8, which clusters with the positive items in the data. Verify the mapping against the original source before drafting. `bakker_2020_rses` shows a similar mismatch.
+- **Item-text alignment (#63), checked 09-24: aligned.** The source (Song et al., 2023, *PLOS ONE*, doi:10.1371/journal.pone.0284335, Methods) numbers its items in its own order: items 3, 5, 8, 9 and 10 are negatively worded, which matches the IRW item text. In the data, four of the five (3, 5, 9, 10) form the wording block. Item 8 ("I wish I could have more respect for myself", reversed) correlates 0.54–0.59 with the positive items and 0.01–0.16 with the other negatives, so it doesn't share the wording factor. That's a finding for the lesson, noted gently, not a data error. `bakker_2020_rses` wasn't checked (it isn't used).
 - Reuse: the RSES is widely treated as free to use, but that needs confirming for #63.
 - No Simulate section fits naturally in a design lesson. The wording-factor simulation is the proposal.

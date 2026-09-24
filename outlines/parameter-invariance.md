@@ -63,5 +63,5 @@ The MRMET items correlate weakly with one another (mean r 0.065), which is commo
 ## Open questions
 
 - Idea 3's selection effect (splitting on the sum score of the same items) isn't in the 252 slides; it came up in the data. Keep it, or split on the odd items throughout?
-- Baker (2001) is a book (the online second edition is free); verify the edition and figure before drafting.
+- Verified 09-24: Baker, F. B. (2001). *The basics of item response theory* (2nd ed.). ERIC Clearinghouse on Assessment and Evaluation (ED458219; free). Ch. 3, "The group invariance of item parameters", pp. 51–54, Figures 3-3 to 3-7: groups with abilities in [−3, −1] and [+1, +3] give the same b = −.39 and a = 1.27. A third edition exists (Baker & Kim, 2017, Springer, doi:10.1007/978-3-319-54205-8).
 - Settled (Ben, 09-24): no ENEM; forms are left to `equating`.

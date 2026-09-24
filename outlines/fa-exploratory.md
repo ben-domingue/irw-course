@@ -11,7 +11,7 @@ Module: fa · Prereqs: instrument-building · Core · Status: outline (page is a
 3. **Rotation.** Loadings aren't unique; rotation picks an interpretable solution with the same fit. Simple structure; orthogonal vs. oblique; my default is oblique. *(major)* Sources: Thurstone (1947, simple structure); Kaiser (1958), doi:10.1007/bf02289233 (varimax); Browne (2001), doi:10.1207/s15327906mbr3601_05 (rotation overview).
 4. **Two practical notes.** Polychoric correlations for Likert items; factor analysis is not PCA. Sources: Olsson (1979), doi:10.1007/bf02296207 (polychoric correlation); Fabrigar, Wegener, MacCallum & Strahan (1999), doi:10.1037/1082-989x.4.3.272.
 
-Articles checked on Crossref (09-24); Thurstone (1947) is a book, still to verify.
+All references checked (09-24). Thurstone, L. L. (1947). *Multiple-factor analysis*. University of Chicago Press (book; confirmed via its 1948 *Psychometrika* review, doi:10.1007/bf02289082). The "unusually clean" claim was dropped from the page (no baseline exists).
 
 ## Picks up
 
