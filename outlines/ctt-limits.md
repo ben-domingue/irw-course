@@ -33,7 +33,7 @@ Module: ctt · Prereqs: ctt-reliability, likelihood · Core · Status: outline
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
 | `4thgrade_math_sirt` | main example | 30 dichotomous items, 664 students (complete), proportions correct 0.20–0.89, in testlets and three domains (arithmetic, measurement, geometry). Item-by-sum-score curves rise, S-shaped, shifted by difficulty. | — |
-| `andrich_mudfold` | failure case (for the monotone model) | Eight statements about capital punishment, 54 complete respondents. Several items don't rise steadily with the sum score (LIFESACRED: 0.87 at a sum of 3, 0.00 at 5); with 54 people the curves are noisy, so the prose should say so. | `unfolding-nominal` (deliberate thread?) |
+| `andrich_mudfold` | failure case (for the monotone model) | Eight statements about capital punishment, 54 complete respondents. Several items don't rise steadily with the sum score (LIFESACRED: 0.87 at a sum of 3, 0.00 at 5); with 54 people the curves are noisy, so the prose should say so. | `unfolding-nominal` (deliberate thread, agreed by Ben 09-24) |
 
 `chess_lnirt` moves out of this lesson (#12), replaced by `4thgrade_math_sirt`.
 
@@ -63,4 +63,10 @@ Module: ctt · Prereqs: ctt-reliability, likelihood · Core · Status: outline
 ## Open questions
 
 - The page stays mostly simulation (the "guided tour" of PS2#4). Fine as is, or split the devious generator into a Go deeper?
-- Thread: `andrich_mudfold` could return in `unfolding-nominal`, which is optional. Keep it in both?
+- Settled (Ben, 09-24): `andrich_mudfold` returns in `unfolding-nominal` as a thread. Record it with `reuses:` once #73 merges.
+- Other unfolding data in the IRW (checked 09-24), none of which replaces `andrich_mudfold` here, because none shows the single-peaked curve against a sum score:
+  - `eurpar2_mudfold`: 1,786 people each pick 2 of 6 political parties (item text). Every sum score is 2, so the unfolding shows up in which pairs get chosen along a left–right order.
+  - `franco_2024_unfolding`: 137 people rank 6 objects. Rankings, not agree/disagree.
+  - `loneliness_mudfold`: 3,987 people, 11 items, 3 categories, no item text. Against the sum score the items split into two directions and 1,566 people sit at 21, which looks more like mixed keying than unfolding.
+
+  `eurpar2_mudfold` and `franco_2024_unfolding` suit `unfolding-nominal` (noted on #52).

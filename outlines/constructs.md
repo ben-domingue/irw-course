@@ -8,7 +8,11 @@ Module: ctt · Prereqs: measurement · Core · Status: outline
 
 1. **A construct is how we operationalize what we can't grasp.** Cronbach and Meehl (1955): a postulated attribute, reflected in test performance, carrying statements of the form "people with this attribute, in situation X, act in manner Y (with a stated probability)". *(major)*
 2. **A construct map.** Wilson's simpler version: an underlying continuum, with qualitatively described levels, on which items and respondents sit in the same space (the picture IRT will draw). A worked example: the California DRDP. *(major)*
-3. **Two tests for a proposed construct.** Does the map order the items before you see data? Does it suggest an intervention: a plan for "increasing" the construct? My view is that some published constructs come much closer to this ideal than others.
+3. **Two tests for a proposed construct.** Does the map order the items before you see data? Does it suggest an intervention: a plan for "increasing" the construct? Slide 11 of c2 sets two descriptions side by side:
+   - a construct map for the Earth and the Solar System, with five levels that each describe what a student understands (level 2: the Sun appears to cross the sky, the Moon's shape changes every 28 days; level 5: a complete model that explains day and night, the phases of the Moon and the seasons);
+   - achievement-level descriptors for geography (Basic, Proficient, Advanced), each a list of things students "should be able to" do.
+
+   The verdict on the slide is "one of these comes much closer to this ideal". Proposed: the astronomy map does, because each level names the misconception to overcome next, so it implies what to teach, while the descriptors list performances with no account of how a student moves between them. *(Ben to confirm.)*
 4. **Continuous or categorical?** Latent classes (Moffitt's taxonomy of antisocial behaviour) vs. a continuum. My prior is that variation is much more often continuous. *(major)*
 5. **A different starting point: blueprints.** Licensure, admissions and K–12 tests often sample a domain to a specification, not a construct map; sometimes that is a bureaucratic minimum standard (the driving test).
 
@@ -40,6 +44,7 @@ One table: the lesson is conceptual, and the table's job is to test a construct 
 **Widgets**
 - Build a construct map: drag number-series items onto levels, then reveal their proportions correct (ideas 2, 3).
 - DRDP explorer: a developmental continuum with descriptors at each level (idea 2).
+- Which description suggests an intervention? The astronomy map and the geography descriptors side by side; pick a student at each level and say what you would teach next (idea 3).
 - Continuum or classes? Simulated sum-score histograms from a continuous trait vs. a four-class mixture; can you tell which is which? (idea 4)
 
 **Predict-then-check:** rank the nine number-series items from easiest to hardest from their text alone. Answered by the proportions correct.
@@ -61,5 +66,5 @@ One table: the lesson is conceptual, and the table's job is to test a construct 
 ## Open questions
 
 - Item text (#63): the lesson leans on item text. The number-series items are short arithmetic sequences; their reuse status needs checking.
-- Slide 11 ("one of these comes much closer to this ideal") compares two constructs whose images aren't in the text export. Which two, for the verdict in idea 3?
+- Idea 3: confirm the verdict proposed there (the astronomy construct map is closer to the ideal than the geography descriptors), and give the sources for both figures. The astronomy map looks like Briggs, Alonzo, Schwab & Wilson (2006) on ordered multiple-choice items; the geography text looks like NAEP achievement levels. Both are guesses, to verify.
 - Simulate compares a continuum with latent classes. Is that the right simulation for a conceptual lesson, or should Simulate build a construct map's Wright map?
