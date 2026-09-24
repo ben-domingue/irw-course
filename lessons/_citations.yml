@@ -40,6 +40,14 @@ borges_brazil_residency_2024_pbt:
   link: https://doi.org/10.3352/jeehp.2024.21.32
   license: CC0 1.0
   irw_version: IRW v414
+c19prc_uk_mcbride_2021_phq9:
+  reference: 'Bentall, Richard and Shevlin, Mark and McBride, Orla and Murphy, Jamie
+    and Hartman, Todd K and Levita, Liat and Gibson-Miller, Jilly and Mason, Liam
+    and Bennett, Kate (2022). The COVID-19 Psychological Research Consortium Study,
+    2020-2021. [Data Collection]. Colchester, Essex: UK Data Service. 10.5255/UKDA-SN-855552'
+  link: https://osf.io/v2zur/
+  license: CC BY 4.0
+  irw_version: IRW v414
 c19prc_uk_mcbride_2021_wordsum:
   reference: 'Bentall, Richard and Shevlin, Mark and McBride, Orla and Murphy, Jamie
     and Hartman, Todd K and Levita, Liat and Gibson-Miller, Jilly and Mason, Liam
@@ -48,11 +56,26 @@ c19prc_uk_mcbride_2021_wordsum:
   link: https://osf.io/v2zur/
   license: CC BY 4.0
   irw_version: IRW v414
+cdm_timss11:
+  reference: George, A. C., & Robitzsch, A. (2014). Multiple group cognitive diagnosis
+    models, with an emphasis on differential item functioning. Psychological Test
+    and Assessment Modeling, 56(4), 405-432
+  link: https://cran.r-project.org/web/packages/CDM/index.html
+  license: GPL-3.0
+  irw_version: IRW v414
 chess_lnirt:
   reference: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis
     of chess expertise. The American journal of psychology, 118(1), 29-60.
   link: https://doi.org/10.2307/30039042
   license: GPL-3.0
+  irw_version: IRW v414
+choi_2026_cmsce_2020_1:
+  reference: 'Choi, J., Jung, S.-S., Choi, E. K., Kim, K. S., & Seo, D. G. (2026).
+    Feasibility of applying computerized adaptive testing to the Clinical Medical
+    Science Comprehensive Examination in Korea: a psychometric study [Data set]. Harvard
+    Dataverse. https://doi.org/10.7910/DVN/TQZQ6L'
+  link: https://doi.org/10.7910/DVN/TQZQ6L
+  license: CC0 1.0
   irw_version: IRW v414
 christensen_2018_wsssf_5831:
   reference: 'Christensen, A.P., Kenett, Y.N., Aste, T. et al. Network structure of
@@ -60,6 +83,13 @@ christensen_2018_wsssf_5831:
     approaches. Behav Res 50, 2531–2550 (2018).'
   link: https://doi.org/10.3758/s13428-018-1032-9
   license: CC0 1.0
+  irw_version: IRW v414
+coroiu_2018_phq9:
+  reference: 'Coroiu A, Kwakkenbos L, Moran C, Thombs B, Albani C, Bourkas S, et al.
+    (2018). Structural validation of the Self-Compassion Scale with a German general
+    population sample. PLOS ONE 13(2): e0190771.'
+  link: https://doi.org/10.1371/journal.pone.0190771
+  license: CC BY 4.0
   irw_version: IRW v414
 credentialform_lnirt:
   reference: 'Cizek, G. J., & Wollack, J. A. (Eds.). (2016). Handbook of quantitative
@@ -85,20 +115,6 @@ enders_2022_science_literacy:
     ONE 17(10): e0276082.'
   link: https://doi.org/10.1371/journal.pone.0276082
   license: CC0 1.0
-  irw_version: IRW v414
-enem_2013_1mil_lc:
-  reference: 'Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil:
-    State of the art of research on ENEM in Brazil. Latin American Journal of Development,
-    3(5), 2898-2907.'
-  link: https://doi.org/10.46814/lajdv3n5-018
-  license: CC BY 4.0
-  irw_version: IRW v414
-enem_2014_1mil_mt:
-  reference: 'Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil:
-    State of the art of research on ENEM in Brazil. Latin American Journal of Development,
-    3(5), 2898-2907.'
-  link: https://doi.org/10.46814/lajdv3n5-018
-  license: CC BY 4.0
   irw_version: IRW v414
 enkavi_2019_stroop:
   reference: Enkavi, A. Z., Eisenberg, I. W., Bissett, P. G., Mazza, G. L., MacKinnon,
@@ -316,6 +332,28 @@ neurodegenerative_huizinga_2019_dass:
     disorders: Evaluation of psychometric features in a community sample. PLoS One,
     15(4), e0232232.'
   link: https://doi.org/10.1371/journal.pone.0232232
+  license: CC0 1.0
+  irw_version: IRW v414
+pirlsmissing_sirt:
+  reference: 'Robitzsch A (2022). sirt: Supplementary Item Response Theory Models.
+    R package version 3.12-66, https://CRAN.R-project.org/package=sirt.'
+  link: https://cran.r-project.org/web/packages/sirt/index.html
+  license: GPL-3.0
+  irw_version: IRW v414
+project_kids_wj_lwid_wave:
+  reference: Hart, S. A., Otaiba, S. A., Connor, C., & Norris, C. U. (2021). Project
+    KIDS Item level Data. LDbase. https://doi.org/10.33009/ldbase.1620837890.bcf8
+  link: https://doi.org/10.33009/ldbase.1620837890.bcf8
+  license: CC BY 4.0
+  irw_version: IRW v414
+promis1wave1_depression:
+  reference: 'Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S.,
+    ... & Hays, R. (2010). Initial adult health item banks and first wave testing
+    of the patient-reported outcomes measurement information system (PROMIS™) network:
+    2005–2008. Journal of clinical epidemiology, 63(11), 1179. Cella, David, 2015,
+    "PROMIS 1 Wave 1", https://doi.org/10.7910/DVN/0NGAKG, Harvard Dataverse, V3,
+    UNF:6:sXYqKDzGWfX7QuTXNGpjGQ== [fileUNF]'
+  link: https://doi.org/10.7910/DVN/0NGAKG
   license: CC0 1.0
   irw_version: IRW v414
 promis1wave1_pain:
