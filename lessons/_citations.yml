@@ -54,6 +54,12 @@ christensen_2018_wsssf_5831:
   link: https://doi.org/10.3758/s13428-018-1032-9
   license: CC0 1.0
   irw_version: IRW v414
+credentialform_lnirt:
+  reference: 'Cizek, G. J., & Wollack, J. A. (Eds.). (2016). Handbook of quantitative
+    methods for detecting cheating on tests. Abingdon, England: Routledge.'
+  link: https://cran.r-project.org/web/packages/LNIRT/index.html
+  license: GPL-3.0
+  irw_version: IRW v414
 DART_Brysbaert_2020_1:
   reference: Brysbaert, M., Sui, L., Dirix, N., & Hintz, F. (2020). Dutch Author Recognition
     Test. Journal of Cognition, 3(1), 6. https://doi.org/10.5334/joc.95
@@ -79,6 +85,14 @@ enem_2014_1mil_mt:
     State of the art of research on ENEM in Brazil. Latin American Journal of Development,
     3(5), 2898-2907.'
   link: https://doi.org/10.46814/lajdv3n5-018
+  license: CC BY 4.0
+  irw_version: IRW v414
+enkavi_2019_stroop:
+  reference: Enkavi, A. Z., Eisenberg, I. W., Bissett, P. G., Mazza, G. L., MacKinnon,
+    D. P., Marsch, L. A., & Poldrack, R. A. (2019). Large-scale analysis of test-retest
+    reliabilities of self-regulation measures. Proceedings of the National Academy
+    of Sciences, 116(12), 5472-5477. https://doi.org/10.1073/pnas.1818430116
+  link: https://doi.org/10.1073/pnas.1818430116
   license: CC BY 4.0
   irw_version: IRW v414
 eurpar2_mudfold:
@@ -124,6 +138,13 @@ frac20:
     Statistics), 51(3), 337-350.'
   link: https://doi.org/10.1111/1467-9876.00272
   license: GPL-3.0
+  irw_version: IRW v414
+genpsych_russell_2024_gpt4o:
+  reference: 'Russell-Lasalandra, L. L., Christensen, A. P., & Golino, H. (2024, September
+    12). Generative Psychometrics via AI-GENIE: Automatic Item Generation and Validation
+    via Network-Integrated Evaluation. https://doi.org/10.31234/osf.io/fgbj4'
+  link: https://doi.org/10.31234/osf.io/fgbj4
+  license: CC0 1.0
   irw_version: IRW v414
 gilbert_meta_1:
   reference: 'Gilbert, J. B., Kim, J. S., & Miratrix, L. W. (2023). Modeling item-level
@@ -183,11 +204,26 @@ gilbert_meta_20:
   link: https://doi.org/10.7910/DVN/Z4WMFE
   license: CC0 1.0
   irw_version: IRW v414
+gpt4mcq_young_2025:
+  reference: Young, R., Courtney, E., Kah, A., Wilkerson, M., & Chen, Y.-H. (2025).
+    Content and Item Response Theory Analysis of ChatGPT-4-Generated Multiple-Choice
+    Items. Teaching of Psychology, 0(0). https://doi.org/10.1177/00986283241311220
+  link: https://doi.org/10.1177/00986283241311220
+  license: CC BY 4.0
+  irw_version: IRW v414
 grit:
   reference: 'Duckworth, A. L., Peterson, C., Matthews, M. D., & Kelly, D. R. (2007).
     Grit: perseverance and passion for long-term goals. Journal of personality and
     social psychology, 92(6), 1087.'
   link: https://doi.org/10.1037/0022-3514.92.6.1087
+  license: CC BY 4.0
+  irw_version: IRW v414
+himmelstein-impossible_question-2025:
+  reference: 'Himmelstein, Mark, Sophie Ma Zhu, Nikolay Petrov, Ezra Karger, Jessica
+    Helmer, Sivan Livnat, Amory Bennett, Page Hedley, and Phil Tetlock. “The Forecasting
+    Proficiency Test: A General Use Assessment of Forecasting Ability”. PsyArXiv,
+    November 23, 2025. doi:10.31234/osf.io/a7kdx_v8.'
+  link: https://doi.org/10.31234/osf.io/a7kdx_v8
   license: CC BY 4.0
   irw_version: IRW v414
 himmelstein-number_series-2025:
@@ -225,6 +261,26 @@ manolika_2021_mini_ipip:
   link: https://doi.org/10.7910/DVN/23NDKX
   license: CC0 1.0
   irw_version: IRW v414
+mentalrotation_wolf_2024:
+  reference: Wolf, J. E., & Larsen, M. (2024). A New Procedure and Stimulus Set for
+    Examining Cross-Modality Mental Rotation. Journal of Open Psychology Data, 12(1).
+  link: https://doi.org/10.5334/jopd.99
+  license: CC BY 4.0
+  irw_version: IRW v414
+motion:
+  reference: 'O’Brien, G., & Yeatman, J. D. (2021). Bridging sensory and language
+    theories of dyslexia: Toward a multifactorial model. Developmental Science, 24(3),
+    e13039.'
+  link: https://doi.org/10.1111/desc.13039
+  license: CC BY 4.0
+  irw_version: IRW v414
+mturkddm_lexical:
+  reference: Ratcliff, R., Hendrickson, A.T. Do data from mechanical Turk subjects
+    replicate accuracy, response time, and diffusion modeling results?. Behav Res
+    53, 2302–2325 (2021). https://doi.org/10.3758/s13428-021-01573-x
+  link: https://doi.org/10.3758/s13428-021-01573-x
+  license: CC BY 4.0
+  irw_version: IRW v414
 neurodegenerative_huizinga_2019_dass:
   reference: 'Huizinga, F., Heutink, J., de Haan, G. A., van der Lijn, I., van der
     Feen, F. E., Vrijling, A. C., ... & Koerts, J. (2020). The development of the
@@ -233,11 +289,6 @@ neurodegenerative_huizinga_2019_dass:
     15(4), e0232232.'
   link: https://doi.org/10.1371/journal.pone.0232232
   license: CC0 1.0
-  irw_version: IRW v414
-pisa2018_read:
-  reference: .na.character
-  link: https://doi.org/10.1787/b25efab8-en
-  license: CC BY-NC-SA 3.0
   irw_version: IRW v414
 promis1wave1_pain:
   reference: 'Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S.,
@@ -248,6 +299,22 @@ promis1wave1_pain:
     UNF:6:sXYqKDzGWfX7QuTXNGpjGQ== [fileUNF]'
   link: https://doi.org/10.7910/DVN/0NGAKG
   license: CC0 1.0
+  irw_version: IRW v414
+rapm_poulton_2022_timed:
+  reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
+    G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
+    Raven’s Advanced Progressive Matrices. Journal of Clinical and Experimental Neuropsychology,
+    44(1), 73-84.
+  link: https://doi.org/10.1080/13803395.2022.2080185
+  license: CC BY 4.0
+  irw_version: IRW v414
+rapm_poulton_2022_untimed:
+  reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
+    G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
+    Raven’s Advanced Progressive Matrices. Journal of Clinical and Experimental Neuropsychology,
+    44(1), 73-84.
+  link: https://doi.org/10.1080/13803395.2022.2080185
+  license: CC BY 4.0
   irw_version: IRW v414
 roar_lexical:
   reference: Yeatman, J. D., Tang, K. A., Donnelly, P. M., Yablonski, M., Ramamurthy,
