@@ -361,7 +361,7 @@ Does the model fit? A common first look is the infit and outfit statistics: mean
 
 Most of the worst-fitting items here *overfit* (outfit below 1): they separate strong and weak players more sharply than a common slope allows. Item Y15 is the exception, with an outfit above 2. The empirical plot compares the model's ICC for one item with the observed proportions correct among players grouped by ability. Try other items in your own session.
 
-For contrast, here is a very different dataset: [wirs](https://itemresponsewarehouse.org/tables/wirs/), six items from a survey about workplace industrial relations.
+For contrast, here is a very different dataset: [wirs](https://itemresponsewarehouse.org/tables/wirs/), six items from the Workplace Industrial Relations Survey, analysed by Bartholomew (1998).
 
 ```{r wirs}
 #| echo: true
@@ -391,6 +391,7 @@ ask_claude("rasch", "It covers the Rasch model: item characteristic curves, why 
 - Tutz, G. (2025). *A short guide to item response theory models*. Springer. Chapter 2 derives the Rasch model, including from sufficiency (section 2.4.2).
 - Wright, B. D. (1997). A history of social science measurement. *Educational Measurement: Issues and Practice*, 16(4), 33–45. The case for the Rasch model, made with feeling.
 - van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. The source of the chess data.
+- Bartholomew, D. J. (1998). Scaling unobservable constructs in social science. *Journal of the Royal Statistical Society: Series C*, 47(1), 1–13. The source of the `wirs` data.
 - From the IRW: [simulating item difficulties](https://itemresponsewarehouse.org/vignettes/diffsim.html) shows what real difficulty distributions look like across hundreds of datasets, which is worth knowing before you choose one for a simulation.
 
 ## For instructors

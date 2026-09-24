@@ -8,19 +8,325 @@ source("_course.R")
 lesson_header("ctt-reliability")
 ```
 
+```{ojs}
+//| echo: false
+import {rng, cor, grid} from "./widgets/irt.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Every score contains error. A student who scores 27 on a test today might score 25 or 29 tomorrow for reasons that have nothing to do with what the test is meant to measure: a lucky guess, a misread question, a bad night's sleep. Classical test theory (CTT) is the oldest and still the most widely used framework for thinking about that error. It is a theory of *test scores*, not of item responses—nothing in this lesson refers to the probability of answering any one item correctly—and that turns out to be both its great convenience and its central limitation. The payoff is **reliability**: a single number that says how much of the variation in scores is signal.
+
+Reliability estimates are everywhere. That doesn't mean they are always meaningful, and part of this lesson is about when they are not.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write down the classical model and define reliability in terms of it;
+- explain why the correlation between two parallel forms estimates reliability;
+- compute Cronbach's alpha, and say why it is a lower bound on reliability (and when it is exact);
+- use split halves and the Spearman–Brown formula;
+- run a classical item analysis and use it to spot items that don't belong—including items that need to be reverse-keyed.
+
 ## Core ideas
 
-## Worked example
+### True scores and error
+
+CTT was designed as a way of understanding measurement error, borrowing from the theory of errors that Gauss and others had built around the normal distribution. The foundational idea is that a person's observed score $X$ is the sum of a **true score** $T$ and an error $E$:
+$$X = T + E.$$
+The true score is defined as the average score the person would get over (hypothetical) endless independent replications of the test; the error is whatever is left. From that definition, errors have mean zero and are uncorrelated with true scores, so the variance splits cleanly:
+$$\sigma^2_X = \sigma^2_T + \sigma^2_E.$$
+**Reliability** is the share of observed-score variance that is true-score variance:
+$$\rho_{XX'} = \frac{\sigma^2_T}{\sigma^2_X} = \frac{\sigma^2_T}{\sigma^2_T + \sigma^2_E}.$$
+It is also the squared correlation between observed and true scores. The trouble, of course, is that we never observe $T$, so this definition cannot be computed from data. The rest of CTT is a set of tricks for getting around that.
+
+### The first trick: parallel forms
+
+Suppose we have two forms of a test, $X$ and $X'$, that measure the same true score with the same error variance and independent errors. What can we say about the correlation between them? A little algebra (try it before looking at problem 1 below) shows that
+$$\text{cor}(X, X') = \frac{\sigma^2_T}{\sigma^2_X} = \rho_{XX'}.$$
+Something special has happened: the correlation between two observable things equals a quantity defined in terms of an unobservable one. Here is that fact in action.
+
+#### Try it: parallel forms
+
+```{ojs}
+//| echo: false
+viewof pf_se = Inputs.range([0.1, 2.5], {value: 0.7, step: 0.05, label: "Error SD (true-score SD = 1)"})
+```
+
+```{ojs}
+//| echo: false
+pf = {
+  const r = rng(11), n = 400, T = [], X = [], X2 = [];
+  for (let i = 0; i < n; i++) { const t = r.norm(); T.push(t); X.push(t + pf_se * r.norm()); X2.push(t + pf_se * r.norm()); }
+  return {T, X, X2, pts: X.map((x, i) => ({x, x2: X2[i]}))};
+}
+Plot.plot({
+  width: 460, height: 400, aspectRatio: 1,
+  x: {label: "Score on form X", domain: [-6, 6]}, y: {label: "Score on form X′", domain: [-6, 6]},
+  marks: [Plot.dot(pf.pts, {x: "x", y: "x2", r: 2.5, fill: "#2780e3", fillOpacity: 0.45}), Plot.linearRegressionY(pf.pts, {x: "x", y: "x2", stroke: "#c2410c"})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Reliability from the definition (true-score variance ÷ observed variance): **${(1 / (1 + pf_se ** 2)).toFixed(2)}**.
+Correlation between the two forms in this sample of 400: **${cor(pf.X, pf.X2).toFixed(2)}**.
+Standard error of measurement (the SD of the errors): **${pf_se.toFixed(2)}**, so a person's observed score typically lands within about ±${(2 * pf_se).toFixed(1)} of their true score.`
+```
+
+The **standard error of measurement** in that last line deserves a moment. Reliability is a property of scores in a population; the standard error of measurement, $\sigma_E = \sigma_X\sqrt{1 - \rho_{XX'}}$, is what reliability means for an individual. A reliability of 0.8 sounds high, but it still leaves each person's score with an error SD of nearly half the spread of scores.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two parallel forms of a reading test correlate 0.81 in a large sample. What is the reliability of *one* form?",
+  options: [
+    {text: "0.81", correct: true, why: "For parallel forms, the correlation between them *is* the reliability of each. No square or square root needed."},
+    {text: "0.90, the square root of 0.81", correct: false, why: "0.90 is the correlation between observed and true scores, $\\sqrt{\\rho_{XX'}}$. Reliability itself is the correlation between parallel forms."},
+    {text: "It can't be known without true scores", correct: false, why: "That's the magic of the parallel-forms trick: two observable scores stand in for the unobservable true score."}
+  ]
+})
+```
+
+### Alpha: reliability from one administration
+
+Parallel forms are expensive, and test-retest designs have their own problems (people remember items, and they change between occasions). The beauty of **Cronbach's alpha** is that you can get a reliability estimate from a single administration, by treating the items themselves as a set of little parallel tests. For a test of $k$ items with item variances $\sigma^2_i$ and total-score variance $\sigma^2_X$,
+$$\alpha = \frac{k}{k-1}\left(1 - \frac{\sum_i \sigma^2_i}{\sigma^2_X}\right).$$
+When items are scored 0/1, this is the same thing as the Kuder–Richardson formula 20 (KR-20). The intuition: if items hang together, the total-score variance is much larger than the sum of the item variances, because the covariances between items add in; if they don't, the two are similar and alpha is small.
+
+Alpha rests on an assumption, though, and it is worth seeing exactly which one. Alpha equals reliability when every item measures the true score *equally well* (the items are "tau-equivalent"). When some items are better measures than others—which is to say, nearly always—alpha is *smaller* than reliability.
+
+#### Try it: when does alpha equal reliability?
+
+Six items, each an equally noisy measure of the same true score, but with loadings on it that you can pull apart.
+
+```{ojs}
+//| echo: false
+viewof al_spread = Inputs.range([0, 1.4], {value: 0, step: 0.05, label: "How unequal the items are"})
+viewof al_err = Inputs.range([0.3, 2], {value: 1, step: 0.05, label: "Error SD per item"})
+```
+
+```{ojs}
+//| echo: false
+al_calc = (spread, err) => {
+  const k = 6, lam = Array.from({length: k}, (_, i) => 1 + spread * (i - (k - 1) / 2) / ((k - 1) / 2));
+  const S = lam.reduce((u, v) => u + v, 0), varX = S * S + k * err * err;
+  const sumVar = lam.reduce((u, l) => u + l * l + err * err, 0);
+  return {lam, rel: S * S / varX, alpha: k / (k - 1) * (1 - sumVar / varX)};
+}
+al_now = al_calc(al_spread, al_err)
+al_curve = grid(0, 1.4, 71).flatMap(s => { const c = al_calc(s, al_err); return [{s, v: c.rel, what: "Reliability"}, {s, v: c.alpha, what: "Alpha"}]; })
+Plot.plot({
+  width: 700, height: 300, x: {label: "How unequal the items are"}, y: {label: null, domain: [0, 1]},
+  color: {legend: true, domain: ["Reliability", "Alpha"], range: ["#2780e3", "#c2410c"]},
+  marks: [Plot.line(al_curve, {x: "s", y: "v", stroke: "what", strokeWidth: 2.5}), Plot.ruleX([al_spread], {stroke: "#999", strokeDasharray: "4 3"})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Item loadings: ${al_now.lam.map(l => l.toFixed(2)).join(", ")}. Reliability **${al_now.rel.toFixed(3)}**; alpha **${al_now.alpha.toFixed(3)}**${al_spread === 0 ? " — identical, because the items are equally good measures." : `, which understates reliability by ${(al_now.rel - al_now.alpha).toFixed(3)}.`}`
+```
+
+The gap is fairly small unless the items are very unequal, which is part of why alpha has survived. But it only ever goes one way.
+
+::: {.callout-note collapse="true"}
+## Proof: alpha is a lower bound on reliability
+
+Write the total score as a sum of items, $X = \sum_{i=1}^k X_i$, with $X_i = T_i + E_i$, where the errors are uncorrelated with each other and with every true score. The test's true score is $T = \sum_i T_i$, and its reliability is $\rho = \sigma^2_T / \sigma^2_X$.
+
+**Step 1: rewrite alpha in terms of true scores.** Because errors are uncorrelated with everything else,
+$$\sigma^2_X = \sigma^2_T + \sum_i \sigma^2_{E_i} \qquad\text{and}\qquad \sigma^2_{X_i} = \sigma^2_{T_i} + \sigma^2_{E_i}.$$
+Subtracting, the error variances cancel:
+$$\sigma^2_X - \sum_i \sigma^2_{X_i} = \sigma^2_T - \sum_i \sigma^2_{T_i}.$$
+So
+$$\alpha = \frac{k}{k-1}\cdot\frac{\sigma^2_X - \sum_i\sigma^2_{X_i}}{\sigma^2_X} = \frac{k}{k-1}\cdot\frac{\sigma^2_T - \sum_i\sigma^2_{T_i}}{\sigma^2_X}.$$
+
+**Step 2: compare with reliability.** Both $\alpha$ and $\rho$ have $\sigma^2_X$ in the denominator, so $\alpha \le \rho$ exactly when
+$$\frac{k}{k-1}\left(\sigma^2_T - \sum_i\sigma^2_{T_i}\right) \le \sigma^2_T \quad\Longleftrightarrow\quad \sigma^2_T \le k\sum_i \sigma^2_{T_i}.$$
+
+**Step 3: that inequality always holds.** Writing $\sigma_i$ for the standard deviation of $T_i$,
+$$\sigma^2_T = \sum_i\sum_j \text{Cov}(T_i, T_j) \le \sum_i\sum_j \sigma_i\sigma_j = \Big(\sum_i \sigma_i\Big)^2 \le k\sum_i\sigma_i^2,$$
+where the first inequality uses $|\text{Cov}(T_i,T_j)| \le \sigma_i\sigma_j$ and the second is the Cauchy–Schwarz inequality. Hence $\alpha \le \rho$. $\blacksquare$
+
+**When is it exact?** Both inequalities in step 3 are equalities only when every pair of item true scores is perfectly correlated *and* every $\sigma_i$ is the same—that is, when the items' true scores differ by at most a constant ($T_i = T_j + c_{ij}$). This is **essential tau-equivalence**, the case the widget shows at "How unequal = 0". Note that the proof leans on the errors being uncorrelated; if they are correlated (items that share a passage, say), alpha can *overstate* reliability, and the lower-bound guarantee is gone.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A colleague reports alpha = 0.72 for a 12-item scale and concludes that 'at least 72% of the score variance is true-score variance.' When is that conclusion safe?",
+  options: [
+    {text: "Always: alpha is a lower bound", correct: false, why: "Only under the classical assumptions—in particular, uncorrelated errors. Correlated errors (items sharing a stem, a passage, a method) can push alpha *above* reliability."},
+    {text: "When the item errors are uncorrelated", correct: true, why: "That's the assumption the proof needs. Given it, alpha ≤ reliability, with equality only for (essentially) tau-equivalent items."},
+    {text: "Only when the scale is unidimensional", correct: false, why: "Unidimensionality isn't what the proof uses. Alpha can be high for a multidimensional scale and is not a test of unidimensionality—a common misreading."}
+  ]
+})
+```
+
+### Split halves and the Spearman–Brown formula
+
+An older route to a single-administration estimate is to split the test into two halves, score each, and correlate them. The halves are only half as long as the test, though, and shorter tests are less reliable. The **Spearman–Brown** formula says how reliability changes when a test is lengthened (or shortened) by a factor $m$ with comparable items:
+$$\rho_{m} = \frac{m\,\rho}{1 + (m-1)\rho}.$$
+Setting $m = 2$ steps a half-test correlation up to full-test reliability. The same formula answers design questions: how long does a test need to be?
+
+#### Try it: lengthening a test
+
+```{ojs}
+//| echo: false
+viewof sb_rho = Inputs.range([0.1, 0.95], {value: 0.6, step: 0.01, label: "Reliability of the current test"})
+viewof sb_m = Inputs.range([0.25, 5], {value: 2, step: 0.25, label: "Length multiplier m"})
+```
+
+```{ojs}
+//| echo: false
+sb = (rho, m) => m * rho / (1 + (m - 1) * rho)
+Plot.plot({
+  width: 700, height: 280, x: {label: "Length multiplier m", domain: [0.25, 5]}, y: {label: "Reliability", domain: [0, 1]},
+  marks: [Plot.line(grid(0.25, 5, 96).map(m => ({m, r: sb(sb_rho, m)})), {x: "m", y: "r", stroke: "#2780e3", strokeWidth: 2.5}),
+          Plot.dot([{m: sb_m, r: sb(sb_rho, sb_m)}], {x: "m", y: "r", r: 6, fill: "#c2410c"}), Plot.ruleY([sb_rho], {stroke: "#ccc"})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`A test with reliability ${sb_rho.toFixed(2)}, made ${sb_m}× as long, would have reliability **${sb(sb_rho, sb_m).toFixed(2)}**. Notice the diminishing returns: each extra item buys less than the one before.`
+```
+
+Which split should you use? There are a great many ways to split a test in half, and they give different answers. One of the nicer facts about alpha is that it equals the *average* Spearman–Brown-adjusted split-half reliability over all possible splits (strictly, when the halves have equal variances). We check this with real data below.
+
+### Item analysis, and reading your items
+
+CTT also offers the simplest tools for looking at individual items. For each item we compute:
+
+- its **mean** (for 0/1 items, the proportion correct, often called the item's *p*-value)—a first indication of difficulty, where larger values mean easier items;
+- its **item-rest correlation**: the correlation between the item and the sum of the *other* items. This tells us whether the item is hanging together with the rest. An item with a correlation near zero, or negative, is either measuring something else or is keyed backwards.
+
+That last point is subtler than it sounds. CTT assumes every item is coded so that a higher response means more of the construct. Many scales deliberately include items worded in the opposite direction, and those have to be **reverse-keyed** before any of this makes sense. How do we know which ones? We will see below that the data can't always tell us, and that the only reliable answer is to read the items.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The Mach IV measures Machiavellianism on a 0–5 agreement scale. Half its items are worded so that agreeing is the *less* Machiavellian answer (e.g., 'Most people are basically good and kind'). If we compute alpha *without* reverse-keying them, roughly what do we get? (Keyed properly, alpha is 0.70.)",
+  choices: ["About 0.70", "About 0.55", "About 0.35", "Below 0"],
+  answer: "About 0.35",
+  reveal: "Alpha is 0.37 unkeyed. Items pulling in opposite directions cancel each other in the total, so the covariances that alpha relies on shrink. It is not negative because the two halves of the scale are each internally consistent."
+})
+```
+
+## Simulate
+
+Here is the lower-bound result from the proof above, on simulated data where we know the true scores. The code generates a six-item test from the classical model, then compares the true reliability, $\text{cor}(X, T)^2$, with alpha. It is base R only, so it starts quickly.
+
+Run it as is (equal loadings), then swap in the line of unequal loadings and run it again. Which number moves?
+
+```{webr}
+{{< include code/ctt-reliability-sim.R >}}
+```
+
+[Download this code](code/ctt-reliability-sim.R).
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/ctt-reliability-irw.R")
+```
+
+We use two tables. [gilbert_meta_1](https://itemresponsewarehouse.org/tables/gilbert_meta_1/) is the outcome measure from a cluster-randomized trial of the MORE reading intervention: 30 reading-comprehension items answered by third graders in 110 schools, deposited by Gilbert (2023). The [Mach IV](https://itemresponsewarehouse.org/tables/lessr_mach4/) is a 20-item attitude scale measuring Machiavellianism (Christie & Geis, 1970); these responses come from Hunter, Gerbing and Boster (1982). All code is base R; [download it](code/ctt-reliability-irw.R).
+
+```{r helpers}
+#| echo: true
+#| code-fold: show
+```
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+We keep the 7,322 students who answered every item (the rest have at least one missing response).
+
+### Item analysis
+
+```{r itemanalysis}
+#| echo: true
+#| code-fold: show
+#| fig-width: 7
+#| fig-height: 5
+```
+
+Most items correlate 0.4 to 0.6 with the rest of the test, as a healthy reading test should. One does not: `s_read_7_4` has an item-rest correlation of essentially zero. Whatever that item measures, it isn't what the other 29 are measuring. Given that this test is the outcome in a randomized trial, it merits comment—an item like this adds noise to the treatment-effect estimate and nothing else.
+
+### Alpha, and all the split halves
+
+```{r alpha}
+#| echo: true
+#| code-fold: show
+```
+
+```{r splithalf}
+#| echo: true
+#| code-fold: show
+#| fig-width: 7
+#| fig-height: 4.5
+```
+
+The red curve is the raw correlation between halves; the black curve steps each one up with Spearman–Brown. Any single split could give you something noticeably above or below alpha, but they average out to alpha (the dashed line), just as the theory says.
+
+### Reverse keying: the Mach IV
+
+```{r mach-raw}
+#| echo: true
+#| code-fold: show
+```
+
+An alpha of 0.37 would sink most scales. But look at the item-rest correlations: they are small and nearly all *positive*, including for items like m04 ("Most people are basically good and kind") that plainly point the opposite way from m01 ("Never tell anyone the real reason you did something unless it is useful to do so"). The data cannot tell us which items are reversed, because the total we correlate against is itself a mix of the two directions. We have to read the items. The published key reverses ten of them:
+
+```{r mach-keyed}
+#| echo: true
+#| code-fold: show
+```
+
+Alpha nearly doubles, to 0.70, and the item-rest correlations now look like a scale. One item still does not fit: m19, about whether people with incurable diseases should be able to choose a painless death. It is a fine question, but it is about something else.
+
+(Automated reverse-keying exists—`psych::alpha(check.keys = TRUE)` flips items that correlate negatively with the first principal component—but as the Mach IV suggests, it offers no guarantees. Use it as a prompt to read the items, not as a substitute.)
+
+### Limitations worth remembering
+
+Many of these were known to Cronbach himself. Alpha is a lower bound only under uncorrelated errors, and there are better lower bounds (the greatest lower bound, "glb") and model-based alternatives such as **omega**, which we meet in [Factor analysis II](fa-confirmatory.qmd). Alpha is not a measure of unidimensionality. And reliability is a property of scores *in a population*: estimate it in a sample that is a poor proxy for the people you care about and the number may not mean much. For a vivid example of that last point, see the IRW vignette on [the reliability paradox in cognitive-control tasks](https://itemresponsewarehouse.org/vignettes/hf_reliability_paradox.html), where tasks that produce robust experimental effects yield unreliable individual differences.
+
+Finally, the limitation that motivates the rest of the course: CTT says nothing about individual item responses. It treats a test as a single score with a single error variance, the same for everyone. We will see in [Where CTT breaks](ctt-limits.qmd) why that is incomplete.
 
 ## Problems
 
+1. **Parallel forms.** Suppose $X = T + E$ and $X' = T + E'$, where $E$ and $E'$ are uncorrelated with each other and with $T$, and have equal variances. Show that $\text{cor}(X, X') = \sigma^2_T/\sigma^2_X$. Where exactly did you use each assumption?
+2. **Attenuation.** Let $Y$ be a criterion (a gold-standard measure, say) with its own reliability $\rho_{YY'}$. Show that $\text{cor}(X, Y) = \text{cor}(T_X, T_Y)\sqrt{\rho_{XX'}\,\rho_{YY'}}$, and hence that a test's correlation with anything is bounded by $\sqrt{\rho_{XX'}}$. What does this imply for a new test whose validity is judged by its correlation with an established one? (Chapter 1 of Lord & Novick, 1968, develops this and the "paradox" it creates for test construction.)
+3. **The weak item.** In `gilbert_meta_1`, drop `s_read_7_4` and recompute alpha. By how much does it change? Now use Spearman–Brown to predict the reliability of a 29-item test from the 30-item alpha. Why do the two answers differ, and in which direction?
+4. **Split halves.** In the split-half figure, why is alpha not below *all* of the adjusted split-half estimates, given that alpha is a lower bound on reliability? (Hint: what is each split-half estimate a bound on, and what does it assume?) *Challenge:* is there anything about the splits that fall below alpha that suggests they are "bad" splits—halves that are not parallel?
+5. **Reading items.** Look at the item-rest correlations for the keyed Mach IV. Choose the two weakest items and, from their wording and the construct, argue whether each should be dropped, rewritten, or kept. Would your decision change if the scale were used to screen job applicants rather than in research?
+6. **Alpha at scale.** Using the `alpha()` function from this lesson, compute alpha for five IRW tables of your choosing with 0/1 responses. Before you do, predict which will be highest. What features of a table (number of items, type of construct, sample) seem to go with high alpha? What would make you distrust a high value?
+
+```{r}
+#| output: asis
+ask_claude("ctt-reliability", "It covers classical test theory: true scores and error, reliability, parallel forms, Cronbach's alpha and why it is a lower bound on reliability, split halves and the Spearman-Brown formula, and classical item analysis including reverse keying, with examples in base R.")
+```
+
 ## Going further
+
+- Lord, F. M., & Novick, M. R. (1968). *Statistical theories of mental test scores*. Addison-Wesley. The canonical treatment; chapter 1 is where the attenuation paradox lives.
+- Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *Psychometrika*, 16(3), 297–334.
+- Sijtsma, K. (2009). On the use, the misuse, and the very limited usefulness of Cronbach's alpha. *Psychometrika*, 74(1), 107–120. A sharp critique, with the glb as an alternative.
+- Gilbert, J. (2023). Replication data for: Modeling item-level heterogeneous treatment effects with the explanatory item response model. Harvard Dataverse. <https://doi.org/10.7910/DVN/QARRYT>. The source of `gilbert_meta_1`.
+- Christie, R., & Geis, F. L. (1970). *Studies in Machiavellianism*. Academic Press. The source of the Mach IV.
+- Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. *Journal of Personality and Social Psychology*, 43(6), 1293–1305. The source of the `lessR_Mach4` responses—and, as the title suggests, a paper worth reading alongside problem 5.
 
 ## For instructors
 
+- **Source:** EDUC 252 class 2 (slides c2, "Classical Test Theory" through "Limitations of alpha") and problem set 2 (#1–3); code in `ben-domingue/252`: `c2/alpha.R`, `ps2/itemanalysis.R`, `ps2/parallel_tests.R`.
+- **Held back:** constructs and construct maps (the first half of c2) are their own lesson; the "CTT failures" demonstration (PS2#4) and "towards IRT" (PS2#5) are in [Where CTT breaks](ctt-limits.qmd).
+- **Changed from 252:** PS2#1 contrasted `gilbert_meta_1` with `gilbert_meta_9`; this lesson uses the Mach IV instead, because `gilbert_meta_9` has repeated waves that complicate a first item analysis, and because the Mach IV carries the reverse-keying lesson.
+- **Item text:** the two Mach IV items quoted above are for discussion. Item text in the IRW carries no licence to reproduce an instrument.
+- **Solutions:** not yet written. Problem 4's challenge is open (in 252 it was posed as a genuine question).

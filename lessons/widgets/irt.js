@@ -84,3 +84,28 @@ export function normalQuantiles(n, mu = 0, sd = 1) {
   };
   return Array.from({ length: n }, (_, i) => mu + sd * qnorm((i + 0.5) / n));
 }
+
+// Seeded random numbers, so a widget's simulated sample is the same every time
+// the page loads and only changes when a slider does.
+export function rng(seed = 1) {
+  let a = seed >>> 0;
+  const unif = () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const norm = () => { // Box-Muller
+    let u = 0; while (u === 0) u = unif();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * unif());
+  };
+  return { unif, norm };
+}
+
+export const cor = (x, y) => {
+  const n = x.length, mx = x.reduce((u, v) => u + v, 0) / n, my = y.reduce((u, v) => u + v, 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) { sxy += (x[i] - mx) * (y[i] - my); sxx += (x[i] - mx) ** 2; syy += (y[i] - my) ** 2; }
+  return sxy / Math.sqrt(sxx * syy);
+};

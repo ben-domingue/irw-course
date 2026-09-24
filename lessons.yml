@@ -77,8 +77,8 @@ lessons:
     module: ctt
     prereqs: [constructs, irw-data]
     origin: {slides: [c2], ps: ["PS2#1", "PS2#2", "PS2#3"], code: [c2/alpha.R, ps2/itemanalysis.R, ps2/parallel_tests.R]}
-    tables: [gilbert_meta_1, gilbert_meta_9, chess_lnirt]
-    status: stub
+    tables: [gilbert_meta_1, lessR_Mach4]
+    status: draft
 
   - id: ctt-limits
     title: "Where CTT breaks: toward item response models"
