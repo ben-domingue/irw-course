@@ -9,5 +9,8 @@ resources:
 # Empirical sections fetch IRW data and fit models at render time; freeze keeps
 # those results until the lesson's source changes.
 freeze: auto
+format:
+  html:
+    include-after-body: widgets/webr-run-guard.html
 execute:
   echo: false

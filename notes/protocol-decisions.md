@@ -23,7 +23,9 @@ Lessons must be in conversation. Rather than pre-specifying threads, **outline e
 lesson** (all 35, optional included; the pilots are outlined backwards from their
 pages) in `outlines/<id>.md` with fixed headings: Core ideas · Picks up · Promises /
 leaves open (hooks) · Tables (≤3, with jobs) · Widget / simulation / problem ideas.
-(plus **Go deeper**, below). Then run **iterative cross-check passes**: every hook paid off or flagged unpaid;
+(plus **Go deeper**, below). Template: `outlines/_template.md` (#7), which adds an
+**Open questions** heading for anything that needs Ben; worked example
+`outlines/rasch.md`. Then run **iterative cross-check passes**: every hook paid off or flagged unpaid;
 every pick-up introduced earlier; duplication and gaps. One report per pass; Ben
 reviews module by module; repeat until clean. The agreed result is then recorded as
 threads (below), which the build checks.
