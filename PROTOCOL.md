@@ -264,6 +264,9 @@ Write as Ben (see the `domingue-voice` skill). The six rules below come from
 - **F. No softeners.** No *honest(ly), genuinely, truly*. At most one "worth
   [verb]ing" per lesson.
 
+**Prose rules.** What the prose may quote, borrow and say about techniques is in
+`PROSE.md` (Ben, 09-24).
+
 Already in voice, keep: verdict-first openings; the fair setup followed by a blunt
 landing; "merits comment"; at most one wry aside per lesson; one concrete anchor per
 lesson (chess, the Mach IV, a reading RCT, the BFI-2).
@@ -398,6 +401,17 @@ A lesson moves to `status: done` only when every box is ticked.
 **Voice**
 - [ ] At least one first-person verdict; none of the banned words; every size word
       has its baseline.
+
+**Prose** (`PROSE.md`)
+- [ ] At most one quotation (items under analysis, titles and invented speech
+      excepted), 25 words or fewer, and only where the wording is the point.
+- [ ] Every quotation and every piece of quoted item wording is cited inline,
+      and checked word for word against its source.
+- [ ] No evaluative judgement of a technique; each technique discussed gets a sentence
+      on when it is a reasonable choice; limitations are shown, not asserted.
+- [ ] No run of about eight or more words shared with a source.
+- [ ] No unsourced claims about what people commonly think or do.
+- [ ] Disagreements set out as assumptions before any verdict.
 
 **Data**
 - [ ] Processing notes read for every table; keying and waves checked.
