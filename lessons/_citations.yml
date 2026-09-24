@@ -308,6 +308,14 @@ rapm_poulton_2022_timed:
   link: https://doi.org/10.1080/13803395.2022.2080185
   license: CC BY 4.0
   irw_version: IRW v414
+rapm_poulton_2022_untimed:
+  reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
+    G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
+    Raven’s Advanced Progressive Matrices. Journal of Clinical and Experimental Neuropsychology,
+    44(1), 73-84.
+  link: https://doi.org/10.1080/13803395.2022.2080185
+  license: CC BY 4.0
+  irw_version: IRW v414
 roar_lexical:
   reference: Yeatman, J. D., Tang, K. A., Donnelly, P. M., Yablonski, M., Ramamurthy,
     M., Karipidis, I. I., ... & Domingue, B. W. (2021). Rapid online assessment of

@@ -74,7 +74,7 @@ Passed over: `genpsych_russell_2024_gpt3_5` and the other AI-GENIE tables (same 
 
 ## Open questions
 
-- Deep dive #25: add a language-model feature (an embedding, or a model's direct difficulty rating) to `compute.R`? That needs an API key and a fixed model version, and the outputs would be committed with the results. Which model, and is the cost acceptable?
+- Deep dive #25: a language-model feature in `compute.R` (an embedding, or a model's difficulty rating) is deferred (Ben, 09-24: punt). The corpus run uses word count and mean word length only, as the vignette does.
 - The slide-7 meta-analysis (IEEE 11062635) and Stenner et al. (2006) aren't on Crossref; can Ben confirm the references, or should the lesson cite other sources?
 - No IRW table holds language-model responses to benchmark questions, so idea 1's second half has no data. Add one (e.g. a public leaderboard's per-question results) to the IRW?
 - The automated-scoring section has no table: no IRW table pairs human and machine scores. Keep it widget-only, or look for one (ASAP-style data)?

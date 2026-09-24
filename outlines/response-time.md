@@ -37,6 +37,7 @@ Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Cros
 | `credentialform_lnirt` | main example | A licensure exam distributed with the `LNIRT` package (Cizek & Wollack, 2016, from IRW biblio): 1,636 respondents, 170 common items plus one of three 10-item pretest blocks (so 20 responses per person are missing by design). Median time 54 s per item. Separate calibration of the two halves of the hierarchical model: more able respondents are faster (θ–speed r = 0.30); harder items take longer (b–β r = 0.51); log-time variance is mostly within person (residual 0.25 vs. person 0.03, item 0.11). Within person, taking longer than expected goes with *lower* accuracy: 0.83 in the fastest residual decile, 0.56 in the slowest. | — |
 | `roar_lexical` | contrast (deliberate thread from `guessing-priors`) | Lexical decision, median 0.85 s. Speed and ability are nearly unrelated (r = −0.09), and the within-person curve is an inverted U: 0.63 accuracy in the fastest residual decile, 0.86 in the middle, 0.70 in the slowest. The fast end is the rapid guessing found in `guessing-priors`. | `guessing-priors` (record under `reuses:`) |
 | `rapm_poulton_2022_timed` | contrast (forced speed) | Raven's APM, 12 items, 60-s limit per item (Poulton et al., 2022; first wave, 479 people). The limit is the SAT by design: 11% of responses hit it, at accuracy 0.29 vs. 0.58 otherwise. Here able people are *slower* (θ–speed r = −0.36): on hard reasoning items, persistence pays. | — |
+| `rapm_poulton_2022_untimed` | contrast (paired with the timed table) | The same 12 items with no limit (567 people, first wave): accuracy 0.65 vs. 0.55 timed. The hard items lose most under the limit (item 10: 0.45 untimed → 0.25 timed; untimed median time 82 s), the easy ones least (item 6: 0.69 → 0.65). Ben (09-24) agreed to the pair as a fourth table. | — |
 | `rr98_accuracy` | sanity (not in the lesson) | Ratcliff & Rouder (1998): errors slower than correct responses (median 0.65 vs. 0.56 s), and harder conditions slower, as published. Checks the RT handling before trusting the fits above. | `irw-data`, `trials` |
 
 **The finding the section is built around:** the speed–ability correlation has no fixed sign (+0.30 on the licensure exam, −0.09 in lexical decision, −0.36 on Raven's), and the within-person curve has no fixed shape. The SAT is one possible story, not the default.
@@ -45,7 +46,7 @@ Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Cros
 
 **Why not PISA.** 252's PS9#1 used `pisa2018_read` (Spain). It has no tokenless CSV (17.6 million responses) and no IRW biblio reference, and Ben (09-24) doesn't expect the #15 subsample soon. `credentialform_lnirt` does the same job (a high-stakes test with minute-scale items). PISA would still be the preferred example if #15 lands, since it is the test readers know.
 
-Other tables checked and passed over: `chess_lnirt` (the corpus pilot instead; it is already in three lessons), `much_tte_2025_matrixreasoning` (a two-group design that needs the paper to interpret), `rapm_poulton_2022_untimed` (a fourth table; see Open questions).
+Other tables checked and passed over: `chess_lnirt` (the corpus pilot instead; it is already in three lessons) and `much_tte_2025_matrixreasoning` (a two-group design that needs the paper to interpret).
 
 ## Widget / simulation / problem ideas
 
@@ -74,6 +75,5 @@ Other tables checked and passed over: `chess_lnirt` (the corpus pilot instead; i
 ## Open questions
 
 - `roar_lexical` is reused from `guessing-priors` (recorded under `reuses:`). `guessing-priors` isn't an ancestor of this lesson. Restate the rapid-guessing finding (my plan), or add `guessing-priors` as a prerequisite?
-- The timed/untimed comparison is the cleanest forced-speed evidence: on the same 12 Raven's items, the hard ones lose most under the 60-s limit (item 10: 0.45 untimed → 0.25 timed; untimed median time 82 s), the easy ones least (item 6: 0.69 → 0.65). It needs `rapm_poulton_2022_untimed` as a fourth table. Allow the pair as one job, or keep it to a Problem with the untimed table named but not analysed?
 - 252 used PISA 2018 reading from Spain; Ben (09-24) doesn't expect the #15 subsample soon, so this outline plans on `credentialform_lnirt`. Revisit if #15 lands?
 - Slide 29: "I don't much like this model." Keep the first-person objection (constant speed within person) as the lesson's verdict?

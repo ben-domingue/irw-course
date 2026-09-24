@@ -289,7 +289,7 @@ lessons:
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
-    tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed]
+    tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed, rapm_poulton_2022_untimed]
     reuses: [roar_lexical]
     status: stub
     optional: true
