@@ -8,19 +8,461 @@ source("_course.R")
 lesson_header("irw-data")
 ```
 
+```{ojs}
+//| echo: false
+import {rng, palette} from "./widgets/irt.js"
+import {median, itemRest} from "./widgets/irw-data.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Every analysis in this course starts from the same object: a record of which respondent gave which response to which item. Before fitting a model to it, we should know how it is stored, what is missing, what else rides along, and what a few simple numbers say. Item response data have their surprises (an item scored the opposite way from its neighbours, a respondent who appears hundreds of times, a missing response that was never asked for), and they are far cheaper to find now than after a model has been fit. This lesson introduces the data, the Item Response Warehouse (IRW) that supplies them, and a first look at three IRW tables: yes/no answers on verbal aggression, a five-point Big Five inventory, and thousands of timed perceptual judgements.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what item response data are, and what the IRW holds;
+- read an IRW table: what one row is, and what `id`, `item`, `resp` and the optional columns hold;
+- move between long and wide formats, and say what needs a decision along the way;
+- compute and interpret four first descriptives for 0/1 and Likert items;
+- check which way each item runs before adding items up;
+- recognise when a table records more than responses: response times, repeated trials, design columns and covariates.
+
 ## Core ideas
 
-## Worked example
+### Item response data, and the IRW
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [What is measurement?](measurement.qmd): psychological measurement works through standardized *probes* (items, stimuli, tasks) that draw out responses. From here on every probe is an **item**, whatever its form, and we take the items as given.
+:::
+
+Respondents (usually people) meet items, and each meeting produces a response: a right or wrong answer, a rating from 1 to 5, a key pressed on seeing a patch of pixels. Analysing responses is a different job from judging whether the items were well written or the construct well defined, but a measure's quality rests on those too; [Constructs and construct maps](constructs.qmd) and the Validity module take them up.
+
+The **Item Response Warehouse** ([Domingue et al., 2025](https://doi.org/10.3758/s13428-025-02796-y)) collects such data. (I lead the team that builds it.) The data are open: each table's licence permits reuse, and the code that converted the original files is public ([ben-domingue/irw](https://github.com/ben-domingue/irw)). They are harmonized: every table follows one standard, so code written for one runs on the others. The warehouse holds more than 4,000 tables ([its index](https://itemresponsewarehouse.org/tables/)), from tests, personality and clinical scales, randomized trials and experiments, most with metadata and many with item text; [Nadela et al. (2026)](https://doi.org/10.59863/CIJG4549) describe how to use it. Every table cites the study that produced it, and so does this course, in the text and in the Data sources block that closes each lesson.
+
+### The data standard
+
+What does an IRW table look like? It has three essential columns ([the IRW data standard](https://itemresponsewarehouse.org/standard.html)): `id`, the thing being measured (usually a respondent, sometimes, say, a word); `item`; and `resp`, the response, always a number.
+
+Within an item, responses are ordinal: higher means more of something (more correct, more agreement). **Dichotomous** responses are 0 or 1; **polytomous** ones have more categories, such as a 1–5 Likert scale. The standard does *not* promise that higher means the same thing on every item: a reverse-worded item, where agreeing means *less* of the trait, may be stored as answered (see *A first look*).
+
+Tables are stored **long**: one row per respondent–item response, so 24 answers occupy 24 rows. Why not the familiar spreadsheet, one row per respondent (**wide**)? Because a response can carry information of its own (how long it took, when, which attempt), and in long format each is one more column beside `resp`, while in wide format each would need a second grid. This is what [Wickham (2014)](https://doi.org/10.18637/jss.v059.i10) calls *tidy* data, each observation a row; here the observation is the response.
+
+::: {.callout-note collapse="true"}
+## The optional columns
+When a table has them, other columns use fixed names ([the IRW data standard](https://itemresponsewarehouse.org/standard.html)): `rt` (response time, in seconds); `date`; `wave` (the occasion in a longitudinal study, also used for before and after an intervention); `treat` (1 for the treatment group in an experiment); `rater`; `cov_` for respondent covariates, constant within `id` (such as `cov_age`); `itemcov_` for item covariates; and occasion columns such as `block`, `trialnum` or `trial_number`, which tell apart repeated responses by one respondent to one item.
+:::
+
+#### Try it: long and wide
+
+Three respondents, three items, each response timed. Pick a row of the long table, find its cell in the wide one, then delete it.
+
+```{ojs}
+//| echo: false
+lw_long = [
+  {id: 1, item: "A", resp: 1, rt: 4.2}, {id: 1, item: "B", resp: 0, rt: 9.1}, {id: 1, item: "C", resp: 1, rt: "5.0"},
+  {id: 2, item: "A", resp: 0, rt: 7.7}, {id: 2, item: "B", resp: 0, rt: 12.3}, {id: 2, item: "C", resp: 1, rt: 6.1},
+  {id: 3, item: "A", resp: 1, rt: 3.8}, {id: 3, item: "B", resp: 1, rt: 8.4}, {id: 3, item: "C", resp: 1, rt: 4.9}
+]
+viewof lw_pick = Inputs.range([1, 9], {value: 5, step: 1, label: "Row of the long table"})
+viewof lw_drop = Inputs.toggle({label: "Delete that row (a missing response)", value: false})
+```
+
+```{ojs}
+//| echo: false
+{
+  const sel = lw_long[lw_pick - 1];
+  const kept = lw_long.filter((d, i) => !(lw_drop && i === lw_pick - 1));
+  const td = (x, on) => `<td style="padding:2px 12px;text-align:center;${on ? `background:${palette.light};font-weight:600` : ""}">${x}</td>`;
+  const th = cols => `<tr>${cols.map(c => `<th style="padding:2px 12px;text-align:center">${c}</th>`).join("")}</tr>`;
+  const longRows = lw_long.map((d, i) => {
+    const on = i === lw_pick - 1;
+    if (on && lw_drop) return `<tr><td colspan="5" style="padding:2px 12px;text-align:center;color:${palette.guide}">(row ${i + 1} deleted)</td></tr>`;
+    return `<tr>${td(i + 1, on)}${td(d.id, on)}${td(d.item, on)}${td(d.resp, on)}${td(d.rt, on)}</tr>`;
+  }).join("");
+  const wideRows = [1, 2, 3].map(id => `<tr>${td(id, false)}${["A", "B", "C"].map(it => {
+    const r = kept.find(d => d.id === id && d.item === it);
+    return td(r ? r.resp : "NA", id === sel.id && it === sel.item);
+  }).join("")}</tr>`).join("");
+  const div = document.createElement("div");
+  div.innerHTML = `<div style="display:flex;gap:3rem;flex-wrap:wrap;align-items:flex-start">
+    <div><strong>Long</strong>: ${kept.length} rows<table>${th(["row", "id", "item", "resp", "rt"])}${longRows}</table></div>
+    <div><strong>Wide</strong>: 3 rows, one per respondent<table>${th(["id", "A", "B", "C"])}${wideRows}</table>
+    <p style="max-width:22rem;font-size:0.9em">The response times have no place in this grid; keeping them would take a second 3 × 3 table.</p></div></div>`;
+  return div;
+}
+```
+
+Each row of the long table is one cell of the wide one. Delete a row and the long table gets shorter, while the wide table keeps its shape and shows an empty (NA) cell. And `rt` has nowhere to go in the wide table.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An IRW table has 12,205 rows, 30 distinct values of `id` and 33 of `item`. What must be true?",
+  options: [
+    {text: "Some respondents answered some items more than once", correct: true, why: "There are only $30 \\times 33 = 990$ respondent–item pairs, so some pairs have many rows. That is a design with repeated trials, and a column such as `block` or `trialnum` should say which attempt each row is."},
+    {text: "Many responses are missing", correct: false, why: "Missing responses make a long table *shorter* than the number of pairs, not longer."},
+    {text: "The table is stored wide", correct: false, why: "A wide table with 30 respondents would have 30 rows. IRW tables are always long."}
+  ]
+})
+```
+
+### Long to wide, and how lessons read data
+
+Many tools want the wide layout. The reshape is mechanical (base R's `tapply()` or `reshape()`, or `irw_long2resp()` in the irw package), but three things happen along the way.
+
+1. **Missing rows become empty cells**, which need a decision: leave out, score as wrong, or model. Skipping an item differs from never being shown it; when the design decides what is missing, the gaps can often be set aside ([Rubin, 1976](https://doi.org/10.1093/biomet/63.3.581), gives the conditions), as [Linking and equating](equating.qmd) and [Item banks and adaptive testing](item-banks-cat.qmd) do.
+2. **Respondents with no responses carry no information.** A respondent whose every `resp` is empty becomes a row of NAs; every lesson drops them.
+3. **Repeated responses need a rule.** If a respondent met an item a dozen times, the reshape must keep one attempt, average them, or redefine the respondent or item. None is neutral; [Trials as items](trials.qmd) takes this up.
+
+#### Try it: patterns of missingness
+
+Thirty respondents and twelve items; dark cells are responses, pale cells missing ones.
+
+```{ojs}
+//| echo: false
+viewof ms_kind = Inputs.radio(["None", "Skipped at random", "Two booklets (by design)", "Stopped early"], {value: "Skipped at random", label: "How responses go missing"})
+viewof ms_share = Inputs.range([0, 0.5], {value: 0.2, step: 0.05, label: "Share missing (random or stopping)"})
+```
+
+```{ojs}
+//| echo: false
+ms_cells = {
+  const r = rng(28), out = [];
+  const stop = Array.from({length: 30}, () => r.unif());   // each respondent's stopping propensity
+  for (let j = 1; j <= 30; j++) for (let i = 1; i <= 12; i++) {
+    let seen = true;
+    if (ms_kind === "Skipped at random") seen = r.unif() >= ms_share;
+    if (ms_kind === "Two booklets (by design)") seen = i <= 4 || (j <= 15 ? i <= 8 : i > 8);
+    if (ms_kind === "Stopped early") seen = i <= 12 - Math.floor(stop[j - 1] * ms_share * 2 * 12);
+    out.push({respondent: j, item: i, seen});
+  }
+  return out;
+}
+ms_neverTogether = {
+  const seen = (j, i) => ms_cells[(j - 1) * 12 + (i - 1)].seen;
+  let n = 0;
+  for (let a = 1; a <= 12; a++) for (let b = a + 1; b <= 12; b++) {
+    let both = false;
+    for (let j = 1; j <= 30; j++) if (seen(j, a) && seen(j, b)) both = true;
+    if (!both) n++;
+  }
+  return n;
+}
+Plot.plot({
+  width: 700, height: 260, padding: 0.05,
+  x: {label: "Respondent", tickFormat: d => (d % 5 === 0 ? d : "")}, y: {label: "Item"},
+  marks: [Plot.cell(ms_cells, {x: "respondent", y: "item", fill: d => (d.seen ? palette.main : palette.light), inset: 0.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Missing: **${(100 * ms_cells.filter(d => !d.seen).length / ms_cells.length).toFixed(0)}%** of cells. The long table would have **${ms_cells.filter(d => d.seen).length}** rows instead of 360. Pairs of items that no respondent answered together: **${ms_neverTogether}** of 66.`
+```
+
+Random skips scatter the gaps, and every pair of items is still answered together by someone. Two booklets leave a third of the cells empty, and 16 pairs of items are never seen together, so the data say nothing directly about how they relate; linking designs are built this way. Stopping early piles the gaps at the end, for a reason that has to do with the respondent.
+
+**How lessons read data.** Each IRW table's landing page ([`verbagg`'s](https://itemresponsewarehouse.org/tables/verbagg/), for example) has a *Download CSV* link that needs no account; the lessons read it with `read.csv()`. The link names the data version (`v59_0`), so an analysis can be pinned to a release. The helper `irw_csv()`, defined in the real-data code below, finds the link. The [irw R package](https://itemresponsewarehouse.github.io/Rpkg/) does more but needs a free Redivis account (see *Going further*).
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In a long table, respondent 17 has no row for item 5. After reshaping to wide, what is in that cell, and what does it mean?",
+  options: [
+    {text: "NA; the table alone doesn't say whether item 5 was skipped or never shown", correct: true, why: "The long table records only the responses that exist. Why one is absent (a skip, a booklet design, running out of time) has to come from the documentation or the pattern of gaps."},
+    {text: "0, because no response counts as wrong", correct: false, why: "Scoring an omission as wrong is a decision an analyst may make, but the reshape itself doesn't make it, and for an item that was never shown it would misstate what happened."},
+    {text: "The reshape fails, because the matrix is incomplete", correct: false, why: "Wide layouts allow empty cells, and most real datasets have some."}
+  ]
+})
+```
+
+### A first look
+
+With the data wide, one row per respondent, four descriptives give a first look at any table (item means are column means; sum scores are row sums):
+
+1. **Missingness and categories, by item.** An item everyone answered alike says nothing about differences between respondents; an unused category can trouble polytomous models ([Polytomous items](polytomous.qmd)).
+2. **Item means.** For 0/1 items, the proportion of 1s; on a test, a first measure of how easy an item is (the *p*-value of [Classical test theory and reliability](ctt-reliability.qmd), which [The Rasch model](rasch.qmd) replaces with a difficulty). A Likert mean is on the response scale, not a proportion.
+3. **The sum-score distribution.** The simplest score: classical test theory is built on it, and the Rasch model needs nothing more. Its distribution shows any pile-up at floor or ceiling.
+4. **Item-rest correlations**: each item against the sum of the *other* items, positive if the items share something. Including the item itself would inflate the correlation, more so on short tests (problem 1).
+
+All four assume the items run the same way. Each lesson states its keying once: higher means more of the construct. Reverse-worded items must be flipped (on a 1–5 scale, $x \to 6 - x$) before sums or item-rest correlations mean anything.
+
+#### Try it: keying
+
+Six simulated 1–5 items, 300 respondents. Items 2 and 5 are worded in reverse and stored as answered. Choose which items to reverse-key.
+
+```{ojs}
+//| echo: false
+viewof ky_flip = Inputs.checkbox(["1", "2", "3", "4", "5", "6"], {label: "Reverse-key items", value: []})
+```
+
+```{ojs}
+//| echo: false
+ky_raw = {
+  const r = rng(6), sign = [1, -1, 1, 1, -1, 1], shift = [0.3, -0.2, 0, -0.4, 0.2, 0.1];
+  const cut = y => (y < -1.4 ? 1 : y < -0.5 ? 2 : y < 0.4 ? 3 : y < 1.3 ? 4 : 5);
+  return Array.from({length: 300}, () => {
+    const t = r.norm();
+    return sign.map((s, i) => cut(s * 0.8 * t + 0.6 * r.norm() + shift[i]));
+  });
+}
+ky_X = ky_raw.map(row => row.map((x, i) => (ky_flip.includes(String(i + 1)) ? 6 - x : x)))
+ky_ir = itemRest(ky_X).map((v, i) => ({item: `Item ${i + 1}`, r: v}))
+ky_sum = ky_X.map(row => row.reduce((u, v) => u + v, 0))
+ky_sd = {
+  const m = ky_sum.reduce((u, v) => u + v, 0) / ky_sum.length;
+  return Math.sqrt(ky_sum.reduce((u, v) => u + (v - m) ** 2, 0) / (ky_sum.length - 1));
+}
+Plot.plot({
+  width: 700, height: 220, x: {label: null}, y: {label: "Item-rest correlation", domain: [-0.8, 0.8]},
+  marks: [Plot.ruleY([0], {stroke: palette.rule}),
+          Plot.barY(ky_ir, {x: "item", y: "r", fill: d => (d.r < 0 ? palette.contrast : palette.main)})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Sum-score SD: **${ky_sd.toFixed(2)}**. Negative item-rest correlations: **${ky_ir.filter(d => d.r < 0).length}** of 6.`
+```
+
+Unkeyed, items 2 and 5 correlate negatively with the rest, and the other four are pulled down, because the total mixes directions. Reverse items 2 and 5 and every bar is positive and about twice as tall, and the sum-score SD more than doubles: the items now add up instead of cancelling. Reverse item 3 by mistake and its bar turns negative.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A 1–5 Likert item has mean 4.5. What can you conclude?",
+  options: [
+    {text: "Most respondents chose 4 or 5", correct: true, why: "A mean of 4.5 on a 1–5 scale is possible only if responses pile up at the top: at least half must be 5s, and at least three in four must be 4s or 5s."},
+    {text: "90% of respondents agreed", correct: false, why: "The mean of a Likert item is on the response scale, not a proportion. It is a proportion only for 0/1 items."},
+    {text: "The item measures the construct well", correct: false, why: "The mean says how the item is answered, not whether it measures the construct. An item nearly everyone agrees with may tell us little about differences between respondents."}
+  ]
+})
+```
+
+### More than responses
+
+Many tables record more than `resp`. **Response time** is one: how long someone took is data too ([Response times](response-time.qmd)). Design columns (`treat`, `wave`, sometimes `cluster_id` for a school) say how data were collected ([Invariance and experience](invariance-experience.qmd)). Covariates (`cov_`) let us compare groups item by item ([Differential item functioning](dif.qmd)) or explain responses ([Explanatory item response models](explanatory-irt.qmd)). And many tables have [item text](https://itemresponsewarehouse.org/itemtext.html).
+
+Nor are items always questions. In a perception experiment the item is a condition, a stimulus of a given strength, met many times as trials ([Ratcliff & Rouder, 1998](https://doi.org/10.1111/1467-9280.00067)). Trials bring response times, and a question: when we compare the times of errors and correct responses, what are we comparing?
+
+#### Try it: when are errors slow?
+
+Simulated trials, 400 in each of five conditions from easy to hard. Harder conditions produce more errors and, if you choose, slower responses; within a condition, errors can be given extra time.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Suppose that *within* every condition, errors and correct responses are equally fast, but hard conditions are slower than easy ones. Pool all the trials and compare the median response time of errors with that of correct responses. What do you expect?",
+  choices: ["Errors slower", "About the same", "Errors faster"],
+  answer: "Errors slower",
+  reveal: "Errors are slower in the pooled comparison, although no condition makes them slower. Most errors happen in the hard conditions, and the hard conditions are slow for every response. The widget starts in exactly this setting: check the pooled medians below it."
+})
+```
+
+```{ojs}
+//| echo: false
+viewof rt_hard = Inputs.range([0, 0.6], {value: 0.3, step: 0.05, label: "Extra time in the hardest condition (s)"})
+viewof rt_err = Inputs.range([0, 0.2], {value: 0, step: 0.01, label: "Extra time for errors within a condition (s)"})
+```
+
+```{ojs}
+//| echo: false
+rt_trials = {
+  const r = rng(98), acc = [0.95, 0.88, 0.75, 0.62, 0.52], out = [];
+  acc.forEach((p, k) => {
+    for (let t = 0; t < 400; t++) {
+      const correct = r.unif() < p;
+      const rt = (0.5 + rt_hard * k / 4) * Math.exp(0.35 * r.norm()) + (correct ? 0 : rt_err);
+      out.push({condition: k + 1, correct, rt});
+    }
+  });
+  return out;
+}
+rt_med = [1, 2, 3, 4, 5].flatMap(k => ["Correct", "Error"].map(o => ({
+  condition: k, outcome: o,
+  rt: median(rt_trials.filter(d => d.condition === k && d.correct === (o === "Correct")).map(d => d.rt))
+})))
+Plot.plot({
+  width: 700, height: 250, x: {label: "Condition (1 = easiest)", ticks: [1, 2, 3, 4, 5]}, y: {label: "Median response time (s)"},
+  color: {legend: true, domain: ["Correct", "Error"], range: [palette.main, palette.contrast]},
+  marks: [Plot.line(rt_med, {x: "condition", y: "rt", stroke: "outcome", strokeWidth: 2}),
+          Plot.dot(rt_med, {x: "condition", y: "rt", fill: "outcome", r: 4})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Pooled over all conditions, the median response time is **${median(rt_trials.filter(d => !d.correct).map(d => d.rt)).toFixed(2)} s** for errors and **${median(rt_trials.filter(d => d.correct).map(d => d.rt)).toFixed(2)} s** for correct responses. Errors: ${rt_trials.filter(d => !d.correct && d.condition === 5).length} in the hardest condition, ${rt_trials.filter(d => !d.correct && d.condition === 1).length} in the easiest.`
+```
+
+With no extra time for errors, the two lines cross back and forth (error medians are noisy where errors are few), yet the pooled error median is clearly higher: errors crowd into the slow, hard conditions. Set the hardest condition's extra time to 0 and the gap disappears. Before comparing responses, ask where they came from.
+
+## Simulate
+
+The code builds a long table in which each respondent has a propensity to say yes and each item its own popularity, deletes 5% of the rows, reshapes, and takes the first look. It's base R and runs in a second or two.
+
+With the seed as written, item means run from 0.23 to 0.80 and the median item-rest correlation is 0.28. Set `spread <- 0`, so every respondent has the same propensity: the means barely move, but the correlations collapse (median 0.03), since nothing about a respondent carries over between items. With `spread <- 2` the median rises to 0.54. Positive item-rest correlations are the first sign that items measure something in common, and that something is what later lessons model.
+
+```{webr}
+{{< include code/irw-data-sim.R >}}
+```
+
+[Download this code](code/irw-data-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/irw-data-irw.R")
+```
+
+[verbagg](https://itemresponsewarehouse.org/tables/verbagg/) is the main example, with 0/1 responses; [manolika_2021_mini_ipip](https://itemresponsewarehouse.org/tables/manolika_2021_mini_ipip/) is the contrast for Likert responses and keying; [rr98_accuracy](https://itemresponsewarehouse.org/tables/rr98_accuracy/) is the contrast for response times and trials. The code is base R ([download it](code/irw-data-irw.R)).
+
+```{r helpers}
+#| echo: true
+#| code-fold: show
+```
+
+### Verbal aggression: 0/1 responses
+
+The verbal aggression data, from [De Boeck and Wilson (2004)](https://doi.org/10.1007/978-1-4757-3990-9) and distributed with the lme4 R package ([Bates et al., 2015](https://doi.org/10.18637/jss.v067.i01)), come from 316 Belgian psychology students (per the [psychotools](https://doi.org/10.32614/CRAN.package.psychotools) documentation). Each item pairs one of four frustrating situations (two where someone else is to blame, such as a bus that fails to stop; two where you are) with a reaction (cursing, scolding, shouting), in two modes: would you *want* to, and would you *do* it? `S2WantCurse` is situation 2, want, curse. Keying: 1 means the reaction was reported.
+
+```{r verbagg-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+One row per response: 316 × 24 = 7,584. Two gentle notes. Respondents answered no, perhaps or yes, and the IRW stores lme4's two-category version, with "perhaps" and "yes" both 1 ([processing script](https://github.com/ben-domingue/irw/blob/main/data/verbagg.R)); lme4's covariates (trait anger, gender) aren't carried over. And one item is spelled `S4wantCurse`, so match item names ignoring case.
+
+```{r verbagg-wide}
+#| echo: true
+#| code-fold: show
+```
+
+```{r verbagg-look}
+#| echo: true
+#| code-fold: show
+#| fig-width: 9
+#| fig-height: 3
+```
+
+No cell is empty; every item has both categories; item means run from 0.09 to 0.79. Sum scores span 0 to 24 (mean 11.4), with only 4 respondents at the floor and 5 at the ceiling. Every item-rest correlation is positive (0.28 to 0.58, median 0.46). Against the simulation's medians of 0.28 and 0.54 (propensity SDs of 1 and 2), these items hang together fairly well.
+
+Which items are reported most? The design lets us ask.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Across the 24 items, which do respondents report more often: *wanting* to react aggressively, or actually *doing* so? And which of the three behaviours (curse, scold, shout) is reported least?",
+  choices: ["Want more; shout least", "Want more; curse least", "Do more; shout least", "Do more; curse least"],
+  answer: "Want more; shout least",
+  reveal: "Wanting is reported more than doing (item means 0.53 against 0.42), and shouting least (0.30, against 0.47 for scolding and 0.65 for cursing). The gap between want and do is largest for shouting, as the table below shows."
+})
+```
+
+```{r verbagg-design}
+#| echo: true
+#| code-fold: show
+```
+
+Wanting beats doing for every behaviour, most of all for shouting (0.39 against 0.22). [Smits, De Boeck and Vansteelandt (2004)](https://doi.org/10.1002/per.529) study this gap as the *inhibition* of verbal aggression; [Explanatory item response models](explanatory-irt.qmd) models it.
+
+### The Mini-IPIP: Likert responses, and keying
+
+The Mini-IPIP ([Donnellan et al., 2006](https://doi.org/10.1037/1040-3590.18.2.192)) measures the Big Five traits with four items each from the International Personality Item Pool, which is in the public domain ([Goldberg et al., 2006](https://doi.org/10.1016/j.jrp.2005.08.007); [IPIP permissions](https://ipip.ori.org/newPermission.htm)). These responses, rated 1 (strongly disagree) to 5 (strongly agree), come from a study of personality and taste in films and books ([Manolika, 2023](https://doi.org/10.1037/ppm0000394); data: [Manolika, 2021](https://doi.org/10.7910/DVN/23NDKX)), with `cov_gender` and `cov_age`.
+
+```{r ipip-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+Nothing is missing (386 × 20 = 7,720). Item means run from 3.0 to 4.5, the highest for `IPIP_17R`, "Am not really interested in others" ([Donnellan et al., 2006](https://doi.org/10.1037/1040-3590.18.2.192); wording checked against the [IPIP scoring key](https://ipip.ori.org/MiniIPIPKey.htm)). Taken at face value, most respondents strongly agree that they aren't interested in other people.
+
+The ten items ending in `R` are worded in reverse. Stored as answered, or already reversed? The deposit's SPSS file labels every item, `R` items included, 1 = strongly disagree to 5 = strongly agree, suggesting the former. If so, each `R` item would correlate *negatively* with its trait's forward items.
+
+```{r ipip-keying}
+#| echo: true
+#| code-fold: show
+```
+
+Every within-trait correlation is positive (0.18 to 0.59), as is every within-trait item-rest correlation. The ten `R` items arrive **already reverse-scored**: higher means more of the trait on all 20, and `IPIP_17R`'s 4.5 means most respondents *disagreed*. (The IRW's [item-text notes](https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_342/notes.csv) agree, and record that respondents answered a Greek translation.) Keying: higher means more Extraversion, Agreeableness, Conscientiousness, Neuroticism (not emotional stability) or Intellect.
+
+How should an analyst decide which way items run? One route trusts the documentation, the scoring key and codebook; the other reads the direction off the data, from signs like these. My rule: before summing a scale, I find out from the documentation which way each item should run, and then I check it in the data, because neither is enough alone. Here the codebook would have had us reverse ten items twice; [Classical test theory and reliability](ctt-reliability.qmd) meets an item the data can't settle.
+
+```{r ipip-sums}
+#| echo: true
+#| code-fold: show
+```
+
+Five traits means five sums of four items (4 to 20), not one of 20; Agreeableness is highest and least spread (17.0, SD 2.4). Covariates repeat on each of a respondent's rows, so we keep one row per `id`: most respondents are women, median age 21.
+
+### Brightness judgements: response times and trials
+
+In [Ratcliff and Rouder's (1998)](https://doi.org/10.1111/1467-9280.00067) first experiment, observers judged whether a square of pixels was bright or dark. Brightness, the share of white pixels, had 33 levels from all black (0) to all white (32), and each display came from one of two overlapping distributions; a response was correct if it named the right one. The data come with the rtdists R package ([Singmann et al., 2014](https://doi.org/10.32614/CRAN.package.rtdists)); the IRW keeps the blocks with accuracy instructions ([processing script](https://github.com/ben-domingue/irw/blob/main/data/rr98.R)). Keying: 1 is correct.
+
+```{r rr98-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+Here `id` is not a person but one of three observers' sessions ("jf 2" is jf's second), 30 in all. The 33 items are brightness levels, and the conditions are repeated as trials: a median of 12 rows per respondent–item pair, told apart by `block` and `trialnum`. This is the quick check's table; going wide needs a rule.
+
+```{r rr98-accuracy}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 3.5
+```
+
+Accuracy is about 0.95 at the extremes and 0.50 in the middle, where either distribution is equally likely. The observers are almost indistinguishable (0.72 to 0.73).
+
+```{r rr98-rt}
+#| echo: true
+#| code-fold: show
+```
+
+Response times have a long right tail (median 0.58 s, maximum 14 s). Ratcliff and Rouder set aside responses outside 0.2–2.5 s ([rtdists documentation](https://search.r-project.org/CRAN/refmans/rtdists/html/rr98.html)); the IRW keeps them (3.3% of rows), so we compare medians. **Errors are slower than correct responses**: 0.65 s against 0.56 s.
+
+But a pooled comparison mixes two things. Does it here?
+
+```{r rr98-bylevel}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 3.5
+```
+
+Partly. Errors are slower within 22 of the 33 levels, so they are slower in their own right, but by only about 0.02 s on average (weighting levels by their errors), against a pooled gap of 0.09 s. The rest is where errors happen: the hard middle levels are slow for every response (across levels, error rate and median time correlate at 0.95), and most errors are there. [Trials as items](trials.qmd) and [Response-time process models](rt-process-models.qmd) return to this table.
 
 ## Problems
 
+1. **Item-total against item-rest.** For $k$ items with equal variances and pairwise correlation $\rho$, derive the item-total and item-rest correlations. How much does including the item inflate the correlation when $k = 5$? When $k = 40$? Check on `verbagg`.
+2. **Response time and difficulty (PS1#3a).** In `rr98_accuracy` (or another timed table; with a Redivis account, `irw::irw_filter(var = "rt", n_categories = 2, density = NULL)` lists them), compute each item's median response time for correct and incorrect responses, and its proportion correct. Are harder items slower? What complicates the inference?
+3. **Long or wide?** Give two situations where wide format is the better store, and two things long format makes easy.
+4. **Your own data.** A 12-item Likert questionnaire, four items reverse-worded, is answered before and after an intervention by two randomized groups, with each respondent's age. Give the IRW-format columns and three example rows, and say how you would record which items are reverse-worded and whether they have been reversed.
+5. **A first look of your own (PS1#3c).** Pick an IRW table, compute the four descriptives, and write a paragraph on what they show, ending with a question they can't answer.
+6. **Challenge: wording and endorsement (PS1#3b).** Using the Mini-IPIP's item text ([IPIP scoring key](https://ipip.ori.org/MiniIPIPKey.htm)), relate a feature of the wording (length, negation) to the item means, as stored and with the reverse-scoring undone. With 20 items, what could this show, and what not? The IRW vignette on [item language and difficulty](https://itemresponsewarehouse.org/vignettes/item_text_difficulty.html) asks a similar question across many tests.
+
+```{r}
+#| output: asis
+ask_claude("irw-data", "It covers item response data and the Item Response Warehouse (IRW): the IRW data standard (id, item, resp, stored long, with optional columns such as rt, wave, treat and cov_ covariates), reshaping long to wide and what can go missing, four first descriptives (missingness and categories, item means, sum scores, item-rest correlations), checking the keying of reverse-worded items, and response times and repeated trials, with examples in base R on verbal aggression, the Mini-IPIP and a brightness-discrimination experiment.")
+```
+
 ## Going further
+
+- Domingue, B. W., et al. (2025). An introduction to the Item Response Warehouse (IRW): A resource for enhancing data usage in psychometrics. *Behavior Research Methods*, 57(10), 276. <https://doi.org/10.3758/s13428-025-02796-y>. The IRW and its data standard. The IRW asks users to cite the original data, and invites them to cite this paper.
+- Nadela, S., Lee, H., Jain, N., Gupta, A., Zhang, X., & Domingue, B. (2026). The Item Response Warehouse: What it is, how to use it, and targets for potential improvements. *Chinese/English Journal of Educational Measurement and Evaluation*, 7(1). <https://doi.org/10.59863/CIJG4549>. A practical guide.
+- The [irw R package](https://itemresponsewarehouse.github.io/Rpkg/). With a free Redivis account, `irw::irw_fetch("verbagg")` fetches a table, `irw_filter()` finds tables by metadata and `irw_itemtext()` fetches item text. `irw_long2resp()` reshapes, but by default drops `cov_` columns and respondents who answered under 10% of items.
+- Wickham, H. (2014). Tidy data. *Journal of Statistical Software*, 59(10). <https://doi.org/10.18637/jss.v059.i10>. Why one observation per row.
+- Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3), 581–592. <https://doi.org/10.1093/biomet/63.3.581>. When missingness can be ignored.
+- De Boeck, P., & Wilson, M. (Eds.). (2004). *Explanatory item response models*. Springer. <https://doi.org/10.1007/978-1-4757-3990-9>. The book the verbal aggression data illustrate.
+- Donnellan, M. B., Oswald, F. L., Baird, B. M., & Lucas, R. E. (2006). The Mini-IPIP scales. *Psychological Assessment*, 18(2), 192–203. <https://doi.org/10.1037/1040-3590.18.2.192>. The Mini-IPIP and its key.
+- Goldberg, L. R., et al. (2006). The international personality item pool and the future of public-domain personality measures. *Journal of Research in Personality*, 40(1), 84–96. <https://doi.org/10.1016/j.jrp.2005.08.007>. Why IPIP items are free to quote.
+- Ratcliff, R., & Rouder, J. N. (1998). Modeling response times for two-choice decisions. *Psychological Science*, 9(5), 347–356. <https://doi.org/10.1111/1467-9280.00067>. The brightness experiment and a model for it.
+- IRW vignettes: [response time and accuracy](https://itemresponsewarehouse.org/vignettes/rt_imv.html) across many tables; [item language and difficulty](https://itemresponsewarehouse.org/vignettes/item_text_difficulty.html).
 
 ```{r}
 #| output: asis
@@ -29,3 +471,9 @@ data_sources("irw-data")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 1 (slides c1, "How does psychological measurement work in practice?" through "A descriptive look at IRW data"), PS1#3, and `c1/irw_data_exploration.R` in `ben-domingue/252`.
+- **Timing:** core ideas and widgets about 40 minutes; the three tables a 30-minute lab.
+- **Changed from 252:** the script used `chess_lnirt`, `irw::irw_fetch()` and item-*total* correlations. This lesson uses three tables for three kinds of response, reads the tokenless CSV (no account needed), uses item-rest correlations and turns item-total into problem 1. The composition effect in `rr98_accuracy` is new.
+- **Held back:** probes are in [What is measurement?](measurement.qmd); item analysis proper in [Classical test theory and reliability](ctt-reliability.qmd); `irw_filter()` in the deep dives.
+- **Item text:** IPIP items are public domain, so the lesson quotes one; the verbal aggression items are not openly licensed, so their situations are described.
+- **Solutions:** held back in `solutions/irw-data.qmd` (not published). Problem 6 is open.

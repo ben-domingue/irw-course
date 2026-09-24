@@ -2,7 +2,7 @@
 
 # Item response data and the IRW (`irw-data`)
 
-Module: foundations · Prereqs: none · Preliminary · Status: outline
+Module: foundations · Prereqs: none · Preliminary · Status: draft (lessons/irw-data.qmd, #28)
 
 ## Core ideas
 
@@ -41,7 +41,7 @@ References verified 09-24 against Crossref; table citations from IRW biblio (lan
 | `manolika_2021_mini_ipip` | contrast (polytomous) | The Mini-IPIP (Donnellan et al., 2006, *Psychological Assessment* 18(2), 192–203, doi:10.1037/1040-3590.18.2.192; data: Manolika, 2021, Harvard Dataverse, doi:10.7910/DVN/23NDKX, CC0): 20 items, 1–5, 386 respondents, with `cov_gender` and `cov_age`. Item means run from 3.0 to 4.5. Items marked `R` arrive already reverse-scored ("Am not really interested in others" averages 4.5), which is worth knowing before summing. IPIP items are public domain (Goldberg et al., 2006, *Journal of Research in Personality* 40(1), 84–96, doi:10.1016/j.jrp.2005.08.007), so the lesson shows their text (A5). | — |
 | `rr98_accuracy` | contrast (response time) | A brightness-discrimination task with `rt` beside `resp` (Ratcliff & Rouder, 1998, *Psychological Science* 9(5), 347–356, doi:10.1111/1467-9280.00067): 12,205 responses to 33 conditions, each answered many times. Errors are slower than correct responses (median 0.65 vs. 0.56 s). Repeated trials mean "one row per respondent" needs a decision. | `trials` (deliberate, recorded); sanity in `response-time`, `rt-process-models` |
 
-Design columns (`treat`, `wave`, `cluster_id`) get a paragraph and a pointer forward, not a fourth table. Numbers are from the 09-24 outline pass (not recomputed). Sanity: none (no model is fitted).
+Design columns (`treat`, `wave`, `cluster_id`) get a paragraph and a pointer forward, not a fourth table. Sanity: none (no model is fitted). All numbers above were recomputed in the draft (IRW v418) and hold; the draft adds that within brightness levels errors are slower at 22 of 33 levels by about 0.02 s, so most of the pooled 0.09 s gap is composition (errors fall at the slow, hard levels).
 
 ## Widget / simulation / problem ideas
 
@@ -70,3 +70,13 @@ Design columns (`treat`, `wave`, `cluster_id`) get a paragraph and a pointer for
 ## Open questions
 
 - None. Item text follows A5 (#63): the Mini-IPIP text is public domain and is shown from the course's item-text snapshot with its provenance manifest; `verbagg`'s situations are described, not quoted, unless the snapshot confirms their licence.
+
+## Changes made while drafting (09-24, #28)
+
+- **Widgets.** "Match the histogram" (four tables) was dropped: it would need a fourth table's data on the page. In its place, a keying widget (reverse-key simulated Likert items, watch item-rest correlations and the sum-score SD). The response-time widget is simulated (errors slow because of where they happen, not only how) rather than rr98's own distributions, which the real-data section plots instead. Long ↔ wide and the missingness map are as planned; the missingness map adds a booklet design and early stopping.
+- **Predict-then-check** in *With real data* is the verbagg want/do question as planned; a second one in *Core ideas* is tied to the response-time widget.
+- **Item text.** The Mini-IPIP item is quoted from the IPIP scoring key (ipip.ori.org), public domain; no snapshot was needed. verbagg's situations are described, not quoted: the IRW item-text notes record no open licence ("silence is permission").
+- **Keying evidence.** The deposit's SPSS value labels describe the `R` items as 1 = strongly disagree … 5 = strongly agree, but the values are already reversed (all within-trait correlations positive, 0.18–0.59). The IRW item-text notes (batch_342) reach the same conclusion and record a Greek administration.
+- **Data reading.** The real-data code defines `irw_csv_url()`/`irw_csv()` (as in `_course.R`) so the downloaded file runs standalone and reads the current version-pinned link.
+- **Length.** Optional columns moved to a collapsible; the draft is at the top of the word range.
+
