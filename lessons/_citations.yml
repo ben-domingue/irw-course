@@ -18,6 +18,12 @@ bfi2_zhang_2025:
   link: https://doi.org/10.1080/00223891.2025.2531187
   license: CC BY 4.0
   irw_version: IRW v414
+bialowolski_2024_financial_literacy:
+  reference: Bialowolski, P. (2024). Financial literacy in a gendered language context
+    [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/MTQGSF
+  link: https://doi.org/10.7910/DVN/MTQGSF
+  license: CC0 1.0
+  irw_version: IRW v414
 borges_brazil_residency_2024_pbt:
   reference: 'Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro,
     P. S., Fonseca, P. C., ... & Ricz, H. M. A. (2024). Increased accessibility of
@@ -27,17 +33,39 @@ borges_brazil_residency_2024_pbt:
   link: https://doi.org/10.3352/jeehp.2024.21.32
   license: CC0 1.0
   irw_version: IRW v414
+c19prc_uk_mcbride_2021_wordsum:
+  reference: 'Bentall, Richard and Shevlin, Mark and McBride, Orla and Murphy, Jamie
+    and Hartman, Todd K and Levita, Liat and Gibson-Miller, Jilly and Mason, Liam
+    and Bennett, Kate (2022). The COVID-19 Psychological Research Consortium Study,
+    2020-2021. [Data Collection]. Colchester, Essex: UK Data Service. 10.5255/UKDA-SN-855552'
+  link: https://osf.io/v2zur/
+  license: CC BY 4.0
+  irw_version: IRW v414
 chess_lnirt:
   reference: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis
     of chess expertise. The American journal of psychology, 118(1), 29-60.
   link: https://doi.org/10.2307/30039042
   license: GPL-3.0
   irw_version: IRW v414
+christensen_2018_wsssf_5831:
+  reference: 'Christensen, A.P., Kenett, Y.N., Aste, T. et al. Network structure of
+    the Wisconsin Schizotypy Scales–Short Forms: Examining psychometric network filtering
+    approaches. Behav Res 50, 2531–2550 (2018).'
+  link: https://doi.org/10.3758/s13428-018-1032-9
+  license: CC0 1.0
+  irw_version: IRW v414
 DART_Brysbaert_2020_1:
   reference: Brysbaert, M., Sui, L., Dirix, N., & Hintz, F. (2020). Dutch Author Recognition
     Test. Journal of Cognition, 3(1), 6. https://doi.org/10.5334/joc.95
   link: https://doi.org/10.5334/joc.95
   license: CC BY-NC-SA 4.0
+  irw_version: IRW v414
+enders_2022_science_literacy:
+  reference: 'Enders AM, Uscinski JE, Klofstad C, Stoler J (2022). On the relationship
+    between conspiracy theory beliefs, misinformation, and vaccine hesitancy. PLOS
+    ONE 17(10): e0276082.'
+  link: https://doi.org/10.1371/journal.pone.0276082
+  license: CC0 1.0
   irw_version: IRW v414
 enem_2013_1mil_lc:
   reference: 'Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil:
@@ -261,6 +289,18 @@ verbagg:
   reference: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer.
   link: https://doi.org/10.1007/978-1-4757-3990-9
   license: GPL-3.0
+  irw_version: IRW v414
+vocabulary_iq:
+  reference: (2018). Vocabulary IQ Test [dataset and codebook]. http://openpsychometrics.org/_rawdata/VIQT_data.zip
+  link: http://openpsychometrics.org/_rawdata/
+  license: CC BY 4.0
+  irw_version: IRW v414
+wilmer-mrmet-normative-data-set-2022:
+  reference: 'Kim, H.A., Kaduthodil, J., Strong, R.W. et al. Multiracial Reading the
+    Mind in the Eyes Test (MRMET): An inclusive version of an influential measure.
+    Behav Res 56, 5900–5917 (2024). https://doi.org/10.3758/s13428-023-02323-x'
+  link: https://doi.org/10.3758/s13428-023-02323-x
+  license: CC BY 4.0
   irw_version: IRW v414
 wilmer-rmet-normative-data-set-2022:
   reference: 'Kim, H.A., Kaduthodil, J., Strong, R.W. et al. Multiracial Reading the
