@@ -2,17 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Classical test theory and reliability – Psychometrics with the IRW</title>
 <style>
-code{white-space: pre-wrap;}
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -67,15 +73,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-55d18e6e33da801dcb1210dfba1c04c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a91fed4e7707a54e5b1d6195dbcc134d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,6 +108,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
+// Two AMD loaders share the global `define` on lesson pages (irw-course#13):
+// Monaco's (quarto-webr's code editor) and d3-require's (Observable's runtime,
+// which fetches Plot, Inputs, htl, marked). Whichever set `define` last receives
+// every call, so if Observable replaces it before Monaco's editor script has run,
+// Monaco's modules go to the wrong loader and the editor never initialises.
+// This routes each call by the script making it: Monaco's own files go to
+// Monaco's loader, everything else to the most recently installed `define`.
+// Must run before Monaco's loader.js (it is included in the page header).
+(function () {
+  var monacoDefine = null, otherDefine = null;
+  function srcOf() { return (document.currentScript && document.currentScript.src) || ""; }
+  function dispatch() {
+    var target = /\/monaco-editor@[^/]+\/min\/vs\//.test(srcOf()) && monacoDefine
+      ? monacoDefine : (otherDefine || monacoDefine);
+    return target.apply(this, arguments);
+  }
+  Object.defineProperty(window, "define", {
+    configurable: true,
+    get: function () { return monacoDefine || otherDefine ? dispatch : undefined; },
+    set: function (v) {
+      if (typeof v !== "function") return;
+      if (/\/monaco-editor@[^/]+\/min\/vs\/loader\.js/.test(srcOf())) monacoDefine = v;
+      else otherDefine = v;
+      var current = otherDefine || monacoDefine;
+      for (var k in current) dispatch[k] = current[k];
+      dispatch.amd = current.amd || {};
+    }
+  });
+})();
+</script>
 <script type="module" src="../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
 <link href="../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
 <meta name="robots" content="noindex, nofollow">
@@ -1661,7 +1697,7 @@ globalThis.qwebrExecuteCode = async function (
 </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -2637,7 +2673,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Stuck, or curious about something this lesson doesn’t cover?</strong> <a href="https://claude.ai/new?q=I%27m%20working%20through%20a%20lesson%20called%20%22Classical%20test%20theory%20and%20reliability%22%20in%20an%20open%20psychometrics%20course%20built%20on%20the%20Item%20Response%20Warehouse%20%28IRW%29.%20It%20covers%20classical%20test%20theory%3A%20true%20scores%20and%20error%2C%20reliability%2C%20parallel%20forms%2C%20Cronbach%27s%20alpha%20and%20why%20it%20is%20a%20lower%20bound%20on%20reliability%2C%20split%20halves%20and%20the%20Spearman-Brown%20formula%2C%20and%20classical%20item%20analysis%20including%20reverse%20keying%2C%20with%20examples%20in%20base%20R.%20Please%20act%20as%20a%20patient%20tutor%3A%20answer%20my%20questions%2C%20check%20my%20reasoning%2C%20and%20prefer%20small%20worked%20examples%20in%20R.%20If%20data%20would%20help%2C%20IRW%20tables%20are%20described%20at%20https%3A%2F%2Fitemresponsewarehouse.org%2Fllms.txt.%20My%20first%20question%20is%3A%20" class="btn btn-outline-primary btn-sm" target="_blank">Ask Claude about this lesson</a> opens a new conversation that already knows what the lesson is about; add your question at the end.</p>
+<p><strong>Stuck, or curious about something this lesson doesn’t cover?</strong> <a href="https://claude.ai/new?q=I%27m%20working%20through%20a%20lesson%20called%20%22Classical%20test%20theory%20and%20reliability%22%20in%20an%20open%20psychometrics%20course%20built%20on%20the%20Item%20Response%20Warehouse%20%28IRW%29.%20It%20covers%20classical%20test%20theory%3A%20true%20scores%20and%20error%2C%20reliability%2C%20parallel%20forms%2C%20Cronbach%27s%20alpha%20and%20why%20it%20is%20a%20lower%20bound%20on%20reliability%2C%20split%20halves%20and%20the%20Spearman-Brown%20formula%2C%20and%20classical%20item%20analysis%20including%20reverse%20keying%2C%20with%20examples%20in%20base%20R.%20Please%20act%20as%20a%20patient%20tutor%3A%20answer%20my%20questions%2C%20check%20my%20reasoning%2C%20and%20prefer%20small%20worked%20examples%20in%20R.%20If%20data%20would%20help%2C%20IRW%20tables%20are%20described%20at%20https%3A%2F%2Fitemresponsewarehouse.org%2Fllms.txt.%20My%20first%20question%20is%3A%20" class="btn btn-outline-primary btn-sm" target="_blank">Ask Claude about this lesson</a> opens a new conversation that already knows what the lesson is about; add your question at the end. Claude shows a caution notice on any prompt that arrives through a link; that’s expected.</p>
 </div>
 </div>
 </div>
@@ -2651,6 +2687,14 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>Gilbert, J. (2023). Replication data for: Modeling item-level heterogeneous treatment effects with the explanatory item response model. Harvard Dataverse. <a href="https://doi.org/10.7910/DVN/QARRYT" class="uri">https://doi.org/10.7910/DVN/QARRYT</a>. The source of <code>gilbert_meta_1</code>.</li>
 <li>Christie, R., &amp; Geis, F. L. (1970). <em>Studies in Machiavellianism</em>. Academic Press. The source of the Mach IV.</li>
 <li>Hunter, J. E., Gerbing, D. W., &amp; Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. <em>Journal of Personality and Social Psychology</em>, 43(6), 1293–1305. The source of the <code>lessR_Mach4</code> responses—and, as the title suggests, a paper worth reading alongside problem 5.</li>
+</ul>
+</section>
+<section id="data-sources" class="level2">
+<h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
+<p>Data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a> (each table name links to its IRW page); references from IRW biblio.</p>
+<ul>
+<li><a href="https://itemresponsewarehouse.org/tables/gilbert_meta_1/"><code>gilbert_meta_1</code></a>: Gilbert, J. B., Kim, J. S., &amp; Miratrix, L. W. (2023). Modeling item-level heterogeneous treatment effects with the explanatory item response model: Leveraging large-scale online assessments to pinpoint the impact of educational interventions. Journal of Educational and Behavioral Statistics, 48(6), 889-913. Gilbert, Josh, 2023, “Replication Data for: Modeling Item-Level Heterogeneous Treatment Effects With the Explanatory Item Response Model: Leveraging Large-Scale Online Assessments to Pinpoint the Impact of Educational Interventions”, <a href="https://doi.org/10.7910/DVN/QARRYT" class="uri">https://doi.org/10.7910/DVN/QARRYT</a>, Harvard Dataverse, V2, UNF:6:r+hUHhEPWWtUbcqXyELTJw== [fileUNF]. Licence: CC BY-NC-SA 4.0.</li>
+<li><a href="https://itemresponsewarehouse.org/tables/lessr_mach4/"><code>lessR_Mach4</code></a>: Hunter, J. E., Gerbing, D. W., &amp; Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. Journal of personality and social psychology, 43(6), 1293. <a href="https://doi.org/10.1037/0022-3514.43.6.1293" class="uri">https://doi.org/10.1037/0022-3514.43.6.1293</a>. Licence: GPL-3.0.</li>
 </ul>
 </section>
 <section id="for-instructors" class="level2">

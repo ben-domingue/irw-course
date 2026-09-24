@@ -2,17 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Factor analysis I: exploring dimensionality – Psychometrics with the IRW</title>
 <style>
-code{white-space: pre-wrap;}
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -67,15 +73,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-55d18e6e33da801dcb1210dfba1c04c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a91fed4e7707a54e5b1d6195dbcc134d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -103,6 +108,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
+// Two AMD loaders share the global `define` on lesson pages (irw-course#13):
+// Monaco's (quarto-webr's code editor) and d3-require's (Observable's runtime,
+// which fetches Plot, Inputs, htl, marked). Whichever set `define` last receives
+// every call, so if Observable replaces it before Monaco's editor script has run,
+// Monaco's modules go to the wrong loader and the editor never initialises.
+// This routes each call by the script making it: Monaco's own files go to
+// Monaco's loader, everything else to the most recently installed `define`.
+// Must run before Monaco's loader.js (it is included in the page header).
+(function () {
+  var monacoDefine = null, otherDefine = null;
+  function srcOf() { return (document.currentScript && document.currentScript.src) || ""; }
+  function dispatch() {
+    var target = /\/monaco-editor@[^/]+\/min\/vs\//.test(srcOf()) && monacoDefine
+      ? monacoDefine : (otherDefine || monacoDefine);
+    return target.apply(this, arguments);
+  }
+  Object.defineProperty(window, "define", {
+    configurable: true,
+    get: function () { return monacoDefine || otherDefine ? dispatch : undefined; },
+    set: function (v) {
+      if (typeof v !== "function") return;
+      if (/\/monaco-editor@[^/]+\/min\/vs\/loader\.js/.test(srcOf())) monacoDefine = v;
+      else otherDefine = v;
+      var current = otherDefine || monacoDefine;
+      for (var k in current) dispatch[k] = current[k];
+      dispatch.amd = current.amd || {};
+    }
+  });
+})();
+</script>
 <script type="module" src="../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
 <link href="../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
 <meta name="robots" content="noindex, nofollow">
@@ -1661,7 +1697,7 @@ globalThis.qwebrExecuteCode = async function (
 </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -2572,7 +2608,7 @@ self_BFI_56 -0.08 0.57  0.01  0.09  0.30</code></pre>
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Stuck, or curious about something this lesson doesn’t cover?</strong> <a href="https://claude.ai/new?q=I%27m%20working%20through%20a%20lesson%20called%20%22Factor%20analysis%20I%3A%20exploring%20dimensionality%22%20in%20an%20open%20psychometrics%20course%20built%20on%20the%20Item%20Response%20Warehouse%20%28IRW%29.%20It%20covers%20exploratory%20factor%20analysis%3A%20the%20common%20factor%20model%2C%20communalities%2C%20choosing%20the%20number%20of%20factors%20%28eigenvalues%2C%20the%20Kaiser%20rule%2C%20scree%20plots%2C%20parallel%20analysis%29%2C%20rotation%20%28orthogonal%20and%20oblique%29%2C%20polychoric%20correlations%20for%20Likert%20items%2C%20and%20a%20five-factor%20analysis%20of%20the%20BFI-2%20with%20the%20psych%20package%20in%20R.%20Please%20act%20as%20a%20patient%20tutor%3A%20answer%20my%20questions%2C%20check%20my%20reasoning%2C%20and%20prefer%20small%20worked%20examples%20in%20R.%20If%20data%20would%20help%2C%20IRW%20tables%20are%20described%20at%20https%3A%2F%2Fitemresponsewarehouse.org%2Fllms.txt.%20My%20first%20question%20is%3A%20" class="btn btn-outline-primary btn-sm" target="_blank">Ask Claude about this lesson</a> opens a new conversation that already knows what the lesson is about; add your question at the end.</p>
+<p><strong>Stuck, or curious about something this lesson doesn’t cover?</strong> <a href="https://claude.ai/new?q=I%27m%20working%20through%20a%20lesson%20called%20%22Factor%20analysis%20I%3A%20exploring%20dimensionality%22%20in%20an%20open%20psychometrics%20course%20built%20on%20the%20Item%20Response%20Warehouse%20%28IRW%29.%20It%20covers%20exploratory%20factor%20analysis%3A%20the%20common%20factor%20model%2C%20communalities%2C%20choosing%20the%20number%20of%20factors%20%28eigenvalues%2C%20the%20Kaiser%20rule%2C%20scree%20plots%2C%20parallel%20analysis%29%2C%20rotation%20%28orthogonal%20and%20oblique%29%2C%20polychoric%20correlations%20for%20Likert%20items%2C%20and%20a%20five-factor%20analysis%20of%20the%20BFI-2%20with%20the%20psych%20package%20in%20R.%20Please%20act%20as%20a%20patient%20tutor%3A%20answer%20my%20questions%2C%20check%20my%20reasoning%2C%20and%20prefer%20small%20worked%20examples%20in%20R.%20If%20data%20would%20help%2C%20IRW%20tables%20are%20described%20at%20https%3A%2F%2Fitemresponsewarehouse.org%2Fllms.txt.%20My%20first%20question%20is%3A%20" class="btn btn-outline-primary btn-sm" target="_blank">Ask Claude about this lesson</a> opens a new conversation that already knows what the lesson is about; add your question at the end. Claude shows a caution notice on any prompt that arrives through a link; that’s expected.</p>
 </div>
 </div>
 </div>
@@ -2585,6 +2621,13 @@ self_BFI_56 -0.08 0.57  0.01  0.09  0.30</code></pre>
 <li>Soto, C. J., &amp; John, O. P. (2017). The next Big Five Inventory (BFI-2). <em>Journal of Personality and Social Psychology</em>, 113(1), 117–143.</li>
 <li>Zhang, X., Huang, M., Sun, J., &amp; Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. <em>Journal of Personality Assessment</em>. <a href="https://doi.org/10.1080/00223891.2025.2531187" class="uri">https://doi.org/10.1080/00223891.2025.2531187</a>. The source of the data.</li>
 <li>From the IRW: <a href="https://itemresponsewarehouse.org/vignettes/dimensionality.html">how often unidimensionality holds</a> across hundreds of datasets, and a <a href="https://itemresponsewarehouse.org/vignettes/cfa.html">CFA walkthrough with lavaan</a> that previews the next lesson.</li>
+</ul>
+</section>
+<section id="data-sources" class="level2">
+<h2 class="anchored" data-anchor-id="data-sources">Data sources</h2>
+<p>Data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a> (each table name links to its IRW page); references from IRW biblio.</p>
+<ul>
+<li><a href="https://itemresponsewarehouse.org/tables/bfi2_zhang_2025/"><code>bfi2_zhang_2025</code></a>: Zhang, X., Huang, M., Sun, J., &amp; Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. PubMed, 1–22. <a href="https://doi.org/10.1080/00223891.2025.2531187" class="uri">https://doi.org/10.1080/00223891.2025.2531187</a>. Licence: CC BY 4.0.</li>
 </ul>
 </section>
 <section id="for-instructors" class="level2">

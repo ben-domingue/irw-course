@@ -284,7 +284,7 @@
     "href": "lessons/rasch.html",
     "title": "The Rasch model",
     "section": "",
-    "text": "Module: Item response theory\nBefore this: Where CTT breaks: toward item response models\nBuilds toward: Information, precision, and short forms · Estimating abilities: MLE and EAP · From the 1PL to the 4PL · What is an item? Explanatory item response models\nIRW tables: chess_lnirt, wirs\nFrom EDUC 252: slides c3; code c3/rasch0.R, c3/rasch1.R, c3/rasch2.R\nStatus: draft\nPlease enable JavaScript to experience the dynamic code cell content on this page.\nCode\nimport {p2pl, pnorm, grid, loglik, mle, patternsWithSum, expectedPropCorrect, normalQuantiles} from \"./widgets/irt.js\"\nimport {quiz, predict} from \"./widgets/quiz.js\""
+    "text": "Module: Item response theory\nBefore this: Where CTT breaks: toward item response models\nBuilds toward: Information, precision, and short forms · Estimating abilities: MLE and EAP · From the 1PL to the 4PL · What is an item? Explanatory item response models · Scale properties: is the scale equal-interval?\nIRW tables: chess_lnirt, wirs\nFrom EDUC 252: slides c3; code c3/rasch0.R, c3/rasch1.R, c3/rasch2.R\nStatus: draft\nPlease enable JavaScript to experience the dynamic code cell content on this page.\nCode\nimport {p2pl, pnorm, grid, loglik, mle, patternsWithSum, expectedPropCorrect, normalQuantiles} from \"./widgets/irt.js\"\nimport {quiz, predict} from \"./widgets/quiz.js\""
   },
   {
     "objectID": "lessons/rasch.html#what-this-is-for",
@@ -334,6 +334,13 @@
     "title": "The Rasch model",
     "section": "Going further",
     "text": "Going further\n\nTutz, G. (2025). A short guide to item response theory models. Springer. Chapter 2 derives the Rasch model, including from sufficiency (section 2.4.2).\nWright, B. D. (1997). A history of social science measurement. Educational Measurement: Issues and Practice, 16(4), 33–45. The case for the Rasch model, made with feeling.\nvan der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. American Journal of Psychology, 118(1), 29–60. The source of the chess data.\nBartholomew, D. J. (1998). Scaling unobservable constructs in social science. Journal of the Royal Statistical Society: Series C, 47(1), 1–13. The source of the wirs data.\nFrom the IRW: simulating item difficulties shows what real difficulty distributions look like across hundreds of datasets, which is worth knowing before you choose one for a simulation."
+  },
+  {
+    "objectID": "lessons/rasch.html#data-sources",
+    "href": "lessons/rasch.html#data-sources",
+    "title": "The Rasch model",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nchess_lnirt: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis of chess expertise. The American journal of psychology, 118(1), 29-60. https://doi.org/10.2307/30039042. Licence: GPL-3.0.\nwirs: Bartholomew, D. (1998) Scaling unobservable constructs in social science. Applied Statistics, 47, 1–13. https://doi.org/10.1111/1467-9876.00094. Licence: GPL-3.0."
   },
   {
     "objectID": "lessons/rasch.html#for-instructors",
@@ -448,6 +455,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/likelihood.html#data-sources",
+    "href": "lessons/likelihood.html#data-sources",
+    "title": "The likelihood and logistic regression",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nchess_lnirt: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis of chess expertise. The American journal of psychology, 118(1), 29-60. https://doi.org/10.2307/30039042. Licence: GPL-3.0."
+  },
+  {
     "objectID": "lessons/likelihood.html#for-instructors",
     "href": "lessons/likelihood.html#for-instructors",
     "title": "The likelihood and logistic regression",
@@ -558,6 +572,13 @@
     "title": "IRTree models",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/irtrees.html#data-sources",
+    "href": "lessons/irtrees.html#data-sources",
+    "title": "IRTree models",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nffm_CSN: Goldberg, L. R. (1992). The development of markers for the Big-Five factor structure. Psychological assessment, 4(1), 26. https://doi.org/10.1037/1040-3590.4.1.26. Licence: CC BY 4.0."
   },
   {
     "objectID": "lessons/irtrees.html#for-instructors",
@@ -672,6 +693,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/guessing-priors.html#data-sources",
+    "href": "lessons/guessing-priors.html#data-sources",
+    "title": "Guessing and priors",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nroar_lexical: Yeatman, J. D., Tang, K. A., Donnelly, P. M., Yablonski, M., Ramamurthy, M., Karipidis, I. I., … & Domingue, B. W. (2021). Rapid online assessment of reading ability. Scientific reports, 11(1), 6396. https://doi.org/10.1038/s41598-021-85907-x. Licence: CC BY 4.0."
+  },
+  {
     "objectID": "lessons/guessing-priors.html#for-instructors",
     "href": "lessons/guessing-priors.html#for-instructors",
     "title": "Guessing and priors",
@@ -728,6 +756,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/fit-prediction.html#data-sources",
+    "href": "lessons/fit-prediction.html#data-sources",
+    "title": "Model fit and out-of-sample prediction",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\ngilbert_meta_2: Kim, J. S., Burkhauser, M. A., Relyea, J. E., Gilbert, J. B., Scherer, E., Fitzgerald, J., … & McIntyre, J. (2023). A longitudinal randomized trial of a sustained content literacy intervention from first to second grade: Transfer effects on students’ reading comprehension. Journal of Educational Psychology, 115(1), 73. James S. Kim; Mary A. Burkhauser; Jackie E. Relyea; Joshua B. Gilbert; Ethan Scherer; Jill Fitzgerald; Douglas Mosher; Joseph McIntyre, 2022, “Replication Data for: A Longitudinal Randomized Trial of a Sustained Content Literacy Intervention from First to Second Grade: Transfer Effects on Students’ Reading Comprehension Outcomes”, https://doi.org/10.7910/DVN/LAWFFU, Harvard Dataverse, V2, UNF:6:VATSovKxwaqyJAT6ZzzfBw== [fileUNF]. Licence: CC BY-NC-SA 4.0.\ngilbert_meta_14: Romero, M., Sandefur, J., & Sandholtz, W. A. (2020). Outsourcing education: Experimental evidence from Liberia. American Economic Review, 110(2), 364-400. Romero, Mauricio; Sandefur, Justin; Sandholtz, Wayne, 2018, “Partnership Schools for Liberia”, https://doi.org/10.7910/DVN/5OPIYU, Harvard Dataverse, V4. Licence: CC0 1.0.\ngilbert_meta_1: Gilbert, J. B., Kim, J. S., & Miratrix, L. W. (2023). Modeling item-level heterogeneous treatment effects with the explanatory item response model: Leveraging large-scale online assessments to pinpoint the impact of educational interventions. Journal of Educational and Behavioral Statistics, 48(6), 889-913. Gilbert, Josh, 2023, “Replication Data for: Modeling Item-Level Heterogeneous Treatment Effects With the Explanatory Item Response Model: Leveraging Large-Scale Online Assessments to Pinpoint the Impact of Educational Interventions”, https://doi.org/10.7910/DVN/QARRYT, Harvard Dataverse, V2, UNF:6:r+hUHhEPWWtUbcqXyELTJw== [fileUNF]. Licence: CC BY-NC-SA 4.0."
+  },
+  {
     "objectID": "lessons/fit-prediction.html#for-instructors",
     "href": "lessons/fit-prediction.html#for-instructors",
     "title": "Model fit and out-of-sample prediction",
@@ -739,7 +774,7 @@
     "href": "lessons/fa-confirmatory.html",
     "title": "Factor analysis II: confirmatory models, omega, and IRT as factor analysis",
     "section": "",
-    "text": "Module: Factor analysis\nBefore this: Factor analysis I: exploring dimensionality · From the 1PL to the 4PL\nBuilds toward: none\nIRW tables: none\nFrom EDUC 252: n/a\nStatus: stub"
+    "text": "Module: Factor analysis\nBefore this: Factor analysis I: exploring dimensionality · From the 1PL to the 4PL\nBuilds toward: Structural equation modeling with lavaan\nIRW tables: none\nFrom EDUC 252: n/a\nStatus: stub"
   },
   {
     "objectID": "lessons/fa-confirmatory.html#what-this-is-for",
@@ -840,6 +875,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/equating.html#data-sources",
+    "href": "lessons/equating.html#data-sources",
+    "title": "Linking and equating",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nenem_2013_1mil_lc: Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil: State of the art of research on ENEM in Brazil. Latin American Journal of Development, 3(5), 2898-2907. https://doi.org/10.46814/lajdv3n5-018. Licence: CC BY 4.0.\nenem_2014_1mil_mt: Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil: State of the art of research on ENEM in Brazil. Latin American Journal of Development, 3(5), 2898-2907. https://doi.org/10.46814/lajdv3n5-018. Licence: CC BY 4.0."
+  },
+  {
     "objectID": "lessons/equating.html#for-instructors",
     "href": "lessons/equating.html#for-instructors",
     "title": "Linking and equating",
@@ -894,6 +936,13 @@
     "title": "Differential item functioning",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/dif.html#data-sources",
+    "href": "lessons/dif.html#data-sources",
+    "title": "Differential item functioning",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nDART_Brysbaert_2020_1: Brysbaert, M., Sui, L., Dirix, N., & Hintz, F. (2020). Dutch Author Recognition Test. Journal of Cognition, 3(1), 6. https://doi.org/10.5334/joc.95. Licence: CC BY-NC-SA 4.0.\ngilbert_meta_11: Kim, J. S., Relyea, J. E., Burkhauser, M. A., Scherer, E., & Rich, P. (2021). Improving elementary grade students’ science and social studies vocabulary knowledge depth, reading comprehension, and argumentative writing: A conceptual replication. Educational Psychology Review, 1-30. Kim, James; Relyea, Jackie Eunjung; Burkhauser, Mary A.; Scherer, Ethan; Rich, Patrick, 2021, “Replication Data for: Improving Elementary Grade Students’ Science and Social Studies Vocabulary Knowledge Depth, Reading Comprehension, and Argumentative Writing: A Conceptual Replication”, https://doi.org/10.7910/DVN/HQEMN6, Harvard Dataverse, V1, UNF:6:fM1zIBl88IKxt400zYOJag== [fileUNF]. Licence: CC BY-NC-SA 4.0."
   },
   {
     "objectID": "lessons/dif.html#for-instructors",
@@ -952,6 +1001,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/ctt-limits.html#data-sources",
+    "href": "lessons/ctt-limits.html#data-sources",
+    "title": "Where CTT breaks: toward item response models",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nchess_lnirt: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis of chess expertise. The American journal of psychology, 118(1), 29-60. https://doi.org/10.2307/30039042. Licence: GPL-3.0.\nandrich_mudfold: Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. Applied psychological measurement, 12(1), 33-51. https://doi.org/10.1177/014662168801200105. Licence: GPL-3.0."
+  },
+  {
     "objectID": "lessons/ctt-limits.html#for-instructors",
     "href": "lessons/ctt-limits.html#for-instructors",
     "title": "Where CTT breaks: toward item response models",
@@ -1006,6 +1062,13 @@
     "title": "Cognitive diagnostic models",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/cdm.html#data-sources",
+    "href": "lessons/cdm.html#data-sources",
+    "title": "Cognitive diagnostic models",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nfrac20: Tatsuoka, C. (2002). Data analytic methods for latent partially ordered classification models. Journal of the Royal Statistical Society: Series C (Applied Statistics), 51(3), 337-350. https://doi.org/10.1111/1467-9876.00272. Licence: GPL-3.0."
   },
   {
     "objectID": "lessons/cdm.html#for-instructors",
@@ -1146,6 +1209,13 @@
     "title": "From the 1PL to the 4PL",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/1pl-to-4pl.html#data-sources",
+    "href": "lessons/1pl-to-4pl.html#data-sources",
+    "title": "From the 1PL to the 4PL",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nenem_2013_1mil_lc: Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil: State of the art of research on ENEM in Brazil. Latin American Journal of Development, 3(5), 2898-2907. https://doi.org/10.46814/lajdv3n5-018. Licence: CC BY 4.0."
   },
   {
     "objectID": "lessons/1pl-to-4pl.html#for-instructors",
@@ -1313,7 +1383,7 @@
     "href": "lessons/ctt-reliability.html#problems",
     "title": "Classical test theory and reliability",
     "section": "Problems",
-    "text": "Problems\n\nParallel forms. Suppose \\(X = T + E\\) and \\(X' = T + E'\\), where \\(E\\) and \\(E'\\) are uncorrelated with each other and with \\(T\\), and have equal variances. Show that \\(\\text{cor}(X, X') = \\sigma^2_T/\\sigma^2_X\\). Where exactly did you use each assumption?\nAttenuation. Let \\(Y\\) be a criterion (a gold-standard measure, say) with its own reliability \\(\\rho_{YY'}\\). Show that \\(\\text{cor}(X, Y) = \\text{cor}(T_X, T_Y)\\sqrt{\\rho_{XX'}\\,\\rho_{YY'}}\\), and hence that a test’s correlation with anything is bounded by \\(\\sqrt{\\rho_{XX'}}\\). What does this imply for a new test whose validity is judged by its correlation with an established one? (Chapter 1 of Lord & Novick, 1968, develops this and the “paradox” it creates for test construction.)\nThe weak item. In gilbert_meta_1, drop s_read_7_4 and recompute alpha. By how much does it change? Now use Spearman–Brown to predict the reliability of a 29-item test from the 30-item alpha. Why do the two answers differ, and in which direction?\nSplit halves. In the split-half figure, why is alpha not below all of the adjusted split-half estimates, given that alpha is a lower bound on reliability? (Hint: what is each split-half estimate a bound on, and what does it assume?) Challenge: is there anything about the splits that fall below alpha that suggests they are “bad” splits—halves that are not parallel?\nReading items. Look at the item-rest correlations for the keyed Mach IV. Choose the two weakest items and, from their wording and the construct, argue whether each should be dropped, rewritten, or kept. Would your decision change if the scale were used to screen job applicants rather than in research?\nAlpha at scale. Using the alpha() function from this lesson, compute alpha for five IRW tables of your choosing with 0/1 responses. Before you do, predict which will be highest. What features of a table (number of items, type of construct, sample) seem to go with high alpha? What would make you distrust a high value?\n\n\n\n\n\n\n\nStuck, or curious about something this lesson doesn’t cover? Ask Claude about this lesson opens a new conversation that already knows what the lesson is about; add your question at the end."
+    "text": "Problems\n\nParallel forms. Suppose \\(X = T + E\\) and \\(X' = T + E'\\), where \\(E\\) and \\(E'\\) are uncorrelated with each other and with \\(T\\), and have equal variances. Show that \\(\\text{cor}(X, X') = \\sigma^2_T/\\sigma^2_X\\). Where exactly did you use each assumption?\nAttenuation. Let \\(Y\\) be a criterion (a gold-standard measure, say) with its own reliability \\(\\rho_{YY'}\\). Show that \\(\\text{cor}(X, Y) = \\text{cor}(T_X, T_Y)\\sqrt{\\rho_{XX'}\\,\\rho_{YY'}}\\), and hence that a test’s correlation with anything is bounded by \\(\\sqrt{\\rho_{XX'}}\\). What does this imply for a new test whose validity is judged by its correlation with an established one? (Chapter 1 of Lord & Novick, 1968, develops this and the “paradox” it creates for test construction.)\nThe weak item. In gilbert_meta_1, drop s_read_7_4 and recompute alpha. By how much does it change? Now use Spearman–Brown to predict the reliability of a 29-item test from the 30-item alpha. Why do the two answers differ, and in which direction?\nSplit halves. In the split-half figure, why is alpha not below all of the adjusted split-half estimates, given that alpha is a lower bound on reliability? (Hint: what is each split-half estimate a bound on, and what does it assume?) Challenge: is there anything about the splits that fall below alpha that suggests they are “bad” splits—halves that are not parallel?\nReading items. Look at the item-rest correlations for the keyed Mach IV. Choose the two weakest items and, from their wording and the construct, argue whether each should be dropped, rewritten, or kept. Would your decision change if the scale were used to screen job applicants rather than in research?\nAlpha at scale. Using the alpha() function from this lesson, compute alpha for five IRW tables of your choosing with 0/1 responses. Before you do, predict which will be highest. What features of a table (number of items, type of construct, sample) seem to go with high alpha? What would make you distrust a high value?\n\n\n\n\n\n\n\nStuck, or curious about something this lesson doesn’t cover? Ask Claude about this lesson opens a new conversation that already knows what the lesson is about; add your question at the end. Claude shows a caution notice on any prompt that arrives through a link; that’s expected."
   },
   {
     "objectID": "lessons/ctt-reliability.html#going-further",
@@ -1321,6 +1391,13 @@
     "title": "Classical test theory and reliability",
     "section": "Going further",
     "text": "Going further\n\nLord, F. M., & Novick, M. R. (1968). Statistical theories of mental test scores. Addison-Wesley. The canonical treatment; chapter 1 is where the attenuation paradox lives.\nCronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. Psychometrika, 16(3), 297–334.\nSijtsma, K. (2009). On the use, the misuse, and the very limited usefulness of Cronbach’s alpha. Psychometrika, 74(1), 107–120. A sharp critique, with the glb as an alternative.\nGilbert, J. (2023). Replication data for: Modeling item-level heterogeneous treatment effects with the explanatory item response model. Harvard Dataverse. https://doi.org/10.7910/DVN/QARRYT. The source of gilbert_meta_1.\nChristie, R., & Geis, F. L. (1970). Studies in Machiavellianism. Academic Press. The source of the Mach IV.\nHunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. Journal of Personality and Social Psychology, 43(6), 1293–1305. The source of the lessR_Mach4 responses—and, as the title suggests, a paper worth reading alongside problem 5."
+  },
+  {
+    "objectID": "lessons/ctt-reliability.html#data-sources",
+    "href": "lessons/ctt-reliability.html#data-sources",
+    "title": "Classical test theory and reliability",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\ngilbert_meta_1: Gilbert, J. B., Kim, J. S., & Miratrix, L. W. (2023). Modeling item-level heterogeneous treatment effects with the explanatory item response model: Leveraging large-scale online assessments to pinpoint the impact of educational interventions. Journal of Educational and Behavioral Statistics, 48(6), 889-913. Gilbert, Josh, 2023, “Replication Data for: Modeling Item-Level Heterogeneous Treatment Effects With the Explanatory Item Response Model: Leveraging Large-Scale Online Assessments to Pinpoint the Impact of Educational Interventions”, https://doi.org/10.7910/DVN/QARRYT, Harvard Dataverse, V2, UNF:6:r+hUHhEPWWtUbcqXyELTJw== [fileUNF]. Licence: CC BY-NC-SA 4.0.\nlessR_Mach4: Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. Journal of personality and social psychology, 43(6), 1293. https://doi.org/10.1037/0022-3514.43.6.1293. Licence: GPL-3.0."
   },
   {
     "objectID": "lessons/ctt-reliability.html#for-instructors",
@@ -1379,6 +1456,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/dimensionality.html#data-sources",
+    "href": "lessons/dimensionality.html#data-sources",
+    "title": "Dimensionality and multidimensional IRT",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nenem_2013_1mil_lc: Martins, D. M. (2021). Estado da arte das pesquisas sobre ENEM no Brasil: State of the art of research on ENEM in Brazil. Latin American Journal of Development, 3(5), 2898-2907. https://doi.org/10.46814/lajdv3n5-018. Licence: CC BY 4.0.\nflorida_twins_dweck: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave 2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec. Licence: CC BY 4.0.\nflorida_twins_grit: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave 2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec. Licence: CC BY 4.0."
+  },
+  {
     "objectID": "lessons/dimensionality.html#for-instructors",
     "href": "lessons/dimensionality.html#for-instructors",
     "title": "Dimensionality and multidimensional IRT",
@@ -1435,6 +1519,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/explanatory-irt.html#data-sources",
+    "href": "lessons/explanatory-irt.html#data-sources",
+    "title": "What is an item? Explanatory item response models",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nimps2025_hf: Obradović, J., Sulik, M. J., Finch, J. E., & Tirado-Strayer, N. (2018). Assessing students’ executive functions in the classroom: Validating a scalable group-based procedure. Journal of Applied Developmental Psychology, 55, 4–13. doi:10.1016/j.appdev.2017.03.003 DeJoseph, M. L., Merculief, A., Sulik, M. J., & Obradović, J. (2025). Understanding Learning Variability in Early Childhood: An Equity-Centered Assessment of Cognitive Regulation among Diverse Preschool Children. Early Education and Development, 1–25. https://doi.org/10.1080/10409289.2025.2578816. &lt;https://doi.org/10.1016/j.appdev.2017.03.003\n\n10.1080/10409289.2025.2578816&gt;. Licence: Permission via Email."
+  },
+  {
     "objectID": "lessons/explanatory-irt.html#for-instructors",
     "href": "lessons/explanatory-irt.html#for-instructors",
     "title": "What is an item? Explanatory item response models",
@@ -1488,7 +1579,7 @@
     "href": "lessons/fa-exploratory.html#problems",
     "title": "Factor analysis I: exploring dimensionality",
     "section": "Problems",
-    "text": "Problems\n\nOne factor. Show that under a one-factor model with standardized items and factor, \\(\\text{cor}(x_i, x_j) = \\lambda_i\\lambda_j\\) for \\(i \\ne j\\). Then show that, for any four items, \\(\\text{cor}(x_1,x_3)\\,\\text{cor}(x_2,x_4) = \\text{cor}(x_1,x_4)\\,\\text{cor}(x_2,x_3)\\). (These “tetrad” constraints were Spearman’s original test for a single factor.)\nReliability, revisited. In a one-factor model, what is the correlation between the sum of the items and the factor? Use your answer to explain why items with low loadings contribute little to reliability, and connect it to the proof that alpha is a lower bound in the reliability lesson. What does “tau-equivalence” mean in terms of loadings?\nChoosing the number of factors. Using the simulation above, find settings (loading, number of people) under which parallel analysis gets the number of factors wrong at least half the time across ten seeds. What does this suggest about using a single rule in small samples?\nFormats. The BFI-2 data come from four randomly assigned response formats (itemcov_format: Likert L, Expanded E, and two item-specific versions ISF and ISL). Fit the five-factor model separately in each format. Do the same items load on the same factors? Are the loadings noticeably stronger in any format? What would a difference tell you about the formats—and why does random assignment matter for that inference? (Zhang et al., 2025, is the place to compare notes.)\nA weak item. Find the three BFI-2 items with the lowest communalities in the five-factor solution. Look them up in Soto and John (2017) (the item wording is published there). Would you drop them? What might they be measuring instead?\nChallenge: PCA versus FA. Run principal() (PCA) and fa() with five components or factors on the BFI-2. Compare the loadings. Which are systematically larger, and why?\n\n\n\n\n\n\n\nStuck, or curious about something this lesson doesn’t cover? Ask Claude about this lesson opens a new conversation that already knows what the lesson is about; add your question at the end."
+    "text": "Problems\n\nOne factor. Show that under a one-factor model with standardized items and factor, \\(\\text{cor}(x_i, x_j) = \\lambda_i\\lambda_j\\) for \\(i \\ne j\\). Then show that, for any four items, \\(\\text{cor}(x_1,x_3)\\,\\text{cor}(x_2,x_4) = \\text{cor}(x_1,x_4)\\,\\text{cor}(x_2,x_3)\\). (These “tetrad” constraints were Spearman’s original test for a single factor.)\nReliability, revisited. In a one-factor model, what is the correlation between the sum of the items and the factor? Use your answer to explain why items with low loadings contribute little to reliability, and connect it to the proof that alpha is a lower bound in the reliability lesson. What does “tau-equivalence” mean in terms of loadings?\nChoosing the number of factors. Using the simulation above, find settings (loading, number of people) under which parallel analysis gets the number of factors wrong at least half the time across ten seeds. What does this suggest about using a single rule in small samples?\nFormats. The BFI-2 data come from four randomly assigned response formats (itemcov_format: Likert L, Expanded E, and two item-specific versions ISF and ISL). Fit the five-factor model separately in each format. Do the same items load on the same factors? Are the loadings noticeably stronger in any format? What would a difference tell you about the formats—and why does random assignment matter for that inference? (Zhang et al., 2025, is the place to compare notes.)\nA weak item. Find the three BFI-2 items with the lowest communalities in the five-factor solution. Look them up in Soto and John (2017) (the item wording is published there). Would you drop them? What might they be measuring instead?\nChallenge: PCA versus FA. Run principal() (PCA) and fa() with five components or factors on the BFI-2. Compare the loadings. Which are systematically larger, and why?\n\n\n\n\n\n\n\nStuck, or curious about something this lesson doesn’t cover? Ask Claude about this lesson opens a new conversation that already knows what the lesson is about; add your question at the end. Claude shows a caution notice on any prompt that arrives through a link; that’s expected."
   },
   {
     "objectID": "lessons/fa-exploratory.html#going-further",
@@ -1496,6 +1587,13 @@
     "title": "Factor analysis I: exploring dimensionality",
     "section": "Going further",
     "text": "Going further\n\nFabrigar, L. R., Wegener, D. T., MacCallum, R. C., & Strahan, E. J. (1999). Evaluating the use of exploratory factor analysis in psychological research. Psychological Methods, 4(3), 272–299. Still the clearest practical guide.\nHorn, J. L. (1965). A rationale and test for the number of factors in factor analysis. Psychometrika, 30(2), 179–185. The origin of parallel analysis.\nSoto, C. J., & John, O. P. (2017). The next Big Five Inventory (BFI-2). Journal of Personality and Social Psychology, 113(1), 117–143.\nZhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. Journal of Personality Assessment. https://doi.org/10.1080/00223891.2025.2531187. The source of the data.\nFrom the IRW: how often unidimensionality holds across hundreds of datasets, and a CFA walkthrough with lavaan that previews the next lesson."
+  },
+  {
+    "objectID": "lessons/fa-exploratory.html#data-sources",
+    "href": "lessons/fa-exploratory.html#data-sources",
+    "title": "Factor analysis I: exploring dimensionality",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nbfi2_zhang_2025: Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. PubMed, 1–22. https://doi.org/10.1080/00223891.2025.2531187. Licence: CC BY 4.0."
   },
   {
     "objectID": "lessons/fa-exploratory.html#for-instructors",
@@ -1666,6 +1764,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/invariance-experience.html#data-sources",
+    "href": "lessons/invariance-experience.html#data-sources",
+    "title": "Measurement invariance under treatment and life events",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\ngilbert_meta_20: Jayanthi, M., Gersten, R., Schumacher, R. F., Dimino, J., Smolkowski, K., & Spallone, S. (2021). Improving struggling fifth-grade students’ understanding of fractions: A randomized controlled trial of an intervention that stresses both concepts and procedures. Exceptional Children, 88(1), 81-100. Gersten, Russell; Jayanthi, Madhavi; Dimino, Joseph; Karp, Karen, 2019, “Impact of a Tier 2 Fractions Intervention on 5th Grade At-Risk Students’ Fractions Achievement”, https://doi.org/10.7910/DVN/Z4WMFE, Harvard Dataverse, V1, UNF:6:8pMQK/5+cfpvcr4ACTvAmQ== [fileUNF]. Licence: CC0 1.0.\ngilbert_meta_2: Kim, J. S., Burkhauser, M. A., Relyea, J. E., Gilbert, J. B., Scherer, E., Fitzgerald, J., … & McIntyre, J. (2023). A longitudinal randomized trial of a sustained content literacy intervention from first to second grade: Transfer effects on students’ reading comprehension. Journal of Educational Psychology, 115(1), 73. James S. Kim; Mary A. Burkhauser; Jackie E. Relyea; Joshua B. Gilbert; Ethan Scherer; Jill Fitzgerald; Douglas Mosher; Joseph McIntyre, 2022, “Replication Data for: A Longitudinal Randomized Trial of a Sustained Content Literacy Intervention from First to Second Grade: Transfer Effects on Students’ Reading Comprehension Outcomes”, https://doi.org/10.7910/DVN/LAWFFU, Harvard Dataverse, V2, UNF:6:VATSovKxwaqyJAT6ZzzfBw== [fileUNF]. Licence: CC BY-NC-SA 4.0."
+  },
+  {
     "objectID": "lessons/invariance-experience.html#for-instructors",
     "href": "lessons/invariance-experience.html#for-instructors",
     "title": "Measurement invariance under treatment and life events",
@@ -1677,7 +1782,7 @@
     "href": "lessons/irw-data.html",
     "title": "Item response data and the IRW",
     "section": "",
-    "text": "Module: Foundations\nBefore this: none\nBuilds toward: The likelihood and logistic regression · Classical test theory and reliability\nIRW tables: chess_lnirt\nFrom EDUC 252: slides c1; problem sets PS1#3; code c1/irw_data_exploration.R\nStatus: stub"
+    "text": "Module: Foundations\nBefore this: none\nBuilds toward: The likelihood and logistic regression · Classical test theory and reliability\nIRW tables: verbagg, manolika_2021_mini_ipip, rr98_accuracy\nFrom EDUC 252: slides c1; problem sets PS1#3; code c1/irw_data_exploration.R\nStatus: stub"
   },
   {
     "objectID": "lessons/irw-data.html#what-this-is-for",
@@ -1720,6 +1825,13 @@
     "title": "Item response data and the IRW",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/irw-data.html#data-sources",
+    "href": "lessons/irw-data.html#data-sources",
+    "title": "Item response data and the IRW",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nverbagg: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer. https://doi.org/10.1007/978-1-4757-3990-9. Licence: GPL-3.0.\nmanolika_2021_mini_ipip: Manolika, M. (2021). The Big Five and Beyond: Which Personality Traits Do Predict Movie and Reading Preferences? [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/23NDKX. Licence: CC0 1.0.\nrr98_accuracy: Ratcliff, R., & Rouder, J. N. (1998). Modeling Response Times for Two-Choice Decisions. Psychological Science, 9(5), 347-356. http://doi.org/10.1111/1467-9280.00067. Licence: GPL-3.0."
   },
   {
     "objectID": "lessons/irw-data.html#for-instructors",
@@ -1789,7 +1901,7 @@
     "href": "lessons/measurement.html",
     "title": "What is measurement?",
     "section": "",
-    "text": "Module: Foundations\nBefore this: none\nBuilds toward: Constructs and construct maps\nIRW tables: none\nFrom EDUC 252: slides c1; problem sets PS1#4\nStatus: stub"
+    "text": "Module: Foundations\nBefore this: none\nBuilds toward: Constructs and construct maps · Scale properties: is the scale equal-interval?\nIRW tables: none\nFrom EDUC 252: slides c1; problem sets PS1#4\nStatus: stub"
   },
   {
     "objectID": "lessons/measurement.html#what-this-is-for",
@@ -1890,6 +2002,13 @@
     "text": "Going further"
   },
   {
+    "objectID": "lessons/polytomous.html#data-sources",
+    "href": "lessons/polytomous.html#data-sources",
+    "title": "Models for polytomous responses",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nscience_ltm: Karlheinz, R. and Melich, A. (1992) Euro-Barometer 38.1: Consumer Protection and Perceptions of Science and Technology. INRA (Europe), Brussels. [computer file]. https://cran.r-project.org/web/packages/ltm/index.html. Licence: GPL-3.0.\npromis1wave1_pain: Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S., … & Hays, R. (2010). Initial adult health item banks and first wave testing of the patient-reported outcomes measurement information system (PROMIS™) network: 2005–2008. Journal of clinical epidemiology, 63(11), 1179. Cella, David, 2015, “PROMIS 1 Wave 1”, https://doi.org/10.7910/DVN/0NGAKG, Harvard Dataverse, V3, UNF:6:sXYqKDzGWfX7QuTXNGpjGQ== [fileUNF]. Licence: CC0 1.0.\nffm_CSN: Goldberg, L. R. (1992). The development of markers for the Big-Five factor structure. Psychological assessment, 4(1), 26. https://doi.org/10.1037/1040-3590.4.1.26. Licence: CC BY 4.0."
+  },
+  {
     "objectID": "lessons/polytomous.html#for-instructors",
     "href": "lessons/polytomous.html#for-instructors",
     "title": "Models for polytomous responses",
@@ -1901,7 +2020,7 @@
     "href": "lessons/response-time.html",
     "title": "Response time and the speed-accuracy tradeoff",
     "section": "",
-    "text": "Module: Beyond the standard models (optional: beyond a first course)\nBefore this: What is an item? Explanatory item response models\nBuilds toward: none\nIRW tables: roar_lexical, pisa2018_read\nFrom EDUC 252: slides c9; problem sets PS9#1; code ps9/sat.R\nStatus: stub"
+    "text": "Module: Beyond the standard models (optional: beyond a first course)\nBefore this: What is an item? Explanatory item response models\nBuilds toward: Process models for response time: drift diffusion and race models\nIRW tables: roar_lexical, pisa2018_read\nFrom EDUC 252: slides c9; problem sets PS9#1; code ps9/sat.R\nStatus: stub"
   },
   {
     "objectID": "lessons/response-time.html#what-this-is-for",
@@ -1944,6 +2063,13 @@
     "title": "Response time and the speed-accuracy tradeoff",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/response-time.html#data-sources",
+    "href": "lessons/response-time.html#data-sources",
+    "title": "Response time and the speed-accuracy tradeoff",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nroar_lexical: Yeatman, J. D., Tang, K. A., Donnelly, P. M., Yablonski, M., Ramamurthy, M., Karipidis, I. I., … & Domingue, B. W. (2021). Rapid online assessment of reading ability. Scientific reports, 11(1), 6396. https://doi.org/10.1038/s41598-021-85907-x. Licence: CC BY 4.0.\npisa2018_read: No reference recorded in IRW biblio. https://doi.org/10.1787/b25efab8-en. Licence: CC BY-NC-SA 3.0."
   },
   {
     "objectID": "lessons/response-time.html#for-instructors",
@@ -2112,6 +2238,13 @@
     "title": "Unfolding and nominal response models",
     "section": "Going further",
     "text": "Going further"
+  },
+  {
+    "objectID": "lessons/unfolding-nominal.html#data-sources",
+    "href": "lessons/unfolding-nominal.html#data-sources",
+    "title": "Unfolding and nominal response models",
+    "section": "Data sources",
+    "text": "Data sources\nData from the Item Response Warehouse (each table name links to its IRW page); references from IRW biblio.\n\nandrich_mudfold: Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. Applied psychological measurement, 12(1), 33-51. https://doi.org/10.1177/014662168801200105. Licence: GPL-3.0.\npreference_inventory: citation missing (no IRW landing page found)."
   },
   {
     "objectID": "lessons/unfolding-nominal.html#for-instructors",
