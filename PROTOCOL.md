@@ -138,8 +138,10 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
   thread returning to the same data) and recorded: the later lesson lists the table
   under `reuses:` in `lessons.yml`. `Rscript check_tables.R` flags any other reuse.
 - **Tokenless CSV only.** Use only tables with a tokenless CSV on their IRW landing
-  page. Redivis serves those only under 100 MB; larger datasets need a teaching
-  subsample published as an ordinary IRW table (#15).
+  page. Redivis serves those only under 100 MB. When a lesson genuinely needs a
+  larger dataset, a teaching subsample is stored in this repo under `lessons/data/`,
+  with a provenance note (the source IRW table and version, how the sample was
+  drawn, and its citation). So far that's only ENEM, for `equating` if needed (#15).
 - **Citation.** Always cite and link the original data: every table is cited where it
   is introduced, with the DOI or URL of the original source from IRW biblio
   (`get_citation`), never from memory, plus a link to its IRW landing page. A
@@ -155,6 +157,8 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 - **Predict-then-check:** exactly **one required**, in *With real data*, immediately
   before the output that answers it, and about the finding that section turns up.
   At most one more in *Core ideas*, tied to a widget.
+- Notation and terminology follow `notes/notation.md` (θ, a, b, c, u; no $D$ in
+  formulas; "respondent"; item-rest correlation).
 - Use `quiz()` and `predict()` from `lessons/widgets/quiz.js`. Every
   wrong option's feedback says why it is wrong.
 
@@ -223,11 +227,10 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 
 ---
 
-## 6. Voice [pending #3]
+## 6. Voice (#3)
 
-Write as Ben (see the `domingue-voice` skill). The rules below are the candidate rules
-from `notes/voice-audit-2026-09-24.md`; they become firm once Ben marks each pattern
-✓ or ✗.
+Write as Ben (see the `domingue-voice` skill). The six rules below come from
+`notes/voice-audit-2026-09-24.md`; Ben adopted all six on 2026-09-24.
 
 - **A. First-person verdicts.** Every lesson gives at least one first-person verdict
   on the choice a practitioner actually faces (which model, which coefficient, which
@@ -360,7 +363,7 @@ A lesson moves to `status: done` only when every box is ticked.
       and package the lesson uses is cited inline with a link, and every reference has
       been verified (none from memory).
 
-**Voice** **[pending #3]**
+**Voice**
 - [ ] At least one first-person verdict; none of the banned words; every size word
       has its baseline.
 
