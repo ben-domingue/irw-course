@@ -16,7 +16,7 @@ Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Cros
 
 ## Picks up
 
-- Crossed random effects for persons and items (`glmer`/`lmer`), item covariates (from `explanatory-irt`).
+- The item response model as a logistic mixed model in long data (`resp ~ 0 + item + (1 | id)`), items as fixed or random effects, and item predictors; log RT is a second outcome with the same random-effects machinery (from `explanatory-irt`, which promises it here).
 - The Rasch item response function, θ and b (from `rasch`). The 2PL's $a$ appears only in passing; `1pl-to-4pl` isn't an ancestor.
 - Response times as a column beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`).
 - Rapid responses at chance in `roar_lexical`, 3.1% of responses under 0.3 s at accuracy 0.51 (from `guessing-priors`). `guessing-priors` isn't an ancestor via `explanatory-irt`, so the lesson restates the finding in a sentence and links back (see Open questions).

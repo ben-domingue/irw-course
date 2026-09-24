@@ -16,11 +16,11 @@ Articles checked on Crossref (09-24). Two slide examples are named, not used: th
 
 ## Picks up
 
-- Items as bundles of features; the LLTM; random item effects; persons × items crossed in `glmer` (from `explanatory-irt`).
-- Hearts and flowers, where the "item" is stimulus × context (from `explanatory-irt`, `imps2025_hf`). Recall only; no reuse.
+- Descriptive vs. explanatory models; the LLTM and the random-item LLTM (items as random effects around the feature prediction); `glmer` in long data (from `explanatory-irt`, which promises continuous stimulus features such as rotation angle and shot location here).
+- "What is an item?": hearts and flowers, where the item is stimulus × context, and shared context as local dependence (a person × family random effect) (from `explanatory-irt`, `imps2025_hf`). Recall only; no reuse.
 - Items that are conditions repeated as trials; `rr98_accuracy`'s 33 conditions answered many times each (from `irw-data`).
-- Crossed random effects (`glmer`) as an alternative estimator (from `item-estimation`; not an ancestor via `explanatory-irt`, so restated).
-- Local dependence in repeated trials (from `dimensionality`; not an ancestor, so restated).
+- Crossed random effects (`glmer`) as an estimator (from `item-estimation`, via `explanatory-irt`).
+- Local dependence in repeated trials and item families (from `dimensionality`, via `explanatory-irt`, where it becomes a testlet effect).
 - Out-of-sample comparison and the IMV (from `fit-prediction`; not an ancestor via `explanatory-irt`, so restated briefly).
 
 ## Promises / leaves open

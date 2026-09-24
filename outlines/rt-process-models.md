@@ -20,7 +20,7 @@ Articles checked on Crossref (09-24). Software: `rtdists` (Singmann et al., CRAN
 - The within- vs. between-person SAT, and the conditional accuracy function (from `response-time`).
 - The 2PL and discrimination as a slope (from `1pl-to-4pl`; not an ancestor, see Open questions).
 - Errors slower than correct responses in `rr98_accuracy` (from `irw-data`).
-- Crossed random effects for ability and difficulty (from `explanatory-irt`, via `response-time`).
+- Crossed random effects for ability and difficulty, fitted to accuracy and log time (from `response-time`).
 
 ## Promises / leaves open
 
