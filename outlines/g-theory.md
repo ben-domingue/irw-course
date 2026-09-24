@@ -1,4 +1,4 @@
-<!-- Outlined 2026-09-24. New material (not in EDUC 252); from the landscape analysis (notes/landscape-2026-09-24.md, gap 2), which also folds interrater reliability in here. -->
+<!-- Outlined 2026-09-24. New material (not in EDUC 252); from the landscape analysis (notes/landscape-2026-09-24.md, gap 2), which also folds interrater reliability in here. Tidied 09-24 (#62): C8 default applied (lme4 now, EMS as Go deeper) while #76 is pending; citations added and verified. -->
 
 # Many sources of error: generalizability theory (`g-theory`)
 
@@ -6,32 +6,36 @@ Module: ctt · Prereqs: instrument-building · Core · Status: outline
 
 ## Core ideas
 
-1. **CTT has one error term; the world has many.** Tasks, raters, occasions: each is a facet, and each contributes error. *(major)*
-2. **Variance components.** A persons × tasks × raters design decomposes score variance into persons, facets and their interactions; estimate them with a random-effects model. *(major)*
-3. **G coefficients.** Relative (rank-ordering) and absolute (level) decisions use different error terms; the generalizability coefficient reduces to alpha in the one-facet case.
-4. **D studies.** With the components in hand, ask what happens with more tasks or more raters. The answer depends on which components are large. *(major)*
-5. **Interrater reliability as a special case.** Agreement vs. consistency; ICCs as G coefficients.
+References verified 09-24 against Crossref unless noted; table citations from IRW biblio. Plan per digest C8: variance components from a random-effects model (`lme4`; Bates, Mächler, Bolker & Walker, 2015, *Journal of Statistical Software* 67(1), doi:10.18637/jss.v067.i01), with the ANOVA/EMS route as the Go deeper. Revisit when #76 answers.
+
+1. **CTT has one error term; the world has many.** *(major)* Tasks, raters, occasions: each is a facet, and each contributes error (Cronbach, Rajaratnam & Gleser, 1963, *British Journal of Statistical Psychology* 16(2), 137–163, doi:10.1111/j.2044-8317.1963.tb00206.x; Cronbach, Gleser, Nanda & Rajaratnam, 1972, *The Dependability of Behavioral Measurements*, Wiley, no DOI, verified via Bock's 1972 review in *Science*, doi:10.1126/science.178.4067.1275).
+2. **Variance components.** *(major)* A persons × tasks × raters design splits score variance into persons, facets and their interactions; estimate them with a random-effects model (Brennan, 2001, *Generalizability Theory*, Springer, doi:10.1007/978-1-4757-3456-0; Shavelson & Webb, 1991, *Generalizability Theory: A Primer*, Sage, no DOI, verified via Sundre's 1993 review, doi:10.1177/109821409301400219).
+3. **G coefficients.** Relative (rank-ordering) and absolute (level) decisions use different error terms; the relative G coefficient for a persons × items design is alpha (Brennan, 2001). A short overview for readers: Shavelson, Webb & Rowley (1989, *American Psychologist* 44(6), 922–932, doi:10.1037/0003-066X.44.6.922).
+4. **D studies.** *(major)* With the components in hand, ask what happens with more tasks or more raters. The answer depends on which components are large.
+5. **Interrater reliability as a special case.** Consistency vs. agreement; ICCs as G coefficients (Shrout & Fleiss, 1979, *Psychological Bulletin* 86(2), 420–428, doi:10.1037/0033-2909.86.2.420; McGraw & Wong, 1996, *Psychological Methods* 1(1), 30–46, doi:10.1037/1082-989X.1.1.30). One subsection, not a separate lesson (landscape analysis).
 
 ## Picks up
 
 - $X = T + E$, reliability, SEM, alpha, Spearman–Brown (from `ctt-reliability`).
-- Raters and constructed-response scoring (from `instrument-building`, if taught first; not a prerequisite).
-- Reliability is a property of scores in a population (from `ctt-reliability`).
+- Many sources of error at once; reliability is a property of scores in a population (from `ctt-reliability`).
+- Raters and constructed-response scoring (from `instrument-building`).
 - Blueprints and domain sampling: items as a facet (from `constructs`).
 
 ## Promises / leaves open
 
-- Raters as a facet in item response models → unpaid (rater models, many-facet Rasch); flag for the Beyond module.
 - Random-effects models for item responses → `explanatory-irt` (items and persons as random effects).
-- Occasions as a facet → `invariance-experience`; ESM data otherwise unpaid.
-- Absolute error for decisions against a cut score → `score-meaning`.
+- Absolute error for decisions against a cut score → `score-meaning` (not a descendant: an "if you've done `g-theory`" Recall there, per E2).
+- Occasions as a facet → `invariance-experience` (a Recall, per E2); ESM data otherwise unpaid.
+- Raters as a facet in item response models → unpaid (rater models, many-facet Rasch); flagged for the Beyond module.
 
 ## Tables
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `Forthmann-2024-cleverness_ratings` | main example | 202 people, 3 alternate-uses tasks, 5 raters, fully crossed. Persons 32% of variance, person × task 29%, residual 30%; raters small (rater 2%, person × rater 6%). So a D study says: add tasks, not raters. | — |
-| `teacherjudgements_lohmann_2026_essayratings` | contrast | 881 essays, 4 criteria, 316 raters (sparse). Here raters matter: rater 14%, essay × rater 19%, against essays 28%. More raters per essay is the lever. | — |
+| `Forthmann-2024-cleverness_ratings` | main example | Cleverness ratings of alternate-uses responses (Forthmann & Myszkowski, 2024, "Analysis of a divergent thinking dataset", OSF, https://osf.io/a9qnc; CC BY 4.0; no DOI). 202 respondents, 3 tasks, 5 raters, fully crossed. Persons 32% of variance, person × task 29%, residual 30%; raters small (rater 2%, person × rater 6%). So a D study says: add tasks, not raters. | — |
+| `teacherjudgements_lohmann_2026_essayratings` | contrast | Teachers rating student essays (Lohmann et al., 2026, *Journal of Educational Psychology* 118(6), 941–960, doi:10.1037/edu0000969; CC BY 4.0). 881 essays, 4 criteria, 316 raters (sparse). Here raters matter: rater 14%, essay × rater 19%, against essays 28%. More raters per essay is the lever. | — |
+
+Numbers from the 09-24 outline pass (not recomputed). Sanity: the simulation (known components recovered) checks the `lme4` pipeline before the real tables.
 
 ## Widget / simulation / problem ideas
 
@@ -42,7 +46,7 @@ Module: ctt · Prereqs: instrument-building · Core · Status: outline
 
 **Predict-then-check:** for the cleverness ratings, which will be the larger source of error, the raters or the tasks? Answered by the variance components.
 
-**Simulate:** a persons × tasks × raters design with known components; estimate them with `lme4` (a few seconds in webR?) and compare with the truth; vary the number of raters.
+**Simulate:** a persons × tasks × raters design with known components; estimate them with `lme4` and compare with the truth; vary the number of raters. `lme4` is in the webR repository (2.0-1 for R 4.5); if the fit is slow in the browser, Simulate shows precomputed results with downloadable code.
 
 **Problems**
 1. Derivation: show that the one-facet (persons × items) G coefficient for relative decisions equals alpha.
@@ -54,10 +58,8 @@ Module: ctt · Prereqs: instrument-building · Core · Status: outline
 
 ## Go deeper
 
-- **Expected mean squares for the p × i design.** How the variance components are identified from an ANOVA table, and why the G coefficient equals alpha. Why: `ctt-reliability`, `score-meaning`. Length: half a page.
+- **Expected mean squares for the p × i design.** How the variance components are identified from an ANOVA table, and why the G coefficient equals alpha (Brennan, 2001). Why: `ctt-reliability`, `score-meaning`; the classic route beside the `lme4` main line (C8). Length: half a page.
 
 ## Open questions
 
-- New material, not in 252: are variance components by `lme4` the right tool for a first course, or classic ANOVA (EMS) tables?
-- `lme4` is in the webR binary repository (repo.r-wasm.org, version 2.0-1 for R 4.5), so it loads. Timing gets checked when the lesson is drafted; if it's slow, Simulate uses precomputed results plus downloadable code.
-- Interrater reliability is folded in here (per the landscape analysis). Enough, or does it need its own section?
+- **#76 (questions for colleagues) is pending.** Is `lme4` the right main tool for a first course, or should the classic ANOVA/EMS tables lead? *Default:* `lme4` in the main line, EMS as the Go deeper (C8); revise when #76 answers.
