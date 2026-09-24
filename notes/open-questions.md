@@ -1,8 +1,19 @@
 # Open questions: digest for Ben
 
-**Part 1 of 2 (2026-09-24).** Covers the cross-cutting decisions and the 23 outlines on
-main (Foundations, CTT, factor analysis, IRT, competitions). Part 2 adds Validity,
-Fairness, Using calibrated items and Beyond when their outline PRs land.
+**Parts 1 and 2 (2026-09-24).** Part 1 (sections A–C) covers the cross-cutting
+decisions and the 23 outlines on main (Foundations, CTT, factor analysis, IRT,
+competitions). Part 2 (sections E and F, plus additions to B and D) covers Validity,
+Fairness and Beyond from main and the outline branches below. Using calibrated items is pending:
+its branch (`8-outlines-uses`) isn't pushed yet.
+
+Part 2 read these versions (refreshed after PR #92 merged):
+- main at `c98c0d2`, which now includes the Beyond part 2 outlines (PR #92, merged at
+  `349f48f`): response-time, rt-process-models, trials, ai-psychometrics;
+- `8-outlines-validity` at `9bc8435` (PR #94): validity-argument, validity-causal,
+  validity-evidence, dif, invariance-experience;
+- `8-outlines-beyond-1` at `e1fd007` (no PR yet): explanatory-irt (cdm, irtrees,
+  unfolding and nominal not yet outlined there);
+- #62 and the open `needs-ben` issues as of 2026-09-24 19:30.
 
 **How to answer:** every question has a recommended default. Reply "defaults except
 A2, C7" (or similar) and give your answer for the exceptions. Claude then records
@@ -100,6 +111,24 @@ with a Redivis login.
 - Grit keying: higher = more grit. The perseverance items are reversed, per the IRW
   option text.
 
+Part 2 (from #62, #45, #65, #15 and PR #92):
+- `rapm_poulton_2022_untimed` is a fourth table in `response-time` (timed vs. untimed
+  Raven's).
+- Deep dive #25: a language-model feature in `compute.R` is punted; the corpus run
+  uses word count and mean word length.
+- Table reuse is fine where it serves a thread; use tables broadly where possible
+  (the recording question is E4).
+- The reliability paradox: `validity-evidence` pays the `ctt-reliability` hook briefly;
+  `trials` gives the full treatment; `validity-causal` uses its Stroop table for
+  Borsboom's between/within point. No formal thread.
+- IL-HTE lives in `invariance-experience` (optional); `dif` introduces it (#45).
+  PS7#1 is homed there; `explanatory-irt` only points to it.
+- `rt-process-models` is its own optional lesson after `response-time` (#65).
+- No PISA subsample (#15, A4), so `response-time` uses `credentialform_lnirt`; there's
+  nothing to revisit.
+- Sanity tables aren't listed in lessons.yml, so they don't count as reuses.
+- Deep dive #25 lives in `ai-psychometrics` (agreed by the two Beyond sessions).
+
 ---
 
 ## C. Per-lesson questions (defaults are safe to accept in bulk)
@@ -173,6 +202,171 @@ with a Redivis login.
 
 ---
 
+---
+
+## E. Part 2: cross-cutting questions
+
+**E1. Prerequisite changes.** Several outlines lean on lessons that aren't their
+ancestors, and `check_course()`'s thread check only accepts ancestors. Each line says
+what adding the prerequisite costs. *Defaults:*
+- `dif ← fa-confirmatory, polytomous`: **add both.** `dif` teaches multigroup CFA and
+  polytomous DIF. Both already come before `dif` in the first-course path, so nothing
+  moves.
+- `validity-argument ← ctt-reliability`: **add.** The lesson recalls alpha
+  ("reliability is necessary, not sufficient"). `ctt-reliability` already comes first
+  in both paths.
+- `validity-evidence ← instrument-building`: **add.** Content evidence starts at item
+  writing. `instrument-building` already comes before it in the first-course path.
+- `rt-process-models ← 1pl-to-4pl`: **add.** Idea 3 maps the diffusion model onto
+  the 2PL. `1pl-to-4pl` is core, so readers of an optional Beyond lesson will have it.
+- `response-time ← guessing-priors`: **don't add.** Restate the one finding it needs
+  in a paragraph instead (3.1% of `roar_lexical` responses come in under 0.3 s, at 0.51
+  accuracy). Adding it would put `ability-estimation`, `fit-prediction`
+  and `guessing-priors` (two of them optional) in front of `response-time`, only for
+  one Recall.
+- `ai-psychometrics ← explanatory-irt`: **add.** Both are optional and in the same
+  module. `explanatory-irt` teaches the LLTM and was written to hand deep dive #25
+  ("can text alone predict difficulty?") on to this lesson. The cost: readers reach
+  `ai-psychometrics` through `rasch → explanatory-irt` as well as `1pl-to-4pl`.
+
+**E2. Hooks from lessons that aren't ancestors.** Examples: `invariance-experience`
+recalls `g-theory` (occasions) and `fa-exploratory` (randomized formats); `dif` recalls
+`instrument-building`, `parameter-invariance`, `sem` and `validity-evidence`;
+`validity-causal` answers a hook from `sem`. *Default:* allow brief "if you've done X"
+Recalls, with no formal thread (threads need an ancestor, PROTOCOL §4). Consequence:
+these connections won't appear in the header box.
+
+**E3. `validity-evidence` and the factor-analysis module.** `fa-confirmatory` hands
+"bifactor models: one construct or three?" to `validity-evidence`, which comes before
+both FA lessons in the first-course path. *Default:* keep the order. `fa-confirmatory`
+answers its own question (its DASS example already has omega hierarchical) and drops
+the hook; `validity-evidence` notes internal structure briefly and points forward.
+Moving `validity-evidence` after the FA module would split the Validity module around
+FA in the path.
+
+**E4. Deliberate table reuses.** You said on 09-24 that reuse is fine where it serves
+a thread. These are the reuses in the outlines; check_tables.R wants each recorded
+under `reuses:` on the later lesson. The first three are already recorded on main
+(PR #92); the last two aren't:
+- `rr98_accuracy`: `irw-data` → `trials`;
+- `roar_lexical`: `guessing-priors` → `response-time` (rapid guessing);
+- `credentialform_lnirt`: `response-time` → `rt-process-models` (the failure case for
+  the diffusion model);
+- `verbagg`: `irw-data` → `explanatory-irt` (described there, modelled here; recorded
+  on the unmerged `8-outlines-beyond-1` branch);
+- `wilmer-rmet-normative-data-set-2022`: `1pl-to-4pl` → `nominal`. It's on main but not
+  recorded, and check_tables.R flags it today.
+
+*Default:* keep the three already recorded and record the other two. Don't add `bfi2_zhang_2025` (randomized response formats)
+to `invariance-experience`: a Recall of `fa-exploratory`'s finding is enough.
+Consequence: check_tables.R's remaining reuse failure (RMET) clears once lessons.yml
+records it.
+
+**E5. Data the lessons want that the IRW doesn't have.** You marked this "to discuss"
+(PR #92). The gaps:
+- NBA shot data (Samangy, GitHub) and LEVANTE mental rotation with angle and RT
+  (`trials`);
+- per-question language-model benchmark results, and essays with both human and
+  machine scores (`ai-psychometrics`);
+- item-level HRS CES-D data for the spousal-loss example (`invariance-experience`);
+- balance-scale responses (`validity-causal`).
+
+*Default:* add nothing now. Each lesson runs on its stand-in table or on simulation, as
+the outlines plan (`mentalrotation_wolf_2024`, oREV, a cited figure for spousal loss,
+widgets for automated scoring). Revisit after drafting, when it's clear which gap hurts
+most. Consequence: none of these lessons waits on new data.
+
+**E6. When a table's source licence and its IRW page differ.** Example:
+`ieswriting_molloy_2022` is CC BY-NC-SA 4.0 at the source (ETS on GitHub) but CC BY 4.0
+on its IRW page. *Default:* follow the stricter licence (the source). A free course
+fits NC-SA; quote a few items with citation rather than showing the whole survey.
+Claude flags each mismatch to the IRW (D). Consequence: A5's "openly licensed" test
+uses the source licence.
+
+**E7. Showing AI-written items in full (`ai-psychometrics`).** You asked for this in
+plainer words (PR #92). Two of the lesson's tables are items written by ChatGPT or
+GPT-4o, released by their authors as CC BY 4.0 (`gpt4mcq_young_2025`) and CC0
+(`genpsych_russell_2024_gpt4o`). Under A5 we show full text only for openly licensed
+instruments. Should we show these items in full, like any other openly licensed
+instrument? *Default:* yes, citing the authors and naming the model that wrote them.
+Consequence: `ai-psychometrics` can show all its items.
+
+**E8. First-person verdicts the slides don't give.** Like A2, these need your writing:
+- `validity-causal`: your view of Borsboom's definition: a replacement for the argument
+  view, a complement, or a concept for a different grain size of test? Slide 15 ends
+  with worries, not a verdict. *Your answer needed*: the lesson's verdict has to be
+  yours.
+- `response-time` (in plainer words, as you asked in PR #92): on c9 slide 29 you wrote
+  "I don't much like this model" about van der Linden's speed–accuracy model. Its
+  weak spot is that it assumes each person works at one constant speed throughout the
+  test. Should that objection be the lesson's first-person verdict? The data support
+  it: how accuracy changes when a person is slower than usual differs across the
+  lesson's three tables. *Default:* yes, in your words from the slide plus one
+  sentence of reason.
+
+**E9. The EM conversation for `item-estimation` (#38).** A claude.ai chat that Claude
+Code can't read. *Your answer needed*: paste the useful parts into #38, or say to go
+ahead without them. Only you can open it.
+
+---
+
+## F. Part 2: per-lesson questions (defaults are safe to accept in bulk)
+
+**Validity**
+- **F1 `validity-argument`**: Simulate in a conceptual lesson. The proposal is a
+  contaminated-criterion simulation: the AUC rises as the "diagnosis" borrows from the
+  screener's items. Keep it, or record a §10 exception? *Default:* keep it. It's the
+  lesson's real-data finding in miniature.
+- **F2 `validity-argument`**: the main example's ADHD flag is the DSM rule applied to
+  the same items (AUC 0.99 by construction). It's framed as a fact about a study built
+  for network analysis, not a flaw. *Default:* keep that framing.
+- **F3 `validity-argument`**: carry your slide-16 disclosure (you worked with two of
+  the four approved dyslexia screeners) into problem 5? *Default:* yes, in one clause.
+- **F4 `validity-causal`**: no balance-scale data in the IRW. Is oREV (age of
+  acquisition predicts Rasch difficulty, r = 0.80) a fair stand-in for a theory of
+  response behaviour? *Default:* yes. The balance scale stays as the worked example in
+  prose and widgets.
+- **F5 `validity-causal`**: cite Kelley's "measures what it purports to measure" as
+  quoted in Borsboom et al. (2004)? *Default:* yes, unless Claude finds the Kelley page
+  (D).
+- **F6 `validity-evidence`**: classification accuracy needs a fourth table, and the
+  MTMM already uses two (self and colleague HEXACO). *Default:* teach it with the ROC
+  widget, the simulation and a Recall of the ADHD table from `validity-argument`. The
+  IRW has no screener with an independent diagnosis (searched 09-24).
+- **F7 `validity-evidence`**: correct SAT–GPA to the national SAT SD, or keep the
+  within-sample range-restriction demonstration (top half on SAT: r 0.43 → 0.25,
+  corrected 0.34)? *Default:* within-sample only. It needs no outside figure.
+
+**Fairness**
+- **F8 `dif`**: the slides' DART table. A checked foil name scores 1, like a
+  recognized author, and there are 199 respondents. *Default:* drop it from the tables;
+  keep the Austen/Allende vs. Clancy/Krabbé pattern as a problem with the foils
+  removed.
+- **F9 `dif`**: the main example's biggest finding is treatment DIF (`gilbert_meta_11`:
+  every demographic grouping essentially category A; treatment 3 C items), which is
+  `invariance-experience`'s subject. *Default:* lead with it, per the #44 scope note.
+  `invariance-experience` uses different tables.
+- **F10 `invariance-experience`**: deep dive #26 takes the first post-randomization
+  wave per table rather than "wave 1" (`gilbert_meta_20` codes its pretest 0;
+  `gilbert_meta_74` has waves 1 and 2). *Default:* adopt it, and suggest the same fix
+  for the IRW IL-HTE vignette in an IRW issue.
+
+**Using calibrated items**
+- Pending: `8-outlines-uses` (score-meaning, equating, item-banks-cat,
+  scale-properties) isn't pushed yet.
+
+**Beyond**
+- **F11 `explanatory-irt`**: `lme4` throughout instead of `mirt`. *Default:* yes. The
+  LLTM and random items are mixed models, and `lme4` is what the IL-HTE and trials
+  lessons use too. Webr speed is Claude's check (D).
+- **F12 `rt-process-models`**: problem 2 needs a word/nonword flag for
+  `mturkddm_lexical`, which the tokenless CSV lacks. *Default:* take it from the
+  item-text snapshot (A5).
+- **F13 `ai-psychometrics`**: the automated-scoring section has no table (see E5).
+  *Default:* widget-only.
+
+---
+
 ## D. Claude's to-do (no action from Ben)
 
 - Verify or replace: Bond & Lang (2013); Baker & Kim (2004); Baker (2001) edition and
@@ -184,3 +378,25 @@ with a Redivis login.
 - Add baselines: "wide spread of difficulty" (`rasch`, diffsim vignette) and
   "unusually clean" (`fa-exploratory`, dimensionality vignette).
 - Tidy #62: #5 and #13 are done; the #3 baselines are Claude's, not Ben's.
+
+Part 2:
+- Verify or replace: Messick (1989), Kelley (1927) (page for the "purports to measure"
+  line), Thorndike (1949), Camilli (2006), the exact wording and page of Borsboom et
+  al.'s (2004) definition, the item-level figure in the supplement of Domingue et al.
+  (2021), the IEEE essay-scoring meta-analysis (c10 slide 7, IEEE 11062635),
+  Stenner et al. (2006), and the source of "r = 0.62, Embretson & Daniel" (c10
+  slide 25). Ask Ben only for any that stay unfound.
+- Find slide sources: the secondary text quoting Dorans & Kulick on DECOY : DUCK (c5
+  slide 13), the JD-Next predictive-bias figure (c5 slide 24), and the CDE original of
+  the CAASPP purposes (c3 slide 21; only a district copy found).
+- Data checks: `gilbert_meta_11` grade (the IRW says grade 1); `alexandrowicz_2018_cesd`
+  sex coding against the paper's data file; rescore HEXACO with the published key; check
+  whether `gilbert_meta_37`'s night-blindness items match the programme's content
+  (Carpena, 2024); `motion`'s second item index (processing notes); the TROG testlet
+  fit.
+- webR checks: `lme4` (`explanatory-irt`, `g-theory`) and `rtdists`
+  (`rt-process-models`; fall back to a plain random walk).
+- Licence checks (A5, E6): `ieswriting_molloy_2022` (flag the mismatch to the IRW), the
+  oREV picture materials, whether the Forecasting Proficiency Test's general-knowledge
+  items were adapted from older pools, and instrument reuse for the `gilbert_meta`
+  outcomes.
