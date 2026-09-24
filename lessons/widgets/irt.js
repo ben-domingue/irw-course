@@ -174,3 +174,47 @@ export function stdGap(treated, control) {
   const mean = (x) => x.reduce((u, v) => u + v, 0) / x.length;
   return (mean(treated) - mean(control)) / sd;
 }
+
+// KR-20 (Cronbach's alpha for 0/1 items). X is an array of respondents' 0/1 rows.
+// Uses n - 1 variances throughout, like R's var().
+export function kr20(X) {
+  const n = X.length, k = X[0].length, p = Array(k).fill(0), tot = X.map(r => r.reduce((u, v) => u + v, 0));
+  for (const r of X) for (let i = 0; i < k; i++) p[i] += r[i] / n;
+  const sumVar = p.reduce((u, pi) => u + pi * (1 - pi), 0) * n / (n - 1);
+  const mt = tot.reduce((u, v) => u + v, 0) / n;
+  const varT = tot.reduce((u, v) => u + (v - mt) ** 2, 0) / (n - 1);
+  return (k / (k - 1)) * (1 - sumVar / varT);
+}
+
+// m distinct indices from 0..w.length-1, each draw proportional to w among the
+// indices not yet drawn (what R's sample(..., prob = w) does without replacement).
+// r is a generator from rng().
+export function sampleWeighted(r, w, m) {
+  const left = w.slice(), out = [];
+  let total = left.reduce((u, v) => u + v, 0);
+  for (let d = 0; d < m; d++) {
+    let u = r.unif() * total, i = 0;
+    while (i < left.length - 1 && (u >= left[i] || left[i] === 0)) { u -= left[i]; i++; }
+    out.push(i); total -= left[i]; left[i] = 0;
+  }
+  return out;
+}
+
+// Logistic regression of y on x by Newton's method. For grouped data, y holds
+// proportions and n the group sizes (default 1 each). Returns {b0, b1}, the MLE.
+export function logisticFit(x, y, n = null) {
+  let b0 = 0, b1 = 0;
+  for (let it = 0; it < 50; it++) {
+    let g0 = 0, g1 = 0, h00 = 0, h01 = 0, h11 = 0;
+    for (let j = 0; j < x.length; j++) {
+      const w = n ? n[j] : 1, p = logistic(b0 + b1 * x[j]), v = w * p * (1 - p);
+      g0 += w * (y[j] - p); g1 += w * (y[j] - p) * x[j];
+      h00 += v; h01 += v * x[j]; h11 += v * x[j] * x[j];
+    }
+    const det = h00 * h11 - h01 * h01;
+    const d0 = (h11 * g0 - h01 * g1) / det, d1 = (h00 * g1 - h01 * g0) / det;
+    b0 += d0; b1 += d1;
+    if (Math.abs(d0) + Math.abs(d1) < 1e-10) break;
+  }
+  return {b0, b1};
+}

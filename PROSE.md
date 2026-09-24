@@ -123,11 +123,19 @@ on are stated before it.
 ## First screen of the drafted lessons (2026-09-24)
 
 A trial run of the screens over `likelihood`, `ctt-reliability`, `rasch` and
-`fa-exploratory`, to test the rules rather than to finish the audit. Each hit needs
-Ben's call or a fix in that lesson's PR.
+`fa-exploratory`. The retrofit PRs (#110, #112) had already removed "a strange
+assumption" (`rasch`) and "a sharp critique" (`ctt-reliability`). The rest were fixed
+in the prose-fixes PR:
 
-| Rule | Where | Hit |
-|---|---|---|
+- `ctt-reliability`: the quoted Mach IV items cite Christie & Geis (1970, ch. 2) inline,
+  with a link; "a common misreading" is gone from a quiz; the Sijtsma (2009) entry says
+  what the paper argues.
+- `fa-exploratory`: the Kaiser rule gets a sentence on when it is a reasonable first
+  look.
+
+No block quotations or attributed quotations turned up in the four lessons.
+
+---|---|---|
 | 2 | `ctt-reliability.qmd:274, 286` | Two Mach IV items quoted; Christie & Geis (1970) is cited only in *Going further*. Needs an inline citation. |
 | 3 | `ctt-reliability.qmd:321` | Sijtsma (2009) described as "A sharp critique". Describe what it argues. |
 | 3 | `rasch.qmd:24` | Sum scores' equal weighting called "a strange assumption". Say what the assumption is and what it misses. |
