@@ -22,6 +22,7 @@ Articles checked on Crossref (09-24). Named, not used: Nelson (2016), doi:10.108
 - The LLTM, the random-item LLTM, `glmer` in long data; hearts and flowers as stimulus × context (from `explanatory-irt`; a Recall of `imps2025_hf`, no reuse).
 - Conditions repeated as trials in `rr98_accuracy` (from `irw-data`).
 - Brief Recalls (E2; restated, not threads): crossed random effects in `item-estimation`; local dependence in `dimensionality`; the IMV in `fit-prediction`; the Stroop between/within point in `validity-causal`.
+- Reliability is a property of scores in a population, and the reliability paradox (from `ctt-reliability`).
 
 ## Promises / leaves open
 

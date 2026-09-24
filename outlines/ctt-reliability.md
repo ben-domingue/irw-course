@@ -31,6 +31,7 @@ Nothing dropped in the retrofit.
 - Reverse keying; automated keying gets most items but not all → `fa-exploratory`, `polytomous`, `instrument-building`, `irtrees`, `unfolding`.
 - Many sources of error at once → `g-theory`.
 - Attenuation (problem 2) → `validity-evidence`, `sem`.
+- Reliability is necessary but not sufficient for validity → `validity-argument` (a Recall of alpha).
 
 ## Tables
 

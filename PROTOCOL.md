@@ -131,7 +131,7 @@ specific objectivity, introduced in `rasch`, shown failing in `1pl-to-4pl`).
 - **Display.** The header box shows "Starts threads" and "Picks up threads", with links.
 - **Check.** `check_course()` fails on an unknown lesson id in a thread, and on a
   thread that returns to a lesson that comes before its introduction in prerequisite
-  order. **[pending #9: not yet implemented]**
+  order.
 - **Drafting rule.** Before writing a lesson, read every thread that touches it. Pay
   off each thread it owes with a **Recall** callout that links back to where the idea
   was introduced. Register any new assumption or promise as a thread.
