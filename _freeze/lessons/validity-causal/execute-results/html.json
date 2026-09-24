@@ -2,7 +2,7 @@
   "hash": "81c538d3662a2c7ec653ee6f11c0f14a",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Validity as causation: Borsboom's view\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Validity (optional: beyond a first course)  \n**Before this:** [Validity as an argument](validity-argument.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** slides c4  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Validity as causation: Borsboom's view\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Validity (optional: beyond a first course)  \n**Before this:** [Validity as an argument](validity-argument.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** slides c4  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"
