@@ -43,7 +43,7 @@ Crossref-checked 09-24 unless marked. Choosing among these models by out-of-samp
 | `wilmer-rmet-normative-data-set-2022` | main example | Reading the Mind in the Eyes (Baron-Cohen et al., 2001, doi:10.1111/1469-7610.00715), 36 four-option items, 17,680 complete respondents (normative data from Kim et al., 2024, doi:10.3758/s13428-023-02323-x). Items are easy (p = 0.56–0.86). 2PL slopes vary about fivefold (0.21–1.2). Despite four options, 3PL lower asymptotes are mostly near zero (median 0.05; range 0–0.68): with easy items there is little information about the bottom of the curve. BIC prefers the 2PL (5,000-person sample: 205,529 vs. 1PL 206,497, 3PL 205,803, 4PL 205,961). Abilities from all four models correlate 0.97–1.00. | `parameter-invariance` uses the MRMET table from the same paper, not this one. |
 | `chess_lnirt` | contrast (deliberate thread from `rasch` and `likelihood`) | 2PL slopes on the 40 chess problems run from 0.02 (Y15, the item Elo barely predicts in `likelihood`) to 3.8 (Y29, also the steepest Elo slope there); Y15's nearly flat curve crosses every other item's. | `likelihood`, `rasch` (record under `reuses:`) |
 
-**ENEM (pending #15).** The 252 code uses `enem_2013_1mil_lc` (Brazil's national exam, 5-option multiple choice, harder items), where the 3PL's guessing parameters are more visible. It has no tokenless CSV. If a teaching subsample is released (#15), it would make a better third table for idea 1 than anything tokenless found so far.
+**ENEM:** not used (Ben, 09-24). RMET is the main example; its weak guessing is part of the lesson.
 
 ## Widget / simulation / problem ideas
 
@@ -70,5 +70,5 @@ Crossref-checked 09-24 unless marked. Choosing among these models by out-of-samp
 
 ## Open questions
 
-- ENEM vs. a tokenless table (#15): the RMET is easy for most people, so it shows guessing weakly. Worth waiting for an ENEM subsample, or is the weak guessing itself the lesson?
+- Settled (Ben, 09-24): RMET, no ENEM.
 - RMET items are photographs of eyes with four words; no item text in the IRW. Fine for a model-comparison lesson?

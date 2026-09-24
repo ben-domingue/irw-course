@@ -138,8 +138,10 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
   thread returning to the same data) and recorded: the later lesson lists the table
   under `reuses:` in `lessons.yml`. `Rscript check_tables.R` flags any other reuse.
 - **Tokenless CSV only.** Use only tables with a tokenless CSV on their IRW landing
-  page. Redivis serves those only under 100 MB; larger datasets need a teaching
-  subsample published as an ordinary IRW table (#15).
+  page. Redivis serves those only under 100 MB. When a lesson genuinely needs a
+  larger dataset, a teaching subsample is stored in this repo under `lessons/data/`,
+  with a provenance note (the source IRW table and version, how the sample was
+  drawn, and its citation). So far that's only ENEM, for `equating` if needed (#15).
 - **Citation.** Always cite and link the original data: every table is cited where it
   is introduced, with the DOI or URL of the original source from IRW biblio
   (`get_citation`), never from memory, plus a link to its IRW landing page. A

@@ -33,7 +33,7 @@ Crossref-checked 09-24 unless marked.
 |---|---|---|---|
 | `wilmer-mrmet-normative-data-set-2022` | main example | Multiracial RMET (Kim et al., 2024, doi:10.3758/s13428-023-02323-x), 37 items, 9,295 complete respondents with gender, age and country. **Random halves:** difficulties agree almost perfectly (Rasch r ≈ 1.00; 2PL slopes r = 0.98). **Women vs. men:** Rasch difficulties r = 0.99, shifted by 0.24 logits (a scale difference, not an item difference); 2PL slopes r = 0.92. **High vs. low scorers, split on the same items:** Rasch r = 0.95 with a 1.3-logit shift; the 2PL falls apart (slopes near zero in both halves, r of difficulties −0.08). **Split instead on the odd items, estimating the even ones:** Rasch r = 0.97; 2PL difficulties r = 0.87, slopes r = 0.60. | `1pl-to-4pl` uses the RMET table from the same paper. |
 
-**ENEM (pending #15).** The 252 demonstration (`c4/enem2.R`) compares two booklets and high/low halves of ENEM. A teaching subsample would allow the two-forms comparison, which the MRMET can't give (one form).
+**ENEM:** not used (Ben, 09-24); forms are left to `equating`.
 
 The MRMET items correlate weakly with one another (mean r 0.065), which is common for tests of this kind and makes the restricted-range problem sharper. The lesson says so gently.
 
@@ -64,4 +64,4 @@ The MRMET items correlate weakly with one another (mean r 0.065), which is commo
 
 - Idea 3's selection effect (splitting on the sum score of the same items) isn't in the 252 slides; it came up in the data. Keep it, or split on the odd items throughout?
 - Baker (2001) is a book (the online second edition is free); verify the edition and figure before drafting.
-- ENEM (#15) for a two-form comparison, or leave forms to `equating`?
+- Settled (Ben, 09-24): no ENEM; forms are left to `equating`.

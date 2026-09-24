@@ -62,6 +62,10 @@ one dataset whose design (forms sharing items) the alternatives can't easily mat
 for `equating`, with `1pl-to-4pl` guessing as a bonus. ffm and PISA are nice-to-have,
 not needed.
 
+**Answered (Ben, 09-24):** if `equating` needs ENEM, store a subsample in the course
+repo (`lessons/data/`, with provenance), not as a new IRW table. `1pl-to-4pl` and the
+other lessons don't use ENEM. No ffm or PISA subsamples.
+
 **A5. Item text (#63).** *Default:*
 - Snapshot item text into the repo with a provenance manifest: source, fetch date, and
   an id↔text alignment check against the original.
@@ -131,7 +135,7 @@ with a Redivis login.
 **Item response theory**
 - **C11 `1pl-to-4pl`**: RMET (easy; guessing median 0.05) now, or wait for ENEM?
   *Default:* RMET now. The weak guessing is itself a finding, and ENEM stays as an
-  optional third table if A4 happens.
+  optional third table if A4 happens. **Answered (Ben, 09-24): RMET; no ENEM here.**
 - **C12 `ability-estimation`**: plausible values in one paragraph here, or in
   `score-meaning`? *Default:* one paragraph here; the full treatment in `score-meaning`.
 - **C13 `information`**: the contrast table is a schizotypy screening scale.
