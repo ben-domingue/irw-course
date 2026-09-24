@@ -1,0 +1,31 @@
+<script>
+// Two AMD loaders share the global `define` on lesson pages (irw-course#13):
+// Monaco's (quarto-webr's code editor) and d3-require's (Observable's runtime,
+// which fetches Plot, Inputs, htl, marked). Whichever set `define` last receives
+// every call, so if Observable replaces it before Monaco's editor script has run,
+// Monaco's modules go to the wrong loader and the editor never initialises.
+// This routes each call by the script making it: Monaco's own files go to
+// Monaco's loader, everything else to the most recently installed `define`.
+// Must run before Monaco's loader.js (it is included in the page header).
+(function () {
+  var monacoDefine = null, otherDefine = null;
+  function srcOf() { return (document.currentScript && document.currentScript.src) || ""; }
+  function dispatch() {
+    var target = /\/monaco-editor@[^/]+\/min\/vs\//.test(srcOf()) && monacoDefine
+      ? monacoDefine : (otherDefine || monacoDefine);
+    return target.apply(this, arguments);
+  }
+  Object.defineProperty(window, "define", {
+    configurable: true,
+    get: function () { return monacoDefine || otherDefine ? dispatch : undefined; },
+    set: function (v) {
+      if (typeof v !== "function") return;
+      if (/\/monaco-editor@[^/]+\/min\/vs\/loader\.js/.test(srcOf())) monacoDefine = v;
+      else otherDefine = v;
+      var current = otherDefine || monacoDefine;
+      for (var k in current) dispatch[k] = current[k];
+      dispatch.amd = current.amd || {};
+    }
+  });
+})();
+</script>
