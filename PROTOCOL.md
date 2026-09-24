@@ -63,6 +63,13 @@ prerequisites) are made at the outline stage, not while drafting.
   what software does ("`mirt` fixes the mean ability at 0"), show it in a small example.
   When it mentions a result from the literature (the 1.7 scaling constant), cite and
   link the source.
+- **Be extremely generous with citations.** Cite, inline and with a link (DOI where
+  there is one), every idea, result, method, figure, instrument, quotation, dataset and
+  R package the lesson uses, including the classics everyone "just knows" (Cronbach
+  1951, Lord & Novick 1968) and the source of any example borrowed from slides or
+  papers. When in doubt, cite. *Going further* adds reading; it doesn't replace inline
+  citations. Verify every reference (Crossref, the publisher, or IRW biblio for data),
+  never from memory, and say so in the outline when a source is still unverified.
 - **Written in Ben's voice** (§6).
 
 ---
@@ -125,16 +132,18 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 - **At most 3** IRW tables per lesson, each with a job (main example, contrast or
   failure case) given in one sentence where the table is introduced.
 - **Breadth.** A table appears in one lesson only, unless the reuse is deliberate (a
-  thread returning to the same data) and recorded. `check_tables.R` flags reuse.
-  **[pending #12: the reuse check is not yet implemented]**
+  thread returning to the same data) and recorded: the later lesson lists the table
+  under `reuses:` in `lessons.yml`. `Rscript check_tables.R` flags any other reuse.
 - **Tokenless CSV only.** Use only tables with a tokenless CSV on their IRW landing
   page. Redivis serves those only under 100 MB; larger datasets need a teaching
   subsample published as an ordinary IRW table (#15).
 - **Citation.** Always cite and link the original data: every table is cited where it
   is introduced, with the DOI or URL of the original source from IRW biblio
   (`get_citation`), never from memory, plus a link to its IRW landing page. A
-  generated **Data sources** block closes each lesson. **[pending #12: generator not
-  yet written]**
+  generated **Data sources** block (`data_sources("<id>")`, just before *For
+  instructors*) closes each lesson. After adding a table, run `Rscript check_tables.R`
+  to refresh `lessons/_citations.yml` and commit it; a lesson whose table has no
+  cached citation fails to render.
 
 ### Quizzes (#1)
 
@@ -317,6 +326,9 @@ A lesson moves to `status: done` only when every box is ticked.
 - [ ] Issues with the data are noted gently, never as criticism of the data or its
       authors.
 - [ ] Software behaviour and literature results are shown or cited, not just asserted.
+- [ ] Citations are generous: every idea, result, method, figure, instrument, quotation
+      and package the lesson uses is cited inline with a link, and every reference has
+      been verified (none from memory).
 
 **Voice** **[pending #3]**
 - [ ] At least one first-person verdict; none of the banned words; every size word

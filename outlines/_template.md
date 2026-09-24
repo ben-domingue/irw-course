@@ -15,7 +15,9 @@ Module: <module id> · Prereqs: <ids from lessons.yml> · Core | Optional · Sta
 ## Core ideas
 
 <!-- The 3–6 ideas a reader should leave with, in teaching order. Each becomes a
-subsection of Core ideas; mark the major ones, which get a quick check (2–4 total). -->
+subsection of Core ideas; mark the major ones, which get a quick check (2–4 total).
+Name the source(s) for each idea (citations are generous: PROTOCOL.md §2), and mark any
+not yet verified. -->
 
 1. **<Idea>.** <One sentence: what the reader should be able to say or do.>
 
