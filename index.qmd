@@ -37,6 +37,48 @@ The lessons were written largely by Claude (Anthropic), an AI model, working fro
 EDUC 252 materials and under Ben Domingue's direction. Ben reviews each lesson before
 it is marked done; until then, read its text, code and interpretations as a draft.
 
+## Why psychometrics?
+
+Much of what we want to know about people hinges on attributes we cannot observe directly:
+how a child's executive functioning changes with age, whether an intervention reduces
+anxiety, how reading develops across school. What we observe instead are responses to
+items: a tap on the correct arrow, "most days" on a survey, a wrong answer to question 7.
+Psychometrics is the discipline that turns those responses into measurements and tells us
+how far to trust them.
+
+Consider a ruler. It measures a child's height regardless of that child's background; a
+different ruler gives a reading with the same meaning; and a well-chosen ruler measures
+quickly across the whole range of heights we care about. Psychological measures rarely do
+all of this, but the ruler suggests what to aim for
+([Domingue, 2026](https://doi.org/10.1146/annurev-devpsych-111124-041520)):
+
+- Measurements should be insensitive to differences in attributes other than the one being
+  measured.
+- Measurements from different instruments should be comparable.
+- Measurement should deliver precise information about the attribute as quickly as
+  possible.
+
+None of these comes for free. Suppose we measure executive functioning with a tablet task.
+Children with less tablet experience may look worse for reasons that have nothing to do with
+executive functioning. The task that suits a four-year-old is not the one that suits a
+ten-year-old, yet we want to talk about growth across those ages. And time with a child is
+short, so every item has to earn its place. Psychometrics has tools for each problem:
+checking whether items work the same way across groups
+([Differential item functioning](lessons/dif.qmd)), putting scores from different forms on a
+common scale ([Linking and equating](lessons/equating.qmd)), and choosing items to fit the
+respondent ([Item banks and adaptive testing](lessons/item-banks-cat.qmd)).
+
+The common thread is a probabilistic model for how people respond to items. Such a model can
+be falsified, so we can interrogate whether it works in a given setting; when it does, it
+gives a compact description of how an instrument functions, one that can be reused with new
+people, new forms and new ages.
+
+Psychological measurement is hard, and whether it deserves the name "measurement" at all has
+been argued over for most of a century ([What is measurement?](lessons/measurement.qmd)).
+Interval scales do not come easily ([Scale properties](lessons/scale-properties.qmd)). But
+the limits of our measures are limits on what we can learn about the attributes themselves.
+Psychometrics is how we find out where those limits are, and how we push them back.
+
 
 ## Lessons by module
 
