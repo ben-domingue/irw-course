@@ -44,11 +44,14 @@ tests, relaxes or shows violated. -->
 case), and what the real-data section should turn up with it. Only tables with a
 tokenless CSV on their landing page (see #15 for subsamples). Flag any table another
 lesson also uses, and say whether the reuse is deliberate (a thread) or should go
-(#12). -->
+(#12). Add a sanity table (a table whose answer is known, used to check the fit
+before trusting it; it needn't appear in the lesson) and, for a deep-dive lesson, the
+corpus filter (#4). Neither counts against the 3. -->
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
 | `<table>` | main example | <the finding the section is written around> | — |
+| `<table>` | sanity | <the known answer> | — |
 
 ## Widget / simulation / problem ideas
 
