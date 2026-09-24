@@ -5,6 +5,13 @@
   link: https://cran.r-project.org/web/packages/sirt/index.html
   license: GPL-3.0
   irw_version: IRW v414
+alexandrowicz_2018_cesd:
+  reference: Alexandrowicz, R.; Jahn, R.; Wancata, J. (2018). Assessing the dimensionality
+    of the CES-D using multi-dimensional multi-level Rasch models. PLOS ONE, 13(5),
+    e0197908. https://doi.org/10.1371/journal.pone.0197908
+  link: https://doi.org/10.1371/journal.pone.0197908
+  license: CC BY 4.0
+  irw_version: IRW v414
 andrich_mudfold:
   reference: Andrich, D. (1988). The application of an unfolding model of the PIRT
     type to the measurement of attitude. Applied psychological measurement, 12(1),
@@ -60,11 +67,17 @@ credentialform_lnirt:
   link: https://cran.r-project.org/web/packages/LNIRT/index.html
   license: GPL-3.0
   irw_version: IRW v414
-DART_Brysbaert_2020_1:
-  reference: Brysbaert, M., Sui, L., Dirix, N., & Hintz, F. (2020). Dutch Author Recognition
-    Test. Journal of Cognition, 3(1), 6. https://doi.org/10.5334/joc.95
-  link: https://doi.org/10.5334/joc.95
-  license: CC BY-NC-SA 4.0
+de_vries_2022_hexaco_other:
+  reference: 'de Vries A, et al. (2022) Self-, other-, and meta-perceptions of personality:
+    Relations with burnout symptoms and eudaimonic workplace well-being. PLOS ONE'
+  link: https://doi.org/10.1371/journal.pone.0272095
+  license: CC BY 4.0
+  irw_version: IRW v414
+de_vries_2022_hexaco_self:
+  reference: 'de Vries A, et al. (2022) Self-, other-, and meta-perceptions of personality:
+    Relations with burnout symptoms and eudaimonic workplace well-being. PLOS ONE'
+  link: https://doi.org/10.1371/journal.pone.0272095
+  license: CC BY 4.0
   irw_version: IRW v414
 enders_2022_science_literacy:
   reference: 'Enders AM, Uscinski JE, Klofstad C, Stoler J (2022). On the relationship
@@ -204,6 +217,15 @@ gilbert_meta_20:
   link: https://doi.org/10.7910/DVN/Z4WMFE
   license: CC0 1.0
   irw_version: IRW v414
+gilbert_meta_37:
+  reference: 'Carpena, F. (2024). Entertainment-Education for Better Health: Insights
+    from a Field Experiment in India. The Journal of Development Studies, 60(5), 745-762.
+    Carpena, Fenella, 2024, "Replication Data for: Entertainment-Education for Better
+    Health: Insights from a Field Experiment in India", https://doi.org/10.7910/DVN/EJ03JR,
+    Harvard Dataverse, V1, UNF:6:pX0ZhtBxkRpvQC6AOfVg4g== [fileUNF]'
+  link: https://doi.org/10.7910/DVN/EJ03JR
+  license: CC0 1.0
+  irw_version: IRW v414
 gpt4mcq_young_2025:
   reference: Young, R., Courtney, E., Kah, A., Wilkerson, M., & Chen, Y.-H. (2025).
     Content and Item Response Theory Analysis of ChatGPT-4-Generated Multiple-Choice
@@ -232,6 +254,12 @@ himmelstein-number_series-2025:
     Proficiency Test: A General Use Assessment of Forecasting Ability”. PsyArXiv,
     November 23, 2025. doi:10.31234/osf.io/a7kdx_v8.'
   link: https://doi.org/10.31234/osf.io/a7kdx_v8
+  license: CC BY 4.0
+  irw_version: IRW v414
+ieswriting_molloy_2022:
+  reference: Educational Testing Service. (n.d.). IES Writing Achievement Study Data.
+    GitHub. Retrieved January 6, 2025, from https://github.com/EducationalTestingService/ies-writing-achievement-study-data
+  link: https://github.com/EducationalTestingService/ies-writing-achievement-study-data
   license: CC BY 4.0
   irw_version: IRW v414
 imps2025_hf:
@@ -323,6 +351,14 @@ roar_lexical:
   link: https://doi.org/10.1038/s41598-021-85907-x
   license: CC BY 4.0
   irw_version: IRW v414
+robison_2026_retesting_stroop:
+  reference: 'Robison, M. K., Campbell, S., Garner, L. D., Sibley, C., & Coyne, J.
+    (2026). A comprehensive psychometrics of cognitive ability measures: Reliability,
+    practice effects, and the stability of latent factor structures across retesting.
+    Behavior Research Methods, 58(2), Article 56. https://doi.org/10.3758/s13428-025-02897-8'
+  link: https://doi.org/10.3758/s13428-025-02897-8
+  license: CC BY 4.0
+  irw_version: IRW v414
 rr98_accuracy:
   reference: Ratcliff, R., & Rouder, J. N. (1998). Modeling Response Times for Two-Choice
     Decisions. Psychological Science, 9(5), 347-356. http://doi.org/10.1111/1467-9280.00067
@@ -335,6 +371,20 @@ science_ltm:
     file]'
   link: https://cran.r-project.org/web/packages/ltm/index.html
   license: GPL-3.0
+  irw_version: IRW v414
+silk_2019_hyperactive:
+  reference: 'Silk TJ, Malpas CB, Beare R, Efron D, Anderson V, et al. (2019) A network
+    analysis approach to ADHD symptoms: More than the sum of its parts. PLOS ONE 14(1):
+    e0211053. https://doi.org/10.1371/journal.pone.0211053'
+  link: https://doi.org/10.1371/journal.pone.0211053
+  license: CC BY 4.0
+  irw_version: IRW v414
+silk_2019_inattentive:
+  reference: 'Silk TJ, Malpas CB, Beare R, Efron D, Anderson V, et al. (2019) A network
+    analysis approach to ADHD symptoms: More than the sum of its parts. PLOS ONE 14(1):
+    e0211053. https://doi.org/10.1371/journal.pone.0211053'
+  link: https://doi.org/10.1371/journal.pone.0211053
+  license: CC BY 4.0
   irw_version: IRW v414
 song_2023_rses:
   reference: Song Y, Sznajder K, Bai Q, Xu Y, Dong Y, Yang X (2023). English as a
@@ -356,6 +406,13 @@ verbagg:
   reference: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer.
   link: https://doi.org/10.1007/978-1-4757-3990-9
   license: GPL-3.0
+  irw_version: IRW v414
+vocab_assessment_3_to_8_year_old_children:
+  reference: 'Bohn, M., Prein, J. C., Delikaya, B., Haun, D. B. M., & Gagarina, N.
+    (2022, August 24). oREV: an Item Response Theory based open receptive vocabulary
+    task for 3 to 8-year-old children. https://doi.org/10.31234/osf.io/4z86w'
+  link: https://doi.org/10.31234/osf.io/4z86w
+  license: CC BY 4.0
   irw_version: IRW v414
 vocabulary_iq:
   reference: (2018). Vocabulary IQ Test [dataset and codebook]. http://openpsychometrics.org/_rawdata/VIQT_data.zip

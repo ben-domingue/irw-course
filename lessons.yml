@@ -106,7 +106,7 @@ lessons:
     module: validity
     prereqs: [constructs]
     origin: {slides: [c3], ps: [], code: []}
-    tables: []
+    tables: [silk_2019_inattentive, silk_2019_hyperactive]
     status: stub
 
   - id: validity-causal
@@ -114,7 +114,7 @@ lessons:
     module: validity
     prereqs: [validity-argument]
     origin: {slides: [c4], ps: [], code: []}
-    tables: []
+    tables: [vocab_assessment_3_to_8_year_old_children, robison_2026_retesting_stroop]
     status: stub
     optional: true
 
@@ -201,7 +201,7 @@ lessons:
     module: fairness
     prereqs: [1pl-to-4pl, validity-argument]
     origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
-    tables: [DART_Brysbaert_2020_1, gilbert_meta_11]
+    tables: [gilbert_meta_11, alexandrowicz_2018_cesd]
     status: stub
 
   - id: invariance-experience
@@ -209,7 +209,7 @@ lessons:
     module: fairness
     prereqs: [dif]
     origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
-    tables: [gilbert_meta_20, gilbert_meta_2]
+    tables: [gilbert_meta_20, gilbert_meta_37]
     status: stub
     optional: true
 
@@ -350,7 +350,7 @@ lessons:
     module: validity
     prereqs: [validity-argument, ctt-reliability]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [de_vries_2022_hexaco_self, de_vries_2022_hexaco_other, ieswriting_molloy_2022]
     status: stub
 
   - id: score-meaning
