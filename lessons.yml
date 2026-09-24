@@ -75,7 +75,7 @@ lessons:
     prereqs: [irw-data]
     origin: {slides: [c1], ps: ["PS1#1", "PS1#2", "PS1#5"], code: [c1/likelihood.R, ps1/ps1-like.R, ps1/ll_logreg.R, ps1/ps1-chess.R]}
     tables: [chess_lnirt]
-    status: draft
+    status: done
 
   - id: constructs
     title: Constructs and construct maps

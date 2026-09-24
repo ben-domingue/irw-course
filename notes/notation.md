@@ -15,6 +15,7 @@ here first, in the same PR.
 | Upper asymptote (slipping) | $u$ | `mirt` calls it `u`; not $d$, to avoid `mirt`'s intercept |
 | Response | $x_{ij}$ | |
 | Sum score | $r$ (or $X$ in CTT lessons) | CTT keeps $X = T + E$ |
+| Regression coefficients | $\beta_0, \beta_1, \dots$ | never $b$, which is item difficulty (Ben, 09-24) |
 | Factor loading | $\lambda$ | factor $\eta$ in CFA/SEM; $f$ in EFA |
 | Information | $I(\theta)$ | test information is the sum of item information |
 | Standard error | $SE(\hat\theta) = 1/\sqrt{I(\theta)}$ | "conditional SEM" (CSEM) in prose |
