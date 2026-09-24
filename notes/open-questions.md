@@ -10,8 +10,8 @@ Part 2 read these versions (refreshed after PR #92 merged):
   `349f48f`): response-time, rt-process-models, trials, ai-psychometrics;
 - `8-outlines-validity` at `9bc8435` (PR #94): validity-argument, validity-causal,
   validity-evidence, dif, invariance-experience;
-- `8-outlines-beyond-1` at `e1fd007` (no PR yet): explanatory-irt (cdm, irtrees,
-  unfolding and nominal not yet outlined there);
+- `8-outlines-beyond-1` at `e1fd007` for explanatory-irt; cdm, irtrees, unfolding and
+  nominal added later from the merged PR #101 (main at `374abf7`; questions F26–F34);
 - `8-outlines-uses` at `24389f1` (PR #96): score-meaning, equating, item-banks-cat,
   scale-properties (added after part 2 merged; questions E10–E12, F14–F25);
 - #62 and the open `needs-ben` issues as of 2026-09-24 19:30.
@@ -259,7 +259,7 @@ under `reuses:` on the later lesson. The first three are already recorded on mai
 - `credentialform_lnirt`: `response-time` → `rt-process-models` (the failure case for
   the diffusion model);
 - `verbagg`: `irw-data` → `explanatory-irt` (described there, modelled here; recorded
-  on the unmerged `8-outlines-beyond-1` branch);
+  on main since PR #101);
 - `wilmer-rmet-normative-data-set-2022`: `1pl-to-4pl` → `nominal`. It's on main but not
   recorded, and check_tables.R flags it today.
 
@@ -425,6 +425,35 @@ beyond deep dives.
   item-text snapshot (A5).
 - **F13 `ai-psychometrics`**: the automated-scoring section has no table (see E5).
   *Default:* widget-only.
+- **F26 `cdm`**: c7.pptx is missing from the export. *Default:* build the lesson from
+  c7/3_cdm.R and PS7#2; send the deck if it has slide material worth keeping.
+- **F27 `cdm`**: verdict: "a CDM earns its keep only when the Q-matrix was designed
+  into the test, not retrofitted". It is Claude's reading of PS7#2 and the ECPE result
+  (the 2PL beats DINA and G-DINA there). *Default:* use it unless you'd put it
+  differently (see also E8).
+- **F28 `cdm`**: Q-matrix validation (PVAF) flags 9 of 20 frac20 items. *Default:* show
+  it briefly, with the caution that PVAF suggests too many changes under DINA; the full
+  analysis goes to a problem.
+- **F29 `irtrees`**: `ffm_CSN` (no tokenless CSV) is replaced by
+  `bfi_goldberg_1992_conscientiousness` (response styles; same IPIP marker family) and
+  `introversion_extroversion` (fast responding; has response times). *Default:* keep
+  these; revisit only if the ffm subsample (A4) is released.
+- **F30 `irtrees`**: the sanity check is simulated, not an IRW table with a published
+  answer (the three-category verbal-aggression tree would need the undichotomized
+  `verbagg`). Also, the skipped-responses hook from `guessing-priors` is paid in
+  simulation only, since no tokenless table has enough skips. *Default:* accept both.
+- **F31 `unfolding`**: quote the eight capital-punishment statements in full? They are
+  short, published in Andrich (1988), and the IRW table is GPL-3.0. *Default:* yes,
+  cited (A5).
+- **F32 `unfolding`**: verdict: "if the statements weren't written to span the middle,
+  the dominance model is enough" (on `andrich_mudfold` the 2PL has the best AIC despite
+  clear unfolding patterns). *Default:* use it unless you'd put it differently.
+  `franco_2024_unfolding` (rankings) stays out of the lesson; a problem only.
+- **F33 `nominal`**: RMET items are photographs; the IRW has the four words, not the
+  images. *Default:* name the words (published in Baron-Cohen et al., 2001), no images.
+- **F34 `nominal`**: the Thissen–Steinberg multiple-choice model isn't in `mirt`.
+  *Default:* teach it with a widget, and fit `mirt`'s nested logit model (`2PLNRM`) as
+  the software example.
 
 ---
 
@@ -455,6 +484,10 @@ Part 2:
   whether `gilbert_meta_37`'s night-blindness items match the programme's content
   (Carpena, 2024); `motion`'s second item index (processing notes); the TROG testlet
   fit.
+- Beyond part 1: confirm which Andrich "Handbook" chapter c9 slide 14 means (likely
+  Andrich, 1997, doi:10.1007/978-1-4757-2691-6_23); check the hyperbolic cosine formula
+  against Andrich & Luo (1993) and whether Andrich (1988) reports scale values to
+  compare with the GGUM order; `GDINA`, `GGUM` and `mudfold` in webR.
 - webR checks: `lme4` (`explanatory-irt`, `g-theory`) and `rtdists`
   (`rt-process-models`; fall back to a plain random walk).
 - Licence checks (A5, E6): `ieswriting_molloy_2022` (flag the mismatch to the IRW), the
