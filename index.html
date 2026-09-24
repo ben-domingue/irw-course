@@ -2,23 +2,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Psychometrics with the IRW: course map – Psychometrics with the IRW</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
+code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -38,14 +32,15 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-a91fed4e7707a54e5b1d6195dbcc134d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-55d18e6e33da801dcb1210dfba1c04c6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -155,6 +150,7 @@ ul.task-list li input[type="checkbox"] {
 <p>These are stand-alone lessons on psychometrics, each built around open data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a>. You can teach them in sequence as a full course or pick out individual lessons. The core lessons make a first course in psychometrics; lessons marked optional go further. Each lesson lists what it assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to Psychometrics) at Stanford.</p>
 <section id="lessons-by-module" class="level2">
 <h2 class="anchored" data-anchor-id="lessons-by-module">Lessons by module</h2>
+<p>Lessons in blue have a draft to read. Lessons in grey are still stubs: a placeholder page with no content yet.</p>
 <style>
 .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 @media (max-width: 768px) { .module-grid { grid-template-columns: 1fr; } }
@@ -163,81 +159,86 @@ ul.task-list li input[type="checkbox"] {
 .module-card ol { margin-bottom: 0; padding-left: 1.2rem; }
 .lesson-optional { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; }
 .lesson-status { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; }
+/* Stubs have a page but no content yet: grey them out so drafts stand out. */
+a.lesson-stub { color: #adb5bd; }
+a.lesson-stub:hover { color: #6c757d; }
 </style>
 <div class="module-grid">
 <section id="foundations" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="foundations">Foundations</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html">What is measurement?</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/irw-data.html">Item response data and the IRW</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="classical-test-theory" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="classical-test-theory">Classical test theory</h3>
 <ol type="1">
-<li><a href="./lessons/constructs.html">Constructs and construct maps</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a> <span class="lesson-status">draft</span></li>
-<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/instrument-building.html">From construct map to items: building an instrument</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/g-theory.html">Many sources of error: generalizability theory</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/instrument-building.html" class="lesson-stub">From construct map to items: building an instrument</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/g-theory.html" class="lesson-stub">Many sources of error: generalizability theory</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="factor-analysis" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="factor-analysis">Factor analysis</h3>
 <ol type="1">
 <li><a href="./lessons/fa-exploratory.html">Factor analysis I: exploring dimensionality</a> <span class="lesson-status">draft</span></li>
-<li><a href="./lessons/fa-confirmatory.html">Factor analysis II: confirmatory models, omega, and IRT as factor analysis</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/fa-confirmatory.html" class="lesson-stub">Factor analysis II: confirmatory models, omega, and IRT as factor analysis</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/sem.html" class="lesson-stub">Structural equation modeling with lavaan</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="validity" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="validity">Validity</h3>
 <ol type="1">
-<li><a href="./lessons/validity-argument.html">Validity as an argument</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/validity-causal.html">Validity as causation: Borsboom’s view</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/validity-evidence.html">Gathering validity evidence</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/validity-causal.html" class="lesson-stub">Validity as causation: Borsboom’s view</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/validity-evidence.html" class="lesson-stub">Gathering validity evidence</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="item-response-theory" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="item-response-theory">Item response theory</h3>
 <ol type="1">
 <li><a href="./lessons/rasch.html">The Rasch model</a> <span class="lesson-status">draft</span></li>
-<li><a href="./lessons/information.html">Information, precision, and short forms</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/ability-estimation.html">Estimating abilities: MLE and EAP</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/item-estimation.html">Estimating item parameters: JML and EM</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/parameter-invariance.html">Parameter invariance</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/fit-prediction.html">Model fit and out-of-sample prediction</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/guessing-priors.html">Guessing and priors</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/dimensionality.html">Dimensionality and multidimensional IRT</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/polytomous.html">Models for polytomous responses</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/information.html" class="lesson-stub">Information, precision, and short forms</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/ability-estimation.html" class="lesson-stub">Estimating abilities: MLE and EAP</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/item-estimation.html" class="lesson-stub">Estimating item parameters: JML and EM</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/1pl-to-4pl.html" class="lesson-stub">From the 1PL to the 4PL</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/parameter-invariance.html" class="lesson-stub">Parameter invariance</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/fit-prediction.html" class="lesson-stub">Model fit and out-of-sample prediction</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/guessing-priors.html" class="lesson-stub">Guessing and priors</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/dimensionality.html" class="lesson-stub">Dimensionality and multidimensional IRT</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/polytomous.html" class="lesson-stub">Models for polytomous responses</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="fairness-and-invariance" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="fairness-and-invariance">Fairness and invariance</h3>
 <ol type="1">
-<li><a href="./lessons/dif.html">Differential item functioning</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/invariance-experience.html">Measurement invariance under treatment and life events</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/dif.html" class="lesson-stub">Differential item functioning</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/invariance-experience.html" class="lesson-stub">Measurement invariance under treatment and life events</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="using-calibrated-items" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="using-calibrated-items">Using calibrated items</h3>
 <ol type="1">
-<li><a href="./lessons/item-banks-cat.html">Item banks and adaptive testing</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/equating.html">Linking and equating</a> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/score-meaning.html">What does a score mean? Norms, error bands, and cut scores</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/item-banks-cat.html" class="lesson-stub">Item banks and adaptive testing</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/equating.html" class="lesson-stub">Linking and equating</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/score-meaning.html" class="lesson-stub">What does a score mean? Norms, error bands, and cut scores</a> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 <section id="beyond-the-standard-models" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="beyond-the-standard-models">Beyond the standard models</h3>
 <ol type="1">
-<li><a href="./lessons/explanatory-irt.html">What is an item? Explanatory item response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/cdm.html">Cognitive diagnostic models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/irtrees.html">IRTree models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/unfolding-nominal.html">Unfolding and nominal response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/response-time.html">Response time and the speed-accuracy tradeoff</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/trials.html">Trials as items: tasks, shots, and rotations</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
-<li><a href="./lessons/ai-psychometrics.html">AI and psychometrics</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/explanatory-irt.html" class="lesson-stub">What is an item? Explanatory item response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/cdm.html" class="lesson-stub">Cognitive diagnostic models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/irtrees.html" class="lesson-stub">IRTree models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/unfolding-nominal.html" class="lesson-stub">Unfolding and nominal response models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/response-time.html" class="lesson-stub">Response time and the speed-accuracy tradeoff</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/trials.html" class="lesson-stub">Trials as items: tasks, shots, and rotations</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/ai-psychometrics.html" class="lesson-stub">AI and psychometrics</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/rt-process-models.html" class="lesson-stub">Process models for response time: drift diffusion and race models</a> <span class="lesson-optional">optional</span> <span class="lesson-status">stub</span></li>
 </ol>
 </section>
 </div>
@@ -266,6 +267,7 @@ ul.task-list li input[type="checkbox"] {
   classDef fa fill:#ccfbf1,stroke:#6c757d,color:#212529
   L32["Factor analysis I: exploring dimensionality"]:::fa
   L33["Factor analysis II: confirmatory models, omega, and IRT as factor analysis"]:::fa
+  L36["Structural equation modeling with lavaan"]:::fa
   classDef fa_opt fill:#ccfbf1,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   classDef validity fill:#fef9c3,stroke:#6c757d,color:#212529
   L07["Validity as an argument"]:::validity
@@ -301,6 +303,7 @@ ul.task-list li input[type="checkbox"] {
   L27["Response time and the speed-accuracy tradeoff"]:::beyond
   L28["Trials as items: tasks, shots, and rotations"]:::beyond
   L29["AI and psychometrics"]:::beyond
+  L37["Process models for response time: drift diffusion and race models"]:::beyond
   classDef beyond_opt fill:#e0f2fe,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
   class L08 validity_opt
   class L12 irt_opt
@@ -316,6 +319,8 @@ ul.task-list li input[type="checkbox"] {
   class L27 beyond_opt
   class L28 beyond_opt
   class L29 beyond_opt
+  class L36 fa_opt
+  class L37 beyond_opt
   L02 --&gt; L03
   L01 --&gt; L04
   L04 --&gt; L05
@@ -357,6 +362,8 @@ ul.task-list li input[type="checkbox"] {
   L07 --&gt; L34
   L05 --&gt; L34
   L05 --&gt; L35
+  L33 --&gt; L36
+  L27 --&gt; L37
   click L01 href "lessons/measurement.html"
   click L02 href "lessons/irw-data.html"
   click L03 href "lessons/likelihood.html"
@@ -392,6 +399,8 @@ ul.task-list li input[type="checkbox"] {
   click L33 href "lessons/fa-confirmatory.html"
   click L34 href "lessons/validity-evidence.html"
   click L35 href "lessons/score-meaning.html"
+  click L36 href "lessons/sem.html"
+  click L37 href "lessons/rt-process-models.html"
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -406,61 +415,61 @@ ul.task-list li input[type="checkbox"] {
 <section id="a-first-course-core-lessons-only" class="level3">
 <h3 class="anchored" data-anchor-id="a-first-course-core-lessons-only">A first course (core lessons only)</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html">What is measurement?</a></li>
-<li><a href="./lessons/irw-data.html">Item response data and the IRW</a></li>
-<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
-<li><a href="./lessons/constructs.html">Constructs and construct maps</a></li>
-<li><a href="./lessons/instrument-building.html">From construct map to items: building an instrument</a></li>
+<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
+<li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
+<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a></li>
+<li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
+<li><a href="./lessons/instrument-building.html" class="lesson-stub">From construct map to items: building an instrument</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
-<li><a href="./lessons/g-theory.html">Many sources of error: generalizability theory</a></li>
-<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a></li>
-<li><a href="./lessons/validity-argument.html">Validity as an argument</a></li>
-<li><a href="./lessons/validity-evidence.html">Gathering validity evidence</a></li>
+<li><a href="./lessons/g-theory.html" class="lesson-stub">Many sources of error: generalizability theory</a></li>
+<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a></li>
+<li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a></li>
+<li><a href="./lessons/validity-evidence.html" class="lesson-stub">Gathering validity evidence</a></li>
 <li><a href="./lessons/fa-exploratory.html">Factor analysis I: exploring dimensionality</a></li>
 <li><a href="./lessons/rasch.html">The Rasch model</a></li>
-<li><a href="./lessons/information.html">Information, precision, and short forms</a></li>
-<li><a href="./lessons/ability-estimation.html">Estimating abilities: MLE and EAP</a></li>
-<li><a href="./lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a></li>
-<li><a href="./lessons/fa-confirmatory.html">Factor analysis II: confirmatory models, omega, and IRT as factor analysis</a></li>
-<li><a href="./lessons/polytomous.html">Models for polytomous responses</a></li>
-<li><a href="./lessons/fit-prediction.html">Model fit and out-of-sample prediction</a></li>
-<li><a href="./lessons/dif.html">Differential item functioning</a></li>
-<li><a href="./lessons/score-meaning.html">What does a score mean? Norms, error bands, and cut scores</a></li>
-<li><a href="./lessons/equating.html">Linking and equating</a></li>
+<li><a href="./lessons/information.html" class="lesson-stub">Information, precision, and short forms</a></li>
+<li><a href="./lessons/ability-estimation.html" class="lesson-stub">Estimating abilities: MLE and EAP</a></li>
+<li><a href="./lessons/1pl-to-4pl.html" class="lesson-stub">From the 1PL to the 4PL</a></li>
+<li><a href="./lessons/fa-confirmatory.html" class="lesson-stub">Factor analysis II: confirmatory models, omega, and IRT as factor analysis</a></li>
+<li><a href="./lessons/polytomous.html" class="lesson-stub">Models for polytomous responses</a></li>
+<li><a href="./lessons/fit-prediction.html" class="lesson-stub">Model fit and out-of-sample prediction</a></li>
+<li><a href="./lessons/dif.html" class="lesson-stub">Differential item functioning</a></li>
+<li><a href="./lessons/score-meaning.html" class="lesson-stub">What does a score mean? Norms, error bands, and cut scores</a></li>
+<li><a href="./lessons/equating.html" class="lesson-stub">Linking and equating</a></li>
 </ol>
 </section>
 <section id="educ-252-stanford-a-10-week-course" class="level3">
 <h3 class="anchored" data-anchor-id="educ-252-stanford-a-10-week-course">EDUC 252 (Stanford), a 10-week course</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html">What is measurement?</a></li>
-<li><a href="./lessons/irw-data.html">Item response data and the IRW</a></li>
-<li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
-<li><a href="./lessons/constructs.html">Constructs and construct maps</a></li>
+<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
+<li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
+<li><a href="./lessons/likelihood.html" class="lesson-stub">The likelihood and logistic regression</a></li>
+<li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
-<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a></li>
-<li><a href="./lessons/validity-argument.html">Validity as an argument</a></li>
+<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a></li>
+<li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a></li>
 <li><a href="./lessons/rasch.html">The Rasch model</a></li>
-<li><a href="./lessons/information.html">Information, precision, and short forms</a></li>
-<li><a href="./lessons/ability-estimation.html">Estimating abilities: MLE and EAP</a></li>
-<li><a href="./lessons/validity-causal.html">Validity as causation: Borsboom’s view</a></li>
-<li><a href="./lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a></li>
-<li><a href="./lessons/parameter-invariance.html">Parameter invariance</a></li>
-<li><a href="./lessons/dimensionality.html">Dimensionality and multidimensional IRT</a></li>
-<li><a href="./lessons/dif.html">Differential item functioning</a></li>
-<li><a href="./lessons/item-estimation.html">Estimating item parameters: JML and EM</a></li>
-<li><a href="./lessons/fit-prediction.html">Model fit and out-of-sample prediction</a></li>
-<li><a href="./lessons/guessing-priors.html">Guessing and priors</a></li>
-<li><a href="./lessons/item-banks-cat.html">Item banks and adaptive testing</a></li>
-<li><a href="./lessons/equating.html">Linking and equating</a></li>
-<li><a href="./lessons/invariance-experience.html">Measurement invariance under treatment and life events</a></li>
-<li><a href="./lessons/explanatory-irt.html">What is an item? Explanatory item response models</a></li>
-<li><a href="./lessons/cdm.html">Cognitive diagnostic models</a></li>
-<li><a href="./lessons/polytomous.html">Models for polytomous responses</a></li>
-<li><a href="./lessons/irtrees.html">IRTree models</a></li>
-<li><a href="./lessons/unfolding-nominal.html">Unfolding and nominal response models</a></li>
-<li><a href="./lessons/response-time.html">Response time and the speed-accuracy tradeoff</a></li>
-<li><a href="./lessons/trials.html">Trials as items: tasks, shots, and rotations</a></li>
-<li><a href="./lessons/ai-psychometrics.html">AI and psychometrics</a></li>
+<li><a href="./lessons/information.html" class="lesson-stub">Information, precision, and short forms</a></li>
+<li><a href="./lessons/ability-estimation.html" class="lesson-stub">Estimating abilities: MLE and EAP</a></li>
+<li><a href="./lessons/validity-causal.html" class="lesson-stub">Validity as causation: Borsboom’s view</a></li>
+<li><a href="./lessons/1pl-to-4pl.html" class="lesson-stub">From the 1PL to the 4PL</a></li>
+<li><a href="./lessons/parameter-invariance.html" class="lesson-stub">Parameter invariance</a></li>
+<li><a href="./lessons/dimensionality.html" class="lesson-stub">Dimensionality and multidimensional IRT</a></li>
+<li><a href="./lessons/dif.html" class="lesson-stub">Differential item functioning</a></li>
+<li><a href="./lessons/item-estimation.html" class="lesson-stub">Estimating item parameters: JML and EM</a></li>
+<li><a href="./lessons/fit-prediction.html" class="lesson-stub">Model fit and out-of-sample prediction</a></li>
+<li><a href="./lessons/guessing-priors.html" class="lesson-stub">Guessing and priors</a></li>
+<li><a href="./lessons/item-banks-cat.html" class="lesson-stub">Item banks and adaptive testing</a></li>
+<li><a href="./lessons/equating.html" class="lesson-stub">Linking and equating</a></li>
+<li><a href="./lessons/invariance-experience.html" class="lesson-stub">Measurement invariance under treatment and life events</a></li>
+<li><a href="./lessons/explanatory-irt.html" class="lesson-stub">What is an item? Explanatory item response models</a></li>
+<li><a href="./lessons/cdm.html" class="lesson-stub">Cognitive diagnostic models</a></li>
+<li><a href="./lessons/polytomous.html" class="lesson-stub">Models for polytomous responses</a></li>
+<li><a href="./lessons/irtrees.html" class="lesson-stub">IRTree models</a></li>
+<li><a href="./lessons/unfolding-nominal.html" class="lesson-stub">Unfolding and nominal response models</a></li>
+<li><a href="./lessons/response-time.html" class="lesson-stub">Response time and the speed-accuracy tradeoff</a></li>
+<li><a href="./lessons/trials.html" class="lesson-stub">Trials as items: tasks, shots, and rotations</a></li>
+<li><a href="./lessons/ai-psychometrics.html" class="lesson-stub">AI and psychometrics</a></li>
 </ol>
 
 
