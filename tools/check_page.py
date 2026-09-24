@@ -59,7 +59,13 @@ try:
     print(f"{'PASS' if hit else 'FAIL'} after {time.time() - t0:.0f}s: {hit.group(0) if hit else 'expected output not seen'}")
     for e in errs:
         print("  R error:", e[:200])
-    shot = call("Page.captureScreenshot", format="png", captureBeyondViewport=True)
+    # Resize the viewport to the whole page before the screenshot. With
+    # captureBeyondViewport alone, Chrome leaves text and images more than a few
+    # screens down unpainted, so long lessons came out partly blank.
+    h = int(call("Page.getLayoutMetrics")["cssContentSize"]["height"])
+    call("Emulation.setDeviceMetricsOverride", width=1300, height=h, deviceScaleFactor=1, mobile=False)
+    time.sleep(3)  # let the newly visible content (MathJax, figures) paint
+    shot = call("Page.captureScreenshot", format="png")
     open(out, "wb").write(base64.b64decode(shot["data"]))
     sys.exit(0 if hit else 1)
 finally:
