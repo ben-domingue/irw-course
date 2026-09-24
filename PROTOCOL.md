@@ -176,7 +176,8 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 ### IRW vignettes and deep dives
 
 - IRW vignettes are **linked, not embedded**, where relevant: in the text where the
-  question comes up, and again in *Going further*.
+  question comes up, and again in *Going further*. `check_links.R` confirms each
+  linked vignette exists (#72).
 - A few lessons carry a **deep dive**: a result across the whole IRW corpus. It has
   three parts: a miniature on one table in the lesson, then the precomputed corpus
   result with its code, then a pointer to the vignette. Candidates are #18–#26.
@@ -337,7 +338,8 @@ A lesson moves to `status: done` only when every box is ticked.
       state matches the widget or the output.
 - [ ] The downloadable `code/<id>-sim.R` and `code/<id>-irw.R` run unchanged in local
       R and give the numbers the page shows.
-- [ ] `check_course()` and `Rscript check_tables.R` pass.
+- [ ] `check_course()`, `Rscript check_tables.R` and `Rscript check_links.R` pass. The
+      last checks every IRW vignette and table link in the lessons (#72).
 
 **Sign-off**
 - [ ] Every open question is in #62; Ben has signed off.
