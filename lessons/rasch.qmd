@@ -21,7 +21,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Sum scores treat every item as interchangeable: a correct answer is worth one point no matter which item it came from. In the last lesson we saw that this is a strange assumption—some items are far harder than others, and the relationship between the sum score and any one item is not a straight line. The Rasch model is the simplest model that takes items seriously. It puts people and items on the same scale, and it does so with a single parameter per person and a single parameter per item. That parsimony buys some unusual properties, and it also makes demands of the data. This lesson is about both.
+Sum scores treat every item as interchangeable: a correct answer is worth one point no matter which item it came from. Yet items differ, and the chance of getting any one of them right does not rise in a straight line with the sum score ([Where CTT breaks](ctt-limits.qmd)). What is the simplest model that takes items seriously? The Rasch model ([Rasch, 1960](https://openlibrary.org/works/OL4506215W)), with one parameter per person and one per item, on the same scale. That parsimony buys some unusual properties, chief among them that the sum score is all the model needs to know about a person, and it makes demands of the data. This lesson is about both.
 
 ## Goals
 
@@ -31,19 +31,21 @@ By the end of this lesson you should be able to:
 - read an item characteristic curve and a Wright map;
 - explain why the scale has no natural origin (and what software does about it);
 - explain why the sum score is all the Rasch model needs to know about a person, and what "specific objectivity" asks of the data;
-- fit the model to real item response data with `mirt` and check whether it fits.
+- fit the model to real item response data with `mirt`, and read item fit statistics and plots to judge where it fits and where it doesn't.
 
 ## Core ideas
 
 ### From logistic regression to the Rasch model
 
-Recall logistic regression: for a binary outcome $y$ and a predictor $x$,
-$$\Pr(y = 1) = \frac{\exp(b_0 + b_1 x)}{1 + \exp(b_0 + b_1 x)}.$$
-There we observe $x$ and estimate $b_0$ and $b_1$. The Rasch model has the same shape, but everything on the right-hand side is unknown. For person $j$ and item $i$,
+::: {.callout-tip appearance="simple"}
+**Recall** from [The likelihood and logistic regression](likelihood.qmd): we regressed 40 chess problems on the players' Elo ratings, $\Pr(y = 1) = \exp(\beta_0 + \beta_1 x)/(1 + \exp(\beta_0 + \beta_1 x))$. Giving each problem its own intercept raised the Elo slope from 0.50 to 0.83. Problem Y15 stood out: about as hard as Y29, but success on it barely moved with Elo. That lesson ended on a question: what if each player had an unknown parameter of their own instead of an observed Elo rating?
+:::
+
+The Rasch model is the answer. It keeps the shape of the logistic regression, but everything on the right-hand side is unknown. For person $j$ and item $i$,
 $$\Pr(x_{ij} = 1) = \frac{\exp(\theta_j - b_i)}{1 + \exp(\theta_j - b_i)}.$$
 
-- $\theta_j$ is the person's **ability**—an idealized version of the sum score. It, and it alone, determines how a person performs on the items.
-- $b_i$ is the item's **difficulty**. When $\theta = b$, the odds of a correct response are even.
+- $\theta_j$ is the person's **ability**, an idealized version of the sum score. It, and it alone, determines how a person performs on the items. It takes the place of $\beta_1 \times \text{Elo}$.
+- $b_i$ is the item's **difficulty**, the item intercept with its sign flipped. When $\theta = b$, the odds of a correct response are even.
 
 Plotting the probability of a correct response against $\theta$ for a single item gives the **item characteristic curve** (ICC). Move the difficulty around and watch what happens.
 
@@ -73,7 +75,7 @@ Plot.plot({
 })
 ```
 
-Note a few things. Changing $b$ slides the curve left and right without changing its shape; a harder item simply needs more ability for the same chance of success. The curve never reaches 0 or 1, so nobody is certain to get any item right or wrong. And the slope slider is a preview: the Rasch model fixes it at 1 for every item, and relaxing that assumption gives the 2PL, which we take up in [From the 1PL to the 4PL](1pl-to-4pl.qmd). (A challenge, especially if you know probit regression: turn on the normal CDF and find the slope that makes the two curves nearly identical. The answer is roughly 1.7: the scaling constant $D$ that older IRT papers carry around so that logistic and normal-ogive parameters can be compared.)
+Changing $b$ slides the curve left and right without changing its shape: a harder item needs more ability for the same chance of success. The curve never reaches 0 or 1, so nobody is certain to get any item right or wrong. The slope slider is a preview: the Rasch model fixes it at 1 for every item, and relaxing that assumption gives the 2PL, which we take up in [From the 1PL to the 4PL](1pl-to-4pl.qmd). (A challenge, especially if you know probit regression: turn on the normal CDF and find the slope that makes the two curves nearly identical. The answer is roughly 1.7: the scaling constant $D$ that older IRT papers carry around so that logistic and normal-ogive parameters can be compared. [Camilli (1994)](https://doi.org/10.3102/10769986019003293) traces where it came from.)
 
 ```{ojs}
 //| echo: false
@@ -89,7 +91,7 @@ quiz({
 
 ### The scale has no origin
 
-Where is zero on this scale? Nowhere in particular. Suppose we add the same constant $C$ to every person's ability and every item's difficulty. The model only ever sees $\theta - b$, so nothing about the predicted responses changes.
+Where is zero on this scale? Nowhere in particular. Add the same constant $C$ to every ability and every difficulty: the model only ever sees $\theta - b$, so no predicted response changes.
 
 #### Try it: shift everything
 
@@ -109,7 +111,7 @@ Inputs.table(shift_people.flatMap(pp => shift_items.map(it => ({
 }))), {layout: "auto", rows: 7})
 ```
 
-The probabilities in the last column do not move. The data can tell us how far apart people and items are, but not where zero is; we say the model is not **identified** without an extra constraint. Software picks one for you. `mirt`, for example, fixes the mean ability at 0; other programs fix the mean item difficulty at 0 instead. The choice is arbitrary, and results from two programs can differ by exactly such a shift—something to remember before you compare numbers across studies.
+The probabilities in the last column do not move. The data can tell us how far apart people and items are, but not where zero is; we say the model is not **identified** without an extra constraint. Software picks one for you. `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)) fixes the mean of the ability distribution at 0, as the chess fit below shows. Programs that use conditional maximum likelihood (see the Go deeper callout below) instead fix one item's difficulty at 0 or make the difficulties sum to 0 ([Mair & Hatzinger, 2007](https://doi.org/10.18637/jss.v020.i09)). The choice is arbitrary, and results from two programs can differ by exactly such a shift. Remember that before you compare numbers across studies.
 
 ```{ojs}
 //| echo: false
@@ -177,13 +179,19 @@ Where people and items overlap, the test can tell people apart; where people sit
 
 ### What the model assumes
 
-Two assumptions deserve emphasis. First, the formula is right: in particular, a single $\theta$ drives every response (the model is **unidimensional**). Second, responses are **locally independent**: once we know $\theta$, knowing how someone answered item 3 tells us nothing more about item 4. Both can fail, and it is worth brainstorming how before we meet the formal checks. Two items that share a reading passage? A test where the last ten items measure something else? The IRW has vignettes on how often each assumption holds across hundreds of datasets: [dimensionality](https://itemresponsewarehouse.org/vignettes/dimensionality.html) and [local dependence](https://itemresponsewarehouse.org/vignettes/local_dependence.html).
+Two assumptions merit emphasis ([Lord, 1980](https://doi.org/10.4324/9780203056615)). First, the formula is right: in particular, a single $\theta$ drives every response (the model is **unidimensional**). Second, responses are **locally independent**: once we know $\theta$, knowing how someone answered item 3 tells us nothing more about item 4. Both can fail, and it is worth brainstorming how before we meet the formal checks. Two items that share a reading passage? A test where the last ten items measure something else? IRW vignettes look at how often each assumption holds across many IRW datasets: [dimensionality](https://itemresponsewarehouse.org/vignettes/dimensionality.html) and [local dependence](https://itemresponsewarehouse.org/vignettes/local_dependence.html).
 
 ### The sum score is sufficient
 
-The Rasch model has a property that sets it apart from nearly every other item response model: the sum score is a **sufficient statistic** for $\theta$. Once you know how many items someone got right, nothing else in their responses—not *which* items—changes what we can learn about their ability. (For an analogy: once you know the mean of a sample from a normal distribution, the individual draws tell you nothing more about the population mean.)
+The Rasch model has a property that sets it apart from nearly every other item response model: the sum score $r$ is a **sufficient statistic** for $\theta$ ([Fisher, 1922](https://doi.org/10.1098/rsta.1922.0009)). Once you know how many items someone got right, nothing else in their responses, not even *which* items, changes what we can learn about their ability. 
 
-This is easier to see than to state. Below are five items of increasing difficulty. Pick a response pattern and look at the likelihood for $\theta$; then look at every other pattern with the same sum score.
+::: {.callout-tip appearance="simple"}
+**Recall** from [The likelihood and logistic regression](likelihood.qmd): in a logistic regression with an intercept, the derivative of the log likelihood with respect to the intercept is $\sum_i (y_i - p_i)$, so at the maximum the model's predicted number of successes equals the observed number.
+:::
+
+For one respondent, $\theta$ plays the part of that intercept. So the maximum-likelihood estimate of $\theta$ is the value at which the expected number correct, $\sum_i \Pr(x_i = 1 \mid \theta)$, equals the observed number correct, $r$. Which items make up $r$ never enters the equation.
+
+That is easier to see than to state. Below are five items of increasing difficulty. Pick a response pattern and look at the likelihood for $\theta$; then look at every other pattern with the same sum score.
 
 #### Try it: sufficiency
 
@@ -220,7 +228,9 @@ md`Your pattern is **${suf_pattern.join("")}** (sum score ${suf_sum}). The maxim
 Inputs.table(suf_same.map(d => ({pattern: d.pattern, "MLE of θ": Number.isFinite(d.mle) ? d.mle.toFixed(2) : (d.mle > 0 ? "+∞" : "−∞")})), {layout: "auto", rows: 11})
 ```
 
-Under the Rasch model the column is constant: every pattern with the same sum score gets the same estimate. Switch to the 2PL and it no longer is—getting a highly discriminating item right now counts for more. Note too that the relationship between sum scores and Rasch abilities is one-to-one but not linear; the step from 4 to 5 correct is a big one.
+Under the Rasch model the column is constant. Switch to the 2PL and it no longer is: getting a highly discriminating item right now counts for more. The relationship between sum scores and Rasch abilities is one-to-one but not linear. On these five items the step from 3 to 4 correct moves the estimate from 0.50 to 1.67, and 5 of 5 has no finite estimate at all.
+
+So which should you report, the sum score or $\hat\theta$? If the Rasch model fits and everyone took the same items, I'd report the sum score. It carries everything the model knows about the respondent, it orders people exactly as $\hat\theta$ does, and nobody needs it explained. $\hat\theta$ earns its keep when respondents take different items, as in [Linking and equating](equating.qmd): there the sum scores are no longer comparable and $\theta$ is.
 
 ```{ojs}
 //| echo: false
@@ -236,7 +246,7 @@ quiz({
 
 ### Specific objectivity
 
-The Rasch tradition has a name for the property it prizes: **specific objectivity**. Comparisons between people should not depend on which items we happened to use, and comparisons between items should not depend on which people happened to take them. It is a demand we place on the data, not something the data grants us for free.
+The Rasch tradition has a name for the property it prizes: **specific objectivity** ([Rasch, 1977](https://doi.org/10.1163/24689300-01401006)). Comparisons between people should not depend on which items we happened to use, and comparisons between items should not depend on which people happened to take them. It is a demand we place on the data, not something the data grants us for free.
 
 It is easiest to see through ICCs. If two items' curves never cross, then *everyone* finds item A easier than item B, whatever their ability. If they cross, the ordering of the items depends on who you ask—and the statement "item A is easier than item B" stops meaning anything on its own.
 
@@ -270,7 +280,7 @@ md`${so_cross === null ? "With equal slopes the curves never cross: whoever you 
   "The slopes differ, so the curves cross somewhere—but outside the range plotted. Push the slope further from 1 to bring the crossing into view."}`
 ```
 
-This is why partisans of the Rasch model feel so strongly about it: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like. The catch is that the model has to fit.
+This is why advocates of the Rasch model hold to it so firmly: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like ([Wright, 1997](https://doi.org/10.1111/j.1745-3992.1997.tb00606.x)). The catch is that the model has to fit.
 Consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
 
 ```{ojs}
@@ -285,21 +295,43 @@ quiz({
 })
 ```
 
+::: {.callout-note collapse="true"}
+## Go deeper: why the sum score is sufficient, and what follows
+
+**Assumptions:** one respondent answers $I$ dichotomous items; the Rasch model holds for every item; responses are locally independent given $\theta$; the difficulties $b_1, \dots, b_I$ are fixed. Write $\varepsilon_i = e^{-b_i}$ (the item's *easiness*) and $r = \sum_i x_i$.
+
+**Factorize the likelihood.** Using $\Pr(x_i \mid \theta) = e^{x_i(\theta - b_i)}/(1 + e^{\theta - b_i})$ for $x_i \in \{0, 1\}$,
+$$\Pr(\mathbf{x} \mid \theta) = \prod_{i=1}^{I} \frac{e^{x_i(\theta - b_i)}}{1 + e^{\theta - b_i}} = \frac{e^{r\theta} \; \prod_i \varepsilon_i^{x_i}}{\prod_i \big(1 + e^{\theta - b_i}\big)}.$$
+The data meet $\theta$ in one place only, $e^{r\theta}$. The product $\prod_i \varepsilon_i^{x_i}$ depends on which items were right but not on $\theta$, and the denominator depends on $\theta$ but not on the data. Taking logs and differentiating gives $r - \sum_i \Pr(x_i = 1 \mid \theta)$, the score equation from the main text.
+
+**Condition on $r$.** Add up the probabilities of all the patterns with the same sum score:
+$$\Pr(r \mid \theta) = \frac{e^{r\theta}\,\gamma_r(\boldsymbol\varepsilon)}{\prod_i \big(1 + e^{\theta - b_i}\big)}, \qquad \gamma_r(\boldsymbol\varepsilon) = \sum_{\mathbf{y}:\, \sum_i y_i = r} \; \prod_i \varepsilon_i^{y_i},$$
+where $\gamma_r$, the *elementary symmetric function* of order $r$, is a sum over patterns and contains no $\theta$. Divide:
+$$\Pr(\mathbf{x} \mid r, \theta) = \frac{\prod_i \varepsilon_i^{x_i}}{\gamma_r(\boldsymbol\varepsilon)}.$$
+$\theta$ has cancelled. Given $r$, the pattern carries no further information about $\theta$; that is the definition of a sufficient statistic. Three things follow.
+
+1. **Conditional maximum likelihood.** Multiply $\Pr(\mathbf{x}_j \mid r_j)$ over respondents and you have a likelihood for the difficulties with no $\theta$ in it. Maximizing it is conditional maximum likelihood (CML). It needs no assumption about how $\theta$ is distributed, and it gives consistent estimates of the $b_i$ as the number of respondents grows ([Andersen, 1970](https://doi.org/10.1111/j.2517-6161.1970.tb00842.x)). Estimating every $\theta_j$ jointly with the $b_i$ does not, because the number of person parameters grows with the data ([Neyman & Scott, 1948](https://doi.org/10.2307/1914288)). The `wirs` analysis below uses $\Pr(x_i = 1 \mid r)$ to compare the model with the data without estimating anyone's $\theta$.
+2. **Specific objectivity is a theorem.** Take two items, $i$ and $k$, and condition on the respondent getting exactly one of them right. The same cancellation, with two items, gives
+$$\Pr(x_i = 1 \mid x_i + x_k = 1, \theta) = \frac{\varepsilon_i}{\varepsilon_i + \varepsilon_k} = \frac{1}{1 + e^{b_i - b_k}},$$
+which contains no $\theta$. Whoever the respondents are, strong or weak, the comparison of the two items comes out the same. Swap the roles of people and items (two respondents, one item, exactly one of them right) and the comparison depends on $\theta_j - \theta_l$ and not on $b$. This is Rasch's specific objectivity, derived rather than assumed. When the model fails, it fails in a checkable way: CML estimates of the difficulties from high and low scorers should agree, and [Andersen (1973)](https://doi.org/10.1007/BF02291180) turned that into a likelihood-ratio test. Problem 3 tries the two-item version on the chess data.
+3. **The converse.** For dichotomous items, if some statistic is sufficient for $\theta$ and is the same statistic whatever the item parameters, it is the sum score, and the model must be the Rasch model: logistic curves with equal slopes ([Andersen, 1977](https://doi.org/10.1007/BF02293746)). [Fischer (1995)](https://doi.org/10.1007/978-1-4612-4230-7_2) collects this and other derivations of the Rasch model. Under the 2PL, the weighted score $\sum_i a_i x_i$ plays the part of $r$, but its weights are item parameters, which is where [From the 1PL to the 4PL](1pl-to-4pl.qmd) picks up.
+:::
+
 ### A note on estimation
 
-Fitting the model is a harder problem than it looks, because nothing on the right-hand side is known. If we knew the item difficulties, estimating abilities would be straightforward (and vice versa). The conventional approach estimates the item parameters first, integrating over the distribution of abilities with the EM algorithm, and then estimates abilities treating those item parameters as known. We take these steps in turn in [Estimating abilities](ability-estimation.qmd) and [Estimating item parameters](item-estimation.qmd). For now, `mirt` will do it for us.
+Fitting the model is harder than it looks, because nothing on the right-hand side is known. The conventional approach, and the one `mirt` takes, estimates the item parameters first, integrating over the distribution of abilities with the EM algorithm ([Bock & Aitkin, 1981](https://doi.org/10.1007/BF02293801)), and then estimates abilities treating those item parameters as known. Conditional maximum likelihood, from the Go deeper callout above, is the Rasch model's own alternative. [Estimating abilities](ability-estimation.qmd) and [Estimating item parameters](item-estimation.qmd) take these in turn.
 
 ## Simulate
 
-The best way to understand what a model can recover is to generate data from it yourself. The code below simulates responses from the Rasch model, fits the model with `mirt`, and compares the estimated difficulties to the truth. It runs here in your browser; the first run takes about 20 seconds while R and `mirt` load.
+The code below simulates responses from the Rasch model, fits the model with `mirt`, and compares the estimated difficulties to the truth. It runs here in your browser; the first run takes about 20 seconds while R and `mirt` load.
 
-Try changing `np` to 50, then to 2000. How does the scatter around the line change? What about changing `ni`?
+Try changing `np` to 50, then to 2000, and watch the scatter around the line. With the seed as written, the root mean squared error of the estimated difficulties is 0.34 with 50 people, 0.13 with 500 and 0.04 with 2,000. Now change `ni` to 40: with 500 people the error barely moves (0.13), because each difficulty rests on the people who answered that item. More items sharpen the *abilities* instead, which is where [Information, precision, and short forms](information.qmd) picks up.
 
 ```{webr}
 {{< include code/rasch-sim.R >}}
 ```
 
-One detail merits emphasis, because it trips up almost everyone: `mirt` writes the Rasch model as $\Pr(x = 1) = 1/(1 + \exp(-(\theta + d)))$, so its parameter `d` is an *easiness*. Our difficulty is $b = -d$, which is why the code negates it.
+One detail trips up many first-time users: `mirt` writes the Rasch model as $\Pr(x = 1) = 1/(1 + \exp(-(\theta + d)))$, so its parameter `d` is an *easiness*. Our difficulty is $b = -d$, which is why the code negates it.
 
 [Download this code](code/rasch-sim.R) to run it in your own R session, where you can make the simulation as large as you like.
 
@@ -310,14 +342,14 @@ One detail merits emphasis, because it trips up almost everyone: `mirt` writes t
 knitr::read_chunk("code/rasch-irw.R")
 ```
 
-We will fit the Rasch model to [chess_lnirt](https://itemresponsewarehouse.org/tables/chess_lnirt/): 40 chess problems answered by 259 players of varying skill (from van der Maas and Wagenmakers's Amsterdam Chess Test). The data come straight from the IRW, with no account needed. The code below is what produced every number and figure in this section; [download it](code/rasch-irw.R) to run it yourself.
+Our main example is [chess_lnirt](https://itemresponsewarehouse.org/tables/chess_lnirt/), the 40 problems of the Amsterdam Chess Test ([van der Maas & Wagenmakers, 2005](https://doi.org/10.2307/30039042)), which we met in [The likelihood and logistic regression](likelihood.qmd); its job here is to show what the Rasch model says about a test built for a wide range of skill. A response is 1 if the player solved the problem. The code below produced every number and figure in this section; [download it](code/rasch-irw.R) to run it yourself.
 
 ```{r fetch}
 #| echo: true
 #| code-fold: show
 ```
 
-IRW tables are long—one row per response—so we reshape to one row per person. Note the first rows above: that player has no responses at all, and we drop players like them.
+IRW tables are long, one row per response, so we reshape to one row per player. The first rows above belong to a player with no responses at all; three of the 259 players are like that, and we drop them, leaving 256.
 
 ```{r reshape}
 #| echo: true
@@ -329,9 +361,16 @@ IRW tables are long—one row per response—so we reshape to one row per person
 #| code-fold: show
 ```
 
-The easiest problem (Y31) sits nearly five logits below the average; the hardest (Y30) more than three and a half above. Wide compared with what? Across 40 randomly chosen dichotomous IRW tables (10–60 items, 300–5,000 respondents), the median standard deviation of Rasch difficulties is 1.4 logits and the median range 4.8; the chess problems, at 2.1 and 8.5, are more spread out than about 85% of them ([code](code/rasch-difficulty-spread.R)). That spread is what you want from a test meant to separate novices from masters.
+The easiest problem (Y31) sits nearly five logits below zero, the mean ability, and the hardest (Y30) more than three and a half above. Is that a wide spread? Wide compared with what? The IRW's [difficulty pool](https://itemresponsewarehouse.org/vignettes/diffsim.html) holds Rasch difficulties for 145 IRW tables ([Zhang et al., 2025](https://doi.org/10.31234/osf.io/jbhxy_v4)), and chess is one of them.
 
-How do these difficulties relate to the simplest measure of item difficulty, the proportion of people who get the item right?
+```{r spread}
+#| echo: true
+#| code-fold: show
+```
+
+The median table in the pool has a standard deviation of difficulties of 0.99; chess, at 1.75 on the pool's scale, is more spread out than 74% of them. (The pool fixes the SD of ability at 1, while the Rasch model fixes the slopes at 1 and lets the SD of ability float, here to 1.22; dividing our 2.1 by 1.22 recovers the pool's 1.75.) That spread is what you want from a test meant to separate novices from masters.
+
+How do these difficulties relate to the simplest measure of item difficulty, the proportion of players who solve the problem?
 
 ```{r pvalues}
 #| echo: true
@@ -340,7 +379,7 @@ How do these difficulties relate to the simplest measure of item difficulty, the
 #| fig-height: 4.5
 ```
 
-The relationship is tight and monotone but not linear: the Rasch scale stretches out the extremes, where a few percentage points of correct responses correspond to a large difference in difficulty.
+The rank correlation is −0.9998. That is sufficiency from the item side: with complete data an item's total is sufficient for its difficulty ([Mair & Hatzinger, 2007](https://doi.org/10.18637/jss.v020.i09)), and a few missing responses keep it from being exactly −1. The relationship is not linear, though: the Rasch scale stretches out the extremes, where a few percentage points correct correspond to a large difference in difficulty.
 
 ```{r wright}
 #| echo: true
@@ -349,9 +388,9 @@ The relationship is tight and monotone but not linear: the Rasch scale stretches
 #| fig-height: 5
 ```
 
-Because `mirt` fixes the mean ability at 0, the mean difficulty tells us how hard the test is for this sample: here the two are within about a tenth of a logit, so the test is well targeted, and the items span the people nicely.
+The mean ability is 0.00, the constraint `mirt` imposes, and adding 1 to every ability and difficulty leaves every probability unchanged (`all.equal` returns `TRUE`). So the mean difficulty says how hard the test is for this sample: 0.12, about a tenth of a logit, against an SD of ability of 1.22. The test is well targeted.
 
-Does the model fit? A common first look is the infit and outfit statistics: mean squared standardized residuals, which should be near 1 if the model is right. Values well below 1 mean an item is *more* predictable than the Rasch model expects (typically an item that discriminates better than average); values well above 1 mean it is noisier.
+Does the model fit? A common first look is the infit and outfit statistics ([Wright & Masters, 1982](https://www.rasch.org/rsa.htm)): mean squared standardized residuals, which should be near 1 if the model is right. Values well below 1 mean an item is *more* predictable than the Rasch model expects (typically an item that discriminates better than average); values well above 1 mean it is noisier. How far from 1 is too far is the subject of [Model fit and out-of-sample prediction](fit-prediction.qmd).
 
 ```{ojs}
 //| echo: false
@@ -359,7 +398,7 @@ predict({
   q: "Chess problems differ quite a bit in how sharply they separate strong players from weak ones, but the Rasch model gives every item the same slope. Among the chess items that fit worst, what do you expect to see?",
   choices: ["Mostly overfit (outfit well below 1)", "Mostly underfit (outfit well above 1)", "About as many of each", "No misfit: every outfit near 1"],
   answer: "Mostly overfit (outfit well below 1)",
-  reveal: "Mostly overfit. Items that discriminate more sharply than the common slope allows are *more* predictable than the model expects, which pushes outfit below 1. Check the output below."
+  reveal: "Mostly overfit: four of the five items with the largest $|z|$ have outfit below 1. Items that discriminate more sharply than the common slope allows are *more* predictable than the model expects, which pushes outfit below 1. The fifth is Y15. Check the output below."
 })
 ```
 
@@ -370,40 +409,46 @@ predict({
 #| fig-height: 4.5
 ```
 
-Most of the worst-fitting items here *overfit* (outfit below 1): they separate strong and weak players more sharply than a common slope allows. Item Y15 is the exception, with an outfit above 2. The empirical plot compares the model's ICC for one item with the observed proportions correct among players grouped by ability. Try other items in your own session.
+Four of the five worst-fitting items by $|z|$ *overfit* (outfit from 0.64 to 0.73): they separate strong and weak players more sharply than a common slope allows. The exception is Y15, whose outfit of 2.2 is the largest of all 40 items: by the size of its misfit, it is the worst-fitting item on the test. It is the problem whose success barely moved with Elo in [The likelihood and logistic regression](likelihood.qmd). The empirical plot compares the model's curve with the proportions solved among players grouped by ability. Those proportions barely rise: below-average players solve Y15 more often than the model expects, and the strongest group less often. Why is a question about the problem itself, which the responses alone can't answer.
 
-For contrast, here is a very different dataset: [wirs](https://itemresponsewarehouse.org/tables/wirs/), six items from the Workplace Industrial Relations Survey, analysed by Bartholomew (1998).
+For contrast, a table whose job is to show a setting where one ability and equal slopes describe the data less well: [wirs](https://itemresponsewarehouse.org/tables/wirs/), six items from the 1990 Workplace Industrial Relations Survey analysed by [Bartholomew (1998)](https://doi.org/10.1111/1467-9876.00094). Each item asks whether a kind of consultation took place about the most recent introduction of new equipment (1 = yes), from informal discussion with individual workers (item 1) through joint consultative committees (item 3) to paid union officials (wording from the `ltm` documentation, [Rizopoulos, 2006](https://doi.org/10.18637/jss.v017.i05)). Because the sum score is sufficient, the Rasch model says what proportion of respondents with each sum score should say yes to each item, without estimating anyone's $\theta$ (the Go deeper callout gives the formula).
 
 ```{r wirs}
 #| echo: true
 #| code-fold: show
-#| fig-width: 6
-#| fig-height: 4.5
 ```
 
-The contrast with chess is stark. The chess item's observed proportions track the model's curve; the wirs item's do not, jumping from 0 to 0.95 and back to about 0.3 within two logits. (With only six items, the ability estimates also bunch into a narrow range.) Whether the Rasch model is a reasonable description of a dataset is something to check item by item, not assume; the formal version of this check is in [Model fit and out-of-sample prediction](fit-prediction.qmd).
+Item 3 (a joint consultative committee) rises more steeply than the model allows: 0.04 of respondents with a sum score of 1 said yes, against a predicted 0.11, and 0.96 of those with 5, against 0.84. Item 1 (informal discussion with individual workers) barely tracks the sum score. It rises from 0.23 to 0.58 between sum scores 1 and 3, then falls to 0.36 and 0.40 at 4 and 5, where the model predicts 0.76 and 0.90. (At sum scores 0 and 6 the observed and predicted values agree by construction, since the sum includes the item.) The data are telling us something about the construct: workplaces that use many formal channels don't talk more with individual workers, so "amount of consultation" may not be a single dimension. Whether the Rasch model describes a dataset is something to check item by item, not assume ([Model fit and out-of-sample prediction](fit-prediction.qmd)).
 
 ## Problems
 
 1. **The logit.** Show that $\frac{e^x}{1+e^x} = \frac{1}{1+e^{-x}}$. Then show that under the Rasch model, $\log\frac{\Pr(x=1)}{\Pr(x=0)} = \theta - b$. What does a one-unit increase in $\theta$ do to the odds of a correct response, on any item?
-2. **Indeterminacy.** Suppose $\theta' = \theta + C$ and $b' = b + C$. Show that $\Pr(x = 1)$ is unchanged. Now suppose instead $\theta' = k\theta$ and $b' = kb$ for some $k \ne 1$. Is the Rasch model still unchanged? What does your answer say about which feature of the scale the Rasch model *does* pin down?
-3. **Reading mirt.** Fit the Rasch model to `chess_lnirt` and plot the item proportions correct against `mirt`'s raw `d` parameters (without negating them). Explain the direction of the relationship, using the `mirt` documentation for `itemtype = "Rasch"`.
+2. **Indeterminacy.** Suppose $\theta' = \theta + C$ and $b' = b + C$. Show that $\Pr(x = 1)$ is unchanged. Now suppose instead $\theta' = k\theta$ and $b' = kb$ for some $k \ne 1$. Is the Rasch model still unchanged? What does your answer say about which feature of the scale the Rasch model *does* pin down, and how does it square with the difficulty pool's chess SD of 1.75 against our 2.1?
+3. **Specific objectivity in the chess data.** By the Go deeper callout, among players who solved exactly one of problems $i$ and $k$, the proportion who solved $i$ should be $1/(1 + e^{b_i - b_k})$ whatever their ability. Pick two problems of middling difficulty, take the players who solved exactly one, and split them at the median of their sum score on the other 38. Compare the two halves with each other and with the prediction. Repeat for a pair that includes Y15. What do you see?
 4. **Targeting.** Draw the Wright map for `chess_lnirt`. For which players does this test give the least information, and why? Suggest the difficulty of two items you would add to the test to improve measurement for them.
-5. **Fit, two ways.** Using `itemfit(..., empirical.plot = i)`, compare the fit of several items in `chess_lnirt` and in `wirs`. Which dataset does the Rasch model describe better? Now simulate data from the Rasch model (the simulation above, with `np = 2000` and `ni = 50`) and look at the same plots. What does "good fit" look like when you know the model is true?
-6. **Challenge: sufficiency in the data.** In `chess_lnirt`, find two players with the same sum score but very different response patterns. Compare their estimated abilities (`fscores`). Then fit a 2PL (`itemtype = "2PL"`) and compare again. Explain what you see.
+5. **Fit, two ways.** Using `itemfit(..., empirical.plot = i)`, compare several items in `chess_lnirt` and in `wirs`. Which dataset does the Rasch model describe better? Now run the simulation above with `np = 2000` and `ni = 50` and look at the same plots. What does "good fit" look like when you know the model is true?
+6. **Challenge: sufficiency in the data.** In `chess_lnirt`, find two players with the same sum score but very different response patterns. Compare their estimated abilities (`fscores`). Then fit a 2PL (`itemtype = "2PL"`) and compare again. Explain what you see. Then the open part: if the 2PL fits the chess data better, how much would you lose by reporting the sum score anyway, and how would you decide?
 
 ```{r}
 #| output: asis
-ask_claude("rasch", "It covers the Rasch model: item characteristic curves, why the scale has no origin, Wright maps, sufficiency of the sum score, specific objectivity, and fitting the model with the mirt package in R.")
+ask_claude("rasch", "It covers the Rasch model: item characteristic curves, why the scale has no origin, Wright maps, sufficiency of the sum score (including conditional maximum likelihood), specific objectivity, and fitting the model with the mirt package in R to chess problems and a workplace survey.")
 ```
 
 ## Going further
 
-- Tutz, G. (2025). *A short guide to item response theory models*. Springer. Chapter 2 derives the Rasch model, including from sufficiency (section 2.4.2).
-- Wright, B. D. (1997). A history of social science measurement. *Educational Measurement: Issues and Practice*, 16(4), 33–45. The case for the Rasch model, made with feeling.
-- van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. The source of the chess data.
-- Bartholomew, D. J. (1998). Scaling unobservable constructs in social science. *Journal of the Royal Statistical Society: Series C*, 47(1), 1–13. The source of the `wirs` data.
-- From the IRW: [simulating item difficulties](https://itemresponsewarehouse.org/vignettes/diffsim.html) shows what real difficulty distributions look like across hundreds of datasets, which is worth knowing before you choose one for a simulation.
+- Rasch, G. (1960). *Probabilistic models for some intelligence and attainment tests*. Danish Institute for Educational Research; expanded edition, University of Chicago Press, 1980. <https://openlibrary.org/works/OL4506215W>. Where the model starts, including the case for separating people from items.
+- Andersen, E. B. (1970). Asymptotic properties of conditional maximum-likelihood estimators. *Journal of the Royal Statistical Society, Series B*, 32(2), 283–301. <https://doi.org/10.1111/j.2517-6161.1970.tb00842.x>. Why conditioning on the sum score gives consistent difficulty estimates.
+- Andersen, E. B. (1977). Sufficient statistics and latent trait models. *Psychometrika*, 42(1), 69–81. <https://doi.org/10.1007/BF02293746>. The converse: sufficiency of the sum score implies the Rasch model.
+- Fischer, G. H. (1995). Derivations of the Rasch model. In G. H. Fischer & I. W. Molenaar (Eds.), *Rasch models: Foundations, recent developments, and applications* (pp. 15–38). Springer. <https://doi.org/10.1007/978-1-4612-4230-7_2>. The Go deeper callout, done properly and from several directions.
+- Rasch, G. (1977). On specific objectivity: An attempt at formalizing the request for generality and validity of scientific statements. *Danish Yearbook of Philosophy*, 14, 58–94. <https://doi.org/10.1163/24689300-01401006>. Rasch's own statement of specific objectivity.
+- Wright, B. D. (1997). A history of social science measurement. *Educational Measurement: Issues and Practice*, 16(4), 33–45. <https://doi.org/10.1111/j.1745-3992.1997.tb00606.x>. The case for the Rasch model, from one of its leading advocates.
+- Wright, B. D., & Masters, G. N. (1982). *Rating scale analysis*. MESA Press. <https://www.rasch.org/rsa.htm>. Infit and outfit, and Rasch analysis in practice.
+- Tutz, G. (2025). *A short guide to item response theory models*. Springer. <https://doi.org/10.1007/978-3-031-87271-6>. Chapter 2 is a compact modern treatment of the binary Rasch model.
+- Camilli, G. (1994). Origin of the scaling constant *d* = 1.7 in item response theory. *Journal of Educational and Behavioral Statistics*, 19(3), 293–295. <https://doi.org/10.3102/10769986019003293>. The 1.7 in the ICC challenge.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package used throughout.
+- van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. <https://doi.org/10.2307/30039042>. The source of the chess data.
+- Bartholomew, D. J. (1998). Scaling unobservable constructs in social science. *Journal of the Royal Statistical Society, Series C*, 47(1), 1–13. <https://doi.org/10.1111/1467-9876.00094>. The source of the `wirs` data.
+- From the IRW: [simulating item difficulties](https://itemresponsewarehouse.org/vignettes/diffsim.html) shows what real difficulty distributions look like across the IRW (the baseline for the chess spread), and why they matter for simulation studies (Zhang, L., Liu, Y., Molenaar, D., Gilbert, J. B., Kanopka, K., & Domingue, B. W. (2025). Realistic simulation of item difficulties. PsyArXiv. <https://doi.org/10.31234/osf.io/jbhxy_v4>). The [dimensionality](https://itemresponsewarehouse.org/vignettes/dimensionality.html), [local dependence](https://itemresponsewarehouse.org/vignettes/local_dependence.html) and [2PL discrimination](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) vignettes take the model's assumptions across the IRW.
 
 ```{r}
 #| output: asis
@@ -413,6 +458,7 @@ data_sources("rasch")
 ## For instructors
 
 - **Source:** EDUC 252 class 3 (slides c3, "Probabilistic item response modeling" through "Estimation of the RM") and the code in `ben-domingue/252`: `c3/rasch0.R`, `c3/rasch1.R`, `c3/rasch2.R`.
-- **Timing:** the core ideas and widgets fit in about 75 minutes of class; the real-data section works well as an in-class lab.
+- **Timing:** the core ideas and widgets fit in about 75 minutes of class; the real-data section works well as an in-class lab. The Go deeper callout is optional reading for students with some mathematical statistics.
+- **Changed from 252 (retrofit, 09-24):** the sufficiency derivation (factorization, conditional ML, specific objectivity as a theorem, Andersen's converse) was added as a Go deeper callout; the `wirs` contrast now compares observed and model-implied proportions given the sum score rather than an empirical plot; the "wide spread" of chess difficulties is judged against the IRW difficulty pool; a problem on reading `mirt`'s raw `d` was replaced by problem 3 (specific objectivity in the chess data).
 - **Held back:** item and test information, and the estimation algorithms, have their own lessons. The problem set questions on Rasch fit statistics (outfit's sampling distribution) are in [Model fit and out-of-sample prediction](fit-prediction.qmd).
-- **Solutions:** not yet written.
+- **Solutions:** held back in `solutions/rasch.qmd` (not published).
