@@ -22,5 +22,10 @@ lesson_header("trials")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("trials")
+```
+
 ## For instructors
 

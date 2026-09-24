@@ -11,6 +11,10 @@ resources:
 freeze: auto
 format:
   html:
+    # Both fix quarto-webr problems on pages with OJS widgets (#13): the first
+    # stops Observable's module loader from capturing the code editor's modules;
+    # the second replays a Run click that lands before the editor exists.
+    include-in-header: widgets/amd-dispatch.html
     include-after-body: widgets/webr-run-guard.html
 execute:
   echo: false

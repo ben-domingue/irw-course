@@ -22,5 +22,10 @@ lesson_header("constructs")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("constructs")
+```
+
 ## For instructors
 

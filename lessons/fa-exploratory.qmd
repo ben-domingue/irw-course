@@ -316,6 +316,11 @@ ask_claude("fa-exploratory", "It covers exploratory factor analysis: the common 
 - Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement of the Big Five via alternative formats for the BFI-2. *Journal of Personality Assessment*. <https://doi.org/10.1080/00223891.2025.2531187>. The source of the data.
 - From the IRW: [how often unidimensionality holds](https://itemresponsewarehouse.org/vignettes/dimensionality.html) across hundreds of datasets, and a [CFA walkthrough with lavaan](https://itemresponsewarehouse.org/vignettes/cfa.html) that previews the next lesson.
 
+```{r}
+#| output: asis
+data_sources("fa-exploratory")
+```
+
 ## For instructors
 
 - **Source:** new material; EDUC 252 did not cover factor analysis directly (dimensionality appeared in c4 and c6, and PS6#1 fit two-factor IRT models to grit and growth-mindset items). Added after the landscape analysis in `notes/landscape-2026-09-24.md`, where exploratory factor analysis appeared in 8 of 11 first-course syllabi.

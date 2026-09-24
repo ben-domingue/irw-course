@@ -29,6 +29,11 @@ for (l in course$lessons) {
     "",
     "## Going further",
     "",
+    "```{r}",
+    "#| output: asis",
+    sprintf("data_sources(\"%s\")", l$id),
+    "```",
+    "",
     "## For instructors",
     ""
   ), path)

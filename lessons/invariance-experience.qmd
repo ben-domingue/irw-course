@@ -22,5 +22,10 @@ lesson_header("invariance-experience")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("invariance-experience")
+```
+
 ## For instructors
 

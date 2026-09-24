@@ -1,8 +1,8 @@
 {
-  "hash": "c176bf0b63fab123d57311560e610c3e",
+  "hash": "0db90ad633a9ae84a3ae9779645460e8",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Factor analysis II: confirmatory models, omega, and IRT as factor analysis\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Factor analysis  \n**Before this:** [Factor analysis I: exploring dimensionality](fa-exploratory.qmd) · [From the 1PL to the 4PL](1pl-to-4pl.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Factor analysis II: confirmatory models, omega, and IRT as factor analysis\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Factor analysis  \n**Before this:** [Factor analysis I: exploring dimensionality](fa-exploratory.qmd) · [From the 1PL to the 4PL](1pl-to-4pl.qmd)  \n**Builds toward:** [Structural equation modeling with lavaan](sem.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

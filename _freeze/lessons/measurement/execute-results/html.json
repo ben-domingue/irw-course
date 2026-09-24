@@ -1,8 +1,8 @@
 {
-  "hash": "bed35d55e18fd349e5f9dabf9c2ee0cc",
+  "hash": "722fbf21efd421da98ba88b1219895c0",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"What is measurement?\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Foundations  \n**Before this:** none  \n**Builds toward:** [Constructs and construct maps](constructs.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c1; problem sets PS1#4  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"What is measurement?\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Foundations  \n**Before this:** none  \n**Builds toward:** [Constructs and construct maps](constructs.qmd) · [Scale properties: is the scale equal-interval?](scale-properties.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c1; problem sets PS1#4  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

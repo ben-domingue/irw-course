@@ -406,6 +406,11 @@ ask_claude("rasch", "It covers the Rasch model: item characteristic curves, why 
 - Bartholomew, D. J. (1998). Scaling unobservable constructs in social science. *Journal of the Royal Statistical Society: Series C*, 47(1), 1–13. The source of the `wirs` data.
 - From the IRW: [simulating item difficulties](https://itemresponsewarehouse.org/vignettes/diffsim.html) shows what real difficulty distributions look like across hundreds of datasets, which is worth knowing before you choose one for a simulation.
 
+```{r}
+#| output: asis
+data_sources("rasch")
+```
+
 ## For instructors
 
 - **Source:** EDUC 252 class 3 (slides c3, "Probabilistic item response modeling" through "Estimation of the RM") and the code in `ben-domingue/252`: `c3/rasch0.R`, `c3/rasch1.R`, `c3/rasch2.R`.
