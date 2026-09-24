@@ -46,12 +46,14 @@ table(r)[c(1, length(table(r)))]      # the lowest and highest scores, and how m
 prop <- aggregate(resp, by = list(r = r), FUN = mean)
 n_r <- as.vector(table(r))
 show <- c("MA1", "MD2", "MA3", "MG4", "MI3")   # five items from easy to hard
+op <- par(mar = c(5, 4, 1, 9), xpd = NA)   # room on the right for the legend
 plot(NULL, xlim = c(0, 30), ylim = c(0, 1), xlab = "Sum score (of 30)",
      ylab = "Proportion correct")
 for (i in names(resp)) lines(prop$r, prop[[i]], col = "grey85")
 cols <- colorRampPalette(c("#93c5fd", "#2780e3", "#c2410c"))(length(show))
 for (k in seq_along(show)) lines(prop$r, prop[[show[k]]], col = cols[k], lwd = 2.5)
-legend("topleft", sprintf("%s (p = %.2f)", show, p[show]), col = cols, lwd = 2.5, bty = "n")
+legend(31.5, 1, sprintf("%s (p = %.2f)", show, p[show]), col = cols, lwd = 2.5, bty = "n")
+par(op)
 # At the top score every item is right, by construction: the sum contains the item.
 round(unlist(prop[prop$r == 30, show]), 2)
 
