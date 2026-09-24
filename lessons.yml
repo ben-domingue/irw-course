@@ -269,7 +269,7 @@ lessons:
     module: beyond
     prereqs: [polytomous]
     origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
-    tables: [andrich_mudfold, preference_inventory]
+    tables: [andrich_mudfold, wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
     reuses: [andrich_mudfold]
     status: stub
     optional: true

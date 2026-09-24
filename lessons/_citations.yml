@@ -18,6 +18,15 @@ bfi2_zhang_2025:
   link: https://doi.org/10.1080/00223891.2025.2531187
   license: CC BY 4.0
   irw_version: IRW v414
+borges_brazil_residency_2024_pbt:
+  reference: 'Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro,
+    P. S., Fonseca, P. C., ... & Ricz, H. M. A. (2024). Increased accessibility of
+    computer-based testing for residency application to a hospital in Brazil with
+    item characteristics comparable to paper-based testing: a psychometric study.
+    Journal of Educational Evaluation for Health Professions, 21, 32.'
+  link: https://doi.org/10.3352/jeehp.2024.21.32
+  license: CC0 1.0
+  irw_version: IRW v414
 chess_lnirt:
   reference: Van Der Maas, H. L., & Wagenmakers, E. J. (2005). A psychometric analysis
     of chess expertise. The American journal of psychology, 118(1), 29-60.
@@ -223,6 +232,13 @@ verbagg:
   reference: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer.
   link: https://doi.org/10.1007/978-1-4757-3990-9
   license: GPL-3.0
+  irw_version: IRW v414
+wilmer-rmet-normative-data-set-2022:
+  reference: 'Kim, H.A., Kaduthodil, J., Strong, R.W. et al. Multiracial Reading the
+    Mind in the Eyes Test (MRMET): An inclusive version of an influential measure.
+    Behav Res 56, 5900–5917 (2024). https://doi.org/10.3758/s13428-023-02323-x'
+  link: https://doi.org/10.3758/s13428-023-02323-x
+  license: CC BY 4.0
   irw_version: IRW v414
 wirs:
   reference: Bartholomew, D. (1998) Scaling unobservable constructs in social science.
