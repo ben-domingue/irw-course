@@ -1,0 +1,26 @@
+---
+title: "Trials as items: tasks, shots, and rotations"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("trials")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

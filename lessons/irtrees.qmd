@@ -1,0 +1,26 @@
+---
+title: "IRTree models"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("irtrees")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

@@ -1,0 +1,88 @@
+---
+title: "Psychometrics with the IRW: course map"
+---
+
+```{r}
+source("lessons/_course.R")
+course <- read_course()
+check_course(course)
+```
+
+These are stand-alone lessons on psychometrics, each built around open data from the
+[Item Response Warehouse](https://itemresponsewarehouse.org). You can teach them in
+sequence as a full course or pick out individual lessons. Each lesson lists what it
+assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to
+Psychometrics) at Stanford.
+
+::: {.callout-warning appearance="simple"}
+**Work in progress.** The lesson list and prerequisites are a first draft, and most
+lessons are still stubs.
+:::
+
+## Lessons by module
+
+```{=html}
+<style>
+.module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+@media (max-width: 768px) { .module-grid { grid-template-columns: 1fr; } }
+.module-card { border: 1px solid #dee2e6; border-left: 4px solid #2780e3; border-radius: 6px; padding: 1rem 1.3rem; background: #fff; }
+.module-card h3 { font-size: 1.05rem; margin-top: 0; }
+.module-card ol { margin-bottom: 0; padding-left: 1.2rem; }
+.lesson-status { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; }
+</style>
+```
+
+```{r}
+#| output: asis
+cat('::: {.module-grid}\n')
+for (m in course$modules) {
+  ls <- Filter(function(l) l$module == m$id, course$lessons)
+  cat('::: {.module-card}\n### ', m$title, '\n\n', sep = '')
+  for (i in seq_along(ls)) {
+    st <- if (ls[[i]]$status != "done") sprintf(' [%s]{.lesson-status}', ls[[i]]$status) else ''
+    cat(i, '. ', lesson_link(ls[[i]], from = 'root'), st, '\n', sep = '')
+  }
+  cat('\n:::\n\n')
+}
+cat(':::\n')
+```
+
+## How the lessons connect
+
+An arrow from A to B means B assumes A. Click a lesson to open it.
+
+```{r}
+#| output: asis
+node <- setNames(sprintf("L%02d", seq_along(course$lessons)),
+                 vapply(course$lessons, `[[`, "", "id"))
+# One colour per module (no subgraphs: they force a wide, unreadable layout).
+pal <- c("#dbeafe", "#dcfce7", "#fef9c3", "#fce7f3", "#ede9fe", "#ffedd5", "#e0f2fe")
+lines <- "flowchart TB"
+for (i in seq_along(course$modules)) {
+  m <- course$modules[[i]]
+  lines <- c(lines, sprintf("  classDef %s fill:%s,stroke:#6c757d,color:#212529", m$id, pal[i]))
+  for (l in Filter(function(l) l$module == m$id, course$lessons))
+    lines <- c(lines, sprintf('  %s["%s"]:::%s', node[[l$id]], gsub('"', "'", l$title), m$id))
+}
+for (l in course$lessons) for (p in unlist(l$prereqs))
+  lines <- c(lines, sprintf("  %s --> %s", node[[p]], node[[l$id]]))
+for (l in course$lessons)
+  lines <- c(lines, sprintf('  click %s href "lessons/%s.html"', node[[l$id]], l$id))
+cat("```{mermaid}\n", paste(lines, collapse = "\n"), "\n```\n\n", sep = "")
+cat(paste(sprintf('<span style="background:%s;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">%s</span>',
+                  pal[seq_along(course$modules)], vapply(course$modules, `[[`, "", "title")), collapse = " "), "\n")
+```
+
+## Paths through the course
+
+A path is one order for teaching the lessons. Add your own to `lessons.yml`.
+
+```{r}
+#| output: asis
+for (p in course$paths) {
+  cat("### ", p$title, "\n\n", sep = "")
+  for (i in seq_along(p$lessons))
+    cat(i, ". ", lesson_link(lesson_by_id(p$lessons[[i]], course), from = "root"), "\n", sep = "")
+  cat("\n")
+}
+```

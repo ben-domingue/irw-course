@@ -1,0 +1,26 @@
+---
+title: "Dimensionality and multidimensional IRT"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("dimensionality")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

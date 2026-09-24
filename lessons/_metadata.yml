@@ -1,0 +1,4 @@
+# Settings for every lesson page. They sit here rather than in _quarto.yml so they
+# travel with lessons/ when it moves into irw_site/course/.
+execute:
+  echo: false

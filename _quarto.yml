@@ -1,0 +1,43 @@
+# Standalone preview of the course. Formatting is copied from irw_site/_quarto.yml
+# (and scss/ + resources/scss/ are copies of the site's) so that lessons/ and
+# index.qmd can later move into irw_site/course/ and pick up the site's own
+# config unchanged. Keep course-specific settings out of this file: they belong
+# in lessons/_metadata.yml and lessons.yml, which travel with the lessons.
+project:
+  type: website
+  render:
+    - index.qmd
+    - lessons/*.qmd
+  preview:
+    port: 4201
+
+website:
+  title: "Psychometrics with the IRW"
+  navbar:
+    search: true
+    left:
+      - href: index.qmd
+        text: Course map
+      - href: https://itemresponsewarehouse.org
+        text: Item Response Warehouse
+
+format:
+  html:
+    theme:
+      - cosmo
+      - scss/global.scss
+      - resources/scss/main.scss
+    toc: false
+    grid:
+      sidebar-width: 0px
+      body-width: 1200px
+      margin-width: 0px
+    callout-icon: false
+    df-print: kable
+    code-fold: true
+
+execute:
+  echo: false
+  message: false
+  warning: false
+  error: false

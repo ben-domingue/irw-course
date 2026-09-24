@@ -1,0 +1,15 @@
+# Raw course materials (Drive export, slides, 252 code checkout). Never published:
+# the slides carry third-party figures, and the export is ~200 MB.
+source/
+
+# Quarto build output (_freeze/ IS committed: it holds the rendered empirical results)
+_site/
+
+.quarto/
+/.quarto/
+*_files/
+
+.Rproj.user
+.Rhistory
+
+**/*.quarto_ipynb

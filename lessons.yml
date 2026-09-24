@@ -1,0 +1,278 @@
+# The one source of truth for the course map. Each lesson is a stand-alone page at
+# lessons/<id>.qmd. The map (index.qmd), each lesson's header box, and the
+# prerequisite check all read this file, so edit a lesson's metadata here and
+# nowhere else.
+#
+# Fields:
+#   id        slug; also the file name lessons/<id>.qmd
+#   title     page title
+#   module    one of the ids under `modules`
+#   prereqs   lesson ids a reader should have seen first (the map's arrows)
+#   origin    where the material comes from in EDUC 252: slide deck (c1..c10),
+#             problem set items (PS1#4), and scripts in ben-domingue/252
+#   tables    IRW tables the lesson uses
+#   status    stub | draft | done
+#
+# DRAFT 2026-09-24: lesson boundaries and prerequisites are a first cut for Ben to
+# revise. c7.pptx is missing from the Drive export, so the CDM lesson's slide
+# origin is a guess.
+
+modules:
+  - id: foundations
+    title: Foundations
+  - id: ctt
+    title: Classical test theory
+  - id: validity
+    title: Validity
+  - id: irt
+    title: Item response theory
+  - id: fairness
+    title: Fairness and invariance
+  - id: uses
+    title: Using calibrated items
+  - id: beyond
+    title: Beyond the standard models
+
+lessons:
+  - id: measurement
+    title: What is measurement?
+    module: foundations
+    prereqs: []
+    origin: {slides: [c1], ps: ["PS1#4"], code: []}
+    tables: []
+    status: stub
+
+  - id: irw-data
+    title: Item response data and the IRW
+    module: foundations
+    prereqs: []
+    origin: {slides: [c1], ps: ["PS1#3"], code: [c1/irw_data_exploration.R]}
+    tables: [chess_lnirt]
+    status: stub
+
+  - id: likelihood
+    title: The likelihood and logistic regression
+    module: foundations
+    prereqs: [irw-data]
+    origin: {slides: [c1], ps: ["PS1#1", "PS1#2", "PS1#5"], code: [c1/likelihood.R, ps1/ps1-like.R, ps1/ll_logreg.R, ps1/ps1-chess.R]}
+    tables: [chess_lnirt]
+    status: stub
+
+  - id: constructs
+    title: Constructs and construct maps
+    module: ctt
+    prereqs: [measurement]
+    origin: {slides: [c2], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: ctt-reliability
+    title: Classical test theory and reliability
+    module: ctt
+    prereqs: [constructs, irw-data]
+    origin: {slides: [c2], ps: ["PS2#1", "PS2#2", "PS2#3"], code: [c2/alpha.R, ps2/itemanalysis.R, ps2/parallel_tests.R]}
+    tables: [gilbert_meta_1, gilbert_meta_9, chess_lnirt]
+    status: stub
+
+  - id: ctt-limits
+    title: "Where CTT breaks: toward item response models"
+    module: ctt
+    prereqs: [ctt-reliability, likelihood]
+    origin: {slides: [c2], ps: ["PS2#4", "PS2#5"], code: [ps2/ctt_failures.R, ps2/towards_irt.R]}
+    tables: [chess_lnirt, andrich_mudfold]
+    status: stub
+
+  - id: validity-argument
+    title: Validity as an argument
+    module: validity
+    prereqs: [constructs]
+    origin: {slides: [c3], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: validity-causal
+    title: "Validity as causation: Borsboom's view"
+    module: validity
+    prereqs: [validity-argument]
+    origin: {slides: [c4], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: rasch
+    title: The Rasch model
+    module: irt
+    prereqs: [ctt-limits]
+    origin: {slides: [c3], ps: [], code: [c3/rasch0.R, c3/rasch1.R, c3/rasch2.R]}
+    tables: [chess_lnirt, wirs]
+    status: stub
+
+  - id: information
+    title: Information, precision, and short forms
+    module: irt
+    prereqs: [rasch]
+    origin: {slides: [c3, c4], ps: ["PS3#1", "PS4#1", "PS6#3"], code: [c4/info.R]}
+    tables: []
+    status: stub
+
+  - id: ability-estimation
+    title: "Estimating abilities: MLE and EAP"
+    module: irt
+    prereqs: [rasch]
+    origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
+    tables: []
+    status: stub
+
+  - id: item-estimation
+    title: "Estimating item parameters: JML and EM"
+    module: irt
+    prereqs: [ability-estimation]
+    origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
+    tables: []
+    status: stub
+
+  - id: 1pl-to-4pl
+    title: From the 1PL to the 4PL
+    module: irt
+    prereqs: [rasch]
+    origin: {slides: [c4], ps: [], code: [c4/enem1.R, c4/enem2.R, c4/enem3.R]}
+    tables: [enem_2013_1mil_lc]
+    status: stub
+
+  - id: parameter-invariance
+    title: Parameter invariance
+    module: irt
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c4], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: fit-prediction
+    title: Model fit and out-of-sample prediction
+    module: irt
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c6], ps: ["PS3#3", "PS3#4", "PS4#2"], code: [ps3/fit.R, ps3/different-links.R, ps4/prediction.R, c6/enem_imv.R]}
+    tables: [gilbert_meta_2, gilbert_meta_14, gilbert_meta_1]
+    status: stub
+
+  - id: guessing-priors
+    title: Guessing and priors
+    module: irt
+    prereqs: [1pl-to-4pl, fit-prediction]
+    origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
+    tables: [roar_lexical]
+    status: stub
+
+  - id: dimensionality
+    title: Dimensionality and multidimensional IRT
+    module: irt
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
+    tables: [enem_2013_1mil_lc, florida_twins_dweck, florida_twins_grit]
+    status: stub
+
+  - id: dif
+    title: Differential item functioning
+    module: fairness
+    prereqs: [1pl-to-4pl, validity-argument]
+    origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
+    tables: [DART_Brysbaert_2020_1, gilbert_meta_11]
+    status: stub
+
+  - id: invariance-experience
+    title: Measurement invariance under treatment and life events
+    module: fairness
+    prereqs: [dif]
+    origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
+    tables: [gilbert_meta_20, gilbert_meta_2]
+    status: stub
+
+  - id: item-banks-cat
+    title: Item banks and adaptive testing
+    module: uses
+    prereqs: [information]
+    origin: {slides: [c6, c10], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: equating
+    title: Linking and equating
+    module: uses
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c6], ps: ["PS6#4"], code: [c6/equate-irt.R, c6/equate-obsscore.R, c6/concurrent.R, ps6/equating.R, ps6/equating_simstudy.R]}
+    tables: [enem_2013_1mil_lc, enem_2014_1mil_mt]
+    status: stub
+
+  - id: explanatory-irt
+    title: "What is an item? Explanatory item response models"
+    module: beyond
+    prereqs: [rasch]
+    origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
+    tables: [imps2025_hf]
+    status: stub
+
+  - id: cdm
+    title: Cognitive diagnostic models
+    module: beyond
+    prereqs: [explanatory-irt]
+    origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
+    tables: [frac20]
+    status: stub
+
+  - id: polytomous
+    title: Models for polytomous responses
+    module: beyond
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
+    tables: [science_ltm, promis1wave1_pain, ffm_CSN]
+    status: stub
+
+  - id: irtrees
+    title: IRTree models
+    module: beyond
+    prereqs: [polytomous, explanatory-irt]
+    origin: {slides: [c8], ps: ["PS8#4"], code: [c8/irtree.R, c8/irtree2.R, c8/irtree_sim.R, ps8/fast.R]}
+    tables: [ffm_CSN]
+    status: stub
+
+  - id: unfolding-nominal
+    title: Unfolding and nominal response models
+    module: beyond
+    prereqs: [polytomous]
+    origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
+    tables: [andrich_mudfold, preference_inventory]
+    status: stub
+
+  - id: response-time
+    title: Response time and the speed-accuracy tradeoff
+    module: beyond
+    prereqs: [explanatory-irt]
+    origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
+    tables: [roar_lexical, pisa2018_read]
+    status: stub
+
+  - id: trials
+    title: "Trials as items: tasks, shots, and rotations"
+    module: beyond
+    prereqs: [explanatory-irt]
+    origin: {slides: [c9], ps: ["PS9#2"], code: [c9/mrot.R, ps9/shots.R]}
+    tables: []
+    status: stub
+
+  - id: ai-psychometrics
+    title: AI and psychometrics
+    module: beyond
+    prereqs: [1pl-to-4pl]
+    origin: {slides: [c10], ps: [], code: [c10/model.R]}
+    tables: []
+    status: stub
+
+# Paths are orderings through the map. Anyone teaching from this can add their own.
+paths:
+  - id: educ252
+    title: "EDUC 252 (Stanford), a 10-week course"
+    lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, ctt-limits,
+              validity-argument, rasch, information, ability-estimation, validity-causal,
+              1pl-to-4pl, parameter-invariance, dimensionality, dif, item-estimation,
+              fit-prediction, guessing-priors, item-banks-cat, equating, invariance-experience,
+              explanatory-irt, cdm, polytomous, irtrees, unfolding-nominal, response-time,
+              trials, ai-psychometrics]

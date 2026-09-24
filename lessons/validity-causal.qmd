@@ -1,0 +1,26 @@
+---
+title: "Validity as causation: Borsboom's view"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("validity-causal")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

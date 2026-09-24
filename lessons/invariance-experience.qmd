@@ -1,0 +1,26 @@
+---
+title: "Measurement invariance under treatment and life events"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("invariance-experience")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

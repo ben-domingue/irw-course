@@ -1,0 +1,26 @@
+---
+title: "Guessing and priors"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("guessing-priors")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

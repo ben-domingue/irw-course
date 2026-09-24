@@ -1,0 +1,26 @@
+---
+title: "From the 1PL to the 4PL"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("1pl-to-4pl")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+
