@@ -21,7 +21,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Sum scores treat every item as interchangeable: a correct answer is worth one point no matter which item it came from. In the last lesson we saw that this is a strange assumption—some items are far harder than others, and the relationship between the sum score and any one item is not a straight line. The Rasch model is the simplest model that takes items seriously. It puts people and items on the same scale, and it does so with a single parameter per person and a single parameter per item. That parsimony buys some remarkable properties, and it also makes demands of the data. This lesson is about both.
+Sum scores treat every item as interchangeable: a correct answer is worth one point no matter which item it came from. In the last lesson we saw that this is a strange assumption—some items are far harder than others, and the relationship between the sum score and any one item is not a straight line. The Rasch model is the simplest model that takes items seriously. It puts people and items on the same scale, and it does so with a single parameter per person and a single parameter per item. That parsimony buys some unusual properties, and it also makes demands of the data. This lesson is about both.
 
 ## Goals
 
@@ -73,7 +73,7 @@ Plot.plot({
 })
 ```
 
-A few things are worth noticing. Changing $b$ slides the curve left and right without changing its shape; a harder item simply needs more ability for the same chance of success. The curve never reaches 0 or 1, so nobody is certain to get any item right or wrong. And the slope slider is a preview: the Rasch model fixes it at 1 for every item, and relaxing that assumption gives the 2PL, which we take up in [From the 1PL to the 4PL](1pl-to-4pl.qmd). (A challenge, especially if you know probit regression: turn on the normal CDF and find the slope that makes the two curves nearly identical. The answer, roughly 1.7, has a long history.)
+Note a few things. Changing $b$ slides the curve left and right without changing its shape; a harder item simply needs more ability for the same chance of success. The curve never reaches 0 or 1, so nobody is certain to get any item right or wrong. And the slope slider is a preview: the Rasch model fixes it at 1 for every item, and relaxing that assumption gives the 2PL, which we take up in [From the 1PL to the 4PL](1pl-to-4pl.qmd). (A challenge, especially if you know probit regression: turn on the normal CDF and find the slope that makes the two curves nearly identical. The answer is roughly 1.7: the scaling constant $D$ that older IRT papers carry around so that logistic and normal-ogive parameters can be compared.)
 
 ```{ojs}
 //| echo: false
@@ -89,7 +89,7 @@ quiz({
 
 ### The scale has no origin
 
-Here is a fact that surprises people. Suppose we add the same constant $C$ to every person's ability and every item's difficulty. The model only ever sees $\theta - b$, so nothing about the predicted responses changes.
+Where is zero on this scale? Nowhere in particular. Suppose we add the same constant $C$ to every person's ability and every item's difficulty. The model only ever sees $\theta - b$, so nothing about the predicted responses changes.
 
 #### Try it: shift everything
 
@@ -183,7 +183,7 @@ Two assumptions deserve emphasis. First, the formula is right: in particular, a 
 
 The Rasch model has a property that sets it apart from nearly every other item response model: the sum score is a **sufficient statistic** for $\theta$. Once you know how many items someone got right, nothing else in their responses—not *which* items—changes what we can learn about their ability. (For an analogy: once you know the mean of a sample from a normal distribution, the individual draws tell you nothing more about the population mean.)
 
-This is easiest to see than to state. Below are five items of increasing difficulty. Pick a response pattern and look at the likelihood for $\theta$; then look at every other pattern with the same sum score.
+This is easier to see than to state. Below are five items of increasing difficulty. Pick a response pattern and look at the likelihood for $\theta$; then look at every other pattern with the same sum score.
 
 #### Try it: sufficiency
 
@@ -270,7 +270,8 @@ md`${so_cross === null ? "With equal slopes the curves never cross: whoever you 
   "The slopes differ, so the curves cross somewhere—but outside the range plotted. Push the slope further from 1 to bring the crossing into view."}`
 ```
 
-This is why partisans of the Rasch model feel so strongly about it: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like. The catch is that the model has to fit. Consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
+This is why partisans of the Rasch model feel so strongly about it: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like. The catch is that the model has to fit. <!-- TODO (Ben): first-person verdict on equal slopes here, e.g. 'My view is that...'; see notes/voice-audit-2026-09-24.md, Pattern A. -->
+Consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
 
 ```{ojs}
 //| echo: false
@@ -328,7 +329,8 @@ IRW tables are long—one row per response—so we reshape to one row per person
 #| code-fold: show
 ```
 
-The easiest problem (Y31) sits nearly five logits below the average; the hardest (Y30) more than three and a half above. That is a wide spread of difficulty, which is what you want from a test meant to separate novices from masters.
+The easiest problem (Y31) sits nearly five logits below the average; the hardest (Y30) more than three and a half above. <!-- TODO: give a baseline for 'wide' (the diffsim vignette has the typical spread across IRW tables). -->
+That is a wide spread of difficulty, which is what you want from a test meant to separate novices from masters.
 
 How do these difficulties relate to the simplest measure of item difficulty, the proportion of people who get the item right?
 
@@ -355,10 +357,10 @@ Does the model fit? A common first look is the infit and outfit statistics: mean
 ```{ojs}
 //| echo: false
 predict({
-  q: "Chess problems differ a lot in how sharply they separate strong players from weak ones, but the Rasch model gives every item the same slope. Among the chess items that fit worst, what do you expect to see?",
+  q: "Chess problems differ quite a bit in how sharply they separate strong players from weak ones, but the Rasch model gives every item the same slope. Among the chess items that fit worst, what do you expect to see?",
   choices: ["Mostly overfit (outfit well below 1)", "Mostly underfit (outfit well above 1)", "About as many of each", "No misfit: every outfit near 1"],
   answer: "Mostly overfit (outfit well below 1)",
-  reveal: "Most of the worst-fitting items overfit: they discriminate more sharply than the common slope allows, so their responses are *more* predictable than the model expects. One item, Y15, goes the other way, with an outfit above 2."
+  reveal: "Mostly overfit. Items that discriminate more sharply than the common slope allows are *more* predictable than the model expects, which pushes outfit below 1. Check the output below."
 })
 ```
 
@@ -380,7 +382,7 @@ For contrast, here is a very different dataset: [wirs](https://itemresponsewareh
 #| fig-height: 4.5
 ```
 
-Compare this plot with the chess one. Whether the Rasch model is a reasonable description of a dataset is something to check item by item, not assume; the formal version of this check is in [Model fit and out-of-sample prediction](fit-prediction.qmd).
+The contrast with chess is stark. The chess item's observed proportions track the model's curve; the wirs item's do not, jumping from 0 to 0.95 and back to about 0.3 within two logits. (With only six items, the ability estimates also bunch into a narrow range.) Whether the Rasch model is a reasonable description of a dataset is something to check item by item, not assume; the formal version of this check is in [Model fit and out-of-sample prediction](fit-prediction.qmd).
 
 ## Problems
 
