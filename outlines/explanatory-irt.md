@@ -23,6 +23,7 @@ Item-difficulty modelling as a design tool is cited, not taught: Embretson (1998
 - `verbagg`'s want/do pattern, described there and modelled here (from `irw-data`).
 - Local dependence among items that share a context (from `ctt-limits`, `ctt-reliability`).
 - Brief Recalls for readers who have done them (E2; restated, not threads): random effects in `g-theory`; `glmer` and latent regression in `item-estimation`; latent regression in `sem`; testlets in `dimensionality` and `information`; item text in `instrument-building`.
+- Brief "if you've done" Recalls (E2; not ancestors): DIF that item features might explain (from `dif`); position effects in a booklet design (from `equating`); items that move under treatment (from `invariance-experience`).
 
 ## Promises / leaves open
 

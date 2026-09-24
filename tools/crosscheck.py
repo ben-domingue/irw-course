@@ -6,11 +6,19 @@ lessons.yml (lesson ids and prerequisites), and reports:
 
   1. lessons with no outline;
   2. lesson ids in hooks that don't exist in lessons.yml;
-  3. promises not acknowledged: A promises X -> B, but B's "Picks up" never names A;
-  4. pick-ups not announced: B picks up X from A, but A's "Promises" never names B;
+  3. promises not acknowledged: A promises X -> B, but B's "Picks up" never names A
+     (anywhere in an item, so a pointer or E2 Recall counts);
+  4. pick-ups not announced: B picks up X from A, but A's "Promises" never names B
+     (anywhere in an item, so "a pointer to `B`" counts);
   5. pick-ups from a lesson that isn't a prerequisite (directly or through the chain),
      so a reader may not have seen it yet;
-  6. hooks marked "unpaid".
+  6. hooks marked "unpaid";
+  7. front to back: in the first-course path, a pick-up from a lesson that comes
+     *later* in the path (the reader can't have seen it, even as an "if you've
+     done X" Recall).
+
+Pick-ups marked as E2 Recalls ("if you've done", or "E2") are allowed from
+non-prerequisites (PROTOCOL.md §4), so section 5 lists them separately.
 
 Usage:
   python3 tools/crosscheck.py                       # outlines/ in the working tree
@@ -128,7 +136,7 @@ def main():
             for b in ids:
                 if b not in lessons:
                     unknown.append((a, "promise", b, item))
-                elif b in texts and b != a and not any(a in src for _, src in P[b]):
+                elif b in texts and b != a and not any(a in ID.findall(it) for it, _ in P[b]):
                     unack.append((a, b, item))
 
     for b, items in P.items():
@@ -138,7 +146,7 @@ def main():
                 if a not in lessons:
                     unknown.append((b, "pick-up", a, item))
                     continue
-                if a in texts and not any(b in ids for _, ids, _ in R[a]):
+                if a in texts and not any(b in ID.findall(it) for it, _, _ in R[a]):
                     unannounced.append((b, a, item))
                 if a != b and a not in anc:
                     order.append((b, a, item))
@@ -161,12 +169,25 @@ def main():
       "B picks something up from A, but A's *Promises* doesn't name B. Usually A's promise list needs a line.\n\n")
     w("".join(f"- `{b}` ← `{a}`: {short(item)}\n" for b, a, item in sorted(unannounced)) or "None.\n")
 
-    w(f"\n## 5. Pick-ups from a lesson that isn't a prerequisite ({len(order)})\n\n"
-      "B relies on A, but A isn't among B's prerequisites (directly or through the chain), so a reader may not have seen it.\n\n")
-    w("".join(f"- `{b}` ← `{a}`: {short(item)}\n" for b, a, item in sorted(order)) or "None.\n")
+    is_e2 = lambda item: bool(re.search(r"if you'?ve done|\bE2\b", item, re.I))
+    bare = [o for o in order if not is_e2(o[2])]
+    e2 = [o for o in order if is_e2(o[2])]
+    w(f"\n## 5. Pick-ups from a lesson that isn't a prerequisite ({len(bare)}, plus {len(e2)} marked as E2 Recalls)\n\n"
+      "B relies on A, but A isn't among B's prerequisites (directly or through the chain), so a reader may not have seen it. "
+      "Either add the prerequisite, or make it a brief \"if you've done A\" Recall (E2) that restates what B needs.\n\n")
+    w("".join(f"- `{b}` ← `{a}`: {short(item)}\n" for b, a, item in sorted(bare)) or "None.\n")
 
     w(f"\n## 6. Hooks marked unpaid ({len(unpaid)})\n\n")
     w("".join(f"- `{a}`: {short(item)}\n" for a, item in sorted(unpaid)) or "None.\n")
+
+    path = next((p["lessons"] for p in course.get("paths", []) if p["id"] == "first-course"), [])
+    pos = {x: i for i, x in enumerate(path)}
+    backward = [(b, a, item) for b in path if b in P for item, srcs in P[b]
+                for a in srcs if a in pos and pos[a] > pos[b]]
+    w(f"\n## 7. Front to back: pick-ups from later in the first-course path ({len(backward)})\n\n"
+      "B comes before A in the first-course path but picks something up from A. Reorder the path, "
+      "or have B teach it and A recall it.\n\n")
+    w("".join(f"- `{b}` (#{pos[b] + 1}) ← `{a}` (#{pos[a] + 1}): {short(item)}\n" for b, a, item in backward) or "None.\n")
 
 
 if __name__ == "__main__":

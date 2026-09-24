@@ -28,6 +28,7 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 - Process models that generate the response and its time together → `rt-process-models`.
 - Rapid guessing as a latent class (a mixture) → unpaid.
 - Using RT to flag aberrant behaviour (`credentialform_lnirt` flags 46 respondents) → unpaid; a problem (van der Linden & Guo, 2008, doi:10.1007/s11336-007-9046-8).
+- Timing information in adaptive tests → `item-banks-cat` (an "if you've done" Recall there, E2).
 
 ## Tables
 

@@ -26,8 +26,8 @@ Articles checked on Crossref (09-24). Named, not used: Nelson (2016), doi:10.108
 ## Promises / leaves open
 
 - Learning across trials as change in θ → unpaid (dynamic IRT).
-- Adaptive testing with task banks (slide 23): a mention; item-banks-cat comes earlier, so no hook.
 - Response times on the same trials: response-time and rt-process-models don't follow this lesson, so they are linked, not hooks.
+- Adaptive task batteries → `item-banks-cat` (an "if you've done" Recall there, E2).
 
 ## Tables
 

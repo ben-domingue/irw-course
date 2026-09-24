@@ -25,7 +25,7 @@ Crossref-checked 09-24 unless marked.
 - Predictive bias, the Cleary model (from `validity-evidence`, not an ancestor: one sentence, E2).
 - Items that work differently for different groups (from `instrument-building`, not an ancestor: E2).
 - Group differences that remain after linking (from `parameter-invariance`, extension: E2).
-- Polytomous DIF, PS8#3 (the hook from `polytomous`, paid by problem 3, which is self-contained; `dif` doesn't depend on `polytomous`, E1).
+- Polytomous DIF, PS8#3: problem 3 teaches it self-contained; for readers who've done `polytomous`, an "if you've done" Recall (E2). `dif` doesn't depend on `polytomous` (E1).
 
 ## Promises / leaves open
 

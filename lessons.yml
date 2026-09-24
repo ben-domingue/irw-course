@@ -60,7 +60,7 @@ lessons:
     module: foundations
     prereqs: []
     origin: {slides: [c1], ps: ["PS1#4"], code: []}
-    tables: []
+    tables: [gilbert_meta_12, gilbert_meta_15]
     status: stub
     tranche: preliminary
 
@@ -432,18 +432,21 @@ lessons:
 paths:
   - id: first-course
     title: "A first course (preliminary and core lessons)"
-    lessons: [measurement, irw-data, likelihood, constructs, instrument-building, ctt-reliability,
+    lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, instrument-building,
               g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
-              information, ability-estimation, 1pl-to-4pl, fa-confirmatory, polytomous,
-              fit-prediction, dif, score-meaning, equating]
+              1pl-to-4pl, information, ability-estimation, fa-confirmatory, fit-prediction,
+              polytomous, dif, score-meaning, equating]
 
   - id: educ252
     title: "EDUC 252 (Stanford), a 10-week course"
+    # The order of the 252 classes, adjusted only where a lesson would otherwise come
+    # before its prerequisite (1pl-to-4pl before information; item-banks-cat after
+    # polytomous).
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, ctt-limits,
-              validity-argument, rasch, information, ability-estimation, validity-causal,
-              1pl-to-4pl, parameter-invariance, dimensionality, dif, item-estimation,
-              fit-prediction, guessing-priors, item-banks-cat, equating, invariance-experience,
-              explanatory-irt, cdm, polytomous, irtrees, unfolding, nominal, response-time,
+              validity-argument, rasch, 1pl-to-4pl, information, ability-estimation, validity-causal,
+              parameter-invariance, dimensionality, dif, item-estimation,
+              fit-prediction, guessing-priors, equating, invariance-experience,
+              explanatory-irt, cdm, polytomous, item-banks-cat, irtrees, unfolding, nominal, response-time,
               trials, ai-psychometrics]
 
 # Filled in by the cross-check passes over the outlines (#9). Example:

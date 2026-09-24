@@ -27,6 +27,7 @@ Articles checked on Crossref (09-24); arXiv preprints on arXiv. Claude's to-do b
 - Rater effects and many-facet models for human and machine raters → unpaid.
 - Psychometrics of AI benchmarks → unpaid (problem 6).
 - Pointers, not hooks (those lessons come earlier or alongside): distractor analysis with the nominal model; differential functioning of machine scores (Alvero et al.); adaptive testing with predicted difficulties.
+- Difficulties predicted for new, uncalibrated items → `item-banks-cat` (an "if you've done" Recall there, E2).
 
 ## Tables
 
