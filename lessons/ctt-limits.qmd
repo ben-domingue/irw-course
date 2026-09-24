@@ -16,7 +16,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-[Classical test theory and reliability](ctt-reliability.qmd) ended on an assumption: CTT models the test score, $X = T + E$, and says nothing about how anyone answers any one item. For many jobs that is all we need. This lesson looks for the places where it isn't. The first is reliability: alpha is computed from items, but the model behind it is a model for totals, and a simulation that obeys that model exactly puts KR-20 far below, or well above, the reliability it was built with. The second is the items: plotted against the sum score, their curves rise in different places and at different rates, they bend rather than run straight, and a few don't rise at all. Replace the sum score in that picture with an unobserved ability and you have the item response model of [the next lesson](rasch.qmd).
+[Classical test theory and reliability](ctt-reliability.qmd) ended on a caveat: CTT is a model for the test score, $X = T + E$, and says nothing about how anyone answers a single item. For many jobs that is all we need. This lesson looks at two places where it isn't. The first is alpha. It is computed from item responses, yet the model behind it is silent about items, and a simulation that obeys $X = T + E$ exactly can put alpha far from the reliability built into it. The second is the items themselves. Plot the proportion correct on each item against the sum score and the curves differ: they rise at different points and at different rates, they bend, and a few don't rise at all. Swap the sum score in that picture for an unobserved ability and you have the item response model of [the next lesson](rasch.qmd).
 
 ## Goals
 
@@ -35,7 +35,9 @@ By the end of this lesson you should be able to:
 
 Suppose every response on a test were a coin flip. What would alpha be? Recall the formula: for $k$ items,
 $$\alpha = \frac{k}{k-1}\left(1 - \frac{\sum_i \sigma^2_i}{\sigma^2_X}\right)$$
-([Cronbach, 1951](https://doi.org/10.1007/BF02310555)), which for 0/1 items is KR-20 ([Kuder & Richardson, 1937](https://doi.org/10.1007/BF02288391)). If the flips are independent, the variance of the total is the sum of the item variances, and alpha is about 0, however long the test. The widget below gives each respondent a coin of their own; the last slider sets how much the coins differ from one respondent to the next.
+([Cronbach, 1951](https://doi.org/10.1007/BF02310555)), which for 0/1 items is KR-20 ([Kuder & Richardson, 1937](https://doi.org/10.1007/BF02288391)). If the flips are independent, the variance of the total is the sum of the item variances, and alpha is about 0, however long the test.
+
+What would it take for alpha to rise? The items would have to share something. So give each respondent a coin of their own. With the last slider at 0, every coin is fair. Move it up and the coins become biased by different amounts, so that some respondents come up "correct" more often than others. A respondent's coin is now a true score: every item they answer shares it, and it differs from one respondent to the next. The dashed line is the reliability that spread implies; each dot is alpha from one simulated test.
 
 #### Try it: a test made of coins
 
@@ -43,7 +45,7 @@ $$\alpha = \frac{k}{k-1}\left(1 - \frac{\sum_i \sigma^2_i}{\sigma^2_X}\right)$$
 //| echo: false
 viewof cf_k = Inputs.range([5, 100], {value: 20, step: 5, label: "Items"})
 viewof cf_n = Inputs.range([50, 1000], {value: 200, step: 50, label: "Respondents"})
-viewof cf_s = Inputs.range([0, 1], {value: 0, step: 0.05, label: "How much respondents' coins differ"})
+viewof cf_s = Inputs.range([0, 1], {value: 0, step: 0.05, label: "Spread of the coins"})
 ```
 
 ```{ojs}
@@ -63,7 +65,7 @@ cf_sim = {
 cf_v = cf_s * cf_s / 12   // variance of the respondents' coin biases
 cf_rel = cf_k * cf_v / (cf_k * cf_v + 0.25 - cf_v)
 Plot.plot({
-  width: 700, height: 200, x: {label: "Alpha (KR-20) in 40 simulated tests", domain: [-0.6, 1]},
+  width: 700, height: 200, x: {label: "Alpha (KR-20); each dot is one simulated test", domain: [-0.6, 1]},
   y: {axis: null},
   marks: [
     Plot.ruleX([0], {stroke: palette.rule}),
@@ -75,10 +77,10 @@ Plot.plot({
 
 ```{ojs}
 //| echo: false
-md`Reliability from the definition (dashed line): **${cf_rel.toFixed(2)}**. Average alpha over the 40 tests: **${(cf_sim.reduce((u, d) => u + d.alpha, 0) / 40).toFixed(2)}**, ranging from ${Math.min(...cf_sim.map(d => d.alpha)).toFixed(2)} to ${Math.max(...cf_sim.map(d => d.alpha)).toFixed(2)}.`
+md`${cf_s === 0 ? "Every coin is fair." : `Coins come up correct anywhere from ${(100 * (0.5 - cf_s / 2)).toFixed(0)}% to ${(100 * (0.5 + cf_s / 2)).toFixed(0)}% of the time, depending on the respondent.`} Reliability built in (dashed line): **${cf_rel.toFixed(2)}**. Alpha averaged over the 40 tests: **${(cf_sim.reduce((u, d) => u + d.alpha, 0) / 40).toFixed(2)}**, ranging from ${Math.min(...cf_sim.map(d => d.alpha)).toFixed(2)} to ${Math.max(...cf_sim.map(d => d.alpha)).toFixed(2)}.`
 ```
 
-With every coin fair, alpha scatters around zero, some tests coming out negative. More items leave it centred on zero; more respondents only narrow the scatter. Now let the coins differ: respondents differ in something every item shares, a true score, and alpha climbs to the reliability line. Reliability needs structure shared across items: in a coin test, the respondent's coin; in a mathematics test, what the student knows.
+With every coin fair, alpha scatters around zero, and some tests come out negative. More items don't move it off zero; more respondents only narrow the scatter. Now spread the coins. The items share something, each respondent's bias, and alpha climbs to the dashed line; now more items do raise it, as Spearman–Brown says they should. Reliability needs something shared across items: in a coin test, the respondent's coin; in a mathematics test, what the student knows.
 
 ```{ojs}
 //| echo: false
@@ -96,66 +98,79 @@ quiz({
 
 If I asked you to simulate item responses that conform to CTT, what would you do? The model tells you how to make totals: draw a true score $T$, draw an error $E$, add them. It doesn't tell you how a total of 20 on a 50-item test comes about: which 20 items, or why those. Nothing in $X = T + E$ refers to an item (Lord & Novick, 1968; see [Guttman's 1969 review](https://doi.org/10.1017/s0033312300004622)).
 
-A problem in EDUC 252 (PS2#4) takes that literally. Draw $T$ and $E$ with variances we choose, so the reliability, $\sigma^2_T/\sigma^2_X$, is whatever we set. Then give each respondent $X$ correct answers, placed on items at random, with easier items picked more often so that the items' proportions correct spread out as a real test's do. The total obeys the classical model exactly. What does KR-20 make of it?
+So take the model literally. Here is a recipe for a 50-item test that obeys $X = T + E$ exactly and does nothing more:
 
-::: {.callout-tip appearance="simple"}
-**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): alpha is a lower bound on reliability. The proof wrote each item as $X_i = T_i + E_i$ with errors uncorrelated with each other and with every true score, and showed $\alpha \le \rho$, with equality for essentially tau-equivalent items ([Novick & Lewis, 1967](https://doi.org/10.1007/BF02289400)). It also noted that with correlated errors alpha can exceed reliability ([Green & Hershberger, 2000](https://doi.org/10.1207/S15328007SEM0702_6)).
-:::
+1. For each respondent, draw a true score $T$ (mean 25, variance $\sigma^2_T$) and an error $E$ (mean 0, variance $\sigma^2_E$), and add them to get the total $X$. The reliability, $\sigma^2_T/(\sigma^2_T + \sigma^2_E)$, is whatever we chose.
+2. Give the respondent $X$ correct answers on items picked at random, with easier items more likely to be picked, so that the items' proportions correct spread out as they do on a real test.
 
-#### Try it: the generator
+Step 1 is the classical model. Step 2 is one way of turning a total into item responses, and CTT has nothing to say against it. What does KR-20 make of the result?
 
-Fifty items, 500 simulated respondents. Choose the reliability and the variance of observed scores (the dashed line); the curves hold the reliability and vary the variance.
+#### Try it: the recipe
+
+Set the two variances. Each light blue dot is one pair of settings from a grid, run through the recipe once; the orange dot is yours. If KR-20 reported the reliability we built in, every dot would sit on the dashed diagonal.
 
 ```{ojs}
 //| echo: false
-viewof dv_rel = Inputs.range([0.1, 0.95], {value: 0.77, step: 0.01, label: "Reliability built in"})
-viewof dv_V = Inputs.range([8, 60], {value: 13, step: 1, label: "Variance of observed scores"})
+viewof dv_t = Inputs.range([1, 50], {value: 10, step: 1, label: "True-score variance"})
+viewof dv_e = Inputs.range([1, 50], {value: 3, step: 1, label: "Error variance"})
 ```
 
 ```{ojs}
 //| echo: false
-dv_sim = (rel, V, seed = 4) => {
+dv_sim = (s2T, s2E, seed = 4) => {
   const r = rng(seed), k = 50, n = 500;
-  const pr = Array.from({length: k}, () => 0.25 + 0.6 * r.unif());
+  const pr = Array.from({length: k}, () => 0.25 + 0.6 * r.unif());   // how often each item gets picked
   const T = [], X = [], rows = [];
   for (let j = 0; j < n; j++) {
-    const t = Math.round(k / 2 + Math.sqrt(rel * V) * r.norm());
-    const x = Math.min(Math.max(t + Math.round(Math.sqrt((1 - rel) * V) * r.norm()), 0), k);
+    const t = Math.round(k / 2 + Math.sqrt(s2T) * r.norm());
+    const x = Math.min(Math.max(t + Math.round(Math.sqrt(s2E) * r.norm()), 0), k);
     const row = Array(k).fill(0);
     for (const i of sampleWeighted(r, pr, x)) row[i] = 1;
     T.push(t); X.push(x); rows.push(row);
   }
   const p = pr.map((_, i) => rows.reduce((u, row) => u + row[i], 0) / n);
   const mx = X.reduce((u, v) => u + v, 0) / n;
-  return {rel: cor(T, X) ** 2, kr: kr20(rows), sumpq: p.reduce((u, v) => u + v * (1 - v), 0),
-          varX: X.reduce((u, v) => u + (v - mx) ** 2, 0) / (n - 1), pmin: Math.min(...p), pmax: Math.max(...p)};
+  return {s2T, s2E, rel: cor(T, X) ** 2, kr: kr20(rows), sumpq: p.reduce((u, v) => u + v * (1 - v), 0),
+          varX: X.reduce((u, v) => u + (v - mx) ** 2, 0) / (n - 1)};
 }
-dv_now = dv_sim(dv_rel, dv_V)
-dv_curve = grid(8, 60, 14).flatMap(V => { const d = dv_sim(dv_rel, V); return [{V, v: d.rel, what: "True reliability"}, {V, v: d.kr, what: "KR-20"}]; })
+dv_grid = [5, 10, 15, 20, 35, 50].flatMap(s2T => [5, 10, 15, 20, 35, 50].map(s2E => dv_sim(s2T, s2E)))
+dv_now = dv_sim(dv_t, dv_e)
 Plot.plot({
-  width: 700, height: 300, x: {label: "Variance of observed scores"}, y: {label: null, domain: [-0.6, 1]},
-  color: {legend: true, domain: ["True reliability", "KR-20"], range: [palette.main, palette.contrast]},
-  marks: [Plot.ruleY([0], {stroke: palette.rule}),
-          Plot.line(dv_curve, {x: "V", y: "v", stroke: "what", strokeWidth: 2.5}),
-          Plot.ruleX([dv_V], {stroke: palette.guide, strokeDasharray: "4 3"})]
+  width: 700, height: 380, x: {label: "Reliability built in", domain: [0, 1]}, y: {label: "KR-20", domain: [Math.min(-0.4, dv_now.kr - 0.1), 1]},
+  marks: [
+    Plot.ruleY([0], {stroke: palette.rule}),
+    Plot.line([[0, 0], [1, 1]], {stroke: palette.guide, strokeDasharray: "5 3"}),
+    Plot.text(["KR-20 above reliability"], {x: 0.02, y: 0.95, textAnchor: "start", fill: palette.guide}),
+    Plot.text(["KR-20 below reliability"], {x: 0.98, y: -0.3, textAnchor: "end", fill: palette.guide}),
+    Plot.dot(dv_grid, {x: "rel", y: "kr", r: 4, fill: palette.light}),
+    Plot.dot([dv_now], {x: "rel", y: "kr", r: 7, fill: palette.contrast})
+  ]
 })
 ```
 
 ```{ojs}
 //| echo: false
-md`At the dashed line: true reliability **${dv_now.rel.toFixed(2)}**, KR-20 **${dv_now.kr.toFixed(2)}**. The variance of the total is ${dv_now.varX.toFixed(1)} and the item variances add up to ${dv_now.sumpq.toFixed(1)}; proportions correct run from ${dv_now.pmin.toFixed(2)} to ${dv_now.pmax.toFixed(2)}.`
+md`Reliability built in: **${dv_now.rel.toFixed(2)}**. KR-20: **${dv_now.kr.toFixed(2)}**. KR-20 uses two things from the data: the item variances, which add up to ${dv_now.sumpq.toFixed(1)}, and the variance of the total, ${dv_now.varX.toFixed(1)}.`
 ```
 
-The reliability line sits wherever you put it, and KR-20 barely notices: it follows the variance of the total. It is near zero when that variance is about the sum of the item variances (about 12 here), as for the coins, and passes 0.8 as the variance approaches 60. At the default, a reliability of 0.77, KR-20 is close to zero; build in 0.3 and push the variance up, and KR-20 reports far more reliability than there is.
+At the defaults, a true-score variance of 10 and an error variance of 3, the reliability is about 0.75 and KR-20 is close to zero (0.05). Swap them (3 and 10) and the reliability drops to about 0.23 while KR-20 hardly moves (0.11). Now raise both: KR-20 climbs toward 0.9 whatever the reliability, and with a large error variance it lands well above the diagonal (5 and 25: reliability 0.23, KR-20 0.65). Push both variances very low and KR-20 goes far below zero, since the total then varies less than the items do. KR-20 is tracking the *sum* of the two variances; reliability is their *ratio*.
 
-Why? The formula needs only two things from the data: the item variances, which the generator fixes by fixing the proportions correct, and the variance of the total, which is $\sigma^2_T + \sigma^2_E$. Nothing in it can see how that total splits into true score and error. The proof could, because it assumed each item's error is uncorrelated with every other item's. The generator breaks that in two directions. A respondent's error $E$ adds or removes correct answers all over the test, so the items share it (correlated errors, pushing alpha up). And once the total is fixed, a correct answer on one item is one fewer for the others (negatively correlated errors, pushing alpha down). With little error variance the second effect wins: the lower bound holds, but it is loose by 0.7 or so. With a lot of error variance the first wins, and alpha is no longer a lower bound at all. $X = T + E$ allows both, since it makes no claim about items. [Sijtsma (2009)](https://doi.org/10.1007/s11336-008-9101-0) argues along related lines that alpha tells us little about how a test's items hang together.
+The formula says why. KR-20 needs only the item variances and the variance of the total. The recipe fixes the first (the item variances add up to about 12 whatever the settings), and the second is $\sigma^2_T + \sigma^2_E$. So, roughly,
+$$\text{KR-20} \approx \frac{50}{49}\left(1 - \frac{12}{\sigma^2_T + \sigma^2_E}\right), \qquad \rho = \frac{\sigma^2_T}{\sigma^2_T + \sigma^2_E}.$$
+Nothing in the first expression can see how the total splits into true score and error.
 
-No student answers a test this way: in the generator, a student with 40 right is no more likely than one with 20 right to have solved a particular hard item. But CTT doesn't rule it out. What rules it out is an assumption CTT never writes down: respondents who score higher should be more likely to get *each item* right.
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): alpha is a lower bound on reliability. The proof wrote each item as $X_i = T_i + E_i$ with errors uncorrelated with each other and with every true score, and showed $\alpha \le \rho$, with equality for essentially tau-equivalent items ([Novick & Lewis, 1967](https://doi.org/10.1007/BF02289400)). It also noted that with correlated errors alpha can exceed reliability ([Green & Hershberger, 2000](https://doi.org/10.1207/S15328007SEM0702_6)).
+:::
+
+How does that square with the lower bound? The proof assumed that item errors are uncorrelated, and the recipe breaks that in two directions. A respondent's error $E$ adds or removes correct answers all over the test, so the items share it: positively correlated errors, which push alpha up. And once the total is fixed, a correct answer on one item is one fewer for the others: negatively correlated errors, which push alpha down. With little error variance the second effect wins, and the bound holds but is loose by 0.7 or so. With a lot of error variance the first wins, and alpha is no longer a lower bound at all. $X = T + E$ allows both, since it makes no claim about items. [Sijtsma (2009)](https://doi.org/10.1007/s11336-008-9101-0) argues along related lines that alpha tells us little about how a test's items hang together.
+
+No student answers a test this way: in the recipe, a student with 40 right is no more likely than one with 20 right to have solved a particular hard item. But CTT doesn't rule it out. What rules it out is an assumption CTT never writes down: respondents who score higher should be more likely to get *each item* right.
 
 ```{ojs}
 //| echo: false
 quiz({
-  q: "In the generator, which change raises KR-20 while leaving the true reliability where it was?",
+  q: "In the recipe, which change raises KR-20 while leaving the true reliability where it was?",
   options: [
     {text: "Scale the true-score and error variances up by the same factor", correct: true, why: "Reliability, $\\sigma^2_T/(\\sigma^2_T + \\sigma^2_E)$, is unchanged, but the variance of the total grows while the item variances don't, so KR-20 rises."},
     {text: "Add respondents", correct: false, why: "More respondents make both numbers more precise. They don't move either one systematically."},
@@ -251,9 +266,9 @@ So, the verdict. For a fixed form, taken by everyone, whose item curves all rise
 
 ## Simulate
 
-The code below is the widget's generator in R, after the EDUC 252 original: nine settings (three true-score variances crossed with three error variances), five data sets each, plotting the reliability built in against KR-20. It is base R and takes a second or two.
+The code below is the widget's recipe in R: nine settings (three true-score variances crossed with three error variances), five data sets each, plotting the reliability built in against KR-20. It is base R and takes a second or two.
 
-With the seed as written, KR-20 falls below reliability when the error variance is small (true-score variance 25, error variance 5: reliability 0.83, KR-20 0.62) and far above it when it is large (5 and 25: reliability 0.18, KR-20 0.61). The `sum_pq` column is about 12 in every setting; KR-20 moves with `var_X` alone. Then try the PS2#4 setting, `s2_true = 10` and `s2_error = 3` (reliability about 0.77). With `n_ppl <- 5000` the points tighten but don't move toward the diagonal.
+With the seed as written, KR-20 falls below reliability when the error variance is small (true-score variance 25, error variance 5: reliability 0.83, KR-20 0.62) and far above it when it is large (5 and 25: reliability 0.18, KR-20 0.61). The `sum_pq` column is about 12 in every setting; KR-20 moves with `var_X` alone. Then try the widget's default, `s2_true = 10` and `s2_error = 3` (reliability about 0.77). With `n_ppl <- 5000` the points tighten but don't move toward the diagonal.
 
 ```{webr}
 {{< include code/ctt-limits-sim.R >}}
@@ -378,8 +393,8 @@ Neighbouring scores are pooled where respondents are thin. DONTBELIEV rises from
 ## Problems
 
 1. **Coins, on paper.** Suppose $n$ respondents answer $k$ items and every response is an independent fair coin flip. Show that the population variance of the total equals the sum of the item variances, and hence that KR-20 is approximately zero. Use the coin widget to see how KR-20's spread depends on $n$ and $k$.
-2. **The generator, narrated.** Read `code/ctt-limits-sim.R` and write a paragraph on its logic (PS2#4). Which part of the classical model does it respect exactly? Which assumption behind alpha does it exploit, and which line of code does the exploiting?
-3. **Easy, hard and the rest score.** In `4thgrade_math_sirt`, fit logistic regressions of MA1 and MI3 on the sum score (PS2#5). Compare the intercepts with your sense of each item's difficulty. Now use the rest score, the sum of the other 29 items, as the predictor. What changes, and why?
+2. **The recipe, narrated.** Read `code/ctt-limits-sim.R` and write a paragraph on its logic. Which part of the classical model does it respect exactly? Which assumption behind alpha does it exploit, and which line of code does the exploiting?
+3. **Easy, hard and the rest score.** In `4thgrade_math_sirt`, fit logistic regressions of MA1 and MI3 on the sum score. Compare the intercepts with your sense of each item's difficulty. Now use the rest score, the sum of the other 29 items, as the predictor. What changes, and why?
 4. **Testlets.** The math items come in testlets (the `testlet` column). Compute the average correlation between items in the same testlet and between items in different testlets. What do you find, and what does it imply for alpha, given the first Recall above? (See the IRW [local dependence](https://itemresponsewarehouse.org/vignettes/local_dependence.html) vignette.)
 5. **Write an unfolding item.** Write one statement about a topic you know well whose agreement should peak in the middle of opinion, and one whose agreement should rise steadily. Sketch the curve you'd expect for each.
 6. **Challenge (open).** The item curves in this lesson use the sum score as the x-axis, and the sum score contains the item, depends on which items were taken, and has error in it. What would you need in order to replace it with something measured without error? Write down the properties you'd want, then see how many [The Rasch model](rasch.qmd) delivers.
@@ -393,7 +408,7 @@ ask_claude("ctt-limits", "It covers where classical test theory stops being enou
 
 - Lord, F. M., & Novick, M. R. (1968). *Statistical theories of mental test scores*. Addison-Wesley. The classical model in full, including what it assumes about items and what it doesn't. Guttman's review: <https://doi.org/10.1017/s0033312300004622>.
 - Sijtsma, K. (2009). On the use, the misuse, and the very limited usefulness of Cronbach's alpha. *Psychometrika*, 74(1), 107–120. <https://doi.org/10.1007/s11336-008-9101-0>. Argues that alpha says little about a test's internal structure, and proposes the greatest lower bound instead.
-- Green, S. B., & Hershberger, S. L. (2000). Correlated errors in true score models and their effect on coefficient alpha. *Structural Equation Modeling*, 7(2), 251–270. <https://doi.org/10.1207/S15328007SEM0702_6>. What correlated item errors, like the generator's, do to alpha.
+- Green, S. B., & Hershberger, S. L. (2000). Correlated errors in true score models and their effect on coefficient alpha. *Structural Equation Modeling*, 7(2), 251–270. <https://doi.org/10.1207/S15328007SEM0702_6>. What correlated item errors, like the recipe's, do to alpha.
 - Ramsay, J. O. (1991). Kernel smoothing approaches to nonparametric item characteristic curve estimation. *Psychometrika*, 56(4), 611–630. <https://doi.org/10.1007/BF02294494>. Smooth item curves estimated without a parametric form, a more careful version of this lesson's plots.
 - Sijtsma, K., & Molenaar, I. W. (2002). *Introduction to nonparametric item response theory*. Sage. <https://doi.org/10.4135/9781412984676>. Rising item curves as an assumption you can test, following Mokken (1971).
 - Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. *Applied Psychological Measurement*, 12(1), 33–51. <https://doi.org/10.1177/014662168801200105>. The capital-punishment statements, and a model for them.
@@ -419,7 +434,7 @@ data_sources("ctt-limits")
 
 - **Source:** EDUC 252 class 2 (slides c2, "Limitations of alpha" through "Looking ahead to next week", including the closing question of how you would simulate item responses that conform to CTT) and problem set 2 (#4, "CTT failures", and #5, "Towards IRT models"); code in `ben-domingue/252`: `ps2/ctt_failures.R`, `ps2/towards_irt.R`.
 - **Timing:** the core ideas and widgets take about 45 minutes; the two real-data analyses work as a 30-minute lab.
-- **Changed from 252:** PS2#4 was a guided tour for students to narrate; here the generator is the lesson's main argument, as a widget and in Simulate, and the lesson adds the settings where KR-20 overshoots reliability. PS2#5 used `chess_lnirt`; this lesson uses `4thgrade_math_sirt`, since chess is the main example in the neighbouring lessons. The unfolding analysis keys the six end statements and looks at the two middle ones against that score, rather than against the unkeyed total.
+- **Changed from 252:** PS2#4 was a guided tour for students to narrate; here the recipe is the lesson's main argument, as a widget and in Simulate, and the lesson adds the settings where KR-20 overshoots reliability. PS2#5 used `chess_lnirt`; this lesson uses `4thgrade_math_sirt`, since chess is the main example in the neighbouring lessons. The unfolding analysis keys the six end statements and looks at the two middle ones against that score, rather than against the unkeyed total.
 - **Reuse:** `andrich_mudfold` returns in [Unfolding models](unfolding.qmd), where a model built for single-peaked curves is fit to it.
 - **Item text:** two of Andrich's (1988) eight statements are quoted, WISHNOTNEC and DONTBELIEV, from the mudfold package documentation; the others are named by their item codes.
 - **Solutions:** held back in `solutions/ctt-limits.qmd` (not published). Problem 6 is open.

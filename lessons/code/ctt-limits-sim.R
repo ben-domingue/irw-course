@@ -1,8 +1,8 @@
-# Where CTT breaks: a generator that respects the classical model for the total
+# Where CTT breaks: a recipe that respects the classical model for the total
 # score, X = T + E, and nothing more. It sets the true reliability, then hands out
 # each respondent's correct answers across items at random (weighted so that some
 # items are easier than others). Base R only.
-# Adapted from ben-domingue/252: ps2/ctt_failures.R (PS2#4).
+# Adapted from ben-domingue/252: ps2/ctt_failures.R.
 set.seed(252)
 n_items <- 50
 n_ppl <- 500
