@@ -32,6 +32,10 @@ first course in psychometrics; lessons marked optional go further. Each lesson l
 assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to
 Psychometrics) at Stanford.
 
+The lessons were written largely by Claude (Anthropic), an AI model, working from the
+EDUC 252 materials and under Ben Domingue's direction. Ben reviews each lesson before
+it is marked done; until then, read its text, code and interpretations as a draft.
+
 
 ## Lessons by module
 

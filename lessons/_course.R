@@ -226,7 +226,10 @@ lesson_header <- function(id) {
     thread_rows,
     "**IRW tables:** ", tables_md, "  \n",
     "**From EDUC 252:** ", if (length(origin)) paste(origin, collapse = "; ") else "n/a", "  \n",
-    "**Status:** ", l$status, "\n",
+    "**Status:** ", l$status, "  \n",
+    # Authorship note on every lesson (#70).
+    "**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 ",
+    "materials and under Ben's direction. Ben reviews each lesson before it is marked done.\n",
     ":::\n\n", sep = ""
   )
 }

@@ -2,7 +2,7 @@
   "hash": "dc1ba63dd1725cf89fdb97062bedfe72",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Constructs and construct maps\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [What is measurement?](measurement.qmd)  \n**Builds toward:** [Classical test theory and reliability](ctt-reliability.qmd) · [Validity as an argument](validity-argument.qmd) · [From construct map to items: building an instrument](instrument-building.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c2  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Constructs and construct maps\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [What is measurement?](measurement.qmd)  \n**Builds toward:** [Classical test theory and reliability](ctt-reliability.qmd) · [Validity as an argument](validity-argument.qmd) · [From construct map to items: building an instrument](instrument-building.qmd)  \n**IRW tables:** none  \n**From EDUC 252:** slides c2  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"

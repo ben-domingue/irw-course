@@ -2,7 +2,7 @@
   "hash": "378454c6b7f0c701d6575d333713b061",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Many sources of error: generalizability theory\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [Classical test theory and reliability](ctt-reliability.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
+    "markdown": "---\ntitle: \"Many sources of error: generalizability theory\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [Classical test theory and reliability](ctt-reliability.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n\n\n## For instructors\n\n",
     "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"
