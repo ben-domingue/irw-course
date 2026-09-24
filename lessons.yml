@@ -82,7 +82,7 @@ lessons:
     module: ctt
     prereqs: [measurement]
     origin: {slides: [c2], ps: [], code: []}
-    tables: []
+    tables: [himmelstein-number_series-2025]
     status: stub
 
   - id: ctt-reliability
@@ -98,7 +98,7 @@ lessons:
     module: ctt
     prereqs: [ctt-reliability, likelihood]
     origin: {slides: [c2], ps: ["PS2#4", "PS2#5"], code: [ps2/ctt_failures.R, ps2/towards_irt.R]}
-    tables: [chess_lnirt, andrich_mudfold]
+    tables: [4thgrade_math_sirt, andrich_mudfold]
     status: stub
 
   - id: validity-argument
@@ -124,6 +124,7 @@ lessons:
     prereqs: [ctt-limits]
     origin: {slides: [c3], ps: [], code: [c3/rasch0.R, c3/rasch1.R, c3/rasch2.R]}
     tables: [chess_lnirt, wirs]
+    reuses: [chess_lnirt]
     status: draft
 
   - id: information
@@ -269,6 +270,7 @@ lessons:
     prereqs: [polytomous]
     origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
     tables: [andrich_mudfold, preference_inventory]
+    reuses: [andrich_mudfold]
     status: stub
     optional: true
 
@@ -304,7 +306,7 @@ lessons:
     module: ctt
     prereqs: [constructs, ctt-reliability]
     origin: {slides: [c2], ps: [], code: []}
-    tables: []
+    tables: [song_2023_rses]
     status: stub
 
   - id: g-theory
@@ -312,7 +314,7 @@ lessons:
     module: ctt
     prereqs: [ctt-reliability]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
     status: stub
 
   - id: fa-exploratory
