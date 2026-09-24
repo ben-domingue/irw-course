@@ -387,6 +387,17 @@ lessons:
     status: stub
     optional: true
 
+  # 2026-09-24: added at Ben's request (#86); module and optional status are a first guess.
+  # Competition tables come from the IRW competition standard (source = "comp").
+  - id: competitions
+    title: "Competitions and paired comparisons: Bradley-Terry and Elo"
+    module: beyond
+    prereqs: [rasch]
+    origin: {slides: [], ps: [], code: []}
+    tables: [nba_2012-2018, friedman2019_risk_harm, friedman2019_risk_disaster]
+    status: stub
+    optional: true
+
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
   - id: first-course
