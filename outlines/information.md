@@ -67,4 +67,4 @@ Instrument sources: Winterstein, Silvia, Kwapil, Kaufman, Reiter-Palmon & Wigert
 
 - The prerequisite is `rasch` only, so 2PL/3PL information is a preview here and paid off in `1pl-to-4pl`. Keep that split, or move this lesson after `1pl-to-4pl`?
 - The contrast table is a clinical screening scale. Ben's slides use an easy-test example; is a schizotypy scale the right tone for a first course, or should the contrast be an easy achievement test?
-- The Lusardi & Mitchell (2014) journal version (*Journal of Economic Literature*) is still to verify.
+- Verified 09-24: Lusardi, A., & Mitchell, O. S. (2014). The economic importance of financial literacy: Theory and evidence. *Journal of Economic Literature*, 52(1), 5–44, doi:10.1257/jel.52.1.5.

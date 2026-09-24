@@ -64,4 +64,4 @@ Two tables from one study count as one data source; the lesson says so.
 - `florida_twins_grit` also appears in `dimensionality` (grit alongside growth mindset, PS6#1). It's recorded as a deliberate thread: `sem` carries `reuses: [florida_twins_grit]`, and both lessons key grit the same way.
 
 - Optional (Ben, 09-24, #64). Still open: `lavaan` is introduced in `fa-confirmatory`, not here. Agree?
-- Twins are clustered in families; is a family id available in the source data? If not, the lesson says the standard errors are too small, gently.
+- Family id (checked 09-24): IRW ids come in pairs ending 00/01 (e.g. 31700, 31701), and `id %/% 100` gives 390 families of two plus 2 singletons. Use it as the cluster variable (e.g. `lavaan`'s `cluster =`). This is inferred from the id pattern; confirm against the LDbase codebook (it needs a login).

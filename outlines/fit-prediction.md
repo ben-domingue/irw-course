@@ -66,4 +66,4 @@ Articles checked on Crossref (09-24) except the two marked.
 
 - `gilbert_meta_2` is also listed for `invariance-experience`. Deliberate thread (fit here, invariance there) or choose another table there?
 - Settled (Ben, 09-24): the 89-dataset comparison is Domingue et al. (2024), §4. First person where Ben gives a verdict (voice rule A).
-- Wright & Masters (1982) and Wu & Adams (2013) have no DOIs; confirm the full references.
+- Verified 09-24: Wu, M., & Adams, R. J. (2013). Properties of Rasch residual fit statistics. *Journal of Applied Measurement*, 14(4), 339–355 (PubMed 24064576; no DOI). Wright, B. D., & Masters, G. N. (1982). *Rating scale analysis*. MESA Press (book; no DOI).

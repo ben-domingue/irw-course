@@ -61,5 +61,5 @@ Wordsum sources: Thorndike (1942), doi:10.1037/h0060053; Cor et al. (2012), doi:
 
 ## Open questions
 
-- Baker & Kim (2004) is from the slides and not yet verified (the Crossref search returned a chapter of a different book).
+- Verified 09-24: Baker, F. B., & Kim, S.-H. (2004). *Item response theory: Parameter estimation techniques* (2nd ed.). Marcel Dekker, doi:10.1201/9781482276725.
 - Plausible values get one paragraph here; enough, or leave them to `score-meaning`?

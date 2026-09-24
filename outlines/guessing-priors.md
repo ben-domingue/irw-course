@@ -66,4 +66,4 @@ Crossref-checked 09-24 unless marked.
 
 - `roar_lexical` is listed for both this lesson and `response-time`. It fits here (two-choice guessing, rapid responses), but `response-time` could keep it as a deliberate thread (recorded under `reuses:`), or choose another RT table.
 - Settled (Ben, 09-24): slide 61's argument is Domingue et al. (2024, *Psychometrika*), §3 and the Table 1 discussion.
-- Han (2012) on fixing guessing parameters is from memory; verify or drop.
+- Verified 09-24: Han, K. T. (2012). Fixing the c parameter in the three-parameter logistic model. *Practical Assessment, Research, and Evaluation*, 17, Article 1, https://scholarworks.umass.edu/pare/vol17/iss1/1/ (ERIC EJ977575). Fixing c = 1/k performed well.

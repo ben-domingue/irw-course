@@ -61,5 +61,5 @@ A conceptual lesson; one table is enough.
 ## Open questions
 
 - Simulate and With real data fit only through the rescaling idea (5). Is that the right real-data hook for a conceptual lesson?
-- Idea 5 draws on Bond and Lang (2013) on the fragility of test-score gaps, which isn't in the 252 materials. Add it? (Citation to verify.)
+- Settled (Ben, digest C2): idea 5 cites Bond & Lang (2013), *Review of Economics and Statistics* 95(5), 1468–1479, doi:10.1162/rest_a_00370 (verified 09-24).
 - Item text (#63): showing a real instrument's probes would ground idea 1. That depends on how item text is sourced.

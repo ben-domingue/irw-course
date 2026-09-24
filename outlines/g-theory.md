@@ -59,5 +59,5 @@ Module: ctt · Prereqs: instrument-building · Core · Status: outline
 ## Open questions
 
 - New material, not in 252: are variance components by `lme4` the right tool for a first course, or classic ANOVA (EMS) tables?
-- Check whether `lme4` runs in webR in reasonable time; if not, Simulate uses precomputed results plus downloadable code.
+- `lme4` is in the webR binary repository (repo.r-wasm.org, version 2.0-1 for R 4.5), so it loads. Timing gets checked when the lesson is drafted; if it's slow, Simulate uses precomputed results plus downloadable code.
 - Interrater reliability is folded in here (per the landscape analysis). Enough, or does it need its own section?

@@ -329,8 +329,7 @@ IRW tables are long—one row per response—so we reshape to one row per person
 #| code-fold: show
 ```
 
-The easiest problem (Y31) sits nearly five logits below the average; the hardest (Y30) more than three and a half above. <!-- TODO: give a baseline for 'wide' (the diffsim vignette has the typical spread across IRW tables). -->
-That is a wide spread of difficulty, which is what you want from a test meant to separate novices from masters.
+The easiest problem (Y31) sits nearly five logits below the average; the hardest (Y30) more than three and a half above. Wide compared with what? Across 40 randomly chosen dichotomous IRW tables (10–60 items, 300–5,000 respondents), the median standard deviation of Rasch difficulties is 1.4 logits and the median range 4.8; the chess problems, at 2.1 and 8.5, are more spread out than about 85% of them ([code](code/rasch-difficulty-spread.R)). That spread is what you want from a test meant to separate novices from masters.
 
 How do these difficulties relate to the simplest measure of item difficulty, the proportion of people who get the item right?
 

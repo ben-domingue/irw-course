@@ -60,6 +60,6 @@ Table citation from IRW biblio.
 
 ## Open questions
 
-- Baker & Kim (2004) is not yet verified.
+- Verified 09-24: Baker, F. B., & Kim, S.-H. (2004). *Item response theory: Parameter estimation techniques* (2nd ed.). Marcel Dekker, doi:10.1201/9781482276725.
 - The prior-sensitivity result on the real data is null (0.02). Keep it as a reassuring real-data check and put the dramatic case in Simulate, or look for a table with a strongly skewed ability distribution?
 - Conditional ML gets a sentence only. Enough for an optional lesson?
