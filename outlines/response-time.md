@@ -75,5 +75,5 @@ Other tables checked and passed over: `chess_lnirt` (the corpus pilot instead; i
 ## Open questions
 
 - `roar_lexical` is reused from `guessing-priors` (recorded under `reuses:`). `guessing-priors` isn't an ancestor of this lesson. Restate the rapid-guessing finding (my plan), or add `guessing-priors` as a prerequisite?
-- 252 used PISA 2018 reading from Spain; Ben (09-24) doesn't expect the #15 subsample soon, so this outline plans on `credentialform_lnirt`. Revisit if #15 lands?
+- 252 used PISA 2018 reading from Spain; this outline plans on `credentialform_lnirt`. **Answered (Ben, 09-24, digest A4):** no PISA subsample; settled.
 - Slide 29: "I don't much like this model." Keep the first-person objection (constant speed within person) as the lesson's verdict?

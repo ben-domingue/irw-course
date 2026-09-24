@@ -71,4 +71,4 @@ Passed over: `motion` (coherence levels; now in `rt-process-models`), `dd_rotati
 
 - PS9#2's NBA shots data (Samangy, GitHub, 2004–2024) aren't in the IRW, so the shots idea runs on simulation and a Problem. Add the data to the IRW (as a subsample, #15-style), or keep it simulated?
 - 252's mental rotation data (LEVANTE, shape rotation) aren't in the IRW; `mentalrotation_wolf_2024` stands in, and its angle effect on accuracy is small (0.77 → 0.70). A dataset with RT and angle would show the classic linear RT effect. Worth asking LEVANTE for an IRW table?
-- The reliability paradox is owed to `validity-evidence` by `ctt-reliability` (course-bd pays it briefly there); this lesson gives the full treatment. Agree with the split?
+- The reliability paradox is owed to `validity-evidence` by `ctt-reliability` (course-bd pays it briefly there); this lesson gives the full treatment. Agree with the split? **Answered (Ben, 09-24): yes.**

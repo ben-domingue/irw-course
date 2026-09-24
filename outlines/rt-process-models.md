@@ -68,7 +68,7 @@ The motion item codes combine a coherence level with a second index (1–6) that
 
 ## Open questions
 
-- Tables: `credentialform_lnirt` as the failure case is a deliberate reuse from `response-time` (recorded under `reuses:`). Fine, or should the failure case use a table no other lesson has?
+- Tables: `credentialform_lnirt` as the failure case is a deliberate reuse from `response-time` (recorded under `reuses:`). Fine, or should the failure case use a table no other lesson has? **Answered (Ben, 09-24):** some reuse is fine; use tables broadly where possible. Keep it.
 - Browser feasibility: EZ is instant; `rtdists` needs to install in webR (it has compiled code). If it doesn't, simulate with a plain R random walk (slower but fine at 100 × 200). Check before drafting.
 - `mturkddm_lexical`'s item text is the letter string of each word and nonword. It is shown only as examples, so the reuse question (#63) is small, but the words/nonwords split in Problem 2 needs a word/nonword flag, which the tokenless CSV doesn't carry. Take it from the item text snapshot, or drop the problem?
 - Prerequisites: idea 3 (diffusion → 2PL) needs the 2PL, but `1pl-to-4pl` isn't an ancestor (`response-time` → `explanatory-irt` → `rasch`). Add `1pl-to-4pl` as a prerequisite, or restate the 2PL in a paragraph?
