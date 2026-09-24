@@ -5,6 +5,9 @@ by a course map. Teach the whole sequence or take single lessons. The material
 grew out of EDUC 252 at Stanford (code: https://github.com/ben-domingue/252).
 IRW roadmap item 15.2 (ben-domingue/irw#1717).
 
+**Draft site:** <https://ben-domingue.github.io/irw-course/> (work in progress; kept out of
+search engines). Work is tracked in this repo's issues, by milestone.
+
 ## Layout
 
 - `lessons.yml`: the one source of truth for lessons, modules, prerequisites and paths.
