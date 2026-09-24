@@ -6,8 +6,8 @@ Module: irt · Prereqs: ctt-limits · Core · Status: outline (page is a draft)
 
 ## Core ideas
 
-1. **The Rasch model is logistic regression with nothing observed on the right.** Write $\Pr(x_{ij}=1)$ in terms of $\theta_j - b_i$; read an ICC. *(major)*
-2. **The scale has no origin.** Only $\theta - b$ matters, so software fixes a constraint; results can differ by a shift. *(major)*
+1. **The Rasch model is logistic regression with nothing observed on the right.** Write $\Pr(x_{ij}=1)$ in terms of $\theta_j - b_i$; read an ICC. *(major)* The $D \approx 1.7$ probit aside cites and links Camilli (1994), [doi:10.3102/10769986019003293](https://doi.org/10.3102/10769986019003293) (Ben, 09-24).
+2. **The scale has no origin.** Only $\theta - b$ matters, so software fixes a constraint; results can differ by a shift. *(major)* Show "`mirt` fixes the mean ability at 0" in a small example: fit, then show `mean(fscores)` ≈ 0 and that shifting $\theta$ and $b$ together leaves the fit unchanged (Ben, 09-24).
 3. **People and items share one scale.** The Wright map shows whether a test is targeted at the people who took it.
 4. **The model's assumptions.** Unidimensionality and local independence; brainstorm how each fails.
 5. **The sum score is sufficient for $\theta$.** Patterns with the same sum score get the same estimate; the 2PL breaks this. *(major)*
@@ -66,7 +66,7 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 
 ## Go deeper
 
-- **The sum score is sufficient (agreed target, not yet in the page).** Factorize the likelihood so it depends on $\theta$ only through $r$; conditioning on $r$ removes $\theta$, which gives conditional ML and makes specific objectivity a theorem. Converse (Andersen): sufficiency implies Rasch. Why: `1pl-to-4pl`, `ability-estimation`, `item-estimation`, `parameter-invariance`. Length: about a page.
+- **The sum score is sufficient (agreed target, confirmed by Ben 09-24; not yet in the page).** Factorize the likelihood so it depends on $\theta$ only through $r$; conditioning on $r$ removes $\theta$, which gives conditional ML and makes specific objectivity a theorem. Converse (Andersen): sufficiency implies Rasch. Why: `1pl-to-4pl`, `ability-estimation`, `item-estimation`, `parameter-invariance`. Length: about a page.
 
 ## Open questions
 
