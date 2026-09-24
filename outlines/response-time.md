@@ -17,7 +17,7 @@ Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Cros
 ## Picks up
 
 - Crossed random effects for persons and items (`glmer`/`lmer`), item covariates (from `explanatory-irt`).
-- The Rasch/2PL item response function, θ and b (from `rasch`, `1pl-to-4pl`).
+- The Rasch item response function, θ and b (from `rasch`). The 2PL's $a$ appears only in passing; `1pl-to-4pl` isn't an ancestor.
 - Response times as a column beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`).
 - Rapid responses at chance in `roar_lexical`, 3.1% of responses under 0.3 s at accuracy 0.51 (from `guessing-priors`). `guessing-priors` isn't an ancestor via `explanatory-irt`, so the lesson restates the finding in a sentence and links back (see Open questions).
 - Out-of-sample comparison and the IMV (from `fit-prediction`), used in the deep dive. Also not an ancestor; restated briefly.
@@ -25,7 +25,7 @@ Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Cros
 ## Promises / leaves open
 
 - Process models that generate the response and its time together (drift diffusion, race models) → `rt-process-models`.
-- Rapid guessing as a latent class of responses (a mixture) → unpaid (the same hook `guessing-priors` leaves open).
+- Rapid guessing as a latent class of responses (a mixture) → unpaid (guessing-priors leaves the same hook open).
 - Using RT to flag aberrant behaviour (preknowledge, cheating); `credentialform_lnirt` carries a flag for 46 candidates → unpaid (a Problem only; van der Linden & Guo, 2008, doi:10.1007/s11336-007-9046-8).
 - Timing information in adaptive testing (item selection, speededness) → `item-banks-cat` (mention only).
 - Omitted and not-reached responses as information → `irtrees`.

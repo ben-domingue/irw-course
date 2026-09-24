@@ -19,17 +19,16 @@ Articles checked on Crossref (09-24). Two slide examples are named, not used: th
 - Items as bundles of features; the LLTM; random item effects; persons × items crossed in `glmer` (from `explanatory-irt`).
 - Hearts and flowers, where the "item" is stimulus × context (from `explanatory-irt`, `imps2025_hf`). Recall only; no reuse.
 - Items that are conditions repeated as trials; `rr98_accuracy`'s 33 conditions answered many times each (from `irw-data`).
-- Crossed random effects (`glmer`) as an alternative estimator (from `item-estimation`).
-- Local dependence in repeated trials (from `dimensionality`).
+- Crossed random effects (`glmer`) as an alternative estimator (from `item-estimation`; not an ancestor via `explanatory-irt`, so restated).
+- Local dependence in repeated trials (from `dimensionality`; not an ancestor, so restated).
 - Out-of-sample comparison and the IMV (from `fit-prediction`; not an ancestor via `explanatory-irt`, so restated briefly).
 
 ## Promises / leaves open
 
-- Response time on the same trials → `response-time` (a sibling, not a prerequisite; linked).
-- Process models for trial-level choices and times → `rt-process-models`.
 - Adaptive testing with task item banks (slide 23) → `item-banks-cat` (mention only).
 - Learning across trials as change in θ → unpaid (dynamic/longitudinal IRT).
-- Reliability of difference scores, the reliability paradox as a CTT result → `ctt-reliability` / `validity-evidence` (course-bd pays it there briefly; this lesson gives the full treatment; `validity-causal` uses a Stroop table for Borsboom's between/within point).
+- Response times on the same trials, and process models for them: linked to the sibling lessons response-time and rt-process-models (neither is downstream of this one, so no hook).
+- The reliability paradox: ctt-reliability owes it to validity-evidence, which pays it briefly (course-bd); this lesson gives the full treatment, and validity-causal uses a Stroop table for Borsboom's between/within point. Not a hook in either direction, since neither is an ancestor.
 
 ## Tables
 

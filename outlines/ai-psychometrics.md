@@ -19,7 +19,7 @@ Articles checked on Crossref (09-24); arXiv preprints checked on arXiv. Unverifi
 - The 2PL: difficulty $b$ and discrimination $a$ (from `1pl-to-4pl`).
 - Item features predict difficulty (the LLTM, random item effects); "can text alone predict difficulty?" is handed forward (from `explanatory-irt`). Not an ancestor of this lesson (the prerequisite is `1pl-to-4pl`), so the LLTM gets a one-paragraph restatement.
 - Item text in the IRW, with its provenance caveats (from `irw-data`; #63).
-- Item text predicts difficulty; wording direction as a second dimension (from `instrument-building`).
+- Item text predicts difficulty; wording direction as a second dimension (from `instrument-building`; not an ancestor, so restated).
 - A construct map orders items before any data (from `constructs`, `himmelstein-number_series-2025`); used as the sanity check below.
 - The IMV and out-of-sample comparison (from `fit-prediction`; restated briefly, not an ancestor).
 
@@ -79,3 +79,4 @@ Passed over: `genpsych_russell_2024_gpt3_5` and the other AI-GENIE tables (same 
 - No IRW table holds language-model responses to benchmark questions, so idea 1's second half has no data. Add one (e.g. a public leaderboard's per-question results) to the IRW?
 - The automated-scoring section has no table: no IRW table pairs human and machine scores. Keep it widget-only, or look for one (ASAP-style data)?
 - Item text is shown in full for all three main tables (CC BY 4.0 / CC0) per Ben's 09-24 rule. Are AI-generated items treated like any other openly licensed text?
+- Prerequisites: the lesson leans on `explanatory-irt` (the LLTM, and the #25 hand-off) and `instrument-building` (item text, wording direction), but its only prerequisite is `1pl-to-4pl`. Add `explanatory-irt` as a prerequisite, or restate the LLTM in a paragraph (the current plan)?

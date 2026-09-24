@@ -18,7 +18,7 @@ Articles checked on Crossref (09-24). Software: `rtdists` (Singmann et al., CRAN
 
 - Log RT, the lognormal model, person speed and item time intensity (from `response-time`).
 - The within- vs. between-person SAT, and the conditional accuracy function (from `response-time`).
-- The 2PL and discrimination as a slope (from `1pl-to-4pl`).
+- The 2PL and discrimination as a slope (from `1pl-to-4pl`; not an ancestor, see Open questions).
 - Errors slower than correct responses in `rr98_accuracy` (from `irw-data`).
 - Crossed random effects for ability and difficulty (from `explanatory-irt`, via `response-time`).
 
@@ -26,7 +26,7 @@ Articles checked on Crossref (09-24). Software: `rtdists` (Singmann et al., CRAN
 
 - Fitting the full diffusion model with trial-to-trial variability (maximum likelihood per person, or hierarchical Bayes, e.g. HDDM) → unpaid (Go further only).
 - Diffusion IRT for real test items (minutes long, many options) → unpaid; the failure case below says why it's hard.
-- Rapid guessing as a separate process (a mixture of a guess process and a diffusion) → unpaid (the same hook `guessing-priors` and `response-time` leave open).
+- Rapid guessing as a separate process (a mixture of a guess process and a diffusion) → unpaid (guessing-priors and response-time leave the same hook open).
 
 ## Tables
 
@@ -71,3 +71,4 @@ The motion item codes combine a coherence level with a second index (1–6) that
 - Tables: `credentialform_lnirt` as the failure case is a deliberate reuse from `response-time` (recorded under `reuses:`). Fine, or should the failure case use a table no other lesson has?
 - Browser feasibility: EZ is instant; `rtdists` needs to install in webR (it has compiled code). If it doesn't, simulate with a plain R random walk (slower but fine at 100 × 200). Check before drafting.
 - `mturkddm_lexical`'s item text is the letter string of each word and nonword. It is shown only as examples, so the reuse question (#63) is small, but the words/nonwords split in Problem 2 needs a word/nonword flag, which the tokenless CSV doesn't carry. Take it from the item text snapshot, or drop the problem?
+- Prerequisites: idea 3 (diffusion → 2PL) needs the 2PL, but `1pl-to-4pl` isn't an ancestor (`response-time` → `explanatory-irt` → `rasch`). Add `1pl-to-4pl` as a prerequisite, or restate the 2PL in a paragraph?
