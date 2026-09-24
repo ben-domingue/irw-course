@@ -66,5 +66,7 @@ One table: the lesson is conceptual, and the table's job is to test a construct 
 ## Open questions
 
 - Item text (#63): the lesson leans on item text. The number-series items are short arithmetic sequences; their reuse status needs checking.
-- Idea 3: confirm the verdict proposed there (the astronomy construct map is closer to the ideal than the geography descriptors), and give the sources for both figures. The astronomy map looks like Briggs, Alonzo, Schwab & Wilson (2006) on ordered multiple-choice items; the geography text looks like NAEP achievement levels. Both are guesses, to verify.
+- Idea 3 sources (checked 09-24; Ben agrees with the verdict and the guesses):
+  - **Geography: confirmed.** The text is the NAEP grade 4 achievement-level descriptions for geography (Basic, Proficient, Advanced), word for word: National Assessment Governing Board, *NAEP Achievement Levels for Geography* (1992–1998), https://www.nagb.gov/content/dam/nagb/en/documents/publications/achievement/naep-geography-achievement-levels-1992-1998.pdf.
+  - **Astronomy: likely, not yet confirmed.** Briggs, D. C., Alonzo, A. C., Schwab, C., & Wilson, M. (2006). Diagnostic assessment with ordered multiple-choice items. *Educational Assessment*, 11(1), 33–63, https://doi.org/10.1207/s15326977ea1101_2 (checked on Crossref). The paper's example is the Earth in the Solar System, but it is closed access and no open copy shows the figure. Ben (Stanford access) or Derek Briggs can confirm that the five-level table is from this paper, and its figure number.
 - Simulate compares a continuum with latent classes. Is that the right simulation for a conceptual lesson, or should Simulate build a construct map's Wright map?
