@@ -10,7 +10,10 @@
 #   prereqs   lesson ids a reader should have seen first (the map's arrows)
 #   origin    where the material comes from in EDUC 252: slide deck (c1..c10),
 #             problem set items (PS1#4), and scripts in ben-domingue/252
-#   tables    IRW tables the lesson uses
+#   tables    IRW tables the lesson uses; each is cited in the lesson's generated
+#             Data sources block (run check_tables.R after adding one)
+#   reuses    tables in `tables` that an earlier lesson already uses, returned to
+#             deliberately (a thread). check_tables.R flags any other reuse.
 #   status    stub | draft | done
 #   optional  true for lessons beyond a first course (default: core). A core
 #             lesson may not list an optional one as a prerequisite.

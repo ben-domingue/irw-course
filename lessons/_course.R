@@ -42,6 +42,60 @@ irw_csv_url <- function(table) {
 
 irw_csv <- function(table) utils::read.csv(irw_csv_url(table))
 
+# The citation for an IRW table, from IRW biblio as published in the schema.org
+# record on its landing page: the reference, a link to the original source (the DOI,
+# else a DOI inside the reference, else the "Source data" URL), and the licence.
+# Needs the network, so lessons never call it: check_tables.R caches the results in
+# lessons/_citations.yml, and data_sources() reads that cache.
+irw_citation <- function(table) {
+  page <- tryCatch(paste(readLines(paste0(TABLE_BASE, tolower(table), "/"), warn = FALSE),
+                         collapse = "\n"), error = function(e) "")
+  ld <- regmatches(page, regexpr('(?s)<script type="application/ld\\+json">.*?</script>', page, perl = TRUE))
+  if (!length(ld)) return(NULL)
+  meta <- jsonlite::fromJSON(gsub("</?script[^>]*>", "", ld))
+  or_na <- function(x) if (length(x)) x else NA_character_
+  ref <- trimws(gsub("\\s*\n+\\s*", " ", or_na(meta$creditText)))
+  src <- regmatches(page, regexec("<th>Source data</th><td>(?:<a[^>]*>)?(https?://[^<\"]+)", page, perl = TRUE))[[1]][2]
+  doi <- regmatches(ref, regexpr("https://doi\\.org/[^ ]+[^ .,;)]", ref))
+  list(reference = if (!is.na(ref) && nzchar(ref)) ref else NA_character_,
+       link = or_na(na.omit(c(meta$citation, doi, src))[1]),
+       license = or_na(meta$license),
+       irw_version = or_na(meta$version))
+}
+
+CITATIONS <- file.path(.course_dir, "lessons", "_citations.yml")
+
+# The Data sources block that closes a lesson: every table the lesson lists in
+# lessons.yml, cited from the cache and linked to its IRW landing page. A table
+# missing from the cache stops the render, so a citation cannot be forgotten; in a
+# stub, whose tables are only planned, it is shown as missing instead.
+# Emit with `#| output: asis`, just before "For instructors".
+data_sources <- function(id) {
+  l <- lesson_by_id(id)
+  tables <- unlist(l$tables)
+  if (!length(tables)) return(invisible())
+  cites <- if (file.exists(CITATIONS)) yaml::read_yaml(CITATIONS) else list()
+  missing <- setdiff(tables, names(cites))
+  if (length(missing) && l$status != "stub")
+    stop("no citation cached for ", paste(missing, collapse = ", "),
+         ": run Rscript check_tables.R from course/")
+  items <- vapply(tables, function(t) {
+    c <- cites[[t]]
+    if (is.null(c)) return(sprintf("- `%s`: *citation missing (no IRW landing page found).*", t))
+    ref <- if (is.na(c$reference)) "No reference recorded in IRW biblio." else
+      gsub("(https?://[^ ]*[^ .,;)])", "<\\1>", c$reference)
+    # Skip the link when the reference already carries it (a DOI, over http or https).
+    key <- sub("^https?://(dx\\.)?", "", c$link)
+    link <- if (!is.na(c$link) && !grepl(key, ref, fixed = TRUE)) paste0(" <", c$link, ">.") else ""
+    lic <- if (is.na(c$license)) "" else paste0(" Licence: ", c$license, ".")
+    sprintf("- [`%s`](%s%s/): %s%s%s", t, TABLE_BASE, tolower(t), sub("\\.?$", ".", ref), link, lic)
+  }, "")
+  cat("## Data sources\n\n",
+      "Data from the [Item Response Warehouse](https://itemresponsewarehouse.org) ",
+      "(each table name links to its IRW page); references from IRW biblio.\n\n",
+      paste(items, collapse = "\n"), "\n\n", sep = "")
+}
+
 read_course <- function() {
   yaml::read_yaml(file.path(.course_dir, "lessons.yml"))
 }

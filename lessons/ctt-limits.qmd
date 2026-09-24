@@ -22,5 +22,10 @@ lesson_header("ctt-limits")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("ctt-limits")
+```
+
 ## For instructors
 

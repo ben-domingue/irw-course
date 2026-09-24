@@ -324,6 +324,11 @@ ask_claude("ctt-reliability", "It covers classical test theory: true scores and 
 - Christie, R., & Geis, F. L. (1970). *Studies in Machiavellianism*. Academic Press. The source of the Mach IV.
 - Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian beliefs and personality: Construct invalidity of the Machiavellianism dimension. *Journal of Personality and Social Psychology*, 43(6), 1293–1305. The source of the `lessR_Mach4` responses—and, as the title suggests, a paper worth reading alongside problem 5.
 
+```{r}
+#| output: asis
+data_sources("ctt-reliability")
+```
+
 ## For instructors
 
 - **Source:** EDUC 252 class 2 (slides c2, "Classical Test Theory" through "Limitations of alpha") and problem set 2 (#1–3); code in `ben-domingue/252`: `c2/alpha.R`, `ps2/itemanalysis.R`, `ps2/parallel_tests.R`.

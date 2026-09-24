@@ -22,5 +22,10 @@ lesson_header("measurement")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("measurement")
+```
+
 ## For instructors
 

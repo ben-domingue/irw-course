@@ -22,5 +22,10 @@ lesson_header("explanatory-irt")
 
 ## Going further
 
+```{r}
+#| output: asis
+data_sources("explanatory-irt")
+```
+
 ## For instructors
 
