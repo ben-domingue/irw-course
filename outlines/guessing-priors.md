@@ -6,7 +6,7 @@ Module: irt · Prereqs: ability-estimation, fit-prediction · Optional · Status
 
 ## Core ideas
 
-1. **The 3PL's guessing parameter is hard to estimate and hard to interpret.** The lower asymptote is informed only by low-ability people on hard items; with easy tests it drifts to zero whatever the number of options. My view: the 3PL doesn't really work as a model of guessing (slide 61: even data simulated from the 3PL are recovered well by the Rasch model). *(major)* Sources: Maris & Bechger (2009), doi:10.1080/15366360903070385 (interpreting 3PL parameters); Han (2012) on fixing the guessing parameter (to verify).
+1. **The 3PL's guessing parameter is hard to estimate and hard to interpret.** The lower asymptote is informed only by low-ability people on hard items; with easy tests it drifts to zero whatever the number of options. My view: the 3PL doesn't really work as a model of guessing (slide 61: even data simulated from the 3PL are recovered well by the Rasch model). *(major)* Sources: Domingue, Kanopka, Kapoor, Pohl, Chalmers, Rahal & Rhemtulla (2024), *Psychometrika* 89(3), 1034–1054, doi:10.1007/s11336-024-09977-2 (IMV(2PL, 3PL) ≤ 0.001 even when the 3PL generates the data; the source for slide 61); Maris & Bechger (2009), doi:10.1080/15366360903070385 (interpreting 3PL parameters); Han (2012) on fixing the guessing parameter (to verify).
 2. **Fix guessing from the item's structure.** When the chance rate is known (two alternatives in a lexical decision task, four options in multiple choice), impose it: the 1PL-G, a Rasch model with a fixed lower asymptote. Not the 3PL: nothing extra is estimated. *(major)* Source: San Martín, del Pino & De Boeck (2006), doi:10.1177/0146621605282773 (guessing models).
 3. **Guessing may belong to people, not items.** Rapid guessing shows up in response times: responses too fast to reflect processing, answered at chance. *(major)* Source: Wise & Kong (2005), doi:10.1207/s15324818ame1802_2.
 4. **Priors keep estimates well behaved.** A posterior is likelihood times prior; with small samples, lognormal priors on slopes and beta priors on guessing pull wild estimates back. A conceptual guide, not a full Bayesian treatment. Sources: Mislevy (1986), doi:10.1007/bf02293979; Harwell & Baker (1991), doi:10.1177/014662169101500409.
@@ -65,5 +65,5 @@ Crossref-checked 09-24 unless marked.
 ## Open questions
 
 - `roar_lexical` is listed for both this lesson and `response-time`. It fits here (two-choice guessing, rapid responses), but `response-time` could keep it as a deliberate thread (recorded under `reuses:`), or choose another RT table.
-- Slide 61's "the 3PL doesn't really work" links to Ben's argument; which paper should the lesson cite?
+- Settled (Ben, 09-24): slide 61's argument is Domingue et al. (2024, *Psychometrika*), §3 and the Table 1 discussion.
 - Han (2012) on fixing guessing parameters is from memory; verify or drop.

@@ -155,6 +155,8 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 - **Predict-then-check:** exactly **one required**, in *With real data*, immediately
   before the output that answers it, and about the finding that section turns up.
   At most one more in *Core ideas*, tied to a widget.
+- Notation and terminology follow `notes/notation.md` (θ, a, b, c, u; no $D$ in
+  formulas; "respondent"; item-rest correlation).
 - Use `quiz()` and `predict()` from `lessons/widgets/quiz.js`. Every
   wrong option's feedback says why it is wrong.
 

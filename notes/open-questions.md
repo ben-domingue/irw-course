@@ -52,6 +52,8 @@ so fix these now in `notes/notation.md`. *Defaults:*
 - "Respondent" or "person", not "examinee" (many tables aren't tests). "Item" throughout;
   "probe" only in `measurement`.
 
+**Answered (Ben, 09-24): yes, and use "respondent".** Recorded in `notes/notation.md`.
+
 **A4. Teaching subsamples (#15).** ENEM, ffm and PISA have no tokenless CSV. The outlines
 found alternatives: RMET for `1pl-to-4pl`, dropped for `dimensionality`, pending for
 `irtrees`. The Using-calibrated-items session is trying TIMSS for `equating`.
@@ -68,6 +70,8 @@ not needed.
   everything else, give summaries plus a citation.
 - Longer term, the IRW adds tokenless item-text CSVs.
 
+**Answered (Ben, 09-24): ok.**
+
 **A6. Competition-table access (`competitions`).** Competition tables have no IRW
 landing page, so there's no tokenless CSV. *Default:* publish teaching copies as standard
 IRW tables, with landing pages, the same route as A4. Until then the lesson stays a
@@ -76,6 +80,8 @@ stub.
 **A7. How lessons read data (`irw-data`).** *Default:* lessons read the tokenless CSV
 (`irw_csv()` in `_course.R`); `irw::irw_fetch` appears in *Going further* for readers
 with a Redivis login.
+
+**Answered (Ben, 09-24): ok.**
 
 ---
 
@@ -135,11 +141,17 @@ with a Redivis login.
   *Default:* keep it as a reassuring check; the dramatic case goes in Simulate.
   Conditional ML gets a sentence (optional lesson).
 - **C15 `guessing-priors`**: which paper backs "the 3PL doesn't really work" (c6
-  slide 61)? *Your answer needed* (or: drop the citation and keep the argument
-  data-driven).
+  slide 61)? **Answered:** Domingue, Kanopka, Kapoor, Pohl, Chalmers, Rahal &
+  Rhemtulla (2024), *Psychometrika* 89(3), 1034–1054, doi:10.1007/s11336-024-09977-2.
+  §3 and the Table 1 discussion: IMV(2PL, 3PL) never exceeds 0.001, even when the 3PL
+  generates the data. They cite 3PL identification problems (Maris & Bechger, 2009;
+  Haberman, 2005; von Davier, 2009).
 - **C16 `fit-prediction`**: the IMV is your work. How much first person? And what is
-  the source of the 89-dataset IMV comparison (c6 slide 21)? *Your answer needed*
-  for the source. *Default:* first person where you give a verdict, per A1.
+  the source of the 89-dataset IMV comparison (c6 slide 21)? **Answered:** the same
+  paper, §4 ("The IMV in Empirical Data"): 89 dichotomous IRW datasets. Related: the
+  IMV in PLOS ONE (Domingue et al., 2025, doi:10.1371/journal.pone.0316491) and for
+  CFA with binary outcomes (Zhang et al., 2026, *Multivariate Behavioral Research*,
+  doi:10.1080/00273171.2026.2645212), which suits `fa-confirmatory` and `sem`. *Default:* first person where you give a verdict, per A1.
 - **C17 `parameter-invariance`**: keep the selection effect (splitting on the same
   items' sum score breaks the 2PL)? *Default:* keep it, a real and teachable finding.
   Leave forms to `equating`.
