@@ -62,6 +62,12 @@ florida_twins_grit:
   link: https://doi.org/10.33009/ldbase.1624481381.d9ec
   license: CC BY 4.0
   irw_version: IRW v414
+florida_twins_panas:
+  reference: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave
+    2, Wave 3 Child Survey Measures. LDbase. https://doi.org/10.33009/ldbase.1624481381.d9ec
+  link: https://doi.org/10.33009/ldbase.1624481381.d9ec
+  license: CC BY 4.0
+  irw_version: IRW v414
 Forthmann-2024-cleverness_ratings:
   reference: Forthmann, Boris, and Nils Myszkowski. 2024. “Analysis of a Divergent
     Thinking Dataset.” OSF. April 22. osf.io/a9qnc.
@@ -133,6 +139,13 @@ gilbert_meta_20:
   link: https://doi.org/10.7910/DVN/Z4WMFE
   license: CC0 1.0
   irw_version: IRW v414
+grit:
+  reference: 'Duckworth, A. L., Peterson, C., Matthews, M. D., & Kelly, D. R. (2007).
+    Grit: perseverance and passion for long-term goals. Journal of personality and
+    social psychology, 92(6), 1087.'
+  link: https://doi.org/10.1037/0022-3514.92.6.1087
+  license: CC BY 4.0
+  irw_version: IRW v414
 himmelstein-number_series-2025:
   reference: 'Himmelstein, Mark, Sophie Ma Zhu, Nikolay Petrov, Ezra Karger, Jessica
     Helmer, Sivan Livnat, Amory Bennett, Page Hedley, and Phil Tetlock. “The Forecasting
@@ -166,6 +179,15 @@ manolika_2021_mini_ipip:
   reference: 'Manolika, M. (2021). The Big Five and Beyond: Which Personality Traits
     Do Predict Movie and Reading Preferences? [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/23NDKX'
   link: https://doi.org/10.7910/DVN/23NDKX
+  license: CC0 1.0
+  irw_version: IRW v414
+neurodegenerative_huizinga_2019_dass:
+  reference: 'Huizinga, F., Heutink, J., de Haan, G. A., van der Lijn, I., van der
+    Feen, F. E., Vrijling, A. C., ... & Koerts, J. (2020). The development of the
+    Screening of Visual Complaints questionnaire for patients with neurodegenerative
+    disorders: Evaluation of psychometric features in a community sample. PLoS One,
+    15(4), e0232232.'
+  link: https://doi.org/10.1371/journal.pone.0232232
   license: CC0 1.0
   irw_version: IRW v414
 pisa2018_read:
