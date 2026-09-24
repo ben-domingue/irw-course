@@ -356,6 +356,9 @@ A lesson moves to `status: done` only when every box is ticked.
 - [ ] 6 problems covering the mix; 6 worked solutions in `solutions/<id>.qmd`.
 - [ ] 0–2 depth callouts, collapsible, self-contained.
 - [ ] Every claim in With real data matches the rendered output.
+- [ ] Every number the text reports from the lesson's own analysis is printed in the
+      page's output. Numbers from the literature are cited instead, widget numbers are
+      shown by the widget, and simple arithmetic is shown in the text (Ben, 09-24).
 - [ ] Issues with the data are noted gently, never as criticism of the data or its
       authors.
 - [ ] Software behaviour and literature results are shown or cited, not just asserted.
