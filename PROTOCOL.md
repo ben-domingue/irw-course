@@ -251,6 +251,8 @@ From what broke while building the pilots and the draft site. Source:
 **Widgets and quizzes**
 - Widget math goes in `lessons/widgets/irt.js` (shared, pure functions). Add new
   helpers there rather than inline in a lesson.
+- Widget colours come from `palette` in `irt.js` (`main`, `contrast`, `light`,
+  `guide` for dashed reference lines, …), never a colour literal in the lesson (#71).
 - Simulated samples in widgets use the seeded `rng(seed)` from `irt.js`, so the
   picture is stable on reload and changes only when a control moves.
 - Math inside OJS `md` strings isn't typeset: use words there. Text passed to
@@ -329,6 +331,7 @@ A lesson moves to `status: done` only when every box is ticked.
       match>"` passes on the local preview and, once published, on the live site
       (three times each while #13 is open). It clicks Run once webR is Ready, waits
       for the output and saves a screenshot for the visual check.
+- [ ] No colour literal in a widget: every colour comes from `palette` (#71).
 - [ ] Every widget changes its output when each control moves; seeded samples are
       stable on reload.
 - [ ] Quiz and predict text with math is typeset (no raw `$`), and every number they

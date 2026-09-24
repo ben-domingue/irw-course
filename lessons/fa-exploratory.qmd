@@ -17,7 +17,7 @@ suppressPackageStartupMessages(library(psych))
 
 ```{ojs}
 //| echo: false
-import {rng, grid, eigenSym, corMatrix} from "./widgets/irt.js"
+import {rng, grid, eigenSym, corMatrix, palette} from "./widgets/irt.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -65,9 +65,9 @@ viewof f1_l = Inputs.form([
 f1_cells = f1_l.flatMap((li, i) => f1_l.map((lj, j) => ({row: `Item ${i + 1}`, col: `Item ${j + 1}`, r: i === j ? 1 : li * lj})))
 Plot.plot({
   width: 420, height: 380, padding: 0.04, x: {label: null, axis: "top"}, y: {label: null},
-  color: {type: "linear", domain: [0, 1], range: ["#ffffff", "#2780e3"]},
+  color: {type: "linear", domain: [0, 1], range: [palette.white, palette.main]},
   marks: [Plot.cell(f1_cells, {x: "col", y: "row", fill: "r"}),
-          Plot.text(f1_cells, {x: "col", y: "row", text: d => d.r.toFixed(2), fontSize: 14, fill: d => d.r > 0.6 ? "white" : "black"})]
+          Plot.text(f1_cells, {x: "col", y: "row", text: d => d.r.toFixed(2), fontSize: 14, fill: d => d.r > 0.6 ? palette.white : palette.ink})]
 })
 ```
 
@@ -119,8 +119,8 @@ pa = {
 }
 Plot.plot({
   width: 700, height: 300, x: {label: "Factor number", ticks: 12}, y: {label: "Eigenvalue"},
-  color: {legend: true, domain: ["Your data", "Random data (average)"], range: ["#2780e3", "#c2410c"]},
-  marks: [Plot.ruleY([1], {stroke: "#bbb", strokeDasharray: "4 3"}),
+  color: {legend: true, domain: ["Your data", "Random data (average)"], range: [palette.main, palette.contrast]},
+  marks: [Plot.ruleY([1], {stroke: palette.guide, strokeDasharray: "4 3"}),
           Plot.line(pa.obs.map((v, i) => ({i: i + 1, v, s: "Your data"})), {x: "i", y: "v", stroke: "s", marker: "circle"}),
           Plot.line(pa.rand.map((v, i) => ({i: i + 1, v, s: "Random data (average)"})), {x: "i", y: "v", stroke: "s", marker: "circle"})]
 })
@@ -174,7 +174,7 @@ Plot.plot({
   marks: [Plot.ruleX([0]), Plot.ruleY([0]),
           Plot.dot(rot.L.map(([x, y], i) => ({x, y, item: `${i + 1}`, g: i < 3 ? "Items 1–3" : "Items 4–6"})), {x: "x", y: "y", r: 7, fill: "g"}),
           Plot.text(rot.L.map(([x, y], i) => ({x, y, t: `${i + 1}`})), {x: "x", y: "y", text: "t", dy: -12})],
-  color: {legend: true, range: ["#2780e3", "#c2410c"]}
+  color: {legend: true, range: [palette.main, palette.contrast]}
 })
 ```
 

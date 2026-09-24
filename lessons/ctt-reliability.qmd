@@ -10,7 +10,7 @@ lesson_header("ctt-reliability")
 
 ```{ojs}
 //| echo: false
-import {rng, cor, grid} from "./widgets/irt.js"
+import {rng, cor, grid, palette} from "./widgets/irt.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -65,7 +65,7 @@ pf = {
 Plot.plot({
   width: 460, height: 400, aspectRatio: 1,
   x: {label: "Score on form X", domain: [-6, 6]}, y: {label: "Score on form X′", domain: [-6, 6]},
-  marks: [Plot.dot(pf.pts, {x: "x", y: "x2", r: 2.5, fill: "#2780e3", fillOpacity: 0.45}), Plot.linearRegressionY(pf.pts, {x: "x", y: "x2", stroke: "#c2410c"})]
+  marks: [Plot.dot(pf.pts, {x: "x", y: "x2", r: 2.5, fill: palette.main, fillOpacity: 0.45}), Plot.linearRegressionY(pf.pts, {x: "x", y: "x2", stroke: palette.contrast})]
 })
 ```
 
@@ -120,8 +120,8 @@ al_now = al_calc(al_spread, al_err)
 al_curve = grid(0, 1.4, 71).flatMap(s => { const c = al_calc(s, al_err); return [{s, v: c.rel, what: "Reliability"}, {s, v: c.alpha, what: "Alpha"}]; })
 Plot.plot({
   width: 700, height: 300, x: {label: "How unequal the items are"}, y: {label: null, domain: [0, 1]},
-  color: {legend: true, domain: ["Reliability", "Alpha"], range: ["#2780e3", "#c2410c"]},
-  marks: [Plot.line(al_curve, {x: "s", y: "v", stroke: "what", strokeWidth: 2.5}), Plot.ruleX([al_spread], {stroke: "#999", strokeDasharray: "4 3"})]
+  color: {legend: true, domain: ["Reliability", "Alpha"], range: [palette.main, palette.contrast]},
+  marks: [Plot.line(al_curve, {x: "s", y: "v", stroke: "what", strokeWidth: 2.5}), Plot.ruleX([al_spread], {stroke: palette.guide, strokeDasharray: "4 3"})]
 })
 ```
 
@@ -185,8 +185,8 @@ viewof sb_m = Inputs.range([0.25, 5], {value: 2, step: 0.25, label: "Length mult
 sb = (rho, m) => m * rho / (1 + (m - 1) * rho)
 Plot.plot({
   width: 700, height: 280, x: {label: "Length multiplier m", domain: [0.25, 5]}, y: {label: "Reliability", domain: [0, 1]},
-  marks: [Plot.line(grid(0.25, 5, 96).map(m => ({m, r: sb(sb_rho, m)})), {x: "m", y: "r", stroke: "#2780e3", strokeWidth: 2.5}),
-          Plot.dot([{m: sb_m, r: sb(sb_rho, sb_m)}], {x: "m", y: "r", r: 6, fill: "#c2410c"}), Plot.ruleY([sb_rho], {stroke: "#ccc"})]
+  marks: [Plot.line(grid(0.25, 5, 96).map(m => ({m, r: sb(sb_rho, m)})), {x: "m", y: "r", stroke: palette.main, strokeWidth: 2.5}),
+          Plot.dot([{m: sb_m, r: sb(sb_rho, sb_m)}], {x: "m", y: "r", r: 6, fill: palette.contrast}), Plot.ruleY([sb_rho], {stroke: palette.rule})]
 })
 ```
 

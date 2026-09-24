@@ -15,7 +15,7 @@ lesson_header("rasch")
 
 ```{ojs}
 //| echo: false
-import {p2pl, pnorm, grid, loglik, mle, patternsWithSum, expectedPropCorrect, normalQuantiles} from "./widgets/irt.js"
+import {p2pl, pnorm, grid, loglik, mle, patternsWithSum, expectedPropCorrect, normalQuantiles, palette} from "./widgets/irt.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -64,11 +64,11 @@ icc_data = grid(-4, 4).flatMap(t => [
 ])
 Plot.plot({
   width: 700, height: 330, x: {label: "Ability θ"}, y: {label: "P(correct)", domain: [0, 1]},
-  color: {legend: icc_norm, domain: ["This item", "Normal CDF"], range: ["#2780e3", "#c2410c"]},
+  color: {legend: icc_norm, domain: ["This item", "Normal CDF"], range: [palette.main, palette.contrast]},
   marks: [
-    Plot.ruleY([0.5], {stroke: "#ccc"}), Plot.ruleX([icc_b], {stroke: "#ccc"}),
+    Plot.ruleY([0.5], {stroke: palette.rule}), Plot.ruleX([icc_b], {stroke: palette.rule}),
     Plot.line(icc_data, {x: "theta", y: "p", stroke: "curve", strokeWidth: 2.5}),
-    Plot.dot([{theta: icc_b, p: p2pl(icc_b, icc_b, icc_a)}], {x: "theta", y: "p", r: 5, fill: "#2780e3"})
+    Plot.dot([{theta: icc_b, p: p2pl(icc_b, icc_b, icc_a)}], {x: "theta", y: "p", r: 5, fill: palette.main})
   ]
 })
 ```
@@ -156,8 +156,8 @@ Plot.plot({
   width: 700, height: 380, y: {label: "Logits", domain: [-5, 5]},
   x: {label: null, ticks: [], domain: [-45, 45]},
   marks: [
-    Plot.rectX(wm_bins, {x1: d => -d.n, x2: 0, y1: "lo", y2: "hi", fill: "#93c5fd", insetTop: 0.5}),
-    Plot.dot(wm_items, {y: d => d, x: (d, i) => 6 + (i % 5) * 6, symbol: "diamond", fill: "#c2410c", r: 5}),
+    Plot.rectX(wm_bins, {x1: d => -d.n, x2: 0, y1: "lo", y2: "hi", fill: palette.light, insetTop: 0.5}),
+    Plot.dot(wm_items, {y: d => d, x: (d, i) => 6 + (i % 5) * 6, symbol: "diamond", fill: palette.contrast, r: 5}),
     Plot.ruleX([0]),
     Plot.text(["People"], {x: -22, y: 4.6, fontSize: 13}),
     Plot.text(["Items"], {x: 18, y: 4.6, fontSize: 13})
@@ -205,8 +205,8 @@ suf_same = patternsWithSum(5, suf_sum).map(x => ({pattern: x.join(""), mle: mle(
 suf_curve = grid(-4, 4).map(t => ({theta: t, ll: Math.exp(loglik(t, suf_pattern, suf_b, suf_slopes))}))
 Plot.plot({
   width: 700, height: 260, x: {label: "Ability θ"}, y: {label: "Likelihood of this pattern"},
-  marks: [Plot.line(suf_curve, {x: "theta", y: "ll", stroke: "#2780e3", strokeWidth: 2.5}),
-          Plot.ruleX([mle(suf_pattern, suf_b, suf_slopes)].filter(Number.isFinite), {stroke: "#c2410c", strokeDasharray: "4 3"})]
+  marks: [Plot.line(suf_curve, {x: "theta", y: "ll", stroke: palette.main, strokeWidth: 2.5}),
+          Plot.ruleX([mle(suf_pattern, suf_b, suf_slopes)].filter(Number.isFinite), {stroke: palette.contrast, strokeDasharray: "4 3"})]
 })
 ```
 
@@ -257,9 +257,9 @@ so_data = grid(-4, 4).flatMap(t => [
 so_cross = Math.abs(so_aB - 1) < 1e-9 ? null : (so_aB * so_bB - so_bA) / (so_aB - 1)
 Plot.plot({
   width: 700, height: 300, x: {label: "Ability θ", domain: [-4, 4]}, y: {label: "P(correct)", domain: [0, 1]},
-  color: {legend: true, range: ["#2780e3", "#c2410c"]},
+  color: {legend: true, range: [palette.main, palette.contrast]},
   marks: [Plot.line(so_data, {x: "theta", y: "p", stroke: "item", strokeWidth: 2.5}),
-          ...(so_cross !== null && Math.abs(so_cross) < 4 ? [Plot.ruleX([so_cross], {stroke: "#666", strokeDasharray: "4 3"})] : [])]
+          ...(so_cross !== null && Math.abs(so_cross) < 4 ? [Plot.ruleX([so_cross], {stroke: palette.guide, strokeDasharray: "4 3"})] : [])]
 })
 ```
 
