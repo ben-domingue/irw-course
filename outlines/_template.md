@@ -10,7 +10,7 @@ cross-checks can match them.
 
 # <Lesson title> (`<id>`)
 
-Module: <module id> · Prereqs: <ids from lessons.yml> · Core | Optional · Status: outline
+Module: <module id> · Prereqs: <ids from lessons.yml> · Preliminary | Core | Extension · Status: outline
 
 ## Core ideas
 
