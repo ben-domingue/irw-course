@@ -109,3 +109,42 @@ export const cor = (x, y) => {
   for (let i = 0; i < n; i++) { sxy += (x[i] - mx) * (y[i] - my); sxx += (x[i] - mx) ** 2; syy += (y[i] - my) ** 2; }
   return sxy / Math.sqrt(sxx * syy);
 };
+
+// Eigenvalues of a symmetric matrix (cyclic Jacobi), largest first. Fine for the
+// small correlation matrices the widgets use (a few dozen items at most).
+export function eigenSym(A) {
+  const n = A.length, a = A.map(r => r.slice());
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += a[p][q] ** 2;
+    if (off < 1e-12) break;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
+      if (Math.abs(a[p][q]) < 1e-15) continue;
+      const th = (a[q][q] - a[p][p]) / (2 * a[p][q]);
+      const t = Math.sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1));
+      const c = 1 / Math.sqrt(t * t + 1), s = t * c;
+      for (let k = 0; k < n; k++) {
+        const akp = a[k][p], akq = a[k][q];
+        a[k][p] = c * akp - s * akq; a[k][q] = s * akp + c * akq;
+      }
+      for (let k = 0; k < n; k++) {
+        const apk = a[p][k], aqk = a[q][k];
+        a[p][k] = c * apk - s * aqk; a[q][k] = s * apk + c * aqk;
+      }
+    }
+  }
+  return a.map((r, i) => r[i]).sort((x, y) => y - x);
+}
+
+// Correlation matrix of the columns of X (an array of rows).
+export function corMatrix(X) {
+  const n = X.length, p = X[0].length, m = Array(p).fill(0), s = Array(p).fill(0);
+  for (const r of X) for (let j = 0; j < p; j++) m[j] += r[j] / n;
+  for (const r of X) for (let j = 0; j < p; j++) s[j] += (r[j] - m[j]) ** 2;
+  const R = Array.from({length: p}, () => Array(p).fill(0));
+  for (let j = 0; j < p; j++) for (let k = j; k < p; k++) {
+    let c = 0; for (const r of X) c += (r[j] - m[j]) * (r[k] - m[k]);
+    R[j][k] = R[k][j] = c / Math.sqrt(s[j] * s[k]);
+  }
+  return R;
+}

@@ -307,8 +307,8 @@ lessons:
     module: fa
     prereqs: [ctt-reliability]
     origin: {slides: [], ps: [], code: []}
-    tables: []
-    status: stub
+    tables: [bfi2_zhang_2025]
+    status: draft
 
   - id: fa-confirmatory
     title: "Factor analysis II: confirmatory models, omega, and IRT as factor analysis"

@@ -42,6 +42,7 @@ out <- c(
   "  }",
   "  .libPaths(c(lib, .libPaths()))",
   "})",
+  "options(mc.cores = 1)  # webR cannot fork; keeps any parallel::mclapply sequential",
   "suppressPackageStartupMessages(library(mirt))"
 )
 writeLines(out, file.path("lessons", "code", "_webr-setup.R"))
