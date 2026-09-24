@@ -235,7 +235,8 @@ lessons:
     module: beyond
     prereqs: [rasch]
     origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
-    tables: [imps2025_hf]
+    tables: [verbagg, trog_brinchmann_2019, imps2025_hf]
+    reuses: [verbagg]
     status: stub
     optional: true
 
@@ -244,7 +245,7 @@ lessons:
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
-    tables: [frac20]
+    tables: [frac20, cdm_ecpe]
     status: stub
     optional: true
 
@@ -261,7 +262,7 @@ lessons:
     module: beyond
     prereqs: [polytomous, explanatory-irt]
     origin: {slides: [c8], ps: ["PS8#4"], code: [c8/irtree.R, c8/irtree2.R, c8/irtree_sim.R, ps8/fast.R]}
-    tables: [ffm_CSN]
+    tables: [bfi_goldberg_1992_conscientiousness, introversion_extroversion]
     status: stub
     optional: true
 
@@ -281,6 +282,7 @@ lessons:
     prereqs: [polytomous, guessing-priors]
     origin: {slides: [c9], ps: [], code: [c9/nominal.R]}
     tables: [wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
+    reuses: [wilmer-rmet-normative-data-set-2022]
     status: stub
     optional: true
 

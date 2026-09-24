@@ -19,6 +19,12 @@ andrich_mudfold:
   link: https://doi.org/10.1177/014662168801200105
   license: GPL-3.0
   irw_version: IRW v414
+bfi_goldberg_1992_conscientiousness:
+  reference: 'Goldberg, Lewis R. "The development of markers for the Big-Five factor
+    structure." Psychological assessment 4.1 (1992): 26.'
+  link: https://doi.org/10.1037/1040-3590.4.1.26
+  license: CC BY 4.0
+  irw_version: IRW v414
 bfi2_zhang_2025:
   reference: Zhang, X., Huang, M., Sun, J., & Savalei, V. (2025). Improving the measurement
     of the Big Five via alternative formats for the BFI-2. PubMed, 1–22. https://doi.org/10.1080/00223891.2025.2531187
@@ -55,6 +61,13 @@ c19prc_uk_mcbride_2021_wordsum:
     2020-2021. [Data Collection]. Colchester, Essex: UK Data Service. 10.5255/UKDA-SN-855552'
   link: https://osf.io/v2zur/
   license: CC BY 4.0
+  irw_version: IRW v414
+cdm_ecpe:
+  reference: 'Templin, J., & Hoffman, L. (2013). Obtaining diagnostic classification
+    model estimates using Mplus. Educational Measurement: Issues and Practice, 32,
+    37-50.'
+  link: https://doi.org/10.1111/emip.12010
+  license: GPL-3.0
   irw_version: IRW v414
 cdm_timss11:
   reference: George, A. C., & Robitzsch, A. (2014). Multiple group cognitive diagnosis
@@ -130,12 +143,6 @@ eurpar2_mudfold:
     Rijksuniversiteit te Groningen).'
   link: https://cran.r-project.org/web/packages/mudfold/index.html
   license: GPL-3.0
-  irw_version: IRW v414
-ffm_CSN:
-  reference: Goldberg, L. R. (1992). The development of markers for the Big-Five factor
-    structure. Psychological assessment, 4(1), 26.
-  link: https://doi.org/10.1037/1040-3590.4.1.26
-  license: CC BY 4.0
   irw_version: IRW v414
 florida_twins_dweck:
   reference: Hart, S. A., Schatschneider, C., & Taylor, J. E. (2021). Wave 1, Wave
@@ -292,6 +299,12 @@ imps2025_hf:
     10.1080/10409289.2025.2578816
   license: Permission via Email
   irw_version: IRW v414
+introversion_extroversion:
+  reference: Development of the Multidimensional Introversion-Extraversion ScalesX
+    [dataset and codebook]. http://openpsychometrics.org/_rawdata/MIES_Dev_Data.zip
+  link: http://openpsychometrics.org/_rawdata/
+  license: CC BY 4.0
+  irw_version: IRW v414
 lessR_Mach4:
   reference: 'Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian
     beliefs and personality: Construct invalidity of the Machiavellianism dimension.
@@ -439,6 +452,13 @@ teacherjudgements_lohmann_2026_essayratings:
     assessments of student essays.Journal of Educational Psychology, 118(6), 941–960.'
   link: https://doi.org/10.1037/edu0000969
   license: CC BY 4.0
+  irw_version: IRW v414
+trog_brinchmann_2019:
+  reference: Brinchmann, E. I., Braeken, J., & Lyster, S.-A. H. (2019). Is there a
+    direct relation between the development of vocabulary and grammar? Developmental
+    Science, 22(1), e12709. https://doi.org/10.1111/desc.12709
+  link: https://doi.org/10.1111/desc.12709
+  license: GPL-2.0
   irw_version: IRW v414
 verbagg:
   reference: De Boeck and Wilson (2004), Explanatory Item Response Models, Springer.
