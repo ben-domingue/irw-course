@@ -60,7 +60,7 @@ lessons:
     module: foundations
     prereqs: []
     origin: {slides: [c1], ps: ["PS1#4"], code: []}
-    tables: []
+    tables: [gilbert_meta_12, gilbert_meta_15]
     status: stub
     tranche: preliminary
 
@@ -432,18 +432,21 @@ lessons:
 paths:
   - id: first-course
     title: "A first course (preliminary and core lessons)"
-    lessons: [measurement, irw-data, likelihood, constructs, instrument-building, ctt-reliability,
+    lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, instrument-building,
               g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
-              information, ability-estimation, 1pl-to-4pl, fa-confirmatory, polytomous,
-              fit-prediction, dif, score-meaning, equating]
+              1pl-to-4pl, information, ability-estimation, fa-confirmatory, fit-prediction,
+              polytomous, dif, score-meaning, equating]
 
   - id: educ252
     title: "EDUC 252 (Stanford), a 10-week course"
+    # The order of the 252 classes, adjusted only where a lesson would otherwise come
+    # before its prerequisite (1pl-to-4pl before information; item-banks-cat after
+    # polytomous).
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, ctt-limits,
-              validity-argument, rasch, information, ability-estimation, validity-causal,
-              1pl-to-4pl, parameter-invariance, dimensionality, dif, item-estimation,
-              fit-prediction, guessing-priors, item-banks-cat, equating, invariance-experience,
-              explanatory-irt, cdm, polytomous, irtrees, unfolding, nominal, response-time,
+              validity-argument, rasch, 1pl-to-4pl, information, ability-estimation, validity-causal,
+              parameter-invariance, dimensionality, dif, item-estimation,
+              fit-prediction, guessing-priors, equating, invariance-experience,
+              explanatory-irt, cdm, polytomous, item-banks-cat, irtrees, unfolding, nominal, response-time,
               trials, ai-psychometrics]
 
 # Filled in by the cross-check passes over the outlines (#9). Example:
@@ -452,4 +455,97 @@ paths:
 #     introduced: rasch
 #     returns:
 #       - {lesson: 1pl-to-4pl, how: crossing ICCs in the chess data break it}
-threads: []
+threads:
+  # Pass 1 (09-24): proposed by the retrofits of ctt-reliability, fa-exploratory and
+  # rasch (#110-#112); every return is a descendant of the introducing lesson (E2).
+  - id: alpha-lower-bound
+    idea: Alpha is a lower bound on reliability
+    introduced: ctt-reliability
+    returns:
+      - {lesson: ctt-limits, how: shows how loose the bound can be (ctt_failures)}
+      - {lesson: fa-exploratory, how: reads tau-equivalence as equal loadings}
+      - {lesson: fa-confirmatory, how: replaces alpha with omega}
+      - {lesson: dimensionality, how: shows correlated errors and testlets breaking the bound}
+  - id: one-sem
+    idea: One standard error of measurement for everyone
+    introduced: ctt-reliability
+    returns:
+      - {lesson: information, how: replaces it with a conditional SEM that varies with θ}
+      - {lesson: score-meaning, how: turns it into error bands around reported scores}
+  - id: reverse-keying
+    idea: Keying has to be checked; the data can't always tell
+    introduced: ctt-reliability
+    returns:
+      - {lesson: instrument-building, how: writes reversed items on purpose}
+      - {lesson: fa-exploratory, how: checks the BFI-2's keying rather than assuming it}
+      - {lesson: polytomous, how: reverses rating-scale categories before fitting}
+      - {lesson: irtrees, how: keys the data before the tree is built}
+      - {lesson: unfolding, how: shows items that are neither forward nor reversed}
+  - id: attenuation
+    idea: Unreliability attenuates correlations
+    introduced: ctt-reliability
+    returns:
+      - {lesson: validity-evidence, how: corrects validity coefficients for it}
+      - {lesson: sem, how: removes it by modelling the latent variables}
+  - id: unidimensionality
+    idea: One factor accounts for the item correlations
+    introduced: fa-exploratory
+    returns:
+      - {lesson: fa-confirmatory, how: tests one factor against the designed facets}
+      - {lesson: dimensionality, how: fits multidimensional IRT and asks how often one dimension holds}
+  - id: rotation-indeterminacy
+    idea: The data fix the correlations, not the frame of the factors
+    introduced: fa-exploratory
+    returns:
+      - {lesson: fa-confirmatory, how: identifies the model by fixing loadings}
+      - {lesson: dimensionality, how: rotates the axes of a multidimensional IRT model}
+  - id: chess-y15
+    idea: "Chess item Y15: Elo barely predicts it"
+    introduced: likelihood
+    returns:
+      - {lesson: rasch, how: finds it the worst-fitting item (largest outfit)}
+      - {lesson: 1pl-to-4pl, how: gives it a slope near zero in the 2PL}
+  - id: sum-score-sufficiency
+    idea: The sum score is sufficient under the Rasch model
+    introduced: rasch
+    returns:
+      - {lesson: 1pl-to-4pl, how: shows the 2PL weighting items by slope instead}
+      - {lesson: ability-estimation, how: shows θ̂ depends on the responses only through r}
+      - {lesson: polytomous, how: keeps it in the partial credit model}
+      - {lesson: dif, how: makes the Mantel-Haenszel null exact when matching on the total}
+      - {lesson: cdm, how: contrasts attribute counts with sum scores}
+      - {lesson: scale-properties, how: asks what it licenses about the scale}
+  - id: specific-objectivity
+    idea: Item comparisons don't depend on who took the items
+    introduced: rasch
+    returns:
+      - {lesson: 1pl-to-4pl, how: shows it failing when ICCs cross (Y15)}
+      - {lesson: parameter-invariance, how: tests it across samples}
+      - {lesson: scale-properties, how: asks what it buys for an equal-interval scale}
+  - id: no-origin
+    idea: Only θ − b is identified; the scale has no origin
+    introduced: rasch
+    returns:
+      - {lesson: equating, how: links scales that differ by a shift (and a stretch)}
+      - {lesson: scale-properties, how: separates convention from measurement}
+  - id: conditional-ml
+    idea: Conditioning on the sum score removes θ
+    introduced: rasch
+    returns:
+      - {lesson: item-estimation, how: compares conditional, joint and marginal ML}
+      - {lesson: fit-prediction, how: uses Andersen's likelihood-ratio test}
+  - id: overfit-underfit
+    idea: Misfit as overfit or underfit (outfit and infit)
+    introduced: rasch
+    returns:
+      - {lesson: fit-prediction, how: gives outfit its null distribution}
+      - {lesson: item-banks-cat, how: screens bank items with it}
+      - {lesson: scale-properties, how: asks how much misfit a scale can bear}
+  - id: local-independence
+    idea: Responses are independent given θ
+    introduced: rasch
+    returns:
+      - {lesson: dimensionality, how: shows passages and testlets breaking it}
+      - {lesson: explanatory-irt, how: models the dependence with random effects}
+      - {lesson: unfolding, how: keeps it but drops the monotone curve the Rasch model pairs with it}
+

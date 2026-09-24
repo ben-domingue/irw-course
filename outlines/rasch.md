@@ -25,6 +25,7 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 - Items and people on one scale; the construct map orders the items (from `constructs`).
 - Consistency with the Rasch model as a route to a unit, the Lexile (from `measurement`).
 - CTT says nothing about item responses (from `ctt-reliability`).
+- Rotational indeterminacy (from `fa-exploratory`; not an ancestor, an "if you've done" Recall, E2): the scale's missing origin is the same kind of indeterminacy.
 
 ## Promises / leaves open
 
@@ -42,6 +43,10 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 - Sufficiency and specific objectivity for ordered categories (the partial credit model) → `polytomous` (Andersen 1977 covers the polytomous case too).
 - Conditional ML and the incidental-parameter problem (Andersen, 1970; Neyman & Scott, 1948) → `item-estimation` (JML vs. MML vs. CML).
 - Conditioning on the sum score to check fit without $\theta$ (the `wirs` table; Andersen's 1973 LR test) → `fit-prediction`.
+- Sufficiency makes the Mantel–Haenszel null exact when matching on the total → `dif` (its Go deeper).
+- What sufficiency, specific objectivity and "no origin" license for an equal-interval scale; outfit and infit as evidence → `scale-properties`.
+- Attribute counts against sum scores → `cdm`; the Rasch model as a model for paired comparisons → `competitions`; the Rasch curve under response time → `response-time`; monotonicity and local independence relaxed → `unfolding`.
+- The scale has no origin, as rotation has no frame in factor analysis: an "if you've done `fa-exploratory`" Recall (E2).
 
 ## Tables
 

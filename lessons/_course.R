@@ -134,6 +134,15 @@ check_course <- function(course = read_course()) {
     if (length(bad))
       problems <- c(problems, sprintf("path %s: unknown lesson '%s'", p$id, bad))
   }
+  # Paths: a lesson never comes before one of its prerequisites that is in the
+  # same path (prerequisites outside the path are the teacher's call).
+  pre_of <- setNames(lapply(course$lessons, function(l) unlist(l$prereqs)), ids)
+  for (p in course$paths) {
+    ord <- unlist(p$lessons)
+    for (i in seq_along(ord)) for (q in intersect(pre_of[[ord[i]]], ord))
+      if (match(q, ord) > i)
+        problems <- c(problems, sprintf("path %s: '%s' comes before its prerequisite '%s'", p$id, ord[i], q))
+  }
   # Cycle check: repeatedly peel off lessons whose prereqs are all peeled.
   pre <- setNames(lapply(course$lessons, function(l) unlist(l$prereqs)), ids)
   done <- character()

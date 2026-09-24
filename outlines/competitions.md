@@ -27,6 +27,7 @@ Module: beyond · Prereqs: rasch · Extension · Status: outline
 - Intransitivity (a beats b beats c beats a) and multidimensional strength → unpaid.
 - Glicko-2, TrueSkill and team-level ratings → unpaid (Going further).
 - Draws modelled properly (Davidson; ordinal models) → unpaid (a pointer to polytomous only).
+- Elo as online estimation in adaptive learning systems → `item-banks-cat` (an "if you've done" Recall there, E2).
 
 ## Tables
 
