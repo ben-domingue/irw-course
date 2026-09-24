@@ -1,83 +1,74 @@
-<!-- Outlined 2026-09-24 from EDUC 252 slides c8 (slides 40–41, fixed vs. random effects in lme4) and c10 (slide 25, item difficulty modelling and the LLTM), PS6#2 (hearts and flowers: "what makes an item?"), PS7#2 part B (items as exchangeable carriers of skills), and the code ps6/hf.R and ps7/cdm.R. c8/lmer_example.R is empty in the export. -->
+<!-- Outlined 2026-09-24 from EDUC 252 c8 (slides 40–41), c10 (slide 25), PS6#2, PS7#2 part B, ps6/hf.R and ps7/cdm.R (c8/lmer_example.R is empty). Tidied 09-24 (#62): Ben's answers applied, cut to one session. -->
 
 # What is an item? Explanatory item response models (`explanatory-irt`)
 
-Module: beyond · Prereqs: rasch · Optional · Status: outline
+Module: beyond · Prereqs: rasch · Extension · Status: outline
 
 ## Core ideas
 
-1. **An item response model is a regression.** Stack the data long (one row per response) and the Rasch model is a logistic mixed model: respondents as a random effect, items as fixed effects, `resp ~ 0 + item + (1 | id)`. Everything else in the lesson is a change to that formula. *(major)* Sources: Rijmen, Tuerlinckx, De Boeck & Kuppens (2003), doi:10.1037/1082-989X.8.2.185; Doran, Bates, Bliese & Dowling (2007), doi:10.18637/jss.v020.i02; De Boeck, Bakker, Zwitser, Nivard, Hofman, Tuerlinckx & Partchev (2011), doi:10.18637/jss.v039.i12; `lme4`: Bates, Mächler, Bolker & Walker (2015), doi:10.18637/jss.v067.i01.
-2. **Descriptive vs. explanatory.** A descriptive model gives each item and each respondent its own parameter; an explanatory model replaces those parameters with predictors (item properties, person properties, or both). The LLTM replaces 24 item difficulties with a handful of design effects. *(major)* Sources: Wilson & De Boeck (2004), ch. 2 of *Explanatory item response models*, doi:10.1007/978-1-4757-3990-9_2; Fischer (1973), doi:10.1016/0001-6918(73)90003-6; Janssen, Schepers & Peres (2004), ch. 6, doi:10.1007/978-1-4757-3990-9_6.
-3. **Explaining difficulty is not the same as fitting it.** Item predictors can account for most of the variation in difficulty and still be rejected by a likelihood-ratio test. Adding an item residual (items as random effects around the LLTM prediction) reconciles the two and says how much is left unexplained. *(major)* Sources: De Boeck (2008), *Random item IRT models*, doi:10.1007/s11336-008-9092-x; Janssen et al. (2004); Cho, De Boeck, Embretson & Rabe-Hesketh (2014), doi:10.1007/s11336-013-9360-2.
-4. **Fixed or random items: are we interested in *these* items?** Ben's question from c8 slide 40: random item effects treat items as a sample from a population of items (item families, clones, generated items). When items come in families, how much of the difficulty sits between families? Sources: De Boeck (2008); Glas & van der Linden (2003) on item cloning, doi:10.1177/0146621603027004001; Sinharay, Johnson & Williamson (2003) on item families, doi:10.3102/10769986028004295.
-5. **Person predictors and latent regression.** Put respondent covariates (grade, time point) in the same formula: the effect is estimated on the θ scale, without a two-step "estimate θ, then regress" detour. Sources: Zwinderman (1991), doi:10.1007/BF02294492; Mislevy (1987), doi:10.1177/014662168701100106; Wilson & De Boeck (2004).
-6. **What is an item? Trials and local dependence.** When a task is repeated, the "item" is a stimulus in a context: the same flower is harder right after a heart. A trial-level covariate is an item predictor; shared context within a family (a testlet effect, a person × family random effect) is local dependence made explicit. *(major)* Sources: PS6#2; Davidson, Amso, Anderson & Diamond (2006) on hearts and flowers, doi:10.1016/j.neuropsychologia.2006.02.006; Bradlow, Wainer & Wang (1999), doi:10.1007/BF02294533; Wang & Wilson (2005), doi:10.1177/0146621604271053.
+1. **An item response model is a regression.** Stack the data long and the Rasch model is `resp ~ 0 + item + (1 | id)`; the rest of the lesson changes that formula. Fitted with `lme4` throughout, not `mirt` (digest F11). *(major)* Sources: Rijmen, Tuerlinckx, De Boeck & Kuppens (2003), doi:10.1037/1082-989X.8.2.185; De Boeck et al. (2011), doi:10.18637/jss.v039.i12; Bates, Mächler, Bolker & Walker (2015), doi:10.18637/jss.v067.i01.
+2. **Descriptive vs. explanatory.** An explanatory model replaces item or person parameters with predictors; the LLTM replaces 24 difficulties with a handful of design effects. *(major)* Sources: Wilson & De Boeck (2004), doi:10.1007/978-1-4757-3990-9_2; Fischer (1973), doi:10.1016/0001-6918(73)90003-6.
+3. **Explaining difficulty is not fitting it; items as random effects.** Item predictors can explain most of the difficulty and still fail a likelihood-ratio test. An item residual (random items around the LLTM prediction) reconciles the two. The same move answers c8 slide 40's question, "are we interested in *these* items?": when items come in families, how much difficulty sits between families? *(major)* Sources: Janssen, Schepers & Peres (2004), doi:10.1007/978-1-4757-3990-9_6; De Boeck (2008), doi:10.1007/s11336-008-9092-x; Glas & van der Linden (2003), doi:10.1177/0146621603027004001.
+4. **Person predictors and latent regression.** Covariates in the same formula give effects on the θ scale with no two-step detour. Sources: Zwinderman (1991), doi:10.1007/BF02294492; Mislevy (1987), doi:10.1177/014662168701100106.
+5. **What is an item? Trials and local dependence.** In a repeated task the item is a stimulus in a context: a flower is harder right after a heart. A trial covariate is an item predictor; a person × family random effect is local dependence made explicit. *(major)* Sources: PS6#2; Davidson, Amso, Anderson & Diamond (2006), doi:10.1016/j.neuropsychologia.2006.02.006; Bradlow, Wainer & Wang (1999), doi:10.1007/BF02294533.
 
-Item-difficulty modelling as a design tool is cited, not taught: Embretson (1998), doi:10.1037/1082-989X.3.3.380; Hartig, Frey, Nold & Klieme (2012), doi:10.1177/0013164411430707.
+**Verdict (Claude's reading; for Ben to confirm):** unless items were generated from the design, I'd fit the LLTM with an item residual, not without: real items always leave something over, and the residual SD says how much.
 
-All references above were checked on Crossref (09-24).
+Item-difficulty modelling as a design tool is cited, not taught: Embretson (1998), doi:10.1037/1082-989X.3.3.380. All references checked on Crossref (09-24).
 
 ## Picks up
 
-- The Rasch model, item difficulty as a fixed parameter, local independence (from `rasch`; its promise: local independence → `explanatory-irt`).
-- The Rasch likelihood and logistic regression (from `likelihood`).
-- `verbagg` and its want/do pattern in the item means (from `irw-data`, described there, modelled here).
-- Random effects and variance components for persons × facets (from `g-theory`; its promise: random-effects models for item responses → `explanatory-irt`).
-- Crossed random effects as an estimator (`glmer`), and latent regression as a prior that depends on covariates (from `item-estimation`, promised there).
-- Latent regression of ability on covariates (promised in `sem`).
-- Local dependence among items that share a context (promised in `ctt-limits`, `ctt-reliability`, `information`, `dimensionality`).
-- Item text as a predictor of difficulty (promised in `instrument-building` and `irw-data`): taken up here with human-coded item features; the text itself goes to `ai-psychometrics`.
+- The Rasch model and local independence (from `rasch`).
+- Logistic regression and the likelihood (from `likelihood`).
+- `verbagg`'s want/do pattern, described there and modelled here (from `irw-data`).
+- Local dependence among items that share a context (from `ctt-limits`, `ctt-reliability`).
+- Brief Recalls for readers who have done them (E2; restated, not threads): random effects in `g-theory`; `glmer` and latent regression in `item-estimation`; latent regression in `sem`; testlets in `dimensionality` and `information`; item text in `instrument-building`.
 
 ## Promises / leaves open
 
-- Item text and LLM-predicted difficulty; deep dive #25 (does item wording predict difficulty?) → `ai-psychometrics` (agreed with course-beyond-2: the deep dive lives there; this lesson's LLTM is the human-coded baseline it improves on).
-- Q-matrix as an item design matrix: the LLTM with skills as predictors becomes a latent class model → `cdm`.
-- Trees as explanatory models (node as an item-side predictor, `item:node + (0 + node | id)`) → `irtrees`.
-- Trials with continuous stimulus features (rotation angle, shot location) → `trials`.
-- Log response time as a second outcome with the same random-effects machinery → `response-time`.
-- Person × item predictors (DIF as an interaction) → `dif`, and treatment × item interactions → `invariance-experience` (PS7#1's `(1 + treat | item)`).
-- The random-item LLTM is a Bayesian-flavoured model with no closed form for how much the item residual matters to scores → unpaid.
+- Item text and LLM-predicted difficulty; deep dive #25 → `ai-psychometrics` (this lesson's LLTM is the human-coded baseline).
+- The Q-matrix as an item design matrix → `cdm`.
+- Trees as explanatory models (`item:node + (0 + node | id)`) → `irtrees`.
+- Continuous stimulus features (rotation angle, shot location) → `trials`.
+- Log response time as a second outcome → `response-time`.
+- How much the item residual matters to scores → unpaid.
 
 ## Tables
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `verbagg` | main example | Verbal aggression (De Boeck & Wilson, 2004; 316 respondents × 24 items, 0/1 as stored, so "perhaps" and "yes" are both 1). Three design factors: want vs. do, curse/scold/shout, other- vs. self-to-blame. The Rasch model (24 item parameters) has AIC 8,129; the LLTM (5 parameters) 8,250, and the likelihood-ratio test rejects it (χ² = 159, df = 19). Yet the design explains 89% of the variance in the Rasch item easiness (r = 0.94). Adding a random item residual gives AIC 8,164 with residual SD 0.34 against a person SD of 1.37. Effects (logits): want +0.71, scold −1.06, shout −2.10, self-to-blame −1.05. A want × shout interaction (+0.69) says the gap between wanting to and doing is widest for shouting. Largest residuals: S3DoShout (−0.86) and S4DoCurse (+0.70). | `irw-data` (deliberate thread: described there, modelled here; record `reuses:`) |
-| `trog_brinchmann_2019` | contrast (random items, families) | Norwegian TROG-2, a test of receptive grammar (Brinchmann, Braeken & Lyster, 2019): 210 children, 80 items in 20 blocks of 4, each block one grammatical construct (`item_family`). Item difficulty is almost all between blocks: with crossed random effects, family variance 5.90 vs. item-within-family 0.35 (94% between). Family means fall from 0.95 to 0.07 correct in test order. Items within a construct are nearly exchangeable, which is the case for random items. Adding a person × family (testlet) random effect, since the test is scored by block, improves fit sharply (AIC 11,974 → 11,708; χ² = 268, df = 1): SD 1.15 against a person SD of 2.26, so children differ by construct well beyond their overall level. That is local dependence made visible. | — |
-| `imps2025_hf` | failure case for the naive item definition; person predictors | Hearts and flowers (Obradović et al., 2018; DeJoseph et al., 2025), mixed block: 31,394 trials from 1,438 child × time points, grades 3–5. Defining the item as shape × side gives four items with accuracy 0.82–0.86, but a trial that follows a switch of shape is much harder: −0.63 logits (flower 0.89 → 0.83, heart 0.87 → 0.80). Trials violate local independence under the naive item definition; the switch covariate repairs part of it. Person side: grade 5 is 0.59 logits above grade 3, grade 4 0.25. | `trials` Recalls it, no reuse (agreed with course-beyond-2) |
-| sanity: `verbagg` against `lme4::VerbAgg` | sanity | The IRW table reproduces the `lme4` copy of the same data exactly (item proportions identical), so the LLTM in De Boeck et al. (2011) is the known answer the pipeline must match. | — |
+| `verbagg` | main example | 316 × 24, stored 0/1. Rasch AIC 8,129; LLTM (5 parameters) 8,250, rejected (χ² = 159, df = 19), yet the design explains 89% of the Rasch easiness variance (r = 0.94). Item residual: AIC 8,164, SD 0.34 vs. person SD 1.37. Want × shout +0.69. | `irw-data` (recorded under `reuses:`) |
+| `trog_brinchmann_2019` | contrast (random items, families) | 210 children, 80 items in 20 constructs of 4. Family variance 5.90 vs. item-within-family 0.35 (94% between). A person × family effect improves fit (AIC 11,974 → 11,708; SD 1.15 vs. person 2.26). | — |
+| `imps2025_hf` | failure case (naive item definition); person predictors | 31,394 trials, grades 3–5. Shape × side gives four items at 0.82–0.86, but a trial after a shape switch is −0.63 logits harder. Grade 5 is +0.59 over grade 3. | `trials` Recalls it (no reuse) |
+| `verbagg` vs. `lme4::VerbAgg` | sanity | Identical item proportions, so De Boeck et al.'s (2011) LLTM is the known answer. | — |
 
-The TROG models are slow in `glmer` (minutes, with a Nelder–Mead convergence warning on one of them), so the lesson precomputes them or fits a subsample; the browser gets the simulation only.
-
-Notes on the data, to say gently in the lesson: `verbagg` is stored dichotomized and without the `lme4` copy's person covariates (anger, gender), so the person-predictor example uses hearts and flowers; one `verbagg` item name is spelled `S4wantCurse` (lower-case "want"), so code that parses the design from names must ignore case. `imps2025_hf` has a `time_limit` (0.75 or 1.25 s) that is a second trial-level predictor worth a problem. The TROG items are copyrighted (Pearson), so the lesson names the constructs, not the items.
+TROG models take minutes in `glmer`: precompute them; the browser gets the simulation. Say gently: `verbagg` is stored dichotomized without person covariates; one item is spelled `S4wantCurse`; TROG items are copyrighted, so name constructs, not items.
 
 ## Widget / simulation / problem ideas
 
 **Widgets**
-- Formula builder: tick boxes for item fixed effects, item predictors, item residual, person predictors; the model formula, number of parameters and a design-matrix picture update (ideas 1, 2).
-- LLTM vs. Rasch difficulties: 24 points (Rasch difficulty vs. LLTM prediction) with a residual-SD slider showing how much scatter a random item residual allows (idea 3).
-- Families: draw items from families with between- and within-family SDs; a respondent's expected score on a new item from a known family vs. a new family (idea 4).
-- Switch cost: an item characteristic curve for "flower after flower" and "flower after heart", with a slider for the switch effect (idea 6).
+- Formula builder: tick item effects, item predictors, residual, person predictors; formula, parameter count and design matrix update (ideas 1, 2).
+- LLTM vs. Rasch difficulties with a residual-SD slider (idea 3).
+- Families: between- vs. within-family SDs; expected score on a new item from a known vs. a new family (idea 3).
+- Switch cost: ICCs for flower-after-flower and flower-after-heart (idea 5).
 
-**Predict-then-check:** the three verbagg design factors explain most of the item difficulties (r = 0.94 with the Rasch estimates). Will a likelihood-ratio test accept the LLTM? Answered by χ² = 159 on 19 df, then the random-residual model.
+**Predict-then-check:** the design explains 89% of item difficulty. Will the LR test accept the LLTM? (χ² = 159 on 19 df; then the residual model.)
 
-**Simulate:** Generate responses from an LLTM with a small item residual; fit Rasch, LLTM and random-item LLTM with `glmer`; compare recovered design effects and residual SD with the truth, and watch the LR test reject the LLTM as the residual SD grows from 0 to 0.5. Keep to about 300 respondents × 24 items for seconds in webR (`lme4` in webR to confirm).
+**Simulate:** LLTM data with a small item residual, 300 × 24; fit Rasch, LLTM and random-item LLTM with `glmer`; watch the LR test reject as the residual SD grows from 0 to 0.5. `lme4` speed in webR is Claude's check (digest D).
 
 **Problems**
-1. Derivation: show that the LLTM is a Rasch model with the constraint $b_i = \sum_k q_{ik}\eta_k$, and count its parameters for verbagg.
-2. Real data with a twist: refit the verbagg LLTM with the want × behaviour interaction. Which interaction does the data support, and what does it say about inhibition?
-3. Judgment (c8 slide 40): for TROG, would you treat items as fixed or random? What changes if a new form draws new items from the same 20 constructs?
-4. Design: you are writing a new item bank of arithmetic word problems. Which item features would you code before fielding it, so that an LLTM could be fitted afterwards?
-5. Real data (PS6#2): add `time_limit` to the hearts-and-flowers model. Does the switch cost depend on the time limit?
-6. Challenge (open): in PS6#2 the item is the stimulus; in verbagg it is a situation × verb. When is a trial "the same item" twice? Propose a criterion and test it on one table.
+1. Derivation: the LLTM as Rasch with $b_i = \sum_k q_{ik}\eta_k$; count verbagg's parameters.
+2. Real data with a twist: the want × behaviour interaction on verbagg. What does it say about inhibition?
+3. Judgment (c8 slide 40): TROG items fixed or random? What if a new form draws new items from the same constructs?
+4. Design: which features would you code for a new bank of arithmetic word problems?
+5. Real data (PS6#2): add `time_limit` to hearts and flowers. Does the switch cost depend on it?
+6. Challenge (open): when is a trial "the same item" twice? Propose a criterion and test it.
 
 ## Go deeper
 
-- **The LLTM is a Rasch model with a linear constraint, so the sum score stays sufficient for θ.** Why: `rasch` (sufficiency), `cdm` (a Q-matrix as the design matrix), `trials`. Length: half a page.
-- **Crossed random effects and the marginal likelihood.** Why the `glmer` Rasch model and `mirt`'s Rasch model give nearly the same item estimates, and where they differ (the Laplace approximation). Why: `item-estimation`, `trials`, `response-time`, `irtrees`. Length: about a page.
+- **The LLTM keeps the sum score sufficient.** A Rasch model with a linear constraint. Why: `rasch`, `cdm`, `trials`. Half a page.
+- **Crossed random effects and the marginal likelihood.** Why `glmer` and `mirt` Rasch estimates nearly agree (Laplace). Why: `trials`, `response-time`, `irtrees`. About a page.
 
 ## Open questions
 
-- `verbagg` returns from `irw-data` as a deliberate thread (the want/do pattern described there becomes a model here). *Default:* keep it, recorded under `reuses:`; it is De Boeck & Wilson's own LLTM example (digest E4).
-- `lme4` throughout, not `mirt` (digest F11). *Default:* yes; whether `lme4` is fast enough in webR is Claude's check.
-- Settled: deep dive #25 lives in `ai-psychometrics` (agreed with course-beyond-2); PS7#1 (IL-HTE) is homed in `invariance-experience` and this lesson only points to it.
+- The verdict above is Claude's reading of the verbagg result (voice rule A needs one per lesson). *Default:* use it unless you'd put it differently.
