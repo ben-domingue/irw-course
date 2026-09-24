@@ -1,11 +1,11 @@
 ---
-title: "Unfolding and nominal response models"
+title: "Nominal response and multiple-choice models"
 ---
 
 ```{r}
 #| output: asis
 source("_course.R")
-lesson_header("unfolding-nominal")
+lesson_header("nominal")
 ```
 
 ## What this is for
@@ -24,7 +24,7 @@ lesson_header("unfolding-nominal")
 
 ```{r}
 #| output: asis
-data_sources("unfolding-nominal")
+data_sources("nominal")
 ```
 
 ## For instructors

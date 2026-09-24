@@ -1,0 +1,31 @@
+---
+title: "Unfolding models"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("unfolding")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("unfolding")
+```
+
+## For instructors
+

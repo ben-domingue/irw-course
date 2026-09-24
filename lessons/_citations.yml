@@ -53,6 +53,13 @@ enem_2014_1mil_mt:
   link: https://doi.org/10.46814/lajdv3n5-018
   license: CC BY 4.0
   irw_version: IRW v414
+eurpar2_mudfold:
+  reference: 'Schuur, H. V. (1984). Structure in political beliefs: A new model for
+    stochastic unfolding with application to European party activists (Doctoral dissertation,
+    Rijksuniversiteit te Groningen).'
+  link: https://cran.r-project.org/web/packages/mudfold/index.html
+  license: GPL-3.0
+  irw_version: IRW v414
 ffm_CSN:
   reference: Goldberg, L. R. (1992). The development of markers for the Big-Five factor
     structure. Psychological assessment, 4(1), 26.
