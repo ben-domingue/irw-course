@@ -24,6 +24,7 @@ rules:
 
 You've accepted the rewrites that came from them, but not the rules themselves.
 *Default:* adopt all six as written; revise if drafts show a problem.
+**Answered (Ben, 09-24): all six adopted.**
 
 **A2. Your two verdicts (#3).** These are the only items here that need your writing,
 not a yes/no:

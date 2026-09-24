@@ -223,11 +223,10 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 
 ---
 
-## 6. Voice [pending #3]
+## 6. Voice (#3)
 
-Write as Ben (see the `domingue-voice` skill). The rules below are the candidate rules
-from `notes/voice-audit-2026-09-24.md`; they become firm once Ben marks each pattern
-✓ or ✗.
+Write as Ben (see the `domingue-voice` skill). The six rules below come from
+`notes/voice-audit-2026-09-24.md`; Ben adopted all six on 2026-09-24.
 
 - **A. First-person verdicts.** Every lesson gives at least one first-person verdict
   on the choice a practitioner actually faces (which model, which coefficient, which
@@ -360,7 +359,7 @@ A lesson moves to `status: done` only when every box is ticked.
       and package the lesson uses is cited inline with a link, and every reference has
       been verified (none from memory).
 
-**Voice** **[pending #3]**
+**Voice**
 - [ ] At least one first-person verdict; none of the banned words; every size word
       has its baseline.
 
