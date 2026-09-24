@@ -3,17 +3,16 @@
 **Parts 1 and 2 (2026-09-24).** Part 1 (sections A–C) covers the cross-cutting
 decisions and the 23 outlines on main (Foundations, CTT, factor analysis, IRT,
 competitions). Part 2 (sections E and F, plus additions to B and D) covers Validity,
-Fairness and Beyond from the outline branches below. Using calibrated items is pending:
+Fairness and Beyond from main and the outline branches below. Using calibrated items is pending:
 its branch (`8-outlines-uses`) isn't pushed yet.
 
-Part 2 read these versions:
-- main at `c29b9f2`;
+Part 2 read these versions (refreshed after PR #92 merged):
+- main at `c98c0d2`, which now includes the Beyond part 2 outlines (PR #92, merged at
+  `349f48f`): response-time, rt-process-models, trials, ai-psychometrics;
 - `8-outlines-validity` at `9bc8435` (PR #94): validity-argument, validity-causal,
   validity-evidence, dif, invariance-experience;
 - `8-outlines-beyond-1` at `e1fd007` (no PR yet): explanatory-irt (cdm, irtrees,
   unfolding and nominal not yet outlined there);
-- `8-outlines-beyond-2` at `36d3c07` (PR #92): response-time, rt-process-models,
-  trials, ai-psychometrics;
 - #62 and the open `needs-ben` issues as of 2026-09-24 19:30.
 
 **How to answer:** every question has a recommended default. Reply "defaults except
@@ -247,19 +246,21 @@ FA in the path.
 
 **E4. Deliberate table reuses.** You said on 09-24 that reuse is fine where it serves
 a thread. These are the reuses in the outlines; check_tables.R wants each recorded
-under `reuses:` on the later lesson:
-- `verbagg`: `irw-data` → `explanatory-irt` (described there, modelled here);
+under `reuses:` on the later lesson. The first three are already recorded on main
+(PR #92); the last two aren't:
 - `rr98_accuracy`: `irw-data` → `trials`;
 - `roar_lexical`: `guessing-priors` → `response-time` (rapid guessing);
 - `credentialform_lnirt`: `response-time` → `rt-process-models` (the failure case for
   the diffusion model);
+- `verbagg`: `irw-data` → `explanatory-irt` (described there, modelled here; recorded
+  on the unmerged `8-outlines-beyond-1` branch);
 - `wilmer-rmet-normative-data-set-2022`: `1pl-to-4pl` → `nominal`. It's on main but not
   recorded, and check_tables.R flags it today.
 
-*Default:* record all five. Don't add `bfi2_zhang_2025` (randomized response formats)
+*Default:* keep the three already recorded and record the other two. Don't add `bfi2_zhang_2025` (randomized response formats)
 to `invariance-experience`: a Recall of `fa-exploratory`'s finding is enough.
-Consequence: check_tables.R's two current reuse failures clear once lessons.yml
-records them.
+Consequence: check_tables.R's remaining reuse failure (RMET) clears once lessons.yml
+records it.
 
 **E5. Data the lessons want that the IRW doesn't have.** You marked this "to discuss"
 (PR #92). The gaps:
