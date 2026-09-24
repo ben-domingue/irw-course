@@ -12,7 +12,7 @@ Module: ctt · Prereqs: measurement · Core · Status: outline
    - a construct map for the Earth and the Solar System, with five levels that each describe what a student understands (level 2: the Sun appears to cross the sky, the Moon's shape changes every 28 days; level 5: a complete model that explains day and night, the phases of the Moon and the seasons);
    - achievement-level descriptors for geography (Basic, Proficient, Advanced), each a list of things students "should be able to" do.
 
-   The verdict on the slide is "one of these comes much closer to this ideal". Proposed: the astronomy map does, because each level names the misconception to overcome next, so it implies what to teach, while the descriptors list performances with no account of how a student moves between them. *(Ben to confirm.)*
+   The verdict on the slide is "one of these comes much closer to this ideal". Proposed: the astronomy map does, because each level names the misconception to overcome next, so it implies what to teach, while the descriptors list performances with no account of how a student moves between them. *(Ben agrees, 09-24.)*
 4. **Continuous or categorical?** Latent classes (Moffitt's taxonomy of antisocial behaviour) vs. a continuum. My prior is that variation is much more often continuous. *(major)*
 5. **A different starting point: blueprints.** Licensure, admissions and K–12 tests often sample a domain to a specification, not a construct map; sometimes that is a bureaucratic minimum standard (the driving test).
 
