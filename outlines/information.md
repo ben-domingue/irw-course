@@ -2,7 +2,7 @@
 
 # Information, precision, and short forms (`information`)
 
-Module: irt · Prereqs: rasch · Core · Status: outline
+Module: irt · Prereqs: 1pl-to-4pl · Core · Status: outline
 
 ## Core ideas
 
@@ -18,10 +18,12 @@ Module: irt · Prereqs: rasch · Core · Status: outline
 - The Rasch model, ICCs, the Wright map, targeting (from `rasch`).
 - One SEM for everyone (thread from `ctt-reliability`), and "one error variance for everyone fails" (from `ctt-limits`).
 - Measures calibrated to the task, precise quickly (from `measurement`, Ben's desiderata).
+- The 2PL and 3PL: slopes and lower asymptotes (from `1pl-to-4pl`), so information is taught for all three models, not only previewed.
+- Items and people on one scale (from `constructs`, via `rasch`).
 
 ## Promises / leaves open
 
-- Information for the 2PL ($a^2p(1-p)$) and 3PL (guessing lowers it) → `1pl-to-4pl`, `guessing-priors`.
+- Guessing lowers information at the bottom of the scale; fixing $c$ or using priors → `guessing-priors`.
 - SE of an ability estimate = $1/\sqrt{I}$ at the estimate; what happens at perfect scores → `ability-estimation`.
 - Choosing the next item by information → `item-banks-cat`.
 - Error bands on reported scores; cut scores where information is low → `score-meaning`.

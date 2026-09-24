@@ -2,7 +2,7 @@
 
 # Estimating abilities: MLE and EAP (`ability-estimation`)
 
-Module: irt · Prereqs: rasch · Core · Status: outline
+Module: irt · Prereqs: information · Core · Status: outline
 
 ## Core ideas
 
@@ -17,15 +17,15 @@ Module: irt · Prereqs: rasch · Core · Status: outline
 - The score equation and curvature; no MLE under separation (from `likelihood`).
 - The Rasch model; the sum score is sufficient (from `rasch`).
 - Priors, as a reading of the likelihood (from `likelihood`, idea 1's Bayesian reading).
-- Information and CSEM (from `information`, if taken first; not a prerequisite, so restate $SE = 1/\sqrt{I}$).
+- Information and CSEM; $SE = 1/\sqrt{I}$ (from `information`).
+- The 2PL: sum-score sufficiency fails, so equal sum scores get different estimates (from `1pl-to-4pl`).
 
 ## Promises / leaves open
 
 - Where the item parameters come from (EM needs a prior for $\theta$ too) → `item-estimation`.
-- Sum-score sufficiency fails for the 2PL → `1pl-to-4pl`.
 - Choosing an estimator for reporting; shrinkage and group comparisons → `score-meaning`.
 - EAP in adaptive testing → `item-banks-cat`.
-- Out-of-sample prediction with MLE vs. EAP (PS5#2b) → `fit-prediction`.
+- Out-of-sample prediction with MLE vs. EAP (PS5#2b): stays a problem here; `fit-prediction` compares models, not estimators.
 - Priors on item parameters → `guessing-priors`.
 
 ## Tables

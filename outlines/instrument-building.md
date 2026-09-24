@@ -16,11 +16,12 @@ Module: ctt · Prereqs: constructs, ctt-reliability · Core · Status: outline
 
 - Construct maps and blueprints (from `constructs`).
 - Item-rest correlations, alpha, reverse keying (from `ctt-reliability`).
+- Probes, and where they come from (from `measurement`).
 
 ## Promises / leaves open
 
 - Raters and constructed-response scoring → `g-theory`.
-- Wording direction as a second dimension → `fa-exploratory`, `dimensionality`.
+- Wording direction as a second dimension → `fa-exploratory`, `fa-confirmatory`, `dimensionality`.
 - Response styles (acquiescence, extreme responding) → `irtrees`; careless responding otherwise unpaid.
 - Distractors carry information → `nominal` (nominal response and multiple-choice models).
 - Item text predicts difficulty → `explanatory-irt`, `ai-psychometrics`.

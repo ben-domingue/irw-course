@@ -2,7 +2,7 @@
 
 # Models for polytomous responses (`polytomous`)
 
-Module: irt · Prereqs: 1pl-to-4pl · Core · Status: outline
+Module: irt · Prereqs: information · Core · Status: outline
 
 ## Core ideas
 
@@ -22,13 +22,14 @@ References checked on Crossref (09-24).
 - Item and test information (from `information`).
 - Likert responses in the IRW's ordinal coding (from `irw-data`, the Mini-IPIP).
 - Reverse keying (thread from `ctt-reliability`).
+- Polychorics; fit of competing models (from `fa-exploratory`, `fit-prediction`; not prerequisites, so restate).
 
 ## Promises / leaves open
 
 - DIF for polytomous items (PS8#3) → `dif`.
 - IRTrees: splitting a response into a tree (c8 slides 31–42) → `irtrees`.
-- Nominal responses and unfolding (c9 slides 13–16) → `unfolding-nominal`.
-- Constructed responses and raters → `g-theory` (thread back).
+- Nominal responses and unfolding (c9 slides 13–16) → `unfolding`, `nominal`.
+- Constructed responses and raters: a cross-reference back to `g-theory`, which isn't a prerequisite.
 - Information from polytomous items for short forms and CAT → `item-banks-cat`.
 - Does the choice among GRM, GPCM and sequential models ever matter? Mostly unpaid; a candidate IMV comparison (Domingue et al., 2024).
 

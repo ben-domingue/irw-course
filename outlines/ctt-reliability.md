@@ -28,7 +28,7 @@ Module: ctt · Prereqs: constructs, irw-data · Core · Status: outline (page is
 - Reliability is a property of scores in a population (the reliability paradox) → `g-theory`, `validity-evidence`.
 - Reverse keying → `fa-exploratory`, `polytomous`, `instrument-building`.
 - Many sources of error at once → `g-theory`.
-- Attenuation (problem 2) → `validity-evidence`.
+- Attenuation (problem 2) → `validity-evidence`, `sem`.
 
 ## Tables
 

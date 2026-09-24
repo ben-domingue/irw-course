@@ -21,6 +21,9 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 - Sum scores treat items as interchangeable; the sum score vs. item relationship is not linear (from `ctt-limits`).
 - Long IRW format, reshaping to wide, dropping empty respondents (from `irw-data`).
 - Probit regression, for the optional $D \approx 1.7$ aside (from outside the course; not taught earlier).
+- Items and people on one scale; the construct map orders the items (from `constructs`).
+- Consistency with the Rasch model as a route to a unit, the Lexile (from `measurement`).
+- CTT says nothing about item responses (from `ctt-reliability`).
 
 ## Promises / leaves open
 
@@ -35,6 +38,7 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 - Formal fit checks, and outfit's sampling distribution → `fit-prediction`.
 - Is a wide spread of difficulty typical? (diffsim vignette baseline) → `rasch` itself, TODO in the page (#3).
 - Are equal slopes plausible in typical data? → deep dive #21 (slopes across the IRW).
+- Sufficiency and specific objectivity for ordered categories (the partial credit model) → `polytomous`.
 
 ## Tables
 

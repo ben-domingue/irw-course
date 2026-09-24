@@ -2,7 +2,7 @@
 
 # Dimensionality and multidimensional IRT (`dimensionality`)
 
-Module: irt · Prereqs: 1pl-to-4pl · Optional · Status: outline
+Module: irt · Prereqs: fa-confirmatory · Optional · Status: outline
 
 ## Core ideas
 
@@ -21,7 +21,9 @@ References checked on Crossref (09-24).
 - Ordinal FA ≡ GRM; multidimensional ordinal FA (from `fa-confirmatory`).
 - The 2PL (from `1pl-to-4pl`).
 - Out-of-sample prediction and the IMV (from `fit-prediction`, if taught first; not a prerequisite).
-- Grit's two facets and its keying (from `fa-confirmatory` and `sem`).
+- Grit's two facets and its keying (from `fa-confirmatory`; keyed as in `sem`).
+- The construct is unidimensional; wording direction as a second dimension (from `constructs`, `instrument-building`).
+- Testlets and correlated errors: local dependence, and alpha overstating (from `ctt-limits`, `ctt-reliability`).
 
 ## Promises / leaves open
 
