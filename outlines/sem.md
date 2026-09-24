@@ -32,7 +32,7 @@ Module: fa · Prereqs: fa-confirmatory · Optional · Status: outline
 | `florida_twins_grit` | main example (measurement: grit) | Grit-O items with item text; first wave; joined to PANAS by `id`. | — |
 | `florida_twins_panas` | main example (outcome: affect) | PANAS positive and negative affect (Watson, Clark & Tellegen, 1988, doi:10.1037/0022-3514.54.6.1063). 618 children and adolescents (ages 9–18) have both. | — |
 
-**Finding (to re-check once keying is settled):** with MLR, fit is modest (CFI 0.84, RMSEA 0.06, SRMR 0.07). Perseverance of effort predicts positive affect strongly (standardized 0.66); consistency of interest predicts lower negative affect (−0.27). The raw signs came out reversed for perseverance: the grit response scale appears to run 1 = "very much like me", so the perseverance items must be reversed before modelling. That's a keying check to confirm against the source, and to note gently.
+**Finding:** with MLR, fit is modest (CFI 0.84, RMSEA 0.06, SRMR 0.07). Perseverance of effort predicts positive affect strongly (standardized 0.66); consistency of interest predicts lower negative affect (−0.27). Keying (confirmed 09-24 from the IRW option text): the grit scale runs 1 = "Very much like me" to 5 = "Not like me at all", so the six perseverance items are reversed to make higher = more grit. The consistency-of-interest items, being negatively worded, already run that way. Same direction as `dimensionality`.
 
 Two tables from one study count as one data source; the lesson says so.
 
@@ -61,8 +61,7 @@ Two tables from one study count as one data source; the lesson says so.
 
 ## Open questions
 
-- `florida_twins_grit` is also listed for `dimensionality` (IRT module, not yet outlined). Settle at that pass: either `dimensionality` takes another table or `sem` records it under `reuses:`. `check_tables.R` flags it until then.
+- `florida_twins_grit` also appears in `dimensionality` (grit alongside growth mindset, PS6#1). It's recorded as a deliberate thread: `sem` carries `reuses: [florida_twins_grit]`, and both lessons key grit the same way.
 
 - Optional (Ben, 09-24, #64). Still open: `lavaan` is introduced in `fa-confirmatory`, not here. Agree?
-- Keying: confirm the Florida twins grit response scale against the source before drafting (see the finding above).
 - Twins are clustered in families; is a family id available in the source data? If not, the lesson says the standard errors are too small, gently.

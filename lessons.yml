@@ -132,7 +132,7 @@ lessons:
     module: irt
     prereqs: [rasch]
     origin: {slides: [c3, c4], ps: ["PS3#1", "PS4#1", "PS6#3"], code: [c4/info.R]}
-    tables: []
+    tables: [bialowolski_2024_financial_literacy, christensen_2018_wsssf_5831]
     status: stub
 
   - id: ability-estimation
@@ -140,7 +140,7 @@ lessons:
     module: irt
     prereqs: [rasch]
     origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
-    tables: []
+    tables: [c19prc_uk_mcbride_2021_wordsum]
     status: stub
 
   - id: item-estimation
@@ -148,7 +148,7 @@ lessons:
     module: irt
     prereqs: [ability-estimation]
     origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
-    tables: []
+    tables: [enders_2022_science_literacy]
     status: stub
     optional: true
 
@@ -157,7 +157,8 @@ lessons:
     module: irt
     prereqs: [rasch]
     origin: {slides: [c4], ps: [], code: [c4/enem1.R, c4/enem2.R, c4/enem3.R]}
-    tables: [enem_2013_1mil_lc]
+    tables: [wilmer-rmet-normative-data-set-2022, chess_lnirt]
+    reuses: [chess_lnirt]
     status: stub
 
   - id: parameter-invariance
@@ -165,7 +166,7 @@ lessons:
     module: irt
     prereqs: [1pl-to-4pl]
     origin: {slides: [c4], ps: [], code: []}
-    tables: []
+    tables: [wilmer-mrmet-normative-data-set-2022]
     status: stub
     optional: true
 
@@ -174,7 +175,7 @@ lessons:
     module: irt
     prereqs: [1pl-to-4pl]
     origin: {slides: [c6], ps: ["PS3#3", "PS3#4", "PS4#2"], code: [ps3/fit.R, ps3/different-links.R, ps4/prediction.R, c6/enem_imv.R]}
-    tables: [gilbert_meta_2, gilbert_meta_14, gilbert_meta_1]
+    tables: [gilbert_meta_2, gilbert_meta_14]
     status: stub
 
   - id: guessing-priors
@@ -182,7 +183,7 @@ lessons:
     module: irt
     prereqs: [1pl-to-4pl, fit-prediction]
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
-    tables: [roar_lexical]
+    tables: [roar_lexical, vocabulary_iq]
     status: stub
     optional: true
 
@@ -191,7 +192,7 @@ lessons:
     module: irt
     prereqs: [1pl-to-4pl]
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
-    tables: [enem_2013_1mil_lc, florida_twins_dweck, florida_twins_grit]
+    tables: [florida_twins_dweck, florida_twins_grit]
     status: stub
     optional: true
 
@@ -252,7 +253,7 @@ lessons:
     module: irt
     prereqs: [1pl-to-4pl]
     origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
-    tables: [science_ltm, promis1wave1_pain, ffm_CSN]
+    tables: [promis1wave1_pain, science_ltm]
     status: stub
 
   - id: irtrees
@@ -365,6 +366,7 @@ lessons:
     prereqs: [fa-confirmatory]
     origin: {slides: [], ps: [], code: []}
     tables: [florida_twins_grit, florida_twins_panas]
+    reuses: [florida_twins_grit]
     status: stub
     optional: true
 
