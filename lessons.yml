@@ -289,7 +289,8 @@ lessons:
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
-    tables: [roar_lexical, pisa2018_read]
+    tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed]
+    reuses: [roar_lexical]
     status: stub
     optional: true
 
@@ -298,7 +299,8 @@ lessons:
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c9], ps: ["PS9#2"], code: [c9/mrot.R, ps9/shots.R]}
-    tables: []
+    tables: [rr98_accuracy, mentalrotation_wolf_2024, enkavi_2019_stroop]
+    reuses: [rr98_accuracy]
     status: stub
     optional: true
 
@@ -307,7 +309,7 @@ lessons:
     module: beyond
     prereqs: [1pl-to-4pl]
     origin: {slides: [c10], ps: [], code: [c10/model.R]}
-    tables: []
+    tables: [himmelstein-impossible_question-2025, gpt4mcq_young_2025, genpsych_russell_2024_gpt4o]
     status: stub
     optional: true
 
@@ -375,7 +377,8 @@ lessons:
     module: beyond
     prereqs: [response-time]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [mturkddm_lexical, motion, credentialform_lnirt]
+    reuses: [credentialform_lnirt]
     status: stub
     optional: true
 
