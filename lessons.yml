@@ -111,7 +111,7 @@ lessons:
     prereqs: [ctt-limits]
     origin: {slides: [c3], ps: [], code: [c3/rasch0.R, c3/rasch1.R, c3/rasch2.R]}
     tables: [chess_lnirt, wirs]
-    status: stub
+    status: draft
 
   - id: information
     title: Information, precision, and short forms

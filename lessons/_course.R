@@ -8,6 +8,23 @@
   normalizePath(here)
 })
 
+# knitr treats ```{webr} cells as its own chunks: it strips their `#|` options
+# (so `context: setup` is lost) and drops them entirely under echo: false. This
+# engine hands each cell back untouched, as a fenced block that the quarto-webr
+# filter then turns into an in-browser cell. Every lesson sources this file in its
+# first chunk, before any webr cell.
+local({
+  webr_opts <- c("context", "autorun", "read-only", "include", "output", "warning",
+                 "message", "results", "fig-width", "fig-height", "timelimit", "classes", "label")
+  knitr::knit_engines$set(webr = function(options) {
+    opts <- options[intersect(names(options), webr_opts)]
+    opts <- opts[!vapply(opts, is.null, TRUE)]
+    head <- if (length(opts)) paste0("#| ", names(opts), ": ",
+      vapply(opts, function(v) if (is.logical(v)) tolower(as.character(v)) else as.character(v), ""))
+    paste(c("```{webr}", head, options$code, "```"), collapse = "\n")
+  })
+})
+
 CODE_BASE  <- "https://github.com/ben-domingue/252/blob/main/"
 TABLE_BASE <- "https://itemresponsewarehouse.org/tables/"
 
@@ -118,6 +135,29 @@ lesson_header <- function(id) {
     "**IRW tables:** ", tables_md, "  \n",
     "**From EDUC 252:** ", if (length(origin)) paste(origin, collapse = "; ") else "n/a", "  \n",
     "**Status:** ", l$status, "\n",
+    ":::\n\n", sep = ""
+  )
+}
+
+# "Ask Claude about this lesson": a button that opens Claude with a prompt
+# carrying the lesson's topic, so a reader can ask questions without leaving
+# with nothing. No backend: it is a link (https://claude.ai/new?q=...). `about`
+# is one or two sentences on what the lesson covers. Emit with `#| output: asis`.
+ask_claude <- function(id, about) {
+  l <- lesson_by_id(id)
+  prompt <- paste0(
+    "I'm working through a lesson called \"", l$title, "\" in an open psychometrics ",
+    "course built on the Item Response Warehouse (IRW). ", about, " ",
+    "Please act as a patient tutor: answer my questions, check my reasoning, and ",
+    "prefer small worked examples in R. If data would help, IRW tables are ",
+    "described at https://itemresponsewarehouse.org/llms.txt. My first question is: "
+  )
+  href <- paste0("https://claude.ai/new?q=", utils::URLencode(prompt, reserved = TRUE))
+  cat(
+    "::: {.callout-tip appearance=\"simple\" icon=\"false\"}\n",
+    "**Stuck, or curious about something this lesson doesn't cover?** ",
+    "[Ask Claude about this lesson](", href, "){target=\"_blank\" .btn .btn-outline-primary .btn-sm} ",
+    "opens a new conversation that already knows what the lesson is about; add your question at the end.\n",
     ":::\n\n", sep = ""
   )
 }
