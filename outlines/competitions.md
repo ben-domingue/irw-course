@@ -1,8 +1,8 @@
-<!-- Outlined 2026-09-24. New lesson (Ben's request, #86); optional and module are a first guess. Built on the IRW competition standard: https://itemresponsewarehouse.org/comps_standard.html -->
+<!-- Outlined 2026-09-24. New lesson (Ben's request, #86), built on the IRW competition standard: https://itemresponsewarehouse.org/comps_standard.html. Left for later (Ben, 09-24, S2): tidied 09-24 (#62) for stale statements only, no redesign. -->
 
 # Competitions and paired comparisons: Bradley-Terry and Elo (`competitions`)
 
-Module: beyond · Prereqs: rasch · Optional · Status: outline
+Module: beyond · Prereqs: rasch · Extension · Status: outline
 
 ## Core ideas
 
@@ -22,12 +22,11 @@ Module: beyond · Prereqs: rasch · Optional · Status: outline
 
 ## Promises / leaves open
 
-- Elo as online ability estimation, and its use for learners and items in adaptive learning systems → `ability-estimation`, `item-banks-cat` (Pelánek (2016) on Elo in education: *unverified*).
-- Out-of-sample prediction as the criterion for choosing a model → `fit-prediction` (not a prerequisite; linked, not assumed).
-- Raters who disagree: Friedman (2019)'s point is that Americans react to the same risks differently; judge-level covariates or random effects → `explanatory-irt` | unpaid.
+- Elo as online ability estimation in adaptive learning systems: a pointer to ability-estimation and item-banks-cat, which don't follow this lesson (Pelánek (2016) on Elo in education: *unverified*). Out-of-sample prediction is restated here, not assumed from fit-prediction.
+- Raters who disagree: Friedman (2019)'s point is that Americans react to the same risks differently; judge-level covariates or random effects → unpaid (explanatory-irt is a sibling, not downstream; problem 6).
 - Intransitivity (a beats b beats c beats a) and multidimensional strength → unpaid.
 - Glicko-2, TrueSkill and team-level ratings → unpaid (Going further).
-- Draws modelled properly (Davidson; ordinal models) → `polytomous` (a pointer only).
+- Draws modelled properly (Davidson; ordinal models) → unpaid (a pointer to polytomous only).
 
 ## Tables
 
@@ -66,11 +65,11 @@ Data notes, to state gently in the lesson:
 
 ## Go deeper
 
-- **Elo as stochastic gradient ascent.** The Elo update is the per-game gradient of the Bradley-Terry log-likelihood, so Elo is an online estimator with a fixed learning rate. Why: connects to `ability-estimation` and `item-banks-cat`. Length: half a page. (Optional lesson, so not a depth-pass candidate unless Ben wants it.)
+- **Elo as stochastic gradient ascent.** The Elo update is the per-game gradient of the Bradley-Terry log-likelihood, so Elo is an online estimator with a fixed learning rate. Why: connects to `ability-estimation` and `item-banks-cat`. Length: half a page. (Extension lesson, so not a depth-pass candidate unless Ben wants it.)
 
 ## Open questions
 
-- **Data access.** Competition tables have no IRW landing page (`tables/<name>/` returns 404), so no tokenless CSV, which §5 requires; same issue as the nominal tables (#15). Options: IRW adds landing pages for `comp` tables; publish teaching copies as standard tables; or allow `irw_fetch(..., source = "comp")` at render time (results frozen in `_freeze/`, so the published site needs no token, but readers running the code do). Also blocks `check_tables.R` citations.
-- Optional, in "Beyond the standard models", with `rasch` as the only prerequisite: agree? It could sit in IRT instead, since Bradley-Terry is so close to Rasch.
-- Main example: NBA (clean, dated, small), or `lichess` (190k games, 53k players; Elo's home, and it continues the chess thread from `likelihood` and `rasch`, but would need a subsample)?
-- Direction of the Friedman scales: check the wording of each criterion's question in the source before drafting.
+- **Data access (digest A6; not yet answered).** Competition tables have no IRW landing page (`tables/<name>/` returns 404), so no tokenless CSV, which §5 requires, and `check_tables.R` can't cite them. *Default (A6):* publish teaching copies as standard IRW tables with landing pages; until then the lesson stays a stub.
+- Direction of the Friedman scales: Claude checks each criterion's question wording in the source before drafting.
+
+Settled (digest C20, C21, defaults): the lesson sits in Beyond as an extension; NBA is the main example, with `lichess` only if A6 produces a subsample.

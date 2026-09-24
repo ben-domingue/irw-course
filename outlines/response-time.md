@@ -1,79 +1,71 @@
-<!-- Outlined 2026-09-24 from EDUC 252 slides c9 (slides 24–54, 57), PS9#1 and ps9/sat.R. Deep dive #24 is homed here. -->
+<!-- Outlined 2026-09-24 from EDUC 252 c9 (slides 24–54, 57), PS9#1 and ps9/sat.R. Deep dive #24 is homed here. No PISA subsample (digest A4), so credentialform_lnirt replaces PS9#1's pisa2018_read. Tidied 09-24 (#62): Ben's answer E8b applied (no first-person criticism of the hierarchical model; its assumptions become a question the data answer). -->
 
 # Response time and the speed–accuracy tradeoff (`response-time`)
 
-Module: beyond · Prereqs: explanatory-irt · Optional · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
 
 ## Core ideas
 
-1. **Response time is data, and it is skewed.** Digital delivery records how long every response took. Times have a long right tail (some respondents walk away), so we model log time: $\log t_{ij} = \beta_i - \tau_j + \varepsilon_{ij}$, with item time intensity $\beta_i$ and person speed $\tau_j$. This is a crossed random-effects model like the ones in `explanatory-irt`. *(major)* Sources: van der Linden (2006), doi:10.3102/10769986031002181; Thissen (1983), "Timed testing: An approach using item response theory", in *New Horizons in Testing* (Academic Press), 179–203, doi:10.1016/b978-0-12-742780-5.50019-6.
-2. **The hierarchical model: speed and ability as two person traits.** An IRT model for accuracy, the lognormal model for time, and a second level that correlates θ with τ (and b with β). What it buys, if its assumptions hold: better estimates and the speed–ability correlation. What I don't like about it: it assumes each person works at one constant speed. *(major)* Sources: van der Linden (2007), doi:10.1007/s11336-006-1478-z; Klein Entink, Fox & van der Linden (2009), doi:10.1007/s11336-008-9075-y; Fox, Klotzke & Simsek (2023), the `LNIRT` package, doi:10.7717/peerj-cs.1232; De Boeck & Jeon (2019), overview, doi:10.3389/fpsyg.2019.00102; Kyllonen & Zu (2016), doi:10.3390/jintelligence4040014.
-3. **The speed–accuracy tradeoff is a within-person claim.** Force someone to go faster and they get less accurate. That says nothing about whether fast *people* are more or less able; the between-person correlation can take either sign. *(major)* Sources: Heitz (2014), doi:10.3389/fnins.2014.00150; Goldhammer et al. (2014) on time-on-task, doi:10.1037/a0034716.
-4. **Don't assume the SAT when nobody invoked it.** Condition on the person and the item, then ask how an idiosyncratic slowdown relates to accuracy (the conditional accuracy function). Across real data the shape is heterogeneous: rising, falling, inverted U. Treat RT as something to explore, not something to cram into the first model you think of (slides 49–54). Sources: Domingue et al. (2022), *JEBS* 47(5), 576–602, doi:10.3102/10769986221099906; Bolsinova, De Boeck & Tijmstra (2017) on conditional dependence, doi:10.1007/s11336-016-9537-6; Gilbert, Young, Himmelsbach, Ulitzsch & Domingue (2025), RT and discrimination across the IRW (PsyArXiv, doi:10.31234/osf.io/rp34w_v3).
-5. **Speed varies within a person over the test.** Response acceleration in an adaptive test: a response 10 positions later takes about 88% as long (slides 30–33). Very fast responses at chance are rapid guesses. Sources: Domingue, Kanopka, Stenhaug, Soland, Kuhfeld & Wise (2021), doi:10.1111/jedm.12291; Wise & Kong (2005), doi:10.1207/s15324818ame1802_2; Schnipke & Scrams (1997), doi:10.1111/j.1745-3984.1997.tb00516.x.
+1. **Response time is data, and it is skewed.** Model log time: $\log t_{ij} = \beta_i - \tau_j + \varepsilon_{ij}$ (item time intensity $\beta_i$, person speed $\tau_j$), a crossed random-effects model like those in `explanatory-irt`. *(major)* Sources: van der Linden (2006), doi:10.3102/10769986031002181; Thissen (1983), doi:10.1016/b978-0-12-742780-5.50019-6.
+2. **The hierarchical model, and what it assumes.** An IRT model for accuracy, the lognormal model for time, and a second level correlating θ with τ (and b with β). It buys better estimates and the speed–ability correlation, *if* two assumptions hold: each respondent works at one constant speed, and given θ and τ, speed and accuracy are conditionally independent. The lesson asks whether they hold and lets the tables answer (ideas 4 and 5). *(major)* Sources: van der Linden (2007), doi:10.1007/s11336-006-1478-z; Klein Entink, Fox & van der Linden (2009), doi:10.1007/s11336-008-9075-y; `LNIRT`: Fox, Klotzke & Simsek (2023), doi:10.7717/peerj-cs.1232; De Boeck & Jeon (2019), doi:10.3389/fpsyg.2019.00102.
+3. **The speed–accuracy tradeoff is a within-person claim.** Forced to go faster, a person gets less accurate. That says nothing about whether fast *people* are more able; the between-person correlation can take either sign. *(major)* Sources: Heitz (2014), doi:10.3389/fnins.2014.00150; Goldhammer et al. (2014), doi:10.1037/a0034716.
+4. **Does conditional independence hold? The conditional accuracy function.** Remove person and item effects, then ask how an unusually slow response relates to accuracy. Under the model the answer is "not at all"; across the tables the curve rises, falls or is an inverted U. *(major)* Sources: Bolsinova, De Boeck & Tijmstra (2017), doi:10.1007/s11336-016-9537-6; Domingue et al. (2022), doi:10.3102/10769986221099906.
+5. **Is speed constant? Speed changes over a test.** Response acceleration in an adaptive test: a response 10 positions later takes about 88% as long (slides 30–33); very fast responses at chance are rapid guesses. Sources: Domingue, Kanopka, Stenhaug, Soland, Kuhfeld & Wise (2021), doi:10.1111/jedm.12291; Wise & Kong (2005), doi:10.1207/s15324818ame1802_2.
 
-Articles checked on Crossref (09-24). Thissen (1983) is a book chapter; its Crossref record matches the publisher's.
+**Verdict (proposed, for Ben to confirm):** I'd model response time when the question is about how people take the test (rapid guessing, speededness, a time limit), not to sharpen θ. Across the IRW, adding response time barely improves prediction of accuracy (median IMV gain 0.0054, `rt_imv` vignette).
+
+Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref record matches the publisher's.
 
 ## Picks up
 
-- The item response model as a logistic mixed model in long data (`resp ~ 0 + item + (1 | id)`), items as fixed or random effects, and item predictors; log RT is a second outcome with the same random-effects machinery (from `explanatory-irt`, which promises it here).
-- The Rasch item response function, θ and b (from `rasch`). The 2PL's $a$ appears only in passing; `1pl-to-4pl` isn't an ancestor.
-- Response times as a column beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`).
-- Rapid responses at chance in `roar_lexical`, 3.1% of responses under 0.3 s at accuracy 0.51 (from `guessing-priors`). `guessing-priors` isn't an ancestor via `explanatory-irt`, so the lesson restates the finding in a sentence and links back (see Open questions).
-- Out-of-sample comparison and the IMV (from `fit-prediction`), used in the deep dive. Also not an ancestor; restated briefly.
+- Items as fixed or random effects in long data; log RT as a second outcome with the same machinery (from `explanatory-irt`).
+- The Rasch item response function (from `rasch`); the 2PL's $a$ appears only in passing.
+- Response times beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`).
+- Brief Recalls (E2; restated, not threads; digest E1): in `roar_lexical`, 3.1% of responses come in under 0.3 s at accuracy 0.51 (`guessing-priors`); the IMV (`fit-prediction`), for the deep dive.
 
 ## Promises / leaves open
 
-- Process models that generate the response and its time together (drift diffusion, race models) → `rt-process-models`.
-- Rapid guessing as a latent class of responses (a mixture) → unpaid (guessing-priors leaves the same hook open).
-- Using RT to flag aberrant behaviour (preknowledge, cheating); `credentialform_lnirt` carries a flag for 46 respondents → unpaid (a Problem only; van der Linden & Guo, 2008, doi:10.1007/s11336-007-9046-8).
-- Timing information in adaptive testing (item selection, speededness) → `item-banks-cat` (mention only).
-- Omitted and not-reached responses as information → `irtrees`.
+- Process models that generate the response and its time together → `rt-process-models`.
+- Rapid guessing as a latent class (a mixture) → unpaid.
+- Using RT to flag aberrant behaviour (`credentialform_lnirt` flags 46 respondents) → unpaid; a problem (van der Linden & Guo, 2008, doi:10.1007/s11336-007-9046-8).
 
 ## Tables
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `credentialform_lnirt` | main example | A licensure exam distributed with the `LNIRT` package (Cizek & Wollack, 2016, from IRW biblio): 1,636 respondents, 170 common items plus one of three 10-item pretest blocks (so 20 responses per person are missing by design). Median time 54 s per item. Separate calibration of the two halves of the hierarchical model: more able respondents are faster (θ–speed r = 0.30); harder items take longer (b–β r = 0.51); log-time variance is mostly within person (residual 0.25 vs. person 0.03, item 0.11). Within person, taking longer than expected goes with *lower* accuracy: 0.83 in the fastest residual decile, 0.56 in the slowest. | — |
-| `roar_lexical` | contrast (deliberate thread from `guessing-priors`) | Lexical decision, median 0.85 s. Speed and ability are nearly unrelated (r = −0.09), and the within-person curve is an inverted U: 0.63 accuracy in the fastest residual decile, 0.86 in the middle, 0.70 in the slowest. The fast end is the rapid guessing found in `guessing-priors`. | `guessing-priors` (record under `reuses:`) |
-| `rapm_poulton_2022_timed` | contrast (forced speed) | Raven's APM, 12 items, 60-s limit per item (Poulton et al., 2022; first wave, 479 people). The limit is the SAT by design: 11% of responses hit it, at accuracy 0.29 vs. 0.58 otherwise. Here able people are *slower* (θ–speed r = −0.36): on hard reasoning items, persistence pays. | — |
-| `rapm_poulton_2022_untimed` | contrast (paired with the timed table) | The same 12 items with no limit (567 people, first wave): accuracy 0.65 vs. 0.55 timed. The hard items lose most under the limit (item 10: 0.45 untimed → 0.25 timed; untimed median time 82 s), the easy ones least (item 6: 0.69 → 0.65). Ben (09-24) agreed to the pair as a fourth table. | — |
-| `rr98_accuracy` | sanity (not in the lesson) | Ratcliff & Rouder (1998): errors slower than correct responses (median 0.65 vs. 0.56 s), and harder conditions slower, as published. Checks the RT handling before trusting the fits above. | `irw-data`, `trials` |
+| `credentialform_lnirt` | main example | Licensure exam (Cizek & Wollack, 2016, from IRW biblio): 1,636 respondents, median 54 s per item. More able respondents are faster (θ–speed r = 0.30); harder items take longer (b–β r = 0.51); log-time variance mostly within person (0.25 vs. person 0.03, item 0.11). Slower than expected goes with lower accuracy: 0.83 in the fastest residual decile, 0.56 in the slowest. | — |
+| `roar_lexical` | contrast | Lexical decision, median 0.85 s. θ–speed r = −0.09; the within-person curve is an inverted U (0.63, 0.86, 0.70), its fast end the rapid guessing restated from `guessing-priors`. | `guessing-priors` (recorded under `reuses:`) |
+| `rapm_poulton_2022_timed` + `_untimed` | contrast (forced speed; one job, two tables, agreed by Ben 09-24) | Raven's APM, 12 items. Timed (60 s/item, 479 people): 11% hit the limit, at 0.29 accuracy; able people are *slower* (r = −0.36). Untimed (567): accuracy 0.65 vs. 0.55; hard items lose most (item 10: 0.45 → 0.25). | — |
+| `rr98_accuracy` | sanity | Errors slower than correct (0.65 vs. 0.56 s), as published. | `irw-data`, `trials` |
 
-**The finding the section is built around:** the speed–ability correlation has no fixed sign (+0.30 on the licensure exam, −0.09 in lexical decision, −0.36 on Raven's), and the within-person curve has no fixed shape. The SAT is one possible story, not the default.
+**The finding:** the speed–ability correlation has no fixed sign (+0.30, −0.09, −0.36) and the within-person curve no fixed shape. On the licensure exam and in lexical decision, an unusually slow response predicts accuracy, in different shapes, so conditional independence doesn't hold there (idea 4). The constant-speed check on these tables (log time by item position, e.g. in `credentialform_lnirt`) is to be computed when drafting; until then idea 5 rests on the cited acceleration result.
 
-**Deep dive #24 (Across the IRW).** Corpus: `irw_filter(var = "rt", n_categories = 2, n_participants = c(150, Inf))`, 20 tables today (150 respondents for stable crossed random effects, as in the IRW `rt_imv` vignette; dichotomous so one accuracy model serves all; the default density filter keeps mostly complete designs). For each table: the θ–speed and b–β correlations from separate calibration, and the IMV gain from adding within-item-centred log RT (linear and spline) to the random-item Rasch model, as the vignette does. The vignette reports a median linear IMV gain of 0.0054 (78% of 18 tables positive) and a spline gain of 0.0091 (94%). Known-good pilot tables: `chess_lnirt` (θ–speed r = +0.50, clear negative within-person slope) and `credentialform_lnirt`. Vignette: <https://itemresponsewarehouse.org/vignettes/rt_imv.html>.
-
-**Why not PISA.** 252's PS9#1 used `pisa2018_read` (Spain). It has no tokenless CSV (17.6 million responses) and no IRW biblio reference, and Ben (09-24) doesn't expect the #15 subsample soon. `credentialform_lnirt` does the same job (a high-stakes test with minute-scale items). PISA would still be the preferred example if #15 lands, since it is the test readers know.
-
-Other tables checked and passed over: `chess_lnirt` (the corpus pilot instead; it is already in three lessons) and `much_tte_2025_matrixreasoning` (a two-group design that needs the paper to interpret).
+**Deep dive #24 (Across the IRW).** `irw_filter(var = "rt", n_categories = 2, n_participants = c(150, Inf))`, 20 tables today (150 for stable crossed random effects; dichotomous for one accuracy model). Per table: θ–speed and b–β correlations, and the IMV gain from centred log RT. The vignette reports median gains of 0.0054 (78% positive) and 0.0091 (94%). Pilot: `chess_lnirt`, `credentialform_lnirt`. Vignette: <https://itemresponsewarehouse.org/vignettes/rt_imv.html>.
 
 ## Widget / simulation / problem ideas
 
 **Widgets**
-- Raw vs. log time: a lognormal generator with sliders for time intensity, speed and σ; histograms of $t$ and $\log t$ (idea 1).
-- Between vs. within: simulate people whose speed and ability correlate at ρ, each with a within-person SAT slope of δ; the scatter of person means shows ρ, the within-person lines show δ, and they can have opposite signs (ideas 3, 4).
-- Conditional accuracy function: choose a shape (flat, rising, falling, inverted U) for the within-person curve; the widget shows the binned residual-time plot the real-data section uses (idea 4).
-- Response acceleration: time per item falls by a factor per 10 positions (0.88 in slides 30–31); the cumulative time saved over 30 items (idea 5).
+- Raw vs. log time: lognormal generator, histograms of $t$ and $\log t$ (idea 1).
+- Between vs. within: persons with speed–ability correlation ρ and within-person slope δ, of opposite signs if you like (ideas 2, 3).
+- Conditional accuracy function: choose a shape; see the binned residual-time plot the real-data section uses (idea 4).
+- Response acceleration: time per item × 0.88 per 10 positions (idea 5).
 
-**Predict-then-check:** "On the licensure exam, will respondents who take longer than usual on an item be more or less likely to get it right?" Answered by the residual-decile accuracies (0.83 → 0.56) and the within-person slope (−1.03 logits per unit of residual log time).
+**Predict-then-check:** on the licensure exam, are respondents who take longer than usual more or less likely to be right? (0.83 → 0.56; −1.03 logits per unit of residual log time.)
 
-**Simulate:** generate from the hierarchical model (θ, τ correlated at ρ; b, β correlated) with no within-person dependence; fit accuracy with `glmer` and log time with `lmer`; recover ρ from the person random effects; then show that the within-person slope is near zero, as it should be (slides 44–46). Then add a true within-person SAT and watch the slope appear. 200 people × 20 items runs in seconds.
+**Simulate:** generate from the hierarchical model with conditional independence; fit accuracy (`glmer`) and log time (`lmer`); recover ρ; the within-person slope is near zero, as it should be. Then add a within-person SAT and watch it appear. 200 × 20, seconds.
 
 **Problems**
-1. Derivation: under the lognormal model, show that the median time for person $j$ on item $i$ is $\exp(\beta_i - \tau_j)$ and that the mean is larger by $\exp(\sigma^2/2)$. Why report medians?
-2. Real data with a twist (PS9#1): fit `resp ~ lrt + (1|item) + (1|id)` to `roar_lexical`. Then replace `lrt` with log time centred within person and item. Why do the two slopes differ, and which answers the SAT question?
-3. Real data: in `credentialform_lnirt`, compare the 46 flagged respondents with the rest on speed and accuracy. The means barely differ (0.71 vs. 0.72 correct). What pattern would preknowledge leave that means can't show?
-4. Judgment: a testing program wants to report a "speed" score beside the ability score. Using the three tables' θ–speed correlations, argue for or against.
-5. Design: you can impose a time limit per item or per test. Which lets you study the SAT, and what would the data look like?
-6. Challenge (open): the within-person curve is an inverted U in lexical decision and falling on the licensure exam. Propose a model in which both come from the same process. (`rt-process-models` takes one route.)
+1. Derivation: under the lognormal model the median time is $\exp(\beta_i - \tau_j)$ and the mean is larger by $\exp(\sigma^2/2)$. Why report medians?
+2. Real data with a twist (PS9#1): `resp ~ lrt + (1|item) + (1|id)` on `roar_lexical`, then with log time centred within person and item. Which slope answers the SAT question?
+3. Real data: the 46 flagged licensure respondents barely differ on means (0.71 vs. 0.72). What would preknowledge leave that means can't show?
+4. Judgment: should a program report a speed score beside ability? Use the three tables.
+5. Design: a per-item or a per-test time limit: which lets you study the SAT?
+6. Challenge (open): propose one process that gives an inverted U in lexical decision and a falling curve on the licensure exam (`rt-process-models` takes one route).
 
 ## Go deeper
 
-- **Why the within-person slope is identified and the between-person one isn't causal.** With person and item effects removed, the residual time varies only within person; a short derivation that a between-person correlation ρ leaves the within-person slope at zero under the hierarchical model. Why: `rt-process-models`, `explanatory-irt` (between vs. within), `validity-causal` (Borsboom's within/between point). Length: half a page.
+- **Within-person slopes are identified; the between-person correlation isn't causal.** Under the hierarchical model, a between-person ρ leaves the within-person slope at zero. Why: `rt-process-models`, `explanatory-irt`. Half a page.
 
 ## Open questions
 
-- `roar_lexical` is reused from `guessing-priors` (recorded under `reuses:`). `guessing-priors` isn't an ancestor of this lesson. Restate the rapid-guessing finding (my plan), or add `guessing-priors` as a prerequisite?
-- 252 used PISA 2018 reading from Spain; this outline plans on `credentialform_lnirt`. **Answered (Ben, 09-24, digest A4):** no PISA subsample; settled.
-- Slide 29: "I don't much like this model." Keep the first-person objection (constant speed within person) as the lesson's verdict?
+- The verdict above (when to model response time) is proposed for the lesson in place of the slide-29 aside, per E8b. *Default:* use it unless you'd put it differently.
