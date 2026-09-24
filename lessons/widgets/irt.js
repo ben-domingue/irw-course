@@ -1,6 +1,18 @@
-// Item response math shared by the lesson widgets. Pure functions only: the
+// Item response math and colours shared by the lesson widgets. Pure functions only: the
 // plotting happens in each lesson's OJS cells, where Observable Plot is in scope.
 // Import with:  import {p2pl, loglik} from "./widgets/irt.js"
+
+// Colours for every widget: use these names, never a hex literal in a lesson.
+// main is the site's primary blue; contrast marks the comparison or the reference.
+export const palette = {
+  main: "#2780e3",
+  contrast: "#c2410c",
+  light: "#93c5fd",
+  white: "#ffffff",
+  rule: "#ccc",   // solid reference line
+  guide: "#999",  // dashed reference line
+  ink: "black"
+};
 
 export const logistic = (x) => 1 / (1 + Math.exp(-x));
 
