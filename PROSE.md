@@ -1,7 +1,7 @@
 # Prose rules
 
-**DRAFT 2026-09-24.** Rules 1–3 are Ben's. Rules 4–6 are proposed by Claude and
-marked **[proposed]** until Ben accepts, edits or drops them. More may be added.
+**Adopted 2026-09-24.** Rules 1–3 are Ben's; Ben accepted 4–6, which Claude proposed.
+More may be added.
 
 `PROTOCOL.md` governs a lesson's structure and §6 there governs voice. This file
 governs what the prose may say and borrow. Each rule has a statement, what it allows,
@@ -80,7 +80,7 @@ misuse, abuse, critique, sharp, fails*, then read each hit. A hit about a *speci
 result* ("parallel analysis gets the number wrong in small samples") is usually fine;
 a hit about a *method in general* is not.
 
-## 4. Write fresh prose [proposed]
+## 4. Write fresh prose
 
 **Rule.** Don't lift or closely paraphrase sentences from the EDUC 252 slides, papers,
 IRW vignettes or package documentation. Take the idea, cite it (PROTOCOL §2), and write
@@ -94,7 +94,7 @@ quotation problems enter unannounced, and it is harder to spot than a quote.
 deck named in *For instructors*, the vignettes it links): any run of about eight or
 more words shared with a source is a hit.
 
-## 5. Don't characterise what "people" think [proposed]
+## 5. Don't characterise what "people" think
 
 **Rule.** No unsourced claims about what researchers, practitioners or students
 believe or do: *a common misreading*, *people often assume*, *many researchers*, *most
@@ -107,7 +107,7 @@ group, which sits badly with rule 3 and with PROTOCOL §2.
 **Screen.** *common, commonly, often, many (researchers|people|users|analysts), most
 (people|researchers|textbooks), people (think|assume|believe), partisans, camp*.
 
-## 6. Present disagreements as questions about assumptions [proposed]
+## 6. Present disagreements as questions about assumptions
 
 **Rule.** Where the field disagrees (Rasch vs. 2PL, alpha vs. omega, how many factors),
 set out what each side assumes and let the data answer the question the lesson can
@@ -138,14 +138,6 @@ No block quotations or attributed quotations turned up in the four lessons.
 
 ---
 
-## Checklist items (for PROTOCOL §9 once adopted)
+## Checklist
 
-- [ ] At most one quotation (items under analysis, titles and invented speech
-      excepted), 25 words or fewer, and only where the wording is the point.
-- [ ] Every quotation and every piece of quoted item wording is cited inline,
-      and checked word for word against its source.
-- [ ] No evaluative judgement of a technique; each technique discussed gets a sentence
-      on when it is a reasonable choice; limitations are shown, not asserted.
-- [ ] [proposed] No run of about eight or more words shared with a source.
-- [ ] [proposed] No unsourced claims about what people commonly think or do.
-- [ ] [proposed] Disagreements set out as assumptions before any verdict.
+These rules are checked under **Prose** in PROTOCOL §9.
