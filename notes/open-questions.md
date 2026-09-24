@@ -3,8 +3,7 @@
 **Parts 1 and 2 (2026-09-24).** Part 1 (sections A–C) covers the cross-cutting
 decisions and the 23 outlines on main (Foundations, CTT, factor analysis, IRT,
 competitions). Part 2 (sections E and F, plus additions to B and D) covers Validity,
-Fairness and Beyond from main and the outline branches below. Using calibrated items is pending:
-its branch (`8-outlines-uses`) isn't pushed yet.
+Fairness, Using calibrated items and Beyond from main and the outline branches below.
 
 Part 2 read these versions (refreshed after PR #92 merged):
 - main at `c98c0d2`, which now includes the Beyond part 2 outlines (PR #92, merged at
@@ -13,6 +12,8 @@ Part 2 read these versions (refreshed after PR #92 merged):
   validity-evidence, dif, invariance-experience;
 - `8-outlines-beyond-1` at `e1fd007` (no PR yet): explanatory-irt (cdm, irtrees,
   unfolding and nominal not yet outlined there);
+- `8-outlines-uses` at `24389f1` (PR #96): score-meaning, equating, item-banks-cat,
+  scale-properties (added after part 2 merged; questions E10–E12, F14–F25);
 - #62 and the open `needs-ben` issues as of 2026-09-24 19:30.
 
 **How to answer:** every question has a recommended default. Reply "defaults except
@@ -128,6 +129,11 @@ Part 2 (from #62, #45, #65, #15 and PR #92):
   nothing to revisit.
 - Sanity tables aren't listed in lessons.yml, so they don't count as reuses.
 - Deep dive #25 lives in `ai-psychometrics` (agreed by the two Beyond sessions).
+- `equating` uses TIMSS 2011, not ENEM. ENEM is available as a repo subsample (A4),
+  but it isn't needed.
+- Cut scores: `score-meaning` takes them as decisions (norms, error near the cut,
+  classification consistency); `validity-evidence` takes classification accuracy
+  against a criterion (agreed by the two sessions).
 
 ---
 
@@ -308,6 +314,35 @@ Consequence: `ai-psychometrics` can show all its items.
 Code can't read. *Your answer needed*: paste the useful parts into #38, or say to go
 ahead without them. Only you can open it.
 
+**E10. Prerequisites for Using calibrated items.** *Defaults:*
+- `score-meaning ← information`: **add.** The conditional SEM then comes from a Recall
+  instead of being re-taught; `information` is core. `ability-estimation` stays a
+  pick-up without a prerequisite.
+- `item-banks-cat ← ability-estimation, polytomous`: **add both.** Since PR #90,
+  `ability-estimation` no longer comes before `information`, so EAP isn't upstream, and
+  the PROMIS contrast is graded. Both are core, so the optional lesson doesn't re-teach
+  EAP or the GRM.
+
+**E11. The split between `measurement` and `scale-properties` (#66).** *Default:*
+- `measurement` keeps the levels of measurement, the claim that an interval scale needs
+  an equal unit, one RCT rescaling demonstration and the stochastic-dominance callout,
+  with no IRT.
+- `scale-properties` takes conjoint measurement, what the Rasch model licenses
+  (conditional on fit; the 2PL's metric is a convention), gains, growth, vertical
+  scales and gap trends.
+- `measurement`'s hook "unpaid for growth and vertical scales unless `equating` takes
+  it" becomes "→ `score-meaning`, `equating`, `scale-properties`". `equating` names
+  vertical scaling and points to `scale-properties`.
+
+Consequence: a core reader still meets the interval question in `measurement` and
+`score-meaning`.
+
+**E12. Precomputed results outside deep dives.** `item-banks-cat`'s post-hoc CAT (600
+respondents × five rules) takes about 19 minutes locally. *Default:* precompute it the
+way deep dives are (a `compute.R` and a committed `.rds`), and run a 50-respondent
+version live in the page. Consequence: the compute/render split in PROTOCOL §5 extends
+beyond deep dives.
+
 ---
 
 ## F. Part 2: per-lesson questions (defaults are safe to accept in bulk)
@@ -352,8 +387,34 @@ ahead without them. Only you can open it.
   for the IRW IL-HTE vignette in an IRW issue.
 
 **Using calibrated items**
-- Pending: `8-outlines-uses` (score-meaning, equating, item-banks-cat,
-  scale-properties) isn't pushed yet.
+- **F14 `score-meaning`**: how much standard setting? *Default:* one core idea and an
+  Angoff widget; the bookmark method named only; no separate lesson.
+- **F15 `score-meaning`**: a clinical screener (PHQ-9) as the main example rather than
+  an achievement test. *Default:* keep the PHQ-9. It has real norms, a real cut and two
+  waves, and no tokenless achievement table has norms and a published cut.
+- **F16 `score-meaning`**: the norm contrast (a German pre-pandemic sample against a UK
+  spring-2020 panel) mixes country, year, language and mode. *Default:* use it as a
+  lesson about reference groups, saying plainly that the gap can't be put down to the
+  pandemic.
+- **F17 `equating`**: TIMSS 2011 (`cdm_timss11`, a 14-booklet common-item ring with
+  randomly equivalent groups) instead of ENEM. *Default:* TIMSS. ENEM's booklets are the
+  same items reordered, and no items are shared across years.
+- **F18 `equating`**: the position effect (the booklet ring fails to close by 1.1
+  logits) as the predict-then-check. *Default:* keep it; it pays off c6 slide 47.
+- **F19 `equating`**: PIRLS across four countries as the nonequivalent-groups contrast
+  edges into DIF and alignment. *Default:* keep it, with a pointer to `dif`.
+- **F20 `equating`**: scope. *Default:* equating and IRT linking in full; vertical
+  scaling named (growth goes to `scale-properties`); concordance (e.g. SAT–ACT) in one
+  sentence.
+- **F21 `item-banks-cat`**: c10 slides 45–46 point to "state summative data in IRW
+  format" for building a bank. *Your answer needed*: only you know which data set the
+  slides mean.
+- **F22 `item-banks-cat`**: PROMIS depression as the contrast, read as a question of
+  bank design (where the items are), not about the respondents. *Default:* keep it.
+- **F23 `scale-properties`**: the known-answer check is a Rasch-simulated copy of the
+  main table, not an IRW table. *Default:* accept it as the sanity check.
+- **F24 `scale-properties`**: your own papers (Domingue, 2014; Briggs & Domingue, 2013)
+  are central sources. *Default:* cite them as ordinary literature.
 
 **Beyond**
 - **F11 `explanatory-irt`**: `lme4` throughout instead of `mirt`. *Default:* yes. The
@@ -400,3 +461,10 @@ Part 2:
   oREV picture materials, whether the Forecasting Proficiency Test's general-knowledge
   items were adapted from older pools, and instrument reuse for the `gilbert_meta`
   outcomes.
+- Using calibrated items: verify Angoff (1971), Lord & Novick (1968), the bookmark
+  method (Lewis et al.), Reckase (1983), Sympson & Hetter (1985), Karabatsos (2001) and
+  Asparouhov & Muthén (2014); check Shevlin et al.'s (2020) wave-1 prevalence of
+  PHQ-9 ≥ 10 against our 22%; read what Choi et al. (2010) found for PROMIS CAT vs.
+  short forms; read the Project KIDS wave timing and treatments on LDbase before the
+  lesson describes the programme; check the PHQ-9's reuse terms against A5; read the
+  processing notes for the seven Uses tables.
