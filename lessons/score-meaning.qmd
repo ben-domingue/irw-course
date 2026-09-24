@@ -1,0 +1,26 @@
+---
+title: "What does a score mean? Norms, error bands, and cut scores"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("score-meaning")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

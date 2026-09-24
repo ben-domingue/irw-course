@@ -12,7 +12,11 @@
 #             problem set items (PS1#4), and scripts in ben-domingue/252
 #   tables    IRW tables the lesson uses
 #   status    stub | draft | done
+#   optional  true for lessons beyond a first course (default: core). A core
+#             lesson may not list an optional one as a prerequisite.
 #
+# 2026-09-24: six lessons added and core/optional set after the landscape
+# analysis in notes/landscape-2026-09-24.md.
 # DRAFT 2026-09-24: lesson boundaries and prerequisites are a first cut for Ben to
 # revise. c7.pptx is missing from the Drive export, so the CDM lesson's slide
 # origin is a guess.
@@ -22,6 +26,8 @@ modules:
     title: Foundations
   - id: ctt
     title: Classical test theory
+  - id: fa
+    title: Factor analysis
   - id: validity
     title: Validity
   - id: irt
@@ -97,6 +103,7 @@ lessons:
     origin: {slides: [c4], ps: [], code: []}
     tables: []
     status: stub
+    optional: true
 
   - id: rasch
     title: The Rasch model
@@ -129,6 +136,7 @@ lessons:
     origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
     tables: []
     status: stub
+    optional: true
 
   - id: 1pl-to-4pl
     title: From the 1PL to the 4PL
@@ -145,6 +153,7 @@ lessons:
     origin: {slides: [c4], ps: [], code: []}
     tables: []
     status: stub
+    optional: true
 
   - id: fit-prediction
     title: Model fit and out-of-sample prediction
@@ -161,6 +170,7 @@ lessons:
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical]
     status: stub
+    optional: true
 
   - id: dimensionality
     title: Dimensionality and multidimensional IRT
@@ -169,6 +179,7 @@ lessons:
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
     tables: [enem_2013_1mil_lc, florida_twins_dweck, florida_twins_grit]
     status: stub
+    optional: true
 
   - id: dif
     title: Differential item functioning
@@ -185,6 +196,7 @@ lessons:
     origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
     tables: [gilbert_meta_20, gilbert_meta_2]
     status: stub
+    optional: true
 
   - id: item-banks-cat
     title: Item banks and adaptive testing
@@ -193,6 +205,7 @@ lessons:
     origin: {slides: [c6, c10], ps: [], code: []}
     tables: []
     status: stub
+    optional: true
 
   - id: equating
     title: Linking and equating
@@ -209,6 +222,7 @@ lessons:
     origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
     tables: [imps2025_hf]
     status: stub
+    optional: true
 
   - id: cdm
     title: Cognitive diagnostic models
@@ -217,10 +231,11 @@ lessons:
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
     tables: [frac20]
     status: stub
+    optional: true
 
   - id: polytomous
     title: Models for polytomous responses
-    module: beyond
+    module: irt
     prereqs: [1pl-to-4pl]
     origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
     tables: [science_ltm, promis1wave1_pain, ffm_CSN]
@@ -233,6 +248,7 @@ lessons:
     origin: {slides: [c8], ps: ["PS8#4"], code: [c8/irtree.R, c8/irtree2.R, c8/irtree_sim.R, ps8/fast.R]}
     tables: [ffm_CSN]
     status: stub
+    optional: true
 
   - id: unfolding-nominal
     title: Unfolding and nominal response models
@@ -241,6 +257,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#3"], code: [c9/nominal.R, ps9/unfold.R]}
     tables: [andrich_mudfold, preference_inventory]
     status: stub
+    optional: true
 
   - id: response-time
     title: Response time and the speed-accuracy tradeoff
@@ -249,6 +266,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
     tables: [roar_lexical, pisa2018_read]
     status: stub
+    optional: true
 
   - id: trials
     title: "Trials as items: tasks, shots, and rotations"
@@ -257,6 +275,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#2"], code: [c9/mrot.R, ps9/shots.R]}
     tables: []
     status: stub
+    optional: true
 
   - id: ai-psychometrics
     title: AI and psychometrics
@@ -265,9 +284,65 @@ lessons:
     origin: {slides: [c10], ps: [], code: [c10/model.R]}
     tables: []
     status: stub
+    optional: true
+
+  - id: instrument-building
+    title: "From construct map to items: building an instrument"
+    module: ctt
+    prereqs: [constructs, ctt-reliability]
+    origin: {slides: [c2], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: g-theory
+    title: "Many sources of error: generalizability theory"
+    module: ctt
+    prereqs: [ctt-reliability]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: fa-exploratory
+    title: "Factor analysis I: exploring dimensionality"
+    module: fa
+    prereqs: [ctt-reliability]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: fa-confirmatory
+    title: "Factor analysis II: confirmatory models, omega, and IRT as factor analysis"
+    module: fa
+    prereqs: [fa-exploratory, 1pl-to-4pl]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: validity-evidence
+    title: Gathering validity evidence
+    module: validity
+    prereqs: [validity-argument, ctt-reliability]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+
+  - id: score-meaning
+    title: "What does a score mean? Norms, error bands, and cut scores"
+    module: uses
+    prereqs: [ctt-reliability]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
 
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
+  - id: first-course
+    title: "A first course (core lessons only)"
+    lessons: [measurement, irw-data, likelihood, constructs, instrument-building, ctt-reliability,
+              g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
+              information, ability-estimation, 1pl-to-4pl, fa-confirmatory, polytomous,
+              fit-prediction, dif, score-meaning, equating]
+
   - id: educ252
     title: "EDUC 252 (Stanford), a 10-week course"
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, ctt-limits,

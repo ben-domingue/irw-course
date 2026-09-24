@@ -1,0 +1,26 @@
+---
+title: "Gathering validity evidence"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("validity-evidence")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

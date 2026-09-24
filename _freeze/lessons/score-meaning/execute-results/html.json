@@ -1,0 +1,15 @@
+{
+  "hash": "d5ae31c466b293177b97aa5a234f28f9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"What does a score mean? Norms, error bands, and cut scores\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Using calibrated items  \n**Before this:** [Classical test theory and reliability](ctt-reliability.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

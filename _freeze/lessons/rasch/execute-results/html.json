@@ -1,0 +1,15 @@
+{
+  "hash": "dc05d89f125b003aac4b6b65e6878f91",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"The Rasch model\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Before this:** [Where CTT breaks: toward item response models](ctt-limits.qmd)  \n**Builds toward:** [Information, precision, and short forms](information.qmd) · [Estimating abilities: MLE and EAP](ability-estimation.qmd) · [From the 1PL to the 4PL](1pl-to-4pl.qmd) · [What is an item? Explanatory item response models](explanatory-irt.qmd)  \n**IRW tables:** [`chess_lnirt`](https://itemresponsewarehouse.org/tables/chess_lnirt/), [`wirs`](https://itemresponsewarehouse.org/tables/wirs/)  \n**From EDUC 252:** slides c3; code [`c3/rasch0.R`](https://github.com/ben-domingue/252/blob/main/c3/rasch0.R), [`c3/rasch1.R`](https://github.com/ben-domingue/252/blob/main/c3/rasch1.R), [`c3/rasch2.R`](https://github.com/ben-domingue/252/blob/main/c3/rasch2.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

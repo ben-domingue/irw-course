@@ -10,7 +10,8 @@ check_course(course)
 
 These are stand-alone lessons on psychometrics, each built around open data from the
 [Item Response Warehouse](https://itemresponsewarehouse.org). You can teach them in
-sequence as a full course or pick out individual lessons. Each lesson lists what it
+sequence as a full course or pick out individual lessons. The core lessons make a
+first course in psychometrics; lessons marked optional go further. Each lesson lists what it
 assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to
 Psychometrics) at Stanford.
 
@@ -28,6 +29,7 @@ lessons are still stubs.
 .module-card { border: 1px solid #dee2e6; border-left: 4px solid #2780e3; border-radius: 6px; padding: 1rem 1.3rem; background: #fff; }
 .module-card h3 { font-size: 1.05rem; margin-top: 0; }
 .module-card ol { margin-bottom: 0; padding-left: 1.2rem; }
+.lesson-optional { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; }
 .lesson-status { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; }
 </style>
 ```
@@ -39,7 +41,8 @@ for (m in course$modules) {
   ls <- Filter(function(l) l$module == m$id, course$lessons)
   cat('::: {.module-card}\n### ', m$title, '\n\n', sep = '')
   for (i in seq_along(ls)) {
-    st <- if (ls[[i]]$status != "done") sprintf(' [%s]{.lesson-status}', ls[[i]]$status) else ''
+    st <- paste0(if (isTRUE(ls[[i]]$optional)) ' [optional]{.lesson-optional}' else '',
+                 if (ls[[i]]$status != "done") sprintf(' [%s]{.lesson-status}', ls[[i]]$status) else '')
     cat(i, '. ', lesson_link(ls[[i]], from = 'root'), st, '\n', sep = '')
   }
   cat('\n:::\n\n')
@@ -49,21 +52,26 @@ cat(':::\n')
 
 ## How the lessons connect
 
-An arrow from A to B means B assumes A. Click a lesson to open it.
+An arrow from A to B means B assumes A. Lessons with a dashed border are optional:
+they go beyond a first course. Click a lesson to open it.
 
 ```{r}
 #| output: asis
 node <- setNames(sprintf("L%02d", seq_along(course$lessons)),
                  vapply(course$lessons, `[[`, "", "id"))
 # One colour per module (no subgraphs: they force a wide, unreadable layout).
-pal <- c("#dbeafe", "#dcfce7", "#fef9c3", "#fce7f3", "#ede9fe", "#ffedd5", "#e0f2fe")
+pal <- c("#dbeafe", "#dcfce7", "#ccfbf1", "#fef9c3", "#fce7f3", "#ede9fe", "#ffedd5", "#e0f2fe")
 lines <- "flowchart TB"
 for (i in seq_along(course$modules)) {
   m <- course$modules[[i]]
   lines <- c(lines, sprintf("  classDef %s fill:%s,stroke:#6c757d,color:#212529", m$id, pal[i]))
   for (l in Filter(function(l) l$module == m$id, course$lessons))
     lines <- c(lines, sprintf('  %s["%s"]:::%s', node[[l$id]], gsub('"', "'", l$title), m$id))
+  # Optional lessons: dashed border.
+  lines <- c(lines, sprintf("  classDef %s_opt fill:%s,stroke:#6c757d,stroke-dasharray:5 3,color:#495057", m$id, pal[i]))
 }
+for (l in Filter(function(l) isTRUE(l$optional), course$lessons))
+  lines <- c(lines, sprintf("  class %s %s_opt", node[[l$id]], l$module))
 for (l in course$lessons) for (p in unlist(l$prereqs))
   lines <- c(lines, sprintf("  %s --> %s", node[[p]], node[[l$id]]))
 for (l in course$lessons)

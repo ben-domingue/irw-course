@@ -49,6 +49,12 @@ check_course <- function(course = read_course()) {
     if (!file.exists(page))
       problems <- c(problems, sprintf("%s: no page at lessons/%s.qmd", l$id, l$id))
   }
+  opt <- ids[vapply(course$lessons, function(l) isTRUE(l$optional), TRUE)]
+  for (l in course$lessons) if (!isTRUE(l$optional)) {
+    bad <- intersect(unlist(l$prereqs), opt)
+    if (length(bad))
+      problems <- c(problems, sprintf("%s: core lesson requires optional '%s'", l$id, bad))
+  }
   for (p in course$paths) {
     bad <- setdiff(unlist(p$lessons), ids)
     if (length(bad))
@@ -106,7 +112,7 @@ lesson_header <- function(id) {
   )
   cat(
     "::: {.callout-note appearance=\"simple\"}\n",
-    "**Module:** ", mod, "  \n",
+    "**Module:** ", mod, if (isTRUE(l$optional)) " (optional: beyond a first course)", "  \n",
     "**Before this:** ", links(unlist(l$prereqs)), "  \n",
     "**Builds toward:** ", links(next_ids), "  \n",
     "**IRW tables:** ", tables_md, "  \n",

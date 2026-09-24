@@ -1,0 +1,15 @@
+{
+  "hash": "26df3b546c119e9484591c6fffdef853",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Differential item functioning\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Fairness and invariance  \n**Before this:** [From the 1PL to the 4PL](1pl-to-4pl.qmd) · [Validity as an argument](validity-argument.qmd)  \n**Builds toward:** [Measurement invariance under treatment and life events](invariance-experience.qmd)  \n**IRW tables:** [`DART_Brysbaert_2020_1`](https://itemresponsewarehouse.org/tables/dart_brysbaert_2020_1/), [`gilbert_meta_11`](https://itemresponsewarehouse.org/tables/gilbert_meta_11/)  \n**From EDUC 252:** slides c5; problem sets PS5#3; code [`c5/art.R`](https://github.com/ben-domingue/252/blob/main/c5/art.R), [`ps5/dif_itemtext.R`](https://github.com/ben-domingue/252/blob/main/ps5/dif_itemtext.R), [`ps5/groupdiff.R`](https://github.com/ben-domingue/252/blob/main/ps5/groupdiff.R), [`ps5/groupdiff_example.R`](https://github.com/ben-domingue/252/blob/main/ps5/groupdiff_example.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "hash": "ee80b7bf99c88a04cea5d29624625030",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Response time and the speed-accuracy tradeoff\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Beyond the standard models (optional: beyond a first course)  \n**Before this:** [What is an item? Explanatory item response models](explanatory-irt.qmd)  \n**Builds toward:** none  \n**IRW tables:** [`roar_lexical`](https://itemresponsewarehouse.org/tables/roar_lexical/), [`pisa2018_read`](https://itemresponsewarehouse.org/tables/pisa2018_read/)  \n**From EDUC 252:** slides c9; problem sets PS9#1; code [`ps9/sat.R`](https://github.com/ben-domingue/252/blob/main/ps9/sat.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

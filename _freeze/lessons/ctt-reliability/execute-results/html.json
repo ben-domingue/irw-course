@@ -1,0 +1,15 @@
+{
+  "hash": "fb41369c8b492fc28fca688aa56d8c0a",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Classical test theory and reliability\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [Constructs and construct maps](constructs.qmd) · [Item response data and the IRW](irw-data.qmd)  \n**Builds toward:** [Where CTT breaks: toward item response models](ctt-limits.qmd) · [From construct map to items: building an instrument](instrument-building.qmd) · [Many sources of error: generalizability theory](g-theory.qmd) · [Factor analysis I: exploring dimensionality](fa-exploratory.qmd) · [Gathering validity evidence](validity-evidence.qmd) · [What does a score mean? Norms, error bands, and cut scores](score-meaning.qmd)  \n**IRW tables:** [`gilbert_meta_1`](https://itemresponsewarehouse.org/tables/gilbert_meta_1/), [`gilbert_meta_9`](https://itemresponsewarehouse.org/tables/gilbert_meta_9/), [`chess_lnirt`](https://itemresponsewarehouse.org/tables/chess_lnirt/)  \n**From EDUC 252:** slides c2; problem sets PS2#1, PS2#2, PS2#3; code [`c2/alpha.R`](https://github.com/ben-domingue/252/blob/main/c2/alpha.R), [`ps2/itemanalysis.R`](https://github.com/ben-domingue/252/blob/main/ps2/itemanalysis.R), [`ps2/parallel_tests.R`](https://github.com/ben-domingue/252/blob/main/ps2/parallel_tests.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

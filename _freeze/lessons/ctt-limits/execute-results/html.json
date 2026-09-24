@@ -1,0 +1,15 @@
+{
+  "hash": "078580c43d8a24cd9d2a18bbf1ba71f3",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Where CTT breaks: toward item response models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [Classical test theory and reliability](ctt-reliability.qmd) · [The likelihood and logistic regression](likelihood.qmd)  \n**Builds toward:** [The Rasch model](rasch.qmd)  \n**IRW tables:** [`chess_lnirt`](https://itemresponsewarehouse.org/tables/chess_lnirt/), [`andrich_mudfold`](https://itemresponsewarehouse.org/tables/andrich_mudfold/)  \n**From EDUC 252:** slides c2; problem sets PS2#4, PS2#5; code [`ps2/ctt_failures.R`](https://github.com/ben-domingue/252/blob/main/ps2/ctt_failures.R), [`ps2/towards_irt.R`](https://github.com/ben-domingue/252/blob/main/ps2/towards_irt.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,26 @@
+---
+title: "Many sources of error: generalizability theory"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("g-theory")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

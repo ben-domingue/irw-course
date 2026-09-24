@@ -1,0 +1,26 @@
+---
+title: "Factor analysis II: confirmatory models, omega, and IRT as factor analysis"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("fa-confirmatory")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+## For instructors
+

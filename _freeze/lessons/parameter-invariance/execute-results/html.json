@@ -1,0 +1,15 @@
+{
+  "hash": "d09b97297d8e34a7da12ffc3ccdc9438",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Parameter invariance\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory (optional: beyond a first course)  \n**Before this:** [From the 1PL to the 4PL](1pl-to-4pl.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** slides c4  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

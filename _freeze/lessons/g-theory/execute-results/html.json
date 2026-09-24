@@ -1,0 +1,15 @@
+{
+  "hash": "d9f0818efe211d056f9e2bb9415b0960",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Many sources of error: generalizability theory\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Classical test theory  \n**Before this:** [Classical test theory and reliability](ctt-reliability.qmd)  \n**Builds toward:** none  \n**IRW tables:** none  \n**From EDUC 252:** n/a  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

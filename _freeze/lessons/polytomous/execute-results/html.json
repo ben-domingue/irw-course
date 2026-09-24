@@ -1,0 +1,15 @@
+{
+  "hash": "d24cefd2f89a64de757c3a47d4a1d1ec",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Models for polytomous responses\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Before this:** [From the 1PL to the 4PL](1pl-to-4pl.qmd)  \n**Builds toward:** [IRTree models](irtrees.qmd) · [Unfolding and nominal response models](unfolding-nominal.qmd)  \n**IRW tables:** [`science_ltm`](https://itemresponsewarehouse.org/tables/science_ltm/), [`promis1wave1_pain`](https://itemresponsewarehouse.org/tables/promis1wave1_pain/), [`ffm_CSN`](https://itemresponsewarehouse.org/tables/ffm_csn/)  \n**From EDUC 252:** slides c8, c9; problem sets PS8#1, PS8#2, PS8#3; code [`c8/basic_polytomous_analysis.R`](https://github.com/ben-domingue/252/blob/main/c8/basic_polytomous_analysis.R), [`c9/polyexample.R`](https://github.com/ben-domingue/252/blob/main/c9/polyexample.R), [`ps8/ratingscale.R`](https://github.com/ben-domingue/252/blob/main/ps8/ratingscale.R), [`ps8/polytomous_estimates.R`](https://github.com/ben-domingue/252/blob/main/ps8/polytomous_estimates.R), [`ps8/polydif.R`](https://github.com/ben-domingue/252/blob/main/ps8/polydif.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

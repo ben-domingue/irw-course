@@ -1,0 +1,15 @@
+{
+  "hash": "3aeed32dc8803b42cbe2d5e088571801",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Model fit and out-of-sample prediction\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Before this:** [From the 1PL to the 4PL](1pl-to-4pl.qmd)  \n**Builds toward:** [Guessing and priors](guessing-priors.qmd)  \n**IRW tables:** [`gilbert_meta_2`](https://itemresponsewarehouse.org/tables/gilbert_meta_2/), [`gilbert_meta_14`](https://itemresponsewarehouse.org/tables/gilbert_meta_14/), [`gilbert_meta_1`](https://itemresponsewarehouse.org/tables/gilbert_meta_1/)  \n**From EDUC 252:** slides c6; problem sets PS3#3, PS3#4, PS4#2; code [`ps3/fit.R`](https://github.com/ben-domingue/252/blob/main/ps3/fit.R), [`ps3/different-links.R`](https://github.com/ben-domingue/252/blob/main/ps3/different-links.R), [`ps4/prediction.R`](https://github.com/ben-domingue/252/blob/main/ps4/prediction.R), [`c6/enem_imv.R`](https://github.com/ben-domingue/252/blob/main/c6/enem_imv.R)  \n**Status:** stub\n:::\n\n## What this is for\n\n*To be written.*\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## For instructors\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
