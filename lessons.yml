@@ -330,7 +330,7 @@ lessons:
     module: fa
     prereqs: [fa-exploratory, 1pl-to-4pl]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [grit, neurodegenerative_huizinga_2019_dass]
     status: stub
 
   - id: validity-evidence
@@ -355,7 +355,7 @@ lessons:
     module: fa
     prereqs: [fa-confirmatory]
     origin: {slides: [], ps: [], code: []}
-    tables: []
+    tables: [florida_twins_grit, florida_twins_panas]
     status: stub
     optional: true
 
