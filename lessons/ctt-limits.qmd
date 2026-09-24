@@ -183,7 +183,7 @@ quiz({
 
 How would we check that assumption in real data? We never see anyone's true score, but we do see their sum score, $r$. For each sum score, take the respondents with that score and compute the proportion who got a given item right. Plotted against $r$, those proportions trace an **item curve**. If higher scorers are more likely to get the item right, it rises. Estimating these curves directly, without a model for their shape, is the business of nonparametric item response theory ([Mokken, 1971](https://doi.org/10.1515/9783110813203); [Ramsay, 1991](https://doi.org/10.1007/BF02294494); [Sijtsma & Molenaar, 2002](https://doi.org/10.4135/9781412984676)).
 
-Here are the curves for a mathematics test taken by 664 German fourth graders (data [below](#items-differ-and-their-curves-bend)).
+Here are the curves for a mathematics test taken by 664 German fourth graders (data [below](#items-differ-and-their-curves-bend)). Pick an item from the menu. The number beside each item, $p$, is its proportion correct: the share of all 664 students who got it right, the item's *p*-value from [Classical test theory and reliability](ctt-reliability.qmd). Items are listed from hardest (smallest $p$) to easiest.
 
 #### Try it: one item against the sum score
 
@@ -262,7 +262,7 @@ So far, more of the construct has meant a higher chance of a positive response. 
 
 The sum score and alpha each rest on assumptions; the question is whether they hold for the job at hand. The sum score treats items as interchangeable, a reasonable summary when everyone takes the same items, when every item's curve rises with the construct, and when what we need is one number per respondent. Alpha estimates reliability well when the items' errors are unrelated and the items measure the true score about equally well. When respondents take different items, when we want to say something about an item rather than the total, or when precision has to vary from one score to another ([Information, precision, and short forms](information.qmd)), those assumptions carry more weight than CTT can check.
 
-So, the verdict. For a fixed form, taken by everyone, whose item curves all rise, I report the sum score and alpha, and I look at the item curves first. The curves cost a few lines of code, and they are where an item that doesn't rise, or rises only at the very top, shows itself. I reach for an item response model when the design stops being a fixed form or the question stops being about the total.
+Where does that leave us? When we have a fixed form, taken by everyone, whose item curves all rise, the sum score and reliability may be sufficient for some purposes. Even then, the item curves are worth a look: they take a few lines of code, and they are where an item that doesn't rise, or rises only at the very top, shows itself. An item response model earns its keep when the design stops being a fixed form or the question stops being about the total.
 
 ## Simulate
 
