@@ -20,11 +20,13 @@ something that actually broke while building the pilots or the draft site.
 - webR has no system `tar`: use `untar(..., tar = "internal")`.
 - The page must not show a webR cell that depends on a slow setup without saying so:
   the first run of a mirt page takes ~20–30 s. Say this in the Simulate section.
-- `lessons/widgets/webr-run-guard.html` (included for every lesson via
-  `lessons/_metadata.yml`) replays a Run click that arrives before the code editor
-  exists. **Open problem (#13):** on some loads the editor (Monaco, from a CDN) never
-  initialises on pages that also carry OJS widgets or math, so Run waits forever.
-  Until #13 closes, the browser check below must run each page several times.
+- Two small scripts, included for every lesson by `lessons/_metadata.yml`, fix
+  quarto-webr problems on pages that also carry OJS widgets (#13):
+  `widgets/amd-dispatch.html` routes the global `define` so Observable's module
+  loader can't capture the code editor's modules (without it the editor failed to
+  initialise on ~3 of 5 loads), and `widgets/webr-run-guard.html` replays a Run
+  click that lands before the editor exists. Keep both unless quarto-webr fixes
+  this upstream.
 
 **Widgets and quizzes**
 - Widget math goes in `lessons/widgets/irt.js` (shared, pure functions). Add new
@@ -60,8 +62,8 @@ something that actually broke while building the pilots or the draft site.
 
 **Mechanics**
 - [ ] `python3 tools/check_page.py <page URL> "<regex only the cell's output can
-      match>"` passes on the local preview and on the live site, **three times each**
-      while #13 is open. It clicks Run once webR is Ready, waits for the output, and
+      match>"` passes on the local preview and on the live site (run it a few times:
+      the #13 failures were intermittent). It clicks Run once webR is Ready, waits for the output, and
       saves a screenshot for the visual check.
 - [ ] Every widget changes its output when each control moves; seeded samples are
       stable on reload.
