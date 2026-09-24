@@ -21,6 +21,56 @@ A2, C7" (or similar) and give your answer for the exceptions. Claude then record
 each answer in the outline, the issue and #62. Section D is Claude's own work, listed
 so you can see it is handled.
 
+**Answers recorded (Ben, 2026-09-24 evening).** Everything below is decided. The
+answers are recorded here first; carrying them into the outlines, `lessons.yml`,
+the course map and PROTOCOL.md is the next PR.
+
+- **All defaults accepted** in C, E and F, except as listed here.
+- **A2** (verdicts in `rasch` and `ctt-reliability`): the existing prose around each
+  TODO stands; remove the TODOs; no separate verdict.
+- **E1:** add the prerequisites as proposed, **except** `dif` ← `fa-confirmatory`,
+  `polytomous`. Instead, trim `dif`: keep impact vs. bias, the matching problem, MH
+  and logistic DIF, and treatment DIF. Multigroup CFA invariance moves to
+  `fa-confirmatory`, and `dif` recalls it in a paragraph. Polytomous DIF becomes a
+  problem on the CES-D table. `dif` must not depend on `polytomous`.
+- **E8a** (`validity-causal`, Borsboom): a good question with no correct answer. The
+  lesson lays out replacement / complement / different grain size and leaves it open,
+  also as its open challenge problem. Its first-person verdict goes on a smaller
+  practitioner question (e.g. what a causal view asks you to check before trusting a
+  score).
+- **E8b** (`response-time`): **no** first-person criticism of van der Linden's model
+  ("I don't much like this model" stays off the public site). Instead, the lesson asks
+  about the model's strict assumptions (constant speed within a respondent;
+  conditional independence of speed and accuracy) and lets the three tables answer.
+  General rule, to go into PROTOCOL.md: no first-person criticism of other
+  researchers' models; turn a slide's critical aside into a question about
+  assumptions.
+- **E9** (`item-estimation`, EM): Ben's EM walkthrough (`em_irt.html`, five panels:
+  θ as missing data, MML vs. EM, E step, M step, convergence) is the basis for the
+  lesson's widgets, rewritten to the course conventions. A local copy is in the
+  gitignored `source/em_irt.html`.
+- **F9** (`dif`): lead with treatment DIF, but the demographic analysis comes first
+  in the text; treatment is the twist.
+- **F21** (`item-banks-cat`): c10 slide 45 links to `anonstate.Rdata`, anonymized state
+  summative data that isn't in the IRW. Keep the exercise ("you work at the state
+  agency; build a bank; what can't you do? no DIF screens") as a design problem
+  without the data.
+- **F27, F32** (verdicts in `cdm`, `unfolding`): on hold.
+- **F31** (`unfolding`): the licence check for the eight statements is against
+  Andrich (1988), not the IRW table's GPL.
+- **C16:** already settled (first person only where Ben gives a verdict).
+- **#76** (G theory, colleagues): pending.
+- **S1 (freeze):** no new lessons, splits or merges without an explicit decision from
+  Ben; draft in tranche order.
+- **S2 (`competitions`):** left for later; outline only.
+- **S3 (tranches):** replace the core/optional flag with three tranches:
+  **preliminary** (`measurement`, `irw-data`, `likelihood`), **core** (the other 18
+  lessons in the first-course path) and **extensions** (the 19 lessons now marked
+  optional). `rt-process-models` stays its own extension lesson.
+- **S4 (`equating`):** core.
+
+---
+
 ---
 
 ## A. Cross-cutting decisions (these shape many lessons; worth real attention)
