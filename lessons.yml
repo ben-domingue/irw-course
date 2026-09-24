@@ -334,6 +334,25 @@ lessons:
     tables: []
     status: stub
 
+  # 2026-09-24: sem and rt-process-models added at Ben's suggestion; both optional (#64, #65).
+  - id: sem
+    title: Structural equation modeling with lavaan
+    module: fa
+    prereqs: [fa-confirmatory]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+    optional: true
+
+  - id: rt-process-models
+    title: "Process models for response time: drift diffusion and race models"
+    module: beyond
+    prereqs: [response-time]
+    origin: {slides: [], ps: [], code: []}
+    tables: []
+    status: stub
+    optional: true
+
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
   - id: first-course

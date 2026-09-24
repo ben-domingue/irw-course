@@ -6,6 +6,11 @@ title: "Psychometrics with the IRW: course map"
 source("lessons/_course.R")
 course <- read_course()
 check_course(course)
+# Links on this page are grey for stubs, the site's link colour otherwise.
+map_link <- function(l) {
+  link <- lesson_link(l, from = "root")
+  if (l$status == "stub") paste0(link, "{.lesson-stub}") else link
+}
 ```
 
 ```{=html}
@@ -30,6 +35,9 @@ Psychometrics) at Stanford.
 
 ## Lessons by module
 
+Lessons in blue have a draft to read. Lessons in grey are still stubs: a placeholder page
+with no content yet.
+
 ```{=html}
 <style>
 .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
@@ -39,6 +47,9 @@ Psychometrics) at Stanford.
 .module-card ol { margin-bottom: 0; padding-left: 1.2rem; }
 .lesson-optional { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #b45309; }
 .lesson-status { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6c757d; }
+/* Stubs have a page but no content yet: grey them out so drafts stand out. */
+a.lesson-stub { color: #adb5bd; }
+a.lesson-stub:hover { color: #6c757d; }
 </style>
 ```
 
@@ -51,7 +62,7 @@ for (m in course$modules) {
   for (i in seq_along(ls)) {
     st <- paste0(if (isTRUE(ls[[i]]$optional)) ' [optional]{.lesson-optional}' else '',
                  if (ls[[i]]$status != "done") sprintf(' [%s]{.lesson-status}', ls[[i]]$status) else '')
-    cat(i, '. ', lesson_link(ls[[i]], from = 'root'), st, '\n', sep = '')
+    cat(i, '. ', map_link(ls[[i]]), st, '\n', sep = '')
   }
   cat('\n:::\n\n')
 }
@@ -98,7 +109,7 @@ A path is one order for teaching the lessons. Add your own to `lessons.yml`.
 for (p in course$paths) {
   cat("### ", p$title, "\n\n", sep = "")
   for (i in seq_along(p$lessons))
-    cat(i, ". ", lesson_link(lesson_by_id(p$lessons[[i]], course), from = "root"), "\n", sep = "")
+    cat(i, ". ", map_link(lesson_by_id(p$lessons[[i]], course)), "\n", sep = "")
   cat("\n")
 }
 ```
