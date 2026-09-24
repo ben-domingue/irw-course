@@ -8,11 +8,22 @@ project:
   render:
     - index.qmd
     - lessons/*.qmd
+  # Draft hosting (ben-domingue.github.io/irw-course): reachable by URL, kept out
+  # of search. Remove robots.txt, the noindex header and the announcement when the
+  # course moves into irw_site.
+  resources:
+    - robots.txt
   preview:
     port: 4201
 
 website:
   title: "Psychometrics with the IRW"
+  site-url: https://ben-domingue.github.io/irw-course
+  announcement:
+    content: "**Draft.** This course is a work in progress: lessons are incomplete and will change. Comments welcome."
+    type: warning
+    dismissable: false
+    position: below-navbar
   navbar:
     search: true
     left:
@@ -35,8 +46,13 @@ format:
     callout-icon: false
     df-print: kable
     code-fold: true
+    include-in-header:
+      text: '<meta name="robots" content="noindex, nofollow">'
 
 execute:
+  # Results are rendered locally and committed in _freeze/, so the deploy runner
+  # never refits a model or refetches data.
+  freeze: auto
   echo: false
   message: false
   warning: false
