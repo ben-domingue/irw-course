@@ -70,3 +70,22 @@ Seed threads from the pilots (inputs to the cross-checks, not final):
 | One SEM for everyone | ctt-reliability | information (CSEM varies), score-meaning |
 | Reverse keying | ctt-reliability | fa-exploratory (already linked), polytomous |
 
+
+## Data breadth and citation (2026-09-24)
+- **Breadth:** draw on a broad sample of IRW tables rather than reusing the same
+  few. A table appears in one lesson only, unless the reuse is deliberate (a thread
+  returning to the same data) and recorded. `check_tables.R` will flag reuse (#12).
+- **Citation:** every table used is cited, linked where possible (DOI/URL from IRW
+  biblio via `get_citation`, never from memory), with a link to its IRW landing
+  page. A generated **Data sources** block closes each lesson (#12).
+
+## Deep dives (2026-09-24, detail open in #4)
+A few lessons go deep with IRW data at corpus scale: a miniature on one table, then
+the precomputed corpus result with code, then a pointer to the vignette. Nine
+candidates are issues #18–#26 (milestone 4). Proposed: deep dives are an exception
+to the 3-table ceiling.
+
+## Tracking
+Work is tracked in GitHub issues on ben-domingue/irw-course: milestones 1 Protocol,
+2 Outlines & cross-checks, 3 Lessons (one issue per lesson), 4 Deep dives,
+5 Infrastructure.
