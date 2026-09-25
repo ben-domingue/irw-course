@@ -339,7 +339,7 @@ lessons:
     prereqs: [constructs, ctt-reliability]
     origin: {slides: [c2], ps: [], code: []}
     tables: [song_2023_rses]
-    status: stub
+    status: draft
     tranche: core
 
   - id: g-theory
