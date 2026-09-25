@@ -1,0 +1,401 @@
+---
+title: "Fairness in testing: bias, impact, and measurement invariance"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("fairness")
+```
+
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {palette, grid} from "./widgets/irt.js"
+import {twoGroups, anchorView, simCleary} from "./widgets/fairness.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
+## What this is for
+
+On an online vocabulary checklist, respondents aged 40 and over check more words than respondents under 25, and native speakers of English check more than non-native speakers. Is the checklist unfair to the young, or to non-native speakers? The gaps alone can't say. [Validity as an argument](validity-argument.qmd) called anything in a score that has nothing to do with the construct **construct-irrelevant variance**; when it lines up with group membership, it is a question of fairness. This lesson separates a difference in the construct (**impact**) from a difference in how the measure works (**bias**), asks what it means for a measure to be the same measure in two groups (**measurement invariance**), and looks at bias in what scores predict. By the end, the checklist gives two different answers for its two groupings.
+
+## Goals
+
+By the end of this lesson you should be able to:
+
+- describe the four views of fairness in the *Standards*, and say why a group difference in scores is not, by itself, evidence of bias;
+- distinguish impact from bias, and name where bias can enter (the instrument, its administration, culture);
+- say what configural, metric and scalar invariance require, which comparison each supports, and what no invariance test can detect;
+- define predictive bias, and explain why an unreliable test can look biased in prediction when it isn't;
+- check invariance for a whole scale with a multigroup model, and judge whether a failure changes the comparison you care about.
+
+## Core ideas
+
+### What does fairness mean?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Validity as an argument](validity-argument.qmd): validity is the degree to which evidence supports an interpretation of scores for a use. The *Standards* call anything in scores that is irrelevant to the construct construct-irrelevant variance, with the example of a mathematics test that leans on reading English. The first thing we want from a measure, from [What is measurement?](measurement.qmd), is insensitivity to attributes other than its target.
+:::
+
+The *Standards for Educational and Psychological Testing* treat fairness as a question of validity ([AERA, APA & NCME, 2014, ch. 3, pp. 49–51](https://www.testingstandards.net/open-access-files.html)). A fair test measures the same construct for everyone it is meant for, so a score means the same thing whoever earned it. The chapter sets out four views (pp. 51–54):
+
+1. **Fair treatment during testing:** standard conditions, with flexibility where a standard procedure would keep someone from showing their standing.
+2. **Lack of measurement bias:** scores mean the same in different groups, item by item, for the whole test, and in what they predict.
+3. **Access to the construct:** nothing irrelevant (small print, idioms, unfamiliar contexts) stands between a respondent and the tasks.
+4. **Validity of individual interpretations:** group labels are a convenience; a score is interpreted for the person.
+
+What doesn't count? The chapter explicitly sets aside one view of fairness, that it means equal outcomes across groups. Differences should prompt a search for sources of bias, but "group differences in outcomes do not in themselves indicate that a testing application is biased or unfair" ([AERA, APA & NCME, 2014, p. 54](https://www.testingstandards.net/open-access-files.html)). This lesson is about the second view, measurement bias, the one data can speak to most directly ([Camilli, 2013](https://doi.org/10.1080/13803611.2013.767602), takes up the others).
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A district finds that students eligible for free lunch score 0.5 SD lower on its mathematics test. On the *Standards*' view, what follows?",
+  options: [
+    {text: "The gap is a reason to look for sources of bias, but does not by itself show the test is biased", correct: true, why: "The *Standards* set aside equal outcomes as a definition of fairness. A gap can reflect real differences in what students have had the chance to learn, bias, or both; it calls for scrutiny, not a verdict."},
+    {text: "The test is biased against students eligible for free lunch", correct: false, why: "That reads a difference in outcomes as bias. The gap may be a real difference in mathematics, which is impact, not bias."},
+    {text: "Nothing: group differences are irrelevant to fairness", correct: false, why: "The *Standards* say the opposite: differences should trigger a closer look for bias. They just aren't evidence of bias on their own."}
+  ]
+})
+```
+
+### Impact is not bias
+
+Measure the heights of 3-year-olds and 10-year-olds. The older children are taller, and nobody blames the tape measure. That is **impact**: the groups differ on the attribute itself. **Bias** is a difference in scores that comes from something other than the attribute: say, the 10-year-olds were measured with their shoes on. Put in terms of error, a measure is fair to two groups when its measurement error is unrelated to group membership. Impact lives in the attribute; bias lives in the error.
+
+#### Try it: impact and bias
+
+Two groups of 400. Each respondent has a true standing on the attribute (reference group mean 0, SD 1) and an observed score, which adds measurement error. The first slider sets the true gap between groups (impact); the second subtracts a constant from every focal-group score (bias).
+
+```{ojs}
+//| echo: false
+viewof ib_impact = Inputs.range([0, 1.5], {value: 1, step: 0.1, label: "Impact: true gap (SDs)"})
+viewof ib_bias = Inputs.range([0, 1.5], {value: 0, step: 0.1, label: "Bias against the focal group"})
+viewof ib_show = Inputs.toggle({label: "Show true standings", value: true})
+```
+
+```{ojs}
+//| echo: false
+ib_sim = twoGroups({seed: 5, n: 400})
+ib_now = ib_sim({impact: ib_impact, bias: ib_bias, err: 0.4})
+ib_means = ["reference", "focal"].flatMap(g => ["true standing", "observed score"].map(what => {
+  const k = what === "true standing" ? "truth" : "observed", v = ib_now.rows.filter(d => d.group === g).map(d => d[k]);
+  return {group: g, what, v: v.reduce((u, x) => u + x, 0) / v.length};
+}))
+{
+  const long = ib_now.rows.flatMap(d => [{group: d.group, what: "observed score", v: d.observed},
+                                         ...(ib_show ? [{group: d.group, what: "true standing", v: d.truth}] : [])]);
+  return Plot.plot({
+    width: 700, height: ib_show ? 330 : 190, marginRight: 110,
+    x: {label: "Score (SDs of the reference group)", domain: [-4.5, 3.5]}, y: {label: null},
+    fy: {label: null, domain: ib_show ? ["true standing", "observed score"] : ["observed score"]},
+    color: {legend: true, domain: ["reference", "focal"], range: [palette.main, palette.contrast]},
+    marks: [
+      Plot.areaY(long, Plot.binX({y2: "count"}, {x: "v", fy: "what", fill: "group", fillOpacity: 0.35, thresholds: 40, curve: "step"})),
+      Plot.ruleX(ib_means.filter(d => ib_show || d.what === "observed score"), {x: "v", fy: "what", stroke: "group", strokeWidth: 2.5}),
+      Plot.frame({stroke: palette.rule})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+md`True gap: **${ib_now.trueGap.toFixed(2)}**. Observed gap: **${ib_now.observedGap.toFixed(2)}**. Bias accounts for ${(ib_bias === 0 ? 0 : -ib_bias).toFixed(1)} of the observed gap; the rest is impact, plus sampling error.`
+```
+
+Set impact to 1 and bias to 0, then 0.5 and 0.5, then 0 and 1. The observed gap is −0.94 each time, and with the true standings hidden the three pictures are identical. Observed scores alone can't split a gap into impact and bias; that takes a comparison at the same level of the attribute, or a criterion outside the test.
+
+Where does bias come from? From the **instrument**: an item that leans on knowledge or language one group is less likely to have, as with the mathematics test that leans on reading. From **administration**: when respondents to the Health and Retirement Study were randomly assigned to answer its cognitive items on the web or by phone, those on the web scored higher, on every item ([Domingue et al., 2023](https://doi.org/10.1093/geronb/gbad068)). Random assignment made the two groups comparable in cognition, so the difference came from the mode. And from **culture**: [Kroupin et al. (2025)](https://doi.org/10.1073/pnas.2407955122) argue that standard tasks of executive function draw on skills that develop mainly with formal schooling, so they may not measure the same thing in children who haven't been to school.
+
+A rule of mine: psychological measures are at their best comparing people who start in similar situations. The bigger the impact, the harder bias is to find, because our checks compare respondents at the same level of the attribute, and when groups barely overlap there are few of them.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Children aged 7 and 11 take the same reading test. The 11-year-olds score 1.5 SD higher. Which statement is right?",
+  options: [
+    {text: "The gap is compatible with no bias at all, since 11-year-olds read better; it takes a comparison at equal reading ability to look for bias", correct: true, why: "Older children read better, so a large gap is expected impact. Bias would show up as the test working differently for the two ages at the same level of reading."},
+    {text: "A gap that large must include some bias", correct: false, why: "The size of a gap says nothing about its source. Heights of 3- and 10-year-olds differ enormously, with no bias in the tape."},
+    {text: "The gap is impact, so the test can't be biased", correct: false, why: "Impact and bias can coexist. A gap that is mostly impact can still hide some bias, and large impact makes that harder to find."}
+  ]
+})
+```
+
+### The same measure in different groups
+
+What does it take for a measure to be the same in two groups? **Measurement invariance**: the distribution of responses given the attribute doesn't depend on the group ([Meredith, 1993](https://doi.org/10.1007/BF02294825); [Millsap, 2011](https://doi.org/10.4324/9780203821961)). When it holds, a difference in scores between groups is impact. When it fails for the test as a whole, the *Standards* speak of **differential test functioning** (DTF): members of different groups with the same standing don't have the same expected score ([AERA, APA & NCME, 2014, p. 51](https://www.testingstandards.net/open-access-files.html)).
+
+In practice invariance is checked by fitting a model to both groups at once and adding constraints in steps ([Vandenberg & Lance, 2000](https://doi.org/10.1177/109442810031002); [Putnick & Bornstein, 2016](https://doi.org/10.1016/j.dr.2016.06.004)):
+
+- **configural:** the same items measure the same attribute in both groups, with every parameter free;
+- **metric:** each item's slope (or loading) is equal across groups, so a unit on the scale means the same thing in each; this is enough to compare correlations;
+- **scalar:** each item's intercept (or difficulty) is equal too, so respondents at the same level have the same expected response; this is what comparing means needs.
+
+When one or two items fail, **partial invariance** frees their parameters and keeps the rest equal.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Factor analysis II](fa-confirmatory.qmd): this is the multigroup ladder you fitted with `lavaan` to the DASS-21, where equal loadings and equal intercepts cost almost nothing across women and men, so their factor means could be compared. Here the same ladder is fitted with an item response model.
+:::
+
+These checks have a limit. The model places the two groups on one scale using the items themselves, since the attribute is never observed. If every item were harder for the focal group by the same amount, its respondents would answer exactly as if they were that much lower on the attribute.
+
+#### Try it: what the data can see
+
+Eight items. Item 4 can be harder for the focal group (a shift in its difficulty), and every item can be harder by a shared amount. The true impact is 0.5. The left panel shows the true shifts; the right, the shifts relative to the other items, which is what a multigroup model can recover.
+
+```{ojs}
+//| echo: false
+viewof av_one = Inputs.range([-1, 1], {value: 0.8, step: 0.1, label: "Item 4 only: extra difficulty for the focal group"})
+viewof av_all = Inputs.range([-1, 1], {value: 0, step: 0.1, label: "Every item: extra difficulty for the focal group"})
+```
+
+```{ojs}
+//| echo: false
+av = anchorView({nItems: 8, k: 3, one: av_one, all: av_all, impact: 0.5})
+{
+  const long = av.items.flatMap(d => [{item: d.item, panel: "true shift", v: d.shift}, {item: d.item, panel: "what the data can see", v: d.seen}]);
+  return Plot.plot({
+    width: 700, height: 250, x: {label: null, tickRotate: -30}, y: {label: "Extra difficulty, focal group", domain: [-2, 2]},
+    fx: {label: null, domain: ["true shift", "what the data can see"]},
+    marks: [
+      Plot.barY(long, {x: "item", y: "v", fx: "panel", fill: d => (d.item === "item 4" ? palette.contrast : palette.main)}),
+      Plot.ruleY([0], {stroke: palette.rule})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+md`True impact: **${av.trueImpact.toFixed(1)}**. Group difference a multigroup model would report: **${av.apparentImpact.toFixed(1)}**.`
+```
+
+With item 4's slider at 0.8 and the shared shift at 0, item 4 stands out on the right and the reported difference is the true 0.5. Now move the shared shift to 0.5: every bar rises on the left, nothing changes on the right, and the reported group difference becomes 1.0. A bias shared by every item is absorbed into the group difference. Invariance is always invariance *relative to the other items*.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A test is translated, and the translation makes every item somewhat harder. A multigroup model across the two language versions finds scalar invariance. What can you conclude?",
+  options: [
+    {text: "No item works differently relative to the others; a difficulty shared by all items would show up as a group difference, not as non-invariance", correct: true, why: "The model places the groups on one scale through the items. A shift common to every item is indistinguishable from a lower mean in the second group."},
+    {text: "The translation is equivalent, so the language groups can be compared", correct: false, why: "Scalar invariance rules out items that shift relative to the others. It can't rule out a shift shared by all of them, which is what this translation did."},
+    {text: "The test is biased against the second language group", correct: false, why: "Nothing in the invariance result shows that. The shared shift is invisible to it; you would need other evidence, such as random assignment of versions or an outside criterion."}
+  ]
+})
+```
+
+### Bias in prediction
+
+If invariance checks can't see a bias shared by every item, what can? Evidence from outside the test. **Predictive bias** is present when scores consistently predict too high or too low a criterion for members of a group ([AERA, APA & NCME, 2014, glossary](https://www.testingstandards.net/open-access-files.html)). [Cleary (1968)](https://doi.org/10.1111/j.1745-3984.1968.tb00613.x) framed it with regression: fit one line predicting the criterion (college grades, say) from the test, and ask whether a group's criterion sits systematically above or below it. The *Standards* ask for this analysis wherever scores are used to predict and samples allow, by comparing slopes and intercepts or deviations from a common line, and note that comparing correlations is not enough when groups differ in means and variances (Standard 3.7, pp. 65–66).
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Gathering validity evidence](validity-evidence.qmd): predictive bias is criterion evidence compared across groups rather than across a selection.
+:::
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): reliability is the share of observed-score variance that is true-score variance. The rest is error.
+:::
+
+#### Try it: one line for two groups
+
+Three hundred respondents per group. The criterion depends on the true standing the same way in both groups, minus an optional real disadvantage for the focal group that the test doesn't carry. The test score adds error, set by its reliability. Solid lines: each group's regression; dashed: the common line.
+
+```{ojs}
+//| echo: false
+viewof cl_impact = Inputs.range([0, 1.5], {value: 1, step: 0.1, label: "Impact (SDs)"})
+viewof cl_rel = Inputs.range([0.4, 1], {value: 0.7, step: 0.05, label: "Reliability of the test"})
+viewof cl_bias = Inputs.range([0, 0.6], {value: 0, step: 0.05, label: "Focal group's criterion, lower at the same true standing"})
+```
+
+```{ojs}
+//| echo: false
+cl = simCleary({seed: 9, n: 300, impact: cl_impact, rel: cl_rel, bias: cl_bias})
+{
+  const xs = grid(-4, 3, 2), line = (f, g) => xs.map(x => ({x, y: f.intercept + f.slope * x, g}));
+  return Plot.plot({
+    width: 700, height: 330, x: {label: "Test score", domain: [-4, 3]}, y: {label: "Criterion", domain: [-4, 3]},
+    color: {legend: true, domain: ["reference", "focal"], range: [palette.main, palette.contrast]},
+    marks: [
+      Plot.dot(cl.pts, {x: "x", y: "y", fill: "group", r: 1.8, fillOpacity: 0.35}),
+      Plot.line(line(cl.ref, "reference"), {x: "x", y: "y", stroke: palette.main, strokeWidth: 2.5}),
+      Plot.line(line(cl.foc, "focal"), {x: "x", y: "y", stroke: palette.contrast, strokeWidth: 2.5}),
+      Plot.line(line(cl.common, "common"), {x: "x", y: "y", stroke: palette.ink, strokeDasharray: "5,4", strokeWidth: 2})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+md`The focal group's criterion sits **${cl.focalResid.toFixed(2)}** from the common line, on average (negative: the common line over-predicts the focal group). Each group's own line crosses a test score of 0 at ${cl.ref.intercept.toFixed(2)} (reference) and ${cl.foc.intercept.toFixed(2)} (focal).`
+```
+
+Start with reliability 1 and no disadvantage: the three lines nearly coincide and the focal group's average residual is close to 0. Lower reliability to 0.7. The focal group's line drops below the reference group's and the common line over-predicts the focal group by 0.14, though nothing about the criterion has changed. Each group's scores regress toward its own mean, so a given test score means a lower true standing in the lower-scoring group. [Linn and Werts (1971)](https://doi.org/10.1111/j.1745-3984.1971.tb00898.x) discuss this effect of unreliability on studies of predictive bias (the Go deeper below derives it). Now add a real disadvantage of 0.3 at reliability 1: the common line over-predicts again, by 0.12, for a reason that has nothing to do with error.
+
+::: {.callout-note collapse="true"}
+## Go deeper: why a fallible test over-predicts the lower group
+
+**Assumptions.** In group $g$, $\theta \sim N(\mu_g, 1)$. The test score is $X = \theta + e$ with $e \sim N(0, \sigma_e^2)$, so its reliability within a group is $\rho = 1/(1 + \sigma_e^2)$. The criterion is $Y = \beta_0 + \beta_1\theta + u$, the same in every group, with $u$ independent of $\theta$ and $e$. There is no bias of any kind.
+
+**The within-group regression.** Within group $g$, $(\theta, X)$ is bivariate normal, so $E(\theta \mid X, g) = \mu_g + \rho\,(X - \mu_g)$. Then
+$$E(Y \mid X, g) = \beta_0 + \beta_1\rho X + \beta_1(1 - \rho)\,\mu_g.$$
+The slopes are equal ($\beta_1\rho$) and the intercepts differ by $\beta_1(1-\rho)(\mu_1 - \mu_2)$.
+
+**What it means.** At reliability 1 the intercepts agree; at any lower reliability, the group with the lower mean has the lower line. A common line fitted to both groups lies between the two, so it over-predicts the lower group and under-predicts the higher, with no bias anywhere. With $\beta_1 = 1$, $\rho = 0.7$ and a gap of 1, the intercepts differ by 0.3, and the common line's average error for each group is somewhat smaller than that (0.14 in the widget, with equal group sizes).
+
+**Where else it appears.** Any comparison of groups at the same observed score inherits the same shrinkage toward group means. [Differential item functioning](dif.qmd) meets it when it matches respondents on their total score.
+:::
+
+The outside criterion is what makes a shared shift visible: a test that understates one group on every item passes an invariance check but under-predicts that group's criterion (see the simulation). The two kinds of evidence can also disagree: a test can show no measurement bias yet differ between groups in its regression lines, and the reverse ([AERA, APA & NCME, 2014, p. 52](https://www.testingstandards.net/open-access-files.html); [Millsap, 2007](https://doi.org/10.1007/s11336-007-9039-7)).
+
+### Item by item
+
+The third way goes item by item: **differential item functioning** (DIF), when respondents at the same level of the attribute differ, by group, in their chance of a response to one item ([AERA, APA & NCME, 2014, p. 51](https://www.testingstandards.net/open-access-files.html)). It is the item-level case of invariance and inherits its limit: an item works differently only relative to the others. A flagged item is not yet a biased one; that takes an explanation. [Differential item functioning](dif.qmd) takes this up.
+
+## Simulate
+
+The code makes two groups that differ by `impact` = 0.8 SD, answering 15 items that work the same way for both. It prints the raw gaps, compares configural and scalar models, and regresses a criterion that depends on $\theta$ alone on the sum score. The first run takes 20–30 seconds while R and `mirt` load.
+
+With the seed as written, every item's raw gap is negative (from −0.08 to −0.21) and the sum scores differ by 0.65 SD, with no biased item. The invariance test finds nothing ($\chi^2$ = 11.9 on 28 df, $p$ = 1.00) and the scalar model puts the focal group's mean at −0.79, close to the true −0.8. Yet the common regression line over-predicts the focal group's criterion: the intercept difference is −0.13 ($t$ = −4.0), the Go deeper's artefact. Set `ni <- 5` and it grows to −0.29; with `ni <- 40`, −0.10.
+
+Now set `shift_all <- 0.5`, a bias on every item. The invariance test still finds nothing ($p$ = 0.85), the focal group's mean moves to −1.31, and its criterion is now *under*-predicted (+0.26). With `shift_one <- 1` instead, the invariance test rejects ($p$ < .001).
+
+```{webr}
+{{< include code/fairness-sim.R >}}
+```
+
+[Download this code](code/fairness-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/fairness-irw.R")
+```
+
+[gcbs_brotherton_2013_vcl](https://itemresponsewarehouse.org/tables/gcbs_brotherton_2013_vcl/) is a 16-word vocabulary checklist from the Open-Source Psychometrics Project, given with its online version of the Generic Conspiracist Beliefs Scale ([Brotherton, French & Pickering, 2013](https://doi.org/10.3389/fpsyg.2013.00279)). Respondents were asked to check every word whose definition they were sure they knew ([codebook](https://openpsychometrics.org/_rawdata/), in the GCBS download). Its job: one checklist, two groupings, and for each we ask whether the gap is impact. [Download the code](code/fairness-irw.R); it needs `mirt`.
+
+On keying: a 1 means the word was checked. Three of the sixteen (*cuivocal*, *florted*, *verdid*) aren't English words; the source includes them as a check on careless or over-confident checking, so the score counts the other 13. These are self-reports of knowing a word, not a test of its meaning, and nothing is missing.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+```{r wide}
+#| echo: true
+#| code-fold: show
+```
+
+Most words are checked by nearly everyone: *boat*, *funny* and *robot* by 97–98%. *Paucity*, *pastiche* and *epistemology* are the hard ones.
+
+```{r groups}
+#| echo: true
+#| code-fold: show
+```
+
+Respondents aged 40 and over check 11.1 words on average, those under 25 check 9.6: a gap of 0.69 SD. Native speakers check 10.2 and non-native speakers 9.6, a gap of −0.29 SD.
+
+How big is a departure from invariance when nothing differs? The function below fits configural, scalar and partial models (each word gets a slope and a difficulty, as in [From the 1PL to the 4PL](1pl-to-4pl.qmd)); we first split the respondents at random, ten times.
+
+```{r invariance-fn}
+#| echo: true
+#| code-fold: true
+```
+
+```{r sanity}
+#| echo: true
+#| code-fold: show
+```
+
+Across ten random splits, the likelihood-ratio $\chi^2$ for the scalar constraints runs from 18.6 to 54.2 on 24 df, and 4 of the 10 fall below .05, where 1 in 20 would be expected. BIC, which charges each parameter more heavily, favours the scalar model in all ten, by 134 to 169. With these 13 words, mostly near the ceiling, the $\chi^2$ test rejects more often than its nominal rate; the random splits are our baseline.
+
+```{r age}
+#| echo: true
+#| code-fold: show
+```
+
+By age, $\chi^2$ is 72.2 on 24 df, above all ten random splits: the words don't work quite the same way for the two ages. But BIC favours the scalar model (13,594 against 13,703 for the configural). The two words that depart most are *paucity* and *epistemology*, and freeing them moves the latent gap from 1.25 to 1.19 SD of the younger group. (The latent gap exceeds the sum-score gap because near-universal words squeeze sum scores together at the top.) This is what impact looks like: a large difference that the words measure in much the same way for both ages.
+
+```{r lang}
+#| echo: true
+#| code-fold: show
+```
+
+By native language, the picture changes. $\chi^2$ is 279.8, five times the largest random split, and BIC now favours the configural model (17,917 against 18,009 for the scalar). Three words depart most: *epistemology*, *abysmal* and *pastiche*.
+
+```{r words}
+#| echo: true
+#| code-fold: show
+```
+
+Non-native speakers check fewer of the 13 words (74% against 79%), yet more of them check *epistemology* (50% against 44%) and about as many check *pastiche* (31% against 32%). *Abysmal* goes the other way: 64% against 84%. The first two have close relatives in several European languages; *abysmal* is more idiomatic. The table can't test that hypothesis: it records only whether English is a respondent's first language.
+
+With every word held equal, the scalar model puts non-native speakers 0.40 SD below native speakers. What happens when the three words get their own parameters in each group, and the other ten set the scale?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Freeing *epistemology*, *abysmal* and *pastiche* (the other ten words held equal), the gap between non-native and native speakers, −0.40 SD with every word equal, will...",
+  choices: ["Shrink toward 0", "Stay about −0.40", "Grow"],
+  answer: "Grow",
+  reveal: "It grows, to −0.51. Two of the three words are checked relatively more by non-native speakers than their overall level would predict. Held equal, they pulled the non-native group's estimate up."
+})
+```
+
+```{r partial}
+#| echo: true
+#| code-fold: show
+```
+
+The gap grows to −0.51, about a quarter larger, and BIC prefers the partial model to both the scalar (17,873 against 18,009) and the configural.
+
+What should a practitioner do with a failed invariance test? One position treats scalar invariance as a gate: if the test rejects, don't compare means. It assumes the test's null is the right standard, and in these data the test rejected in 4 of 10 random splits. Another treats non-invariance as a matter of degree, sized by what it does to the comparison. It assumes the items left equal are themselves invariant, since they set the scale. Where I come down: when an invariance test rejects, I don't stop at the $p$-value. I free the items that fail and ask whether the comparison I care about moves. By age it barely moves (1.25 to 1.19); by native language it moves by a quarter, which is too much to ignore.
+
+Is the native-language gap, then, bias? That depends on the use. If the scores are read as knowledge of English words, the ten anchor words suggest most of the gap is impact, and the three words that depart are measuring something extra for some respondents. If the same scores were used as a measure of verbal ability in an international sample, the whole gap would be construct-irrelevant: English is part of every item, a shift shared by all of them, and no invariance test would see it.
+
+## Problems
+
+1. **What invariance can't see.** Show that under the 2PL, adding $\delta$ to every item's difficulty for one group gives the same response probabilities as lowering that group's $\theta$ by $\delta$. What does this imply about a translation that makes every item harder, and what kind of evidence could detect it?
+2. **The non-words.** The three non-words should never be checked. Compare how often they are checked by age and by native language. Drop everyone who checks any and refit the native-language comparison: does the gap change, and do the same three words depart?
+3. **One gap, two uses.** The checklist is used (a) to study English vocabulary across adulthood in English-speaking countries, and (b) as a covariate for verbal ability in an international online study. For each use, is the native-language gap impact, bias, or both? Which of the *Standards*' four views does each answer draw on?
+4. **Web or phone?** The Health and Retirement Study randomly assigned respondents to answer by web or by phone ([Domingue et al., 2023](https://doi.org/10.1093/geronb/gbad068)). Why does random assignment reveal a mode effect shared by every item, which an invariance test can't? What would you do without randomization?
+5. **How big is the artefact?** In the simulation, $\beta_1 = 1$, the groups differ by 0.8 SD, and the 15-item sum score's reliability is about 0.8 (compute alpha within each group to check). How far apart does the Go deeper put the two intercepts? The simulation gives −0.13: why might a sum score of 2PL items not match exactly?
+6. **Challenge: invariant and unfair?** [Meredith (1993)](https://doi.org/10.1007/BF02294825) argues that strict factorial invariance is required for fairness. Suppose a test is invariant across two groups and the gap between them reflects unequal opportunity to learn the material ([AERA, APA & NCME, 2014, p. 54](https://www.testingstandards.net/open-access-files.html)). Is using its scores to select students fair? Is invariance necessary for fairness, sufficient, or neither? This is open.
+
+```{r}
+#| output: asis
+ask_claude("fairness", "It covers fairness in the Standards (chapter 3: fair treatment, lack of measurement bias, access to the construct, valid individual interpretations; group differences are not in themselves evidence of bias), impact versus bias, measurement invariance (configural, metric, scalar, partial) and why a shift shared by every item can't be detected, predictive bias and the Cleary model, including how unreliability makes a common regression line over-predict the lower-scoring group, and DIF as the item-level case, with a vocabulary checklist (gcbs_brotherton_2013_vcl) grouped by age and by native language as the worked example.")
+```
+
+## Going further
+
+- AERA, APA, & NCME. (2014). *Standards for educational and psychological testing*. American Educational Research Association. <https://www.testingstandards.net/open-access-files.html>. Chapter 3 is on fairness; open access.
+- Camilli, G. (2013). Ongoing issues in test fairness. *Educational Research and Evaluation*, 19(2–3), 104–120. <https://doi.org/10.1080/13803611.2013.767602>. Fairness beyond item statistics.
+- Meredith, W. (1993). Measurement invariance, factor analysis and factorial invariance. *Psychometrika*, 58(4), 525–543. <https://doi.org/10.1007/BF02294825>. The definitions, and the argument that invariance is required for fairness.
+- Millsap, R. E. (2011). *Statistical approaches to measurement invariance*. Routledge. <https://doi.org/10.4324/9780203821961>. Invariance in factor models and item response models, at book length.
+- Millsap, R. E. (2007). Invariance in measurement and prediction revisited. *Psychometrika*, 72(4), 461–473. <https://doi.org/10.1007/s11336-007-9039-7>. When measurement invariance and predictive invariance agree, and when they don't.
+- Borsboom, D. (2006). When does measurement invariance matter? *Medical Care*, 44(11, Suppl. 3), S176–S181. <https://doi.org/10.1097/01.mlr.0000245143.08679.cc>. A short paper on the question the verdict above turns on.
+- Cleary, T. A. (1968). Test bias: Prediction of grades of Negro and white students in integrated colleges. *Journal of Educational Measurement*, 5(2), 115–124. <https://doi.org/10.1111/j.1745-3984.1968.tb00613.x>. The regression definition of predictive bias.
+- Linn, R. L., & Werts, C. E. (1971). Considerations for studies of test bias. *Journal of Educational Measurement*, 8(1), 1–4. <https://doi.org/10.1111/j.1745-3984.1971.tb00898.x>. Unreliability and omitted predictors in studies of predictive bias.
+- Sackett, P. R., Borneman, M. J., & Connelly, B. S. (2008). High stakes testing in higher education and employment: Appraising the evidence for validity and fairness. *American Psychologist*, 63(4), 215–227. <https://doi.org/10.1037/0003-066X.63.4.215>. A review of large databases and meta-analyses, which finds little evidence that admissions and employment tests under-predict how members of minority groups perform.
+- Aguinis, H., Culpepper, S. A., & Pierce, C. A. (2010). Revival of test bias research in preemployment testing. *Journal of Applied Psychology*, 95(4), 648–680. <https://doi.org/10.1037/a0018714>. Simulations arguing that artefacts such as unreliability and range restriction make conclusions about intercept differences less secure.
+- Domingue, B. W., et al. (2023). The mode effect of web-based surveying on the 2018 U.S. Health and Retirement Study measure of cognitive functioning. *The Journals of Gerontology: Series B*, 78(9), 1466–1473. <https://doi.org/10.1093/geronb/gbad068>. Administration bias, found by random assignment.
+
+```{r}
+#| output: asis
+data_sources("fairness")
+```
+
+## For instructors
+
+- **Source:** EDUC 252 class 5 (slides c5, 1–16: fairness as error associated with other characteristics, reference and focal groups, impact and bias with the heights example, the rule on comparing people who start in similar situations, sources of bias, culture-level differences). The vocabulary-checklist analysis, the three widgets and the simulation are new.
+- **Added 09-25 (Ben):** this lesson was added while reviewing [Differential item functioning](dif.qmd), as a broader preliminary to it. Impact versus bias moved here from `dif`, which now lists this lesson as a prerequisite.
+- **Timing:** about 45 minutes for the core ideas and widgets; the real-data section works as a 25-minute lab (the model fits take about a minute locally). Problems 3 and 6 work as small-group discussions.
+- **Held back:** DIF methods (in [Differential item functioning](dif.qmd)); multigroup factor analysis (in [Factor analysis II](fa-confirmatory.qmd)); treatment as a grouping variable (in [Measurement invariance under treatment and life events](invariance-experience.qmd)); accommodations, accessibility and universal design (the *Standards*' third view) are named only.
+- **Solutions:** held back in `solutions/fairness.qmd` (not published). Problem 6 is open.

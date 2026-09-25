@@ -210,10 +210,21 @@ lessons:
     status: stub
     tranche: extension
 
+  # 2026-09-25: added at Ben's request while reviewing dif (#150): fairness, impact vs.
+  # bias and measurement invariance in general, as a preliminary to dif.
+  - id: fairness
+    title: "Fairness in testing: bias, impact, and measurement invariance"
+    module: fairness
+    prereqs: [validity-argument]
+    origin: {slides: [c5], ps: [], code: []}
+    tables: [gcbs_brotherton_2013_vcl]
+    status: draft
+    tranche: core
+
   - id: dif
     title: Differential item functioning
     module: fairness
-    prereqs: [1pl-to-4pl, validity-argument]
+    prereqs: [1pl-to-4pl, validity-argument, fairness]
     origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
     tables: [gilbert_meta_11, alexandrowicz_2018_cesd]
     status: stub
@@ -448,7 +459,7 @@ paths:
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, instrument-building,
               g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
               1pl-to-4pl, information, ability-estimation, fa-confirmatory, fit-prediction,
-              polytomous, dif, score-meaning, equating]
+              polytomous, fairness, dif, score-meaning, equating]
 
   - id: educ252
     title: "EDUC 252 (Stanford), a 10-week course"
@@ -457,7 +468,7 @@ paths:
     # polytomous).
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, ctt-limits,
               validity-argument, rasch, 1pl-to-4pl, information, ability-estimation, validity-causal,
-              parameter-invariance, dimensionality, dif, item-estimation,
+              parameter-invariance, dimensionality, fairness, dif, item-estimation,
               fit-prediction, guessing-priors, equating, invariance-experience,
               explanatory-irt, cdm, polytomous, item-banks-cat, irtrees, unfolding, nominal, response-time,
               trials, ai-psychometrics]
