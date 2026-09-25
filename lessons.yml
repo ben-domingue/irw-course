@@ -426,7 +426,7 @@ lessons:
     prereqs: [measurement, rasch]
     origin: {slides: [], ps: [], code: []}
     tables: [project_kids_wj_lwid_wave]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-24: added at Ben's request (#86); module and optional status are a first guess.

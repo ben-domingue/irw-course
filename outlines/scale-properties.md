@@ -2,7 +2,7 @@
 
 # Scale properties: is the scale equal-interval? (`scale-properties`)
 
-Module: uses · Prereqs: measurement, rasch · Extension · Status: outline
+Module: uses · Prereqs: measurement, rasch · Extension · Status: draft
 
 **The split with `measurement` (E11, settled).** `measurement` keeps the levels, the equal-unit claim, one RCT rescaling and the stochastic-dominance callout, with no IRT. This lesson takes conjoint measurement, what Rasch licenses, gains, growth, vertical scales and gap trends.
 
@@ -67,3 +67,15 @@ Data notes: items outside the basal–ceiling window are missing by design, igno
 ## Open questions
 
 - None. (Settled 09-24: E11 the split with `measurement`, F23 the simulated sanity copy, F24 Ben's papers cited as ordinary literature.)
+
+## Drafting notes (09-25)
+
+What changed from this outline when the lesson was drafted (`draft-scale-properties`):
+
+- **Forms.** The WJ-III has parallel forms A and B with different words at the same positions, and the IRW table records only the position (about half the children in projects 5–9 took form B; projects 1–3 switch forms by wave). The lesson reads the form from the Project KIDS total-scores file on LDbase (matched on the IRW id, the row number of the Project KIDS files; checked against `cov_project`) and treats form × position as the item: 140 items with at least 100 responses. Project 3's spring responses have no recorded form and are set aside. Proposed for the IRW: add the form as a covariate (see the PR).
+- **Numbers recomputed** on that basis: 3,009 children with fall and spring; gains by fall quarter 3.2, 3.6, 3.0, 1.2 logits (0.88, 1.00, 0.83, 0.34 fall SDs); crossing $k$ = 0.44, where a unit at +2 SD counts 5.8 times one at −2 SD; grouped on winter $	heta$ the ends gain 2.8 and 1.6. By grade, growth decelerates (about 3 logits in K and grade 1, 1.5 and 1.0 in grades 2 and 3). 2PL AIC 211,105 vs Rasch 226,621; 113 of 140 items overfit. The Rasch-simulated copy (same forms, starting points and ceiling rule) shows the design alone produces overfit (78 of 140) and a 2PL gain (LR 2,728 vs 15,793 real); double cancellation fails in 12.8% of tested triples (real) vs 8.2% (copy).
+- **Treatment contrast** restricted to the four studies comparing ISI with business-as-usual (projects 1, 2, 5, 6). In projects 7 and 8 (ISI vs vocabulary) the group coded `treat = 1` has the size the data paper gives for the vocabulary arm, so they are left out. ISI's effect on gains is 0.06 fall SDs, 0.04–0.07 for $k$ from −1 to 0.5, 0.02 at $k$ = 1 and zero at $k$ = 1.5.
+- **Wave timing** (digest D): waves 1–3 are the fall, winter and spring of one school year in each study (van Dijk et al., 2022, doi:10.5334/jopd.58); grades K (projects 1, 2), 1 (3, 5, 6, 9), 2 (7), 3 (8).
+- **Widgets:** four. Added "which rescalings keep the Rasch model?" (ICC shapes under $f_k$, idea 2). The vertical-scale widget applies $f_k$ to a stylized five-grade scale instead of setting linked variances (idea 4). "Rescale the gains" moved into the real-data section as a static plot answered by the predict-then-check.
+- **Simulate:** equal true gains, Rasch vs middle-peaked 2PL; $	heta$ by ML from the sum score (sufficiency), so it runs in seconds. The cancellation check moved to the real-data section.
+- **Citations:** Fischer (2017) removed from *Going further* (the chapter could not be verified on Crossref). Added and verified: van Dijk et al. (2022), Connor et al. (2007, doi:10.1126/science.1134513), Dumont & Willis (2008, doi:10.1002/9780470373699.speced2229) for the WJ-III, Warm (1989), Mislevy & Wu (1996), the Project KIDS total-scores data (doi:10.33009/ldbase.1620844399.85a0).

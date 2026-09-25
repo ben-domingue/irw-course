@@ -1,0 +1,228 @@
+# Scale properties with real data: Woodcock-Johnson III Letter-Word Identification
+# in Project KIDS (project_kids_wj_lwid_wave), from the Item Response Warehouse.
+# Who gains more in a school year, children who start low or children who start
+# high, and does the answer survive a change of scale? Runs as-is in R with the
+# mirt package; no login or token. The whole script takes about ten minutes.
+# New for this course.
+
+## ---- fetch
+library(mirt)
+set.seed(2014)
+# Each IRW table has a landing page (itemresponsewarehouse.org/tables/<name>/) with
+# a CSV download. This link is pinned to one version of the data.
+lw_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.project_kids_wj_lwid_wave/rows?format=csv"
+df <- read.csv(lw_url)
+# Items are scored 1 (read correctly) or 0; higher = better word reading. Waves 1,
+# 2 and 3 are the fall, winter and spring of one school year.
+df$pos <- as.integer(gsub("\\D", "", df$item))   # the item's position on the test
+c(responses = nrow(df), children = length(unique(df$id)))
+table(wave = df$wave[!duplicated(paste(df$id, df$wave))])   # children per wave
+
+## ---- forms
+# The WJ-III has two parallel forms, A and B, with different words at the same
+# positions, and the IRW table records only the position. The form is in the Project
+# KIDS total-scores file on LDbase (open, no login). The IRW's id is the row number
+# of the Project KIDS files (see the IRW processing script), so we check that the
+# project each id belongs to agrees in the two files before using the form.
+full <- read.csv("https://ldbase.org/system/files/datasets/2021-08/PK_FullData.csv")
+stopifnot(all(full$project[df$id] == df$cov_project))
+form <- cbind(full$PK_WJLW_FORM_w1, full$PK_WJLW_FORM_w2, full$PK_WJLW_FORM_w3)
+df$form <- c("A", "B")[form[cbind(df$id, df$wave)] + 1]
+table(form = df$form, wave = df$wave, useNA = "ifany")
+# Project 3 recorded no form at wave 3, so those responses can't be assigned to
+# items. We set them aside.
+df <- df[!is.na(df$form), ]
+df$it <- sprintf("%s%02d", df$form, df$pos)
+# Same position, different words: proportion correct at a few positions, grade 1
+# fall (projects 5, 6 and 9 split their children between the forms).
+g1 <- df[df$wave == 1 & df$cov_project %in% c(5, 6, 9) & df$pos %in% c(13, 25, 28), ]
+round(tapply(g1$resp, list(position = g1$pos, form = g1$form), mean), 2)
+
+## ---- design
+# One row per child per wave (a "record"), one column per form-by-position item.
+df$rec <- paste(df$id, df$wave)
+wide <- tapply(df$resp, list(df$rec, df$it), function(x) x[1])
+recs <- data.frame(rec = rownames(wide),
+                   id = as.integer(sub(" .*", "", rownames(wide))),
+                   wave = as.integer(sub(".* ", "", rownames(wide))))
+# Items near the end of the test were reached by very few children; items read
+# fewer than 100 times are dropped so every estimate rests on some data.
+X <- as.data.frame(wide[, colSums(!is.na(wide)) >= 100])
+c(records = nrow(X), items = ncol(X), dropped = ncol(wide) - ncol(X))
+# How each record runs: it starts at position 1 or 2, goes up the test, and stops
+# after a run of wrong answers (the ceiling rule). Items past the ceiling are
+# missing by design.
+first <- tapply(df$pos, df$rec, min); last <- tapply(df$pos, df$rec, max)
+table(start = first)
+summary(as.vector(last - first + 1))   # items per record
+# Grade from project: kindergarten (projects 1, 2), grade 1 (3, 5, 6, 9), grade 2
+# (7), grade 3 (8). In the fall of grade 3, the first 20 positions are almost never
+# missed, consistent with items below a child's starting point being credited
+# rather than read aloud.
+grade_of <- c("1" = "K", "2" = "K", "3" = "1", "5" = "1", "6" = "1", "9" = "1", "7" = "2", "8" = "3")
+df$grade <- factor(grade_of[as.character(df$cov_project)], levels = c("K", "1", "2", "3"))
+early <- df[df$pos <= 20 & df$wave == 1, ]
+round(tapply(early$resp, early$grade, mean), 3)
+
+## ---- fit
+# One Rasch calibration for all three waves: the same item has the same
+# difficulty in fall and spring, which is what puts the waves on one scale.
+m1 <- mirt(X, 1, itemtype = "Rasch", verbose = FALSE)
+b <- -coef(m1, simplify = TRUE)$items[, "d"]   # mirt's d is an easiness: b = -d
+# Weighted likelihood (Warm) estimates of theta: finite for every record, and not
+# pulled toward the overall mean the way EAP estimates are.
+recs$theta <- fscores(m1, method = "WLE", verbose = FALSE)[, 1]
+round(c(sd_b = sd(b), sd_theta = sd(recs$theta)), 2)
+
+## ---- gains
+# Children with a fall and a spring score.
+th <- reshape(recs[, c("id", "wave", "theta")], idvar = "id", timevar = "wave",
+              direction = "wide")
+names(th) <- c("id", "t1", "t2", "t3")
+kids <- th[!is.na(th$t1) & !is.na(th$t3), ]
+kids$project <- full$project[kids$id]
+kids$grade <- factor(grade_of[as.character(kids$project)], levels = c("K", "1", "2", "3"))
+kids$gain <- kids$t3 - kids$t1
+kids$q <- cut(kids$t1, quantile(kids$t1, 0:4 / 4), include.lowest = TRUE,
+              labels = paste0("Q", 1:4))
+sd1 <- sd(kids$t1)   # the fall SD: the unit for gains in SD terms
+summ <- function(g) round(do.call(rbind, lapply(split(kids, g), function(d) c(
+  n = nrow(d), fall_min = min(d$t1), fall_max = max(d$t1), fall = mean(d$t1),
+  spring = mean(d$t3), gain = mean(d$gain), gain_sd_units = mean(d$gain) / sd1))), 2)
+nrow(kids)
+summ(kids$q)       # by fall quartile
+summ(kids$grade)   # by grade: one test across four grades, a small vertical scale
+
+## ---- rescale
+# The order-preserving rescalings of the measurement lesson, applied to theta
+# standardized on the fall: f_k(z) = (exp(k z) - 1) / k. Gains are in fall-SD units
+# of the rescaled score.
+f_k <- function(z, k) if (k == 0) z else (exp(k * z) - 1) / k
+z1 <- (kids$t1 - mean(kids$t1)) / sd1
+z3 <- (kids$t3 - mean(kids$t1)) / sd1
+qgain <- function(k) tapply(f_k(z3, k) - f_k(z1, k), kids$q, mean) / sd(f_k(z1, k))
+ks <- seq(-1, 1.5, by = 0.05)
+G <- t(sapply(ks, qgain))
+# The smallest k at which the top quartile's gain overtakes the bottom quartile's.
+k_cross <- uniroot(function(k) diff(qgain(k)[c(1, 4)]), c(0.01, 1.5))$root
+c(k_cross = round(k_cross, 2),
+  unit_at_plus2_vs_minus2 = round(exp(4 * k_cross), 1))   # f_k'(2) / f_k'(-2)
+round(rbind("k = 0" = qgain(0), "k = crossing" = qgain(k_cross), "k = 1" = qgain(1)), 2)
+op <- par(mfrow = c(1, 2), mar = c(4.2, 4.2, 1, 1))
+matplot(ks, G, type = "l", lty = 1, lwd = 2.5,
+        col = c("#c2410c", "#e08a5a", "#93c5fd", "#2780e3"),
+        xlab = "Rescaling k (positive stretches the top)", ylab = "Mean gain (fall SD units)")
+abline(v = c(0, k_cross), lty = 2, col = "#999")
+legend("topright", paste("fall", colnames(G)), lwd = 2.5, bty = "n",
+       col = c("#c2410c", "#e08a5a", "#93c5fd", "#2780e3"))
+plot(kids$t1, kids$t3, pch = 16, cex = 0.4, col = adjustcolor("#2780e3", 0.3),
+     xlab = "Fall theta", ylab = "Spring theta")
+abline(0, 1, lty = 2, col = "#999")
+abline(v = tapply(kids$t1, kids$q, max)[1:3], col = "#c2410c", lty = 3)
+par(op)
+
+## ---- rtm
+# Grouping on the fall score builds in regression to the mean: a fall score that
+# is low partly by bad luck tends to be followed by a higher one. Group instead on
+# the winter score, which shares no measurement error with fall or spring.
+w2 <- kids[!is.na(kids$t2), ]
+w2$q2 <- cut(w2$t2, quantile(w2$t2, 0:4 / 4), include.lowest = TRUE, labels = paste0("Q", 1:4))
+round(rbind(fall_quartiles = tapply(w2$gain, w2$q, mean),
+            winter_quartiles = tapply(w2$gain, w2$q2, mean)), 2)
+nrow(w2)
+
+## ---- treatment
+# Projects 1, 2, 5 and 6 randomized classrooms or schools to Individualized
+# Student Instruction (ISI) or business-as-usual reading instruction (van Dijk et
+# al., 2022). In the IRW table treat = 1 is ISI there; children in project 5's third
+# condition are coded missing and left out. Effect of ISI on the fall-to-spring gain,
+# in fall-SD units, within project, under each rescaling. Randomization was by
+# classroom or school, so these naive standard errors are too small: the point is
+# the sign, not the p-value.
+tr <- kids
+tr$treat <- full$treatment[tr$id]
+tr <- tr[tr$project %in% c(1, 2, 5, 6) & tr$treat %in% c(0, 1), ]
+table(project = tr$project, treat = tr$treat)
+tz1 <- (tr$t1 - mean(kids$t1)) / sd1; tz3 <- (tr$t3 - mean(kids$t1)) / sd1
+effect <- function(k) {
+  g <- (f_k(tz3, k) - f_k(tz1, k)) / sd(f_k(z1, k))
+  coef(summary(lm(g ~ tr$treat + factor(tr$project))))[2, 1:2]
+}
+round(t(sapply(c(-1, -0.5, 0, 0.5, 1, 1.5), function(k) c(k = k, effect(k)))), 3)
+
+## ---- compare
+# Does the Rasch model describe these items well enough to lend theta its unit?
+# First, a 2PL, which lets every item have its own slope.
+m2 <- mirt(X, 1, itemtype = "2PL", verbose = FALSE, technical = list(NCYCLES = 3000))
+a <- coef(m2, simplify = TRUE)$items[, "a1"]
+round(quantile(a, c(0.1, 0.5, 0.9)), 2)   # slopes, with the SD of theta fixed at 1
+round(c(AIC_rasch = extract.mirt(m1, "AIC"), AIC_2pl = extract.mirt(m2, "AIC")))
+# Second, outfit and infit (the rasch lesson), using the WLE thetas.
+fit_real <- itemfit(m1, fit_stats = "infit", Theta = matrix(recs$theta))
+fit_summary <- function(f) round(c(median_outfit = median(f$outfit),
+  overfit = sum(f$outfit < 0.7), underfit = sum(f$outfit > 1.3), items = nrow(f)), 2)
+fit_summary(fit_real)
+
+## ---- simcopy
+# The known answer. Simulate a copy of the table from the Rasch model itself, with
+# the fitted difficulties and each record's theta, and give it the same design:
+# the same form, the same starting position, and the ceiling rule (stop at the end
+# of the eight-item page on which a child first misses six in a row). Then run the
+# same checks. Whatever misfit the copy shows comes from the design, not the items.
+fm <- substr(colnames(X), 1, 1); ps <- as.integer(substr(colnames(X), 2, 3))
+rec_form <- substr(df$it, 1, 1)[match(rownames(X), df$rec)]
+rec_start <- first[rownames(X)]
+S <- matrix(NA_integer_, nrow(X), ncol(X), dimnames = dimnames(X))
+for (i in seq_len(nrow(X))) {
+  cols <- which(fm == rec_form[i] & ps >= rec_start[i])
+  cols <- cols[order(ps[cols])]
+  x <- rbinom(length(cols), 1, plogis(recs$theta[i] - b[cols]))
+  run <- cumsum(x == 0) - cummax((x == 1) * cumsum(x == 0))   # current run of misses
+  hit <- which(run >= 6)[1]
+  stop <- if (is.na(hit)) length(cols) else
+    max(which(ps[cols] <= ceiling(ps[cols[hit]] / 8) * 8))
+  S[i, cols[seq_len(stop)]] <- x[seq_len(stop)]
+}
+S <- as.data.frame(S)
+c(items_per_record_real = mean(rowSums(!is.na(X))), items_per_record_copy = mean(rowSums(!is.na(S))))
+s1 <- mirt(S, 1, itemtype = "Rasch", verbose = FALSE)
+s2 <- mirt(S, 1, itemtype = "2PL", verbose = FALSE, technical = list(NCYCLES = 3000))
+theta_copy <- fscores(s1, method = "WLE", verbose = FALSE)[, 1]
+fit_copy <- itemfit(s1, fit_stats = "infit", Theta = matrix(theta_copy))
+lr <- function(r, t) 2 * (extract.mirt(t, "logLik") - extract.mirt(r, "logLik"))
+rbind(real = c(AIC_rasch = extract.mirt(m1, "AIC"), AIC_2pl = extract.mirt(m2, "AIC"),
+               LR = lr(m1, m2), fit_summary(fit_real)),
+      copy = c(AIC_rasch = extract.mirt(s1, "AIC"), AIC_2pl = extract.mirt(s2, "AIC"),
+               LR = lr(s1, s2), fit_summary(fit_copy)))
+
+## ---- cancel
+# Cancellation, checked in the data (a descriptive version of Domingue, 2014).
+# Rows: ten groups of records by theta. Columns: 15 Form A items spread across the
+# test, ordered from hardest to easiest by their Rasch difficulties. Cells:
+# proportion correct, where at least 30 records in the group read the item. Count
+# (i) group-by-item-pair checks in which the group does better on the harder item
+# (single cancellation), and (ii) 3 x 3 submatrices whose double
+# cancellation premises hold but whose conclusion fails.
+cancel_check <- function(R, theta, cols) {
+  grp <- cut(theta, quantile(theta, 0:10 / 10), include.lowest = TRUE, labels = FALSE)
+  P <- sapply(cols, function(j) tapply(R[, j], grp, mean, na.rm = TRUE))
+  N <- sapply(cols, function(j) tapply(!is.na(R[, j]), grp, sum))
+  P[N < 30] <- NA
+  sc <- 0; sc_n <- 0; dc <- 0; dc_n <- 0
+  for (r in 1:nrow(P)) for (c1 in 1:(ncol(P) - 1)) for (c2 in (c1 + 1):ncol(P)) {
+    if (!is.na(P[r, c1]) && !is.na(P[r, c2])) { sc_n <- sc_n + 1; sc <- sc + (P[r, c1] > P[r, c2]) }
+  }
+  tri <- combn(nrow(P), 3); trc <- combn(ncol(P), 3)
+  for (i in seq_len(ncol(tri))) for (j in seq_len(ncol(trc))) {
+    a <- tri[, i]; x <- trc[, j]; M <- P[a, x]
+    if (anyNA(M)) next
+    if (M[2, 1] >= M[1, 2] && M[3, 2] >= M[2, 3]) { dc_n <- dc_n + 1; dc <- dc + (M[3, 1] < M[1, 3]) }
+    if (M[2, 1] <= M[1, 2] && M[3, 2] <= M[2, 3]) { dc_n <- dc_n + 1; dc <- dc + (M[3, 1] > M[1, 3]) }
+  }
+  sc <- unname(sc); dc <- unname(dc)
+  c(order_checks = sc_n, order_violations = sc, share_order = round(sc / sc_n, 3),
+    double_tested = dc_n, double_violations = dc, share_double = round(dc / dc_n, 3))
+}
+cols <- which(fm == "A")[round(seq(1, sum(fm == "A"), length.out = 15))]
+cols <- cols[order(-b[cols])]   # from hardest to easiest, by the Rasch difficulties
+rbind(real = cancel_check(X, recs$theta, cols), copy = cancel_check(S, theta_copy, cols))

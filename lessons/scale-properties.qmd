@@ -8,21 +8,458 @@ source("_course.R")
 lesson_header("scale-properties")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {p2pl, grid, rescaleExp, palette} from "./widgets/irt.js"
+import {cancellation, rescaledNormal, rescaledGains, thetaAtP} from "./widgets/scale-properties.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Who gains more in a year of learning to read, the child who starts behind or the child who starts ahead? In the Project KIDS reading studies, children in the bottom quarter in the fall gained more than twice as much by spring, in Rasch logits, as children in the top quarter. Is that a fact about reading or about the scale? A gain compares an interval at one place on the scale with an interval somewhere else, and [What is measurement?](measurement.qmd) showed that an order-preserving rescaling can change a mean difference. This lesson asks what would give $\theta$ an equal unit, what the [Rasch model](rasch.qmd) licenses when it fits, and which conclusions about gains, growth and gaps survive when we can't be sure it does.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what an equal unit would be and what Stevens, Michell, and Borsboom and Mellenbergh ask of the evidence for one;
+- state the cancellation conditions and check them on a table of proportions correct;
+- explain what the Rasch model licenses about the unit of $\theta$, why that depends on fit, and why a 2PL's metric is a convention;
+- decide whether a comparison of gains or gaps keeps its sign under every order-preserving rescaling;
+- analyse gains by starting level in longitudinal item responses, separating conclusions that depend on the scale from those that don't.
+
 ## Core ideas
 
-## Worked example
+### What an equal unit would mean
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): an interval scale allows only linear relabellings, and rescaling a vocabulary trial's sum score moved its 0.68 SD effect anywhere from 0.16 to 0.71.
+:::
+
+Where would an equal unit come from? [Stevens (1946)](https://doi.org/10.1126/science.103.2684.677) settles it by rule: a scale is interval if we agree to allow only linear transformations of it. [Michell (1997)](https://doi.org/10.1111/j.2044-8295.1997.tb02641.x) answers that whether an attribute is quantitative is an empirical hypothesis, one that psychology has mostly assumed rather than tested. [Borsboom and Mellenbergh (2004)](https://doi.org/10.1177/0959354304040200) reply that item response models are checked against data as a matter of course, and that at least one class of them is a form of additive conjoint measurement, so its fit tests the quantitative hypothesis jointly with the model's other assumptions.
+
+We can lay rods end to end to check that two units of length make a double unit; we can't do that with reading ability. What evidence could show that the step from $\theta = -2$ to $-1$ equals the step from $1$ to $2$?
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A publisher says its reading scale is interval because the scores come from an item response model. Which of these would count as evidence for the claim in Michell's sense?",
+  options: [
+    {text: "The scores were computed by IRT software", correct: false, why: "That is a rule for assigning numbers, which is Stevens's standard. Any consistent rule produces numbers; it doesn't show that equal steps are equal amounts."},
+    {text: "The response data satisfy the ordering conditions that an additive person-plus-item structure implies", correct: true, why: "Those conditions (cancellation, below) can fail in data. Passing them is evidence that the attribute has additive, quantitative structure."},
+    {text: "The scores are normally distributed", correct: false, why: "Any continuous distribution can be made normal by an order-preserving transformation, so a normal shape says nothing about the spacing."}
+  ]
+})
+```
+
+### Additive conjoint measurement, and what the Rasch model licenses
+
+[Luce and Tukey (1964)](https://doi.org/10.1016/0022-2496(64)90015-x) showed how to get a unit from order alone. Suppose ability and item easiness jointly determine the probability of a correct response. If they combine additively, $\Pr(x_{ij} = 1) = F(\theta_j - b_i)$ for some increasing $F$, the table of probabilities must obey certain ordering conditions, the **cancellation conditions**. Conversely, if a rich enough table obeys them, additive numbers exist, unique up to a linear transformation with a common unit: an interval scale, derived from which cells are larger than which.
+
+The Rasch model is additive in this sense, with $F$ the logistic function ([Perline, Wright & Wainer, 1979](https://doi.org/10.1177/014662167900300213)). What does that pin down?
+
+#### Try it: which rescalings keep the Rasch model?
+
+Three Rasch items ($b = -2, 0, 2$) plotted against $f_k(\theta) = (e^{k\theta} - 1)/k$, the rescaling from [What is measurement?](measurement.qmd); $k = 0$ leaves $\theta$ alone.
+
+```{ojs}
+//| echo: false
+viewof icc_k = Inputs.range([-1, 1], {value: 0, step: 0.05, label: "Rescaling k"})
+```
+
+```{ojs}
+//| echo: false
+icc_items = [{b: -2, name: "b = −2"}, {b: 0, name: "b = 0"}, {b: 2, name: "b = 2"}]
+icc_data = grid(-4, 4, 161).flatMap(t => icc_items.map(it => ({x: rescaleExp(t, icc_k), p: p2pl(t, it.b), item: it.name})))
+icc_width = icc_items.map(it => rescaleExp(thetaAtP(0.75, it.b), icc_k) - rescaleExp(thetaAtP(0.25, it.b), icc_k))
+Plot.plot({
+  width: 700, height: 300,
+  x: {label: "Rescaled ability", domain: [rescaleExp(-4, icc_k), rescaleExp(4, icc_k)]}, y: {label: "P(correct)", domain: [0, 1]},
+  color: {legend: true, domain: icc_items.map(d => d.name), range: [palette.light, palette.main, palette.contrast]},
+  marks: [
+    Plot.ruleY([0.25, 0.75], {stroke: palette.rule}),
+    Plot.line(icc_data, {x: "x", y: "p", stroke: "item", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Distance along the horizontal axis from P = 0.25 to P = 0.75: **${icc_width.map(w => w.toFixed(2)).join("**, **")}** for the three items.`
+```
+
+At $k = 0$ the three curves are copies of one another, each 2.20 wide: a Rasch curve is one curve slid along $\theta$. Move $k$ and the copies stop matching; stretching the top widens the hard item's curve and squeezes the easy item's. If the Rasch model holds on $\theta$, it fails on every nonlinear rescaling, and only $\beta_0 + \beta_1\theta$ keeps the curves alike. That is the licence: if the data follow the Rasch model, $\theta$ is an interval scale.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): only $\theta - b$ is identified, so the scale has no origin, and `mirt` fixes one by setting the mean ability to 0. The origin is a convention; with the slopes fixed at 1, the unit is not.
+:::
+
+Additivity also shows in a table.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): the sum score is sufficient for $\theta$, and conditioning on it gives **specific objectivity**: whether item $i$ is easier than item $k$ comes out the same whoever the respondents are, because the ICCs never cross.
+:::
+
+Sufficiency also says what $\theta$ adds: with everyone on the same items, $\hat\theta$ orders respondents exactly as $r$ does, so $\theta$ contributes only spacing, and the spacing is only as good as the additive structure behind it.
+
+That every respondent orders the items the same way is the first cancellation condition (single cancellation). The second, **double cancellation**, links three respondents and three items: two inequalities between cells imply a third, because under additivity the premises add up to the conclusion (Go deeper, below).
+
+#### Try it: check the cancellation conditions
+
+Five respondents ($\theta$ from −2 to 2, top to bottom) and five items, hardest on the left; each cell is a probability correct. The slider lets the slopes differ (0 is the Rasch model).
+
+```{ojs}
+//| echo: false
+viewof cc_s = Inputs.range([0, 1.5], {value: 0, step: 0.05, label: "How much the slopes differ"})
+```
+
+```{ojs}
+//| echo: false
+cc_theta = [-2, -1, 0, 1, 2]
+cc_b = [1.5, 0.75, 0, -0.75, -1.5]
+cc_a = [0, 1, -1, 0.7, -0.5].map(z => Math.exp(cc_s * z))
+cc_P = cc_theta.map(t => cc_b.map((b, i) => p2pl(t, b, cc_a[i])))
+cc_res = cancellation(cc_P)
+cc_cols = cc_b.map((_, c) => `item ${c + 1} (a = ${cc_a[c].toFixed(2)})`)
+cc_cells = cc_theta.flatMap((t, r) => cc_b.map((b, c) => ({person: `θ = ${t}`, item: cc_cols[c], p: cc_P[r][c]})))
+Plot.plot({
+  width: 700, height: 260, marginLeft: 60, marginBottom: 40,
+  x: {label: null, domain: cc_cols},
+  y: {label: null, domain: cc_theta.map(t => `θ = ${t}`)},
+  color: {type: "linear", domain: [0, 1], range: [palette.white, palette.main]},
+  marks: [
+    Plot.cell(cc_cells, {x: "item", y: "person", fill: "p", inset: 1}),
+    Plot.text(cc_cells, {x: "item", y: "person", text: d => d.p.toFixed(2), fill: d => d.p > 0.6 ? palette.white : palette.ink})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Item orderings checked: ${cc_res.orderChecks}; a respondent does better on the harder item of a pair in **${cc_res.orderViolations}**. Triples where the double-cancellation premises hold: ${cc_res.doubleTested}; the conclusion fails in **${cc_res.doubleViolations}**.`
+```
+
+At 0 both counts are zero. Let the slopes differ by 0.25 and some curves cross among these respondents: a low scorer finds one item easier and a high scorer the other, and double cancellation starts to fail too. No relabelling of $\theta$ repairs a crossing, because a crossing is a fact about order.
+
+::: {.callout-note collapse="true"}
+## Go deeper: additive conjoint measurement in one page
+
+**Assumptions:** respondents $j$ and items $i$; $P_{ji}$ is the probability that respondent $j$ answers item $i$ correctly. The structure is **additive** if there are numbers $\theta_j$ and $e_i$ (an easiness, $e_i = -b_i$) and a strictly increasing $F$ with $P_{ji} = F(\theta_j + e_i)$.
+
+**Single cancellation.** If $P_{ji} \ge P_{ki}$ for one item, then $\theta_j \ge \theta_k$ (apply $F^{-1}$ and cancel $e_i$), so $P_{ji'} \ge P_{ki'}$ for every item $i'$. The same argument with the roles swapped says every respondent orders the items the same way.
+
+**Double cancellation.** Take respondents $1, 2, 3$ and items $1, 2, 3$. Suppose $P_{21} \ge P_{12}$ and $P_{32} \ge P_{23}$. Applying $F^{-1}$,
+$$\theta_2 + e_1 \ge \theta_1 + e_2, \qquad \theta_3 + e_2 \ge \theta_2 + e_3.$$
+Add them and cancel $\theta_2 + e_2$ from both sides: $\theta_3 + e_1 \ge \theta_1 + e_3$, that is, $P_{31} \ge P_{13}$. The same holds with every $\ge$ reversed.
+
+**The converse.** Order conditions alone can't produce numbers unless the structure is rich enough: solvability (enough respondents and items that any cell can be matched by moving along a row or a column) and an Archimedean condition (no infinitely large or small differences). Given those, [Luce and Tukey (1964)](https://doi.org/10.1016/0022-2496(64)90015-x) show that the cancellation conditions are enough for additive $\theta$ and $e$ to exist, and that any two such representations are related by $\theta' = \alpha\theta + \beta$, $e' = \alpha e + \gamma$ with $\alpha > 0$. The unit is common to persons and items and determined up to that one $\alpha$. Fixing $F$ as the logistic, as the Rasch model does, fixes $\alpha$ too and leaves only the origin free.
+
+**With sampling error.** The conditions are about probabilities, and we observe proportions. A table of proportions from exactly additive data will violate some conditions by chance, most often where two cells are nearly equal. [Karabatsos (2001)](https://pubmed.ncbi.nlm.nih.gov/12011506/) proposed estimating the probabilities under the order restrictions in a Bayesian model, and [Domingue (2014)](https://doi.org/10.1007/s11336-013-9342-4) evaluated an improved version by simulation and applied it to a reading assessment designed to support an equal-interval scale. The real-data section below uses a simpler descriptive count, with a simulated baseline in place of the Bayesian model.
+:::
+
+What of models that let slopes differ? In the 2PL the curves cross, so no rescaling makes the structure additive. [Lord (1975)](https://doi.org/10.1007/bf02291567) found harder items tending to have steeper slopes in six data sets, and showed that a suitable monotone transformation of the ability scale removes the pattern. With item-specific slopes, $\theta$'s metric is a convention (logistic curves and, in `mirt`, a normal ability distribution with SD 1). So the Rasch model's claim to an interval scale is conditional on fit, and fit can be checked.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two items' curves cross at $\\theta = 1$. Which cancellation condition fails, and can a rescaling of $\\theta$ restore it?",
+  options: [
+    {text: "Single cancellation fails, and no rescaling restores it", correct: true, why: "Below the crossing respondents find one item easier, above it the other. An order-preserving rescaling moves the crossing point's label but can't remove the crossing, so the items' order still depends on the respondent."},
+    {text: "Single cancellation fails, but stretching the scale near $\\theta = 1$ restores it", correct: false, why: "A rescaling keeps every respondent's rank and every probability; it only relabels the horizontal axis. The two curves still cross, at the relabelled point."},
+    {text: "Nothing fails: crossing curves only change the item difficulties", correct: false, why: "Crossing is exactly the case in which item order depends on the respondent, which is what single cancellation rules out."}
+  ]
+})
+```
+
+### Comparisons that need an equal unit, and those that don't
+
+Many questions need no equal unit: who is ahead, when one group's scores sit above the other's everywhere, and percentile ranks survive every rescaling.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): a mean difference keeps its sign under every order-preserving rescaling exactly when one group's distribution **stochastically dominates** the other's; if the curves of shares at or above each score cross, some rescaling reverses the sign.
+:::
+
+A comparison of gains is a difference of differences. If two groups start from the same distribution, as the arms of a randomized trial do, it reduces to the spring comparison, which is safe when one spring distribution dominates the other. If they start in different places, each gain is an interval on its own stretch of the scale, and a rescaling can stretch one stretch and shrink the other.
+
+#### Try it: overlap or not
+
+Two groups, normal with SD 1 in the fall; the low group gains more on the scale as drawn. Pull the groups apart and watch the range of $k$ over which it still does. Gains are in fall-SD units of the rescaled score.
+
+```{ojs}
+//| echo: false
+viewof ov_d = Inputs.range([0, 4], {value: 0, step: 0.1, label: "Distance between the groups' fall means"})
+viewof ov_gl = Inputs.range([0, 2], {value: 1, step: 0.05, label: "Low group's gain"})
+viewof ov_gh = Inputs.range([0, 2], {value: 0.6, step: 0.05, label: "High group's gain"})
+```
+
+```{ojs}
+//| echo: false
+ov_ks = grid(-1.5, 1.5, 61)
+ov_curve = ov_ks.flatMap(k => { const g = rescaledGains(0, ov_gl, ov_d, ov_gh, k); return [{k, gain: g.low, group: "low group"}, {k, gain: g.high, group: "high group"}]; })
+ov_lowAhead = ov_ks.filter(k => { const g = rescaledGains(0, ov_gl, ov_d, ov_gh, k); return g.low > g.high; })
+Plot.plot({
+  width: 700, height: 280,
+  x: {label: "Rescaling k (negative compresses the top)"}, y: {label: "Mean gain (fall SD units)"},
+  color: {legend: true, domain: ["low group", "high group"], range: [palette.contrast, palette.main]},
+  marks: [
+    Plot.ruleX([0], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(ov_curve, {x: "k", y: "gain", stroke: "group", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`${ov_lowAhead.length === ov_ks.length ? "The low group gains more for every k from −1.5 to 1.5." :
+  ov_lowAhead.length === 0 ? "The high group gains at least as much for every k from −1.5 to 1.5." :
+  `The low group gains more for k from ${Math.min(...ov_lowAhead).toFixed(2)} to ${Math.max(...ov_lowAhead).toFixed(2)}; outside that range the order of the gains is reversed.`}`
+```
+
+At distance 0 the low group's larger gain holds for every $k$: both groups start from one distribution, and the low group's spring distribution dominates. At 1 SD apart, $k$ from 0.7 reverses the order, and the further apart the groups, the milder the rescaling that does it. Overlap alone doesn't protect a comparison of gains; a common start does.
+
+::: {.callout-note collapse="true"}
+## Go deeper: when a comparison of gains survives every rescaling
+
+**Assumptions:** scores take finitely many values $s_0 < s_1 < \dots < s_m$. Group A has fall score $X_A$ and spring score $Y_A$; group B has $X_B$ and $Y_B$. A rescaling is a nondecreasing $g$, and the comparison of gains is
+$$D(g) = \big(E[g(Y_A)] - E[g(X_A)]\big) - \big(E[g(Y_B)] - E[g(X_B)]\big).$$
+(Dividing by a positive SD doesn't change its sign.)
+
+**Write each expectation as a sum of steps,** as in [What is measurement?](measurement.qmd): $E[g(X)] = g(s_0) + \sum_k \Delta_k \Pr(X \ge s_k)$ with $\Delta_k = g(s_k) - g(s_{k-1}) \ge 0$. Then
+$$D(g) = \sum_{k=1}^{m} \Delta_k\, c_k, \qquad c_k = \big[\Pr(Y_A \ge s_k) - \Pr(X_A \ge s_k)\big] - \big[\Pr(Y_B \ge s_k) - \Pr(X_B \ge s_k)\big].$$
+Each bracket is the share of a group that crossed the threshold $s_k$ between fall and spring, net of any who fell back below it.
+
+**The condition.** By the argument of the measurement callout, $D(g)$ has the same sign for every nondecreasing $g$ if and only if the $c_k$ all have that sign: at every threshold, group A's net share crossing it is at least group B's.
+
+**Two cases.**
+
+1. *A common start* ($X_A$ and $X_B$ equally distributed, as in a randomized trial). The fall terms cancel and $c_k = \Pr(Y_A \ge s_k) - \Pr(Y_B \ge s_k)$: the condition is dominance of the spring distributions, the measurement lesson's result.
+2. *Separate ranges.* Suppose A's scores lie below some $s_j$ in both waves and B's lie at or above it, and in each group scores rise at some threshold. At a threshold inside A's range, B crosses nothing (it is above it both times), so $c_k \ge 0$, and strictly positive somewhere; inside B's range A crosses nothing, so $c_k \le 0$, and strictly negative somewhere. The $c_k$ take both signs, so some rescaling makes A's gain larger and another makes B's larger. Groups whose scores don't overlap can't have a scale-free answer to "who gained more?"
+
+Metric-free alternatives follow the same logic. [Ho (2009)](https://doi.org/10.3102/1076998609332755) summarizes a gap by $V$, a transformation of the probability that a randomly chosen member of one group outscores a randomly chosen member of the other, which no monotone rescaling can change.
+:::
+
+[Bond and Lang (2013)](https://doi.org/10.1162/rest_a_00370) found the same fragility in gap trends: under plausible rescalings, the widening of the Black–White reading gap between kindergarten and third grade reversed in one national survey and shrank considerably in another.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "On a reading scale, every child in group A scores below every child in group B, in both the fall and the spring. Group A's mean rose by 10 points and group B's by 5. Which conclusion survives every order-preserving rescaling?",
+  options: [
+    {text: "Group A gained more than group B", correct: false, why: "The groups occupy separate stretches of the scale, so a rescaling that compresses A's stretch and stretches B's reverses the order of the gains."},
+    {text: "Group A's scores rose, if A's spring distribution sits above its fall distribution everywhere", correct: true, why: "That is dominance within one group, the measurement lesson's condition applied to spring against fall. It holds on every rescaling."},
+    {text: "Neither: without an interval scale nothing about gains can be said", correct: false, why: "Order-based statements survive: whether a group's scores rose everywhere, and comparisons of percentile ranks, need no unit."}
+  ]
+})
+```
+
+### Gains, growth and vertical scales
+
+A **vertical scale** puts tests for different grades on one scale to measure growth. If you've done [Linking and equating](equating.qmd): the grade tests share items, and IRT linking uses them to put both calibrations on one $\theta$ scale, a step that assumes $\theta$ has an equal unit. [Briggs (2013)](https://doi.org/10.1111/jedm.12011) argues that the interval properties a growth interpretation needs are what conjoint measurement could test.
+
+Two patterns come up when vertical scales are built: growth that decelerates with grade, and within-grade spread that shrinks in the upper grades, which [Yen (1986)](https://doi.org/10.1111/j.1745-3984.1986.tb00252.x) examined as **scale shrinkage**. [Briggs and Weeks (2009)](https://doi.org/10.1111/j.1745-3992.2009.00158.x) built eight vertical scales from one set of Colorado reading data; all showed decelerating growth, by amounts that depended on how each scale was built. Which patterns belong to the children?
+
+#### Try it: stretch a vertical scale
+
+Five grades on a stylized vertical scale, normal with SD 1, with means that grow by 2.0, 1.5, 1.0 and 0.7 from kindergarten to grade 4. The slider applies $f_k$ to the whole scale; bars run one SD either side of each grade mean.
+
+```{ojs}
+//| echo: false
+viewof vs_k = Inputs.range([-0.6, 0.6], {value: 0, step: 0.02, label: "Rescaling k"})
+```
+
+```{ojs}
+//| echo: false
+vs_grades = ["K", "1", "2", "3", "4"]
+vs_mu = [-2.5, -0.5, 1.0, 2.0, 2.7]
+vs_r = vs_mu.map((m, i) => { const r = rescaledNormal(m, 1, vs_k); return {grade: vs_grades[i], mean: r.mean, sd: Math.sqrt(r.variance)}; })
+vs_inc = vs_r.slice(1).map((d, i) => d.mean - vs_r[i].mean)
+Plot.plot({
+  width: 700, height: 300,
+  x: {label: "Grade", domain: vs_grades}, y: {label: "Rescaled score"},
+  marks: [
+    Plot.ruleX(vs_r, {x: "grade", y1: d => d.mean - d.sd, y2: d => d.mean + d.sd, stroke: palette.light, strokeWidth: 6}),
+    Plot.line(vs_r, {x: "grade", y: "mean", stroke: palette.main, strokeWidth: 2}),
+    Plot.dot(vs_r, {x: "grade", y: "mean", r: 5, fill: palette.main})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Growth from grade to grade: ${vs_inc.map(v => v.toFixed(2)).join(", ")}. Growth from grade 3 to 4 is **${(vs_inc[3] / vs_inc[0]).toFixed(2)}** times growth from K to 1, and the SD in grade 4 is **${(vs_r[4].sd / vs_r[0].sd).toFixed(2)}** times the SD in kindergarten.`
+```
+
+At $k = 0$ growth decelerates (the last step is 0.35 of the first) with equal spread in every grade. Near $k = 0.3$ growth is roughly even and the grade 4 spread nearly five times kindergarten's; negative $k$ steepens the deceleration and shrinks the upper grades' spread. Each pattern is one rescaling away from the others, so none is a finding until something fixes the unit. [Briggs and Domingue (2013)](https://doi.org/10.3102/1076998613508317) ask when this matters: for normative comparisons of gain scores, mainly when a scale shows marked shrinkage; for the size of students' growth trajectories, most of all.
+
+### What to do about it
+
+Three habits cover most cases: report what survives every monotone rescaling with confidence; use a metric-free summary such as Ho's $V$ where the claim allows; and check the Rasch model's fit before leaning on $\theta$'s unit. The real-data section does all three.
+
+## Simulate
+
+Every child in this simulation gains exactly one logit between fall and spring. The code generates responses from the Rasch model and from a 2PL whose slopes peak mid-test, fits the Rasch model to each, and compares estimated gains by quarter of the true fall ability (so regression to the mean plays no part). The first run takes 20–30 seconds while R and `mirt` load.
+
+With the seed as written, the Rasch data give gains of 0.98 to 1.06 logits in the four quarters; the 2PL data give 1.43 and 1.40 in the middle quarters against 1.09 and 1.08 at the ends. The Rasch fit stretches the middle of the scale, so children who start there appear to gain more. Set `peak <- 0` and the row flattens. Misfit can manufacture a difference in gains.
+
+```{webr}
+{{< include code/scale-properties-sim.R >}}
+```
+
+[Download this code](code/scale-properties-sim.R) to run it with more children or items in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/scale-properties-irw.R")
+```
+
+The main example is [project_kids_wj_lwid_wave](https://itemresponsewarehouse.org/tables/project_kids_wj_lwid_wave/): the 76-item Letter-Word Identification test of the Woodcock–Johnson III ([Dumont & Willis, 2008](https://doi.org/10.1002/9780470373699.speced2229)), from naming letters to reading hard words, given in Project KIDS ([Hart, Al Otaiba, Connor & Norris, 2021](https://doi.org/10.33009/ldbase.1620837890.bcf8)). Its job is to ask whether gains by starting level survive rescaling. Project KIDS pooled nine studies of reading instruction in North Florida, 2005–2011, from kindergarten to grade 3; each ran for one school year, and the three waves are its fall, winter and spring assessments ([van Dijk, Norris, Al Otaiba, Schatschneider & Hart, 2022](https://doi.org/10.5334/jopd.58)). Items are scored 1 for a correct reading (the test is commercial, so no item text is shown). [Download the code](code/scale-properties-irw.R); it takes about ten minutes.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+Two features of the design need care. The WJ-III has two parallel forms with different words at the same positions, and the IRW table records only the position. We read the form from the Project KIDS total-scores file on LDbase (Hart, Al Otaiba, Connor & Norris, 2021, [*Project KIDS Total Scores Data*](https://doi.org/10.33009/ldbase.1620844399.85a0)) and treat each form's items as distinct: among first graders in the fall, 0.96 read form A's item 13 correctly and 0.80 form B's.
+
+```{r forms}
+#| echo: true
+#| code-fold: show
+```
+
+The second is administration. Each record starts at the first position (the second, in the spring) and stops after a run of wrong answers, so items above a child's ceiling are missing by design; since that depends only on observed responses, the likelihood can ignore it ([Mislevy & Wu, 1996](https://doi.org/10.1002/j.2333-8504.1996.tb01708.x)). Children in grades 2 and 3 almost never miss the first 20 positions (0.998 and 0.997 correct in the fall), consistent with items below a starting point being credited rather than read aloud.
+
+```{r design}
+#| echo: true
+#| code-fold: show
+```
+
+We fit one Rasch model to all three waves, so an item has one difficulty in fall and spring, and estimate each record's $\theta$ by weighted likelihood ([Warm, 1989](https://doi.org/10.1007/BF02294627)), which doesn't pull estimates toward the mean as `mirt`'s default EAP does. The SD of $\theta$ is 3.7 logits, so a logit is a small step here.
+
+```{r fit}
+#| echo: true
+#| code-fold: show
+```
+
+Now the gains, for the 3,009 children with a fall and a spring score, by quarter of fall $\theta$ and by grade.
+
+```{r gains}
+#| echo: true
+#| code-fold: show
+```
+
+The bottom quarter gained 3.2 logits and the top quarter 1.2, with the middle quarters close to the bottom. By grade, growth decelerates: about 3 logits in kindergarten and grade 1, then 1.5 and 1.0 in grades 2 and 3. The quarters' fall ranges don't overlap, so by the Go deeper callout some rescaling reverses the comparison of the bottom and top quarters. How strong a rescaling?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Stretch the top of the $\\theta$ scale with $f_k$. At about what $k$ does the top quarter's gain catch up with the bottom quarter's?",
+  choices: ["About 0.1 (a unit at +2 SD worth 1.5 units at −2 SD)", "About 0.4 (worth about 6)", "About 1.5 (worth about 400)", "Never: the bottom quarter's lead is too large"],
+  answer: "About 0.4 (worth about 6)",
+  reveal: "The gains cross at $k = 0.44$, where a unit at +2 fall SDs counts 5.8 times a unit at −2 SDs. That is a strong rescaling, but the lead of the bottom quarter, more than 2.5 times the top's, disappears under it."
+})
+```
+
+```{r rescale}
+#| echo: true
+#| code-fold: show
+#| fig-width: 9
+#| fig-height: 3.8
+```
+
+At $k = 0.44$ the top quarter's gain (0.57 fall SDs) catches the bottom quarter's, and at $k = 1$ it is more than three times as large. The scatterplot shows why: the bottom quarter lives on a stretch of the scale the top quarter never visits, and $\theta$'s unit is all that makes their intervals comparable.
+
+Part of the bottom quarter's lead is regression to the mean: grouping on the fall score selects children whose fall scores were low partly by chance.
+
+::: {.callout-tip appearance="simple"}
+If you've done [What does a score mean?](score-meaning.qmd): a difference between two error-laden scores is less reliable than either. The first score's error enters the difference with a minus sign, so grouping on the first score builds error into the gains; grouping on a third measurement doesn't.
+:::
+
+```{r rtm}
+#| echo: true
+#| code-fold: show
+```
+
+Grouped on the winter score, the bottom quarter's gain falls from 3.2 to 2.8 and the top's rises from 1.3 to 1.6. The order holds; the gap narrows.
+
+Does the Rasch model give $\theta$ a unit we can trust here? We compare it with a 2PL and look at item fit.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): outfit well below 1 means an item is more predictable than the Rasch model expects (overfit, typically an item that discriminates better than average); well above 1 means noisier (underfit).
+:::
+
+```{r compare}
+#| echo: true
+#| code-fold: show
+```
+
+The 2PL's AIC is lower by about 15,500, the slopes run from 2.4 to 7.1 (10th to 90th percentile), and 113 of the 140 items overfit. But the ceiling rule and credited early items might make responses more predictable whatever the items are. The known answer settles it: a copy of the table simulated from the Rasch model, with the fitted difficulties, each record's $\theta$, and the same forms, starting points and ceiling rule.
+
+```{r simcopy}
+#| echo: true
+#| code-fold: show
+```
+
+The design matters: in the copy, where the Rasch model is true, 78 items overfit and the 2PL still improves the likelihood (a likelihood-ratio statistic of 2,728). The real table goes much further (15,793, and 113 overfitting items). The cancellation count agrees, less sharply, since proportions in thin cells violate the conditions by chance.
+
+```{r cancel}
+#| echo: true
+#| code-fold: show
+```
+
+Double cancellation fails in 12.8% of the triples tested in the real table and 8.2% in the copy. These items discriminate unequally, as naming a letter and reading a rare word might; the Rasch model's licence for the unit is weaker here than for a Rasch-generated copy.
+
+Finally, a comparison that needs almost no unit. Four of the studies randomized classrooms or schools to business-as-usual instruction or to Individualized Student Instruction (ISI), in which software recommends how much of each kind of reading instruction each child gets ([Connor, Morrison, Fishman, Schatschneider & Underwood, 2007](https://doi.org/10.1126/science.1134513)). (The two studies that compared ISI with a vocabulary intervention are left out; see *For instructors*.) Randomization gives the two arms the same fall distribution in expectation, case 1 of the Go deeper callout.
+
+```{r treatment}
+#| echo: true
+#| code-fold: show
+```
+
+ISI's effect on the gain is 0.06 fall SDs on $\theta$, between 0.04 and 0.07 for $k$ from −1 to 0.5, 0.02 at $k = 1$ and −0.004 at $k = 1.5$, a rescaling that counts a unit at +2 SDs about 400 times one at −2 SDs. The sign holds across a far wider range of rescalings than the comparison of quarters did. (These standard errors ignore the clustering, so they are too small; the sign is the point.)
+
+So what would I report from these data? That the ISI arms gained more, by an amount that depends somewhat on the scale; and that children who started lower gained more, as a hypothesis whose sign turns on the spacing of a scale the Rasch model describes only partly. In general I treat $\theta$ from a well-fitting Rasch model as the best interval scale we have, and comparisons of gains across distant parts of any scale as hypotheses, not findings. A scale earns its unit one fit at a time.
 
 ## Problems
 
+1. **Cancellation, derived and broken.** Show that the Rasch model's probabilities satisfy double cancellation for every choice of three respondents and three items. Then construct a 2PL example (three respondents, three items) in which double cancellation fails.
+2. **Gains on a 2PL scale.** Redo the gain comparison with $\theta$ from the 2PL. Does the order of the quarters' gains change? Where does the crossing $k$ move from 0.44, and why?
+3. **Caught up?** A district reports that its lowest readers "caught up" with average readers between grades 3 and 5 on a vertically scaled test. What would you need to know before believing it? Which parts of the claim could be checked without an equal unit?
+4. **Design a test of the unit.** You are building a reading scale for grades 1 to 6. What data, which check, and what result would persuade you that it is equal-interval?
+5. **A metric-free comparison.** For the ISI contrast, compute Ho's $V = \sqrt 2\, \Phi^{-1}(P)$ for spring $\theta$, where $P$ is the probability that a random treated child outscores a random control child ([Ho, 2009](https://doi.org/10.3102/1076998609332755)). Compare it with the standardized mean difference, and show that $V$ doesn't move under rescaling.
+6. **Challenge: what would convince them?** [Michell (2000)](https://doi.org/10.1177/0959354300105004) argues that psychometrics treats its attributes as quantitative without testing it; [Borsboom and Mellenbergh (2004)](https://doi.org/10.1177/0959354304040200) answer that fitting item response models tests it jointly with other assumptions. What evidence would satisfy each, and would any satisfy both? This is open.
+
+```{r}
+#| output: asis
+ask_claude("scale-properties", "It covers what an equal-interval scale would be (Stevens, Michell, Borsboom and Mellenbergh), additive conjoint measurement and the cancellation conditions, what the Rasch model licenses about the unit of theta and why that depends on fit, when comparisons of gains and gaps survive order-preserving rescalings, vertical scales and growth, and an analysis of fall-to-spring gains on the Woodcock-Johnson Letter-Word Identification test in Project KIDS with mirt in R.")
+```
+
 ## Going further
 
-- Fischer, G. H. (2017). Measuring change using Rasch models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 387–404). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on measuring change with Rasch models.
+- Luce, R. D., & Tukey, J. W. (1964). Simultaneous conjoint measurement: A new type of fundamental measurement. *Journal of Mathematical Psychology*, 1(1), 1–27. <https://doi.org/10.1016/0022-2496(64)90015-x>. Where a unit from order alone comes from.
+- Perline, R., Wright, B. D., & Wainer, H. (1979). The Rasch model as additive conjoint measurement. *Applied Psychological Measurement*, 3(2), 237–255. <https://doi.org/10.1177/014662167900300213>. The connection, with two worked data sets.
+- Karabatsos, G. (2001). The Rasch model, additive conjoint measurement, and new models of probabilistic measurement theory. *Journal of Applied Measurement*, 2(4), 389–423. <https://pubmed.ncbi.nlm.nih.gov/12011506/>. Testing the cancellation conditions when responses carry error.
+- Domingue, B. (2014). Evaluating the equal-interval hypothesis with test score scales. *Psychometrika*, 79(1), 1–19. <https://doi.org/10.1007/s11336-013-9342-4>. A Bayesian check of the conditions, evaluated by simulation and applied to a reading test.
+- Kyngdon, A. (2008). The Rasch model from the perspective of the representational theory of measurement. *Theory & Psychology*, 18(1), 89–109. <https://doi.org/10.1177/0959354307086924>. A dissent: the Rasch model read against the representational theory of measurement.
+- Michell, J. (2000). Normal science, pathological science and psychometrics. *Theory & Psychology*, 10(5), 639–667. <https://doi.org/10.1177/0959354300105004>. The argument Borsboom and Mellenbergh answer.
+- Lord, F. M. (1975). The 'ability' scale in item characteristic curve theory. *Psychometrika*, 40(2), 205–217. <https://doi.org/10.1007/bf02291567>. The metric of $\theta$ as a choice.
+- Briggs, D. C. (2013). Measuring growth with vertical scales. *Journal of Educational Measurement*, 50(2), 204–226. <https://doi.org/10.1111/jedm.12011>. What a vertical scale's interval claim would need.
+- Briggs, D. C., & Domingue, B. W. (2013). The gains from vertical scaling. *Journal of Educational and Behavioral Statistics*, 38(6), 551–576. <https://doi.org/10.3102/1076998613508317>. When the choice of vertical scale changes conclusions about gains.
+- Briggs, D. C., & Weeks, J. P. (2009). The impact of vertical scaling decisions on growth interpretations. *Educational Measurement: Issues and Practice*, 28(4), 3–14. <https://doi.org/10.1111/j.1745-3992.2009.00158.x>. Eight vertical scales from one data set.
+- Yen, W. M. (1986). The choice of scale for educational measurement: An IRT perspective. *Journal of Educational Measurement*, 23(4), 299–325. <https://doi.org/10.1111/j.1745-3984.1986.tb00252.x>. Criteria for choosing a scale, and scale shrinkage.
+- Bond, T. N., & Lang, K. (2013). The evolution of the Black-White test score gap in grades K–3: The fragility of results. *Review of Economics and Statistics*, 95(5), 1468–1479. <https://doi.org/10.1162/rest_a_00370>. Gap trends under rescaling.
+- Bond, T. N., & Lang, K. (2018). The Black–White education scaled test-score gap in grades K-7. *Journal of Human Resources*, 53(4), 891–917. <https://doi.org/10.3368/jhr.53.4.0916.8242r>. A unit borrowed from eventual educational attainment.
+- Ho, A. D. (2009). A nonparametric framework for comparing trends and gaps across tests. *Journal of Educational and Behavioral Statistics*, 34(2), 201–228. <https://doi.org/10.3102/1076998609332755>. Gap statistics that no rescaling changes.
+- Reardon, S. F., & Ho, A. D. (2015). Practical issues in estimating achievement gaps from coarsened data. *Journal of Educational and Behavioral Statistics*, 40(2), 158–189. <https://doi.org/10.3102/1076998615570944>. Metric-free gaps when only proficiency categories are reported.
+- Ballou, D. (2009). Test scaling and value-added measurement. *Education Finance and Policy*, 4(4), 351–383. <https://doi.org/10.1162/edfp.2009.4.4.351>. What scaling does to value-added estimates.
+- Jacob, B., & Rothstein, J. (2016). The measurement of student ability in modern assessment systems. *Journal of Economic Perspectives*, 30(3), 85–108. <https://doi.org/10.1257/jep.30.3.85>. What test scales can and can't support, for economists.
 
 ```{r}
 #| output: asis
@@ -31,3 +468,8 @@ data_sources("scale-properties")
 
 ## For instructors
 
+- **Source:** new for this course (#66); no EDUC 252 slides. Built from the measurement-theory literature (Luce & Tukey; Michell; Borsboom & Mellenbergh; Perline, Wright & Wainer) and the literature on gains, growth and gaps (Yen; Briggs & Weeks; Briggs; Briggs & Domingue; Bond & Lang; Ho). The Project KIDS analysis is new.
+- **Timing:** about 60 minutes for the core ideas and widgets; the real-data section works as a 30-minute lab, and its code takes about ten minutes to run.
+- **Data notes:** the WJ-III form (A or B) is read from the Project KIDS total-scores file, matched on the IRW's id, which is the row number of the Project KIDS files; the code checks the match against the project column. The treatment contrast uses only the four studies that compared ISI with business-as-usual instruction (projects 1, 2, 5 and 6). In the two that compared ISI with a vocabulary intervention (projects 7 and 8), the group coded `treat = 1` has the size that the data paper ([van Dijk et al., 2022](https://doi.org/10.5334/jopd.58)) gives for the vocabulary arm, so which arm is which is unclear from the table.
+- **Held back:** DIF as a source of group gaps (items, not the scale, differ across groups) is in [Differential item functioning](dif.qmd); treatment effects on latent scales, and constructs that change, are in [Measurement invariance under treatment and life events](invariance-experience.qmd); reporting scales (nonlinear transformations of $\theta$) are in [What does a score mean?](score-meaning.qmd). A formal Bayesian test of the cancellation conditions across the IRW, following Domingue (2014), is not attempted.
+- **Solutions:** held back in `solutions/scale-properties.qmd` (not published).
