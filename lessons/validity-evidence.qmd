@@ -272,28 +272,29 @@ quiz({
 
 ### What a complete argument would need
 
-Everything above comes from item responses and a few covariates, which is what an IRW table holds: internal structure, agreement with other measures, a criterion, a classification. That backs some links of an argument, not all of them. A complete argument for a use needs evidence gathered for that use, in its setting, and much of it isn't response data at all. What would the rest look like? Take a hypothetical case, close to our writing data: a college places incoming students in a first-year writing support course when they score below a cut on a writing test.
+Everything above comes from item responses and a few covariates, which is what an IRW table holds, and it backs only some links of an argument. What would the rest look like? [Shepard (1993, pp. 431–432)](https://doi.org/10.3102/0091732X019001405) sets out an example from [Kane (1992, pp. 531–532)](https://doi.org/10.1037/0033-2909.112.3.527): an algebra test used to send college students either to calculus or to a remedial algebra course. The argument for that use rests on seven assumptions, paraphrased in the table with the evidence each needs.
 
 ::: {.callout-note appearance="simple"}
-## A worked specification (hypothetical): placement in a writing support course
+## Kane's placement argument, and what the IRW could supply
 
-| Claim in the argument | Evidence needed | In the IRW? |
+| Assumption (after Kane, 1992, as listed by Shepard, 1993, pp. 431–432) | Evidence needed | In the IRW? |
 |---|---|---|
-| **Scoring:** prompts and rubric reward writing, not unrelated skills | Expert review of prompts and rubric against the course's goals; think-alouds with students ([From construct map to items](instrument-building.qmd)); rater training and agreement | Partly: some tables hold ratings by several raters; reviews and think-alouds, no |
-| **Generalization:** a student would be placed the same way with another prompt or rater | Reliability across prompts and raters ([Many sources of error](g-theory.qmd)); the standard error near the cut ([What does a score mean?](score-meaning.qmd)) | Partly: only where a table has several prompts or raters per student |
-| **Across groups:** the test works the same way for multilingual students and others | Item-level bias ([Differential item functioning](dif.qmd)); differential prediction of the criterion by group | Partly: DIF needs a group covariate, which some tables have; differential prediction also needs the criterion by group |
-| **Extrapolation:** scores predict success in the regular course | Grades in the regular course for students across the whole score range | Partly: a few tables carry grades, as ours does, but not for students placed by this test |
-| **Decision:** the cut places the right students | The cut's rationale; accuracy against an independent judgment of who needs support | No |
-| **Consequences:** the support course helps the students it receives, and doesn't harm particular groups | Outcomes (pass rates, credits, time to degree, cost) for students just above and just below the cut, by group; students' and instructors' accounts | No |
-
-The rows marked "no" need institutional records, a study built around the cut, and interviews and expert panels. A response warehouse can't hold them, because they aren't responses. The partial rows are where IRW data can rehearse an analysis that a validity study would repeat on its own data. [Shepard (1993)](https://doi.org/10.3102/0091732X019001405) reviews how test validity is evaluated.
+| 1. The algebra skills tested are used heavily in calculus, so they are prerequisites | Analysis of the calculus course: its materials, tasks and instructors' judgments | No |
+| 2. The test's content matches those skills | Expert review of the items against the course ([From construct map to items](instrument-building.qmd)) | No: some tables have item text, but not the course to match it to |
+| 3. Scores generalize across items, occasions and scorers | Reliability, and the standard error near the cut ([Many sources of error](g-theory.qmd); [What does a score mean?](score-meaning.qmd)) | Yes, where a table has the design (several forms, occasions or raters) |
+| 4. No systematic error biases scores as measures of algebra skill | Response processes (think-alouds, speededness) and bias for groups ([Differential item functioning](dif.qmd)) | Partly: DIF needs a group covariate, which some tables have |
+| 5. A suitable measure of success in calculus exists | A criterion defined for the course, independent of the test | Partly: a few tables carry grades, as ours does |
+| 6. The remedial course teaches the algebra that calculus uses | A study of what students learn in the remedial course | No |
+| 7. Students with strong algebra wouldn't gain much from the remedial course | Outcomes by score for students in each course, which is where the decision's consequences show | No |
 :::
+
+Shepard's point about this list is that several studies backing the first three assumptions can't make up for missing evidence on the fifth and sixth (p. 432). For placement in particular she puts the effects of the placement at the centre: students on each side of the cut should end up better off than they would have been without the test (p. 441). Her own cases (the SAT, the General Aptitude Test Battery, and placement in special education and two-year kindergartens; pp. 432–443) follow the same pattern. Response data are strongest on assumptions 3 and 4, the ones that can't compensate for the rest. The others need course records, studies of instruction and outcomes across the cut, gathered for that use in that setting.
 
 ## Simulate
 
-The code is base R and runs in under a second. Part 1 draws 20,000 applicants whose predictor and criterion correlate 0.5 and selects the top half, either on the predictor (direct) or on a third variable related to the predictor and to what it misses in the criterion (indirect). Part 2 draws a screener whose cases score 2 SDs higher, cuts it at 1.2, and compares base rates of 3% and 30%.
+Part 1 draws 20,000 applicants whose predictor and criterion correlate 0.5 and selects the top half, either on the predictor (direct) or on a third variable related to the predictor and to what it misses in the criterion (indirect). Part 2 draws a screener whose cases score 2 SDs higher, cuts it at 1.2, and compares base rates of 3% and 30%.
 
-With the seed as written, direct selection lowers the correlation to 0.33 and case II returns 0.50, the pool's value; indirect selection lowers it to 0.27 and case II returns only 0.32. In part 2, sensitivity (about 0.79) and specificity (about 0.88) barely move while the PPV goes from 0.175 to 0.749. Try `keep <- 0.2`; then set the 0.4 in the line defining `z` to 0. Is indirect selection still a problem?
+With the seed as written, direct selection lowers the correlation to 0.33 and case II returns 0.50, the pool's value; indirect selection lowers it to 0.27 and case II returns only 0.32. In part 2, sensitivity (about 0.79) and specificity (about 0.88) barely move while the PPV goes from 0.175 to 0.749. Then set the 0.4 in the line defining `z` to 0: is indirect selection still a problem?
 
 ```{webr}
 {{< include code/validity-evidence-sim.R >}}
@@ -347,7 +348,7 @@ Trait alphas run from 0.80 to 0.84 (self) and 0.82 to 0.88 (colleague); 393 empl
 #| fig-height: 6
 ```
 
-The validity values run from 0.26 (Honesty-Humility) to 0.52 (Openness), well above the average absolute correlation of different traits by different methods (0.06) or by the same method (0.13). De Vries et al. (2022, Introduction) cite self–other agreement of about 0.30 to 0.55 in earlier studies; two colleagues rating the same person give a baseline from these data:
+The validity values run from 0.26 (Honesty-Humility) to 0.52 (Openness), well above the average absolute correlation of different traits by different methods (0.06) or by the same method (0.13). Two colleagues rating the same person give another baseline:
 
 ```{r raters}
 #| echo: true
@@ -361,7 +362,7 @@ For 357 targets, two colleagues agree at 0.30 to 0.58, much as each agrees with 
 #| code-fold: show
 ```
 
-Every validity value beats its ten heterotrait–heteromethod values, and the trait correlations follow much the same pattern in both methods (the two sets correlate 0.87). But Honesty-Humility's validity value, 0.26, is below its correlation with Agreeableness within self-reports (0.32) and within colleagues' ratings (0.37), and Agreeableness only just passes (0.38 against 0.37). Within either method, Honesty-Humility and Agreeableness move together more than two views of Honesty-Humility do.
+Every validity value beats its ten heterotrait–heteromethod values, and the trait correlations follow much the same pattern in both methods (the two sets correlate 0.87). But Honesty-Humility's validity value, 0.26, is below its correlation with Agreeableness within self-reports (0.32) and within colleagues' ratings (0.37), and Agreeableness only just passes (0.38 against 0.37).
 
 Shared method or close traits? The overlap appears in self-reports too, which points to the traits; [Ashton and Lee (2007)](https://doi.org/10.1177/1088868306294907) relate both to reciprocal altruism. De Vries et al. note that employees chose their own raters, who may have liked them. Liking would add to the overlap in colleagues' ratings only, where it is a little larger (0.37 against 0.32).
 
@@ -390,7 +391,7 @@ Alpha is 0.95, and 526 students have a grade and a GPA. The SAT column merits a 
 #| code-fold: show
 ```
 
-116 students have an SAT total of 1036.86, a value no test reports and close to the mean of the others (1038): probably a missing score filled in with the mean, though the documentation doesn't say. A constant can't track grades, so these 116 pull the SAT–grade correlation from 0.49 down to 0.43. We keep the 410 students with a reported score.
+116 students have an SAT total of 1036.86, a value no test reports and close to the mean of the others (1038): probably a missing score filled in with the mean, though the documentation doesn't say. These 116 pull the SAT–grade correlation from 0.49 down to 0.43. We keep the 410 students with a reported score.
 
 ```{ojs}
 //| echo: false
@@ -411,7 +412,7 @@ Confidence correlates 0.07 with course grade and 0.08 with GPA; SAT, 0.49 and 0.
 
 ### Restricting the range
 
-What would a college that admitted only the top half of these students on SAT find?
+Suppose a college had admitted only the top half of these students on SAT.
 
 ```{r restrict}
 #| echo: true
@@ -450,7 +451,8 @@ ask_claude("validity-evidence", "It covers sources of validity evidence matched 
 - Widaman, K. F. (1985). Hierarchically nested covariance structure models for multitrait-multimethod data. *Applied Psychological Measurement*, 9(1), 1–26. <https://doi.org/10.1177/014662168500900101>. The MTMM matrix as a factor model with trait and method factors.
 - Sireci, S., & Faulkner-Bond, M. (2014). Validity evidence based on test content. *Psicothema*, 26(1), 100–107. <https://doi.org/10.7334/psicothema2013.256>. How content evidence is gathered and summarized.
 - Rios, J., & Wells, C. (2014). Validity evidence based on internal structure. *Psicothema*, 26(1), 108–116. <https://doi.org/10.7334/psicothema2013.260>. Dimensionality, reliability and invariance as internal-structure evidence.
-- Shepard, L. A. (1993). Evaluating test validity. *Review of Research in Education*, 19, 405–450. <https://doi.org/10.3102/0091732X019001405>. A review chapter on evaluating test validity.
+- Shepard, L. A. (1993). Evaluating test validity. *Review of Research in Education*, 19, 405–450. <https://doi.org/10.3102/0091732X019001405>. Validity as the evaluation of a test use, with Kane's placement argument and cases on the SAT, the GATB and placement in special education and kindergarten.
+- Kane, M. T. (1992). An argument-based approach to validity. *Psychological Bulletin*, 112(3), 527–535. <https://doi.org/10.1037/0033-2909.112.3.527>. The placement argument in the table.
 - Lane, S. (2014). Validity evidence based on testing consequences. *Psicothema*, 26(1), 127–135. <https://doi.org/10.7334/psicothema2013.258>. The source of evidence this lesson doesn't reach.
 - Hunsley, J., & Meyer, G. J. (2003). The incremental validity of psychological testing and assessment: Conceptual, methodological, and statistical issues. *Psychological Assessment*, 15(4), 446–455. <https://doi.org/10.1037/1040-3590.15.4.446>. How to design and read an incremental-validity study.
 - Sackett, P. R., & Yang, H. (2000). Correction for range restriction: An expanded typology. *Journal of Applied Psychology*, 85(1), 112–118. <https://doi.org/10.1037/0021-9010.85.1.112>. The kinds of selection, and the correction each needs.
