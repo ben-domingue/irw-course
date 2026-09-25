@@ -175,6 +175,13 @@ frac20:
   link: https://doi.org/10.1111/1467-9876.00272
   license: GPL-3.0
   irw_version: IRW v418
+gcbs_brotherton_2013_vcl:
+  reference: 'Brotherton, R., French, C. C., & Pickering, A. D. (2013). Measuring
+    belief in conspiracy theories: The generic conspiracist beliefs scale. Frontiers
+    in psychology, 4, 279.'
+  link: https://doi.org/10.3389/fpsyg.2013.00279
+  license: CC BY 4.0
+  irw_version: IRW v418
 genpsych_russell_2024_gpt4o:
   reference: 'Russell-Lasalandra, L. L., Christensen, A. P., & Golino, H. (2024, September
     12). Generative Psychometrics via AI-GENIE: Automatic Item Generation and Validation
