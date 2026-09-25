@@ -265,7 +265,7 @@ lessons:
     origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
     tables: [verbagg, trog_brinchmann_2019, imps2025_hf]
     reuses: [verbagg]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: cdm
