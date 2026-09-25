@@ -28,6 +28,7 @@ Articles checked on Crossref (09-24); arXiv preprints on arXiv. Claude's to-do b
 - Psychometrics of AI benchmarks → unpaid (problem 6).
 - Pointers, not hooks (those lessons come earlier or alongside): distractor analysis with the nominal model; differential functioning of machine scores (Alvero et al.); adaptive testing with predicted difficulties.
 - Difficulties predicted for new, uncalibrated items → `item-banks-cat` (an "if you've done" Recall there, E2).
+- Human and machine raters: rater effects and automated scoring engines → `rater-models` (an "if you've done" pointer; cite Casabianca et al., 2023, *JEM*, doi:10.1111/jedm.12360, verified on Crossref by the rater-models outline, and Lewis & Casabianca, 2026, doi:10.1111/emip.70017, for agreement statistics).
 
 ## Tables
 

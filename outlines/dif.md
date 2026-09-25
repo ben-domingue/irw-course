@@ -26,6 +26,7 @@ Crossref-checked 09-24 unless marked.
 - Items that work differently for different groups (from `instrument-building`, not an ancestor: E2).
 - Group differences that remain after linking (from `parameter-invariance`, extension: E2).
 - Polytomous DIF, PS8#3: problem 3 teaches it self-contained; for readers who've done `polytomous`, an "if you've done" Recall (E2). `dif` doesn't depend on `polytomous` (E1).
+- Impact vs. bias; invariance in general; the Cleary artefact and the matching problem as one mechanism (from `fairness`, now a prerequisite).
 
 ## Promises / leaves open
 

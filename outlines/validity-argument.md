@@ -29,6 +29,7 @@ For *Going further*: Hubley & Zumbo (2011), doi:10.1007/s11205-011-9843-4 (conse
 - The same scores, two uses: an outcome for evaluating an intervention vs. a measure of the construct → `invariance-experience`.
 - Consequences as evidence (Campbell's law; score reports that are never studied) → unpaid.
 - Decision inferences and cut scores: a pointer to `score-meaning`, which isn't a descendant (E2; no hook).
+- Construct-irrelevant variance as the root of unfairness → `fairness`.
 
 ## Tables
 

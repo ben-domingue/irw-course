@@ -511,6 +511,7 @@ threads:
     returns:
       - {lesson: validity-evidence, how: corrects validity coefficients for it}
       - {lesson: sem, how: removes it by modelling the latent variables}
+      - {lesson: fairness, how: shows unreliability producing intercept differences between groups}
   - id: unidimensionality
     idea: One factor accounts for the item correlations
     introduced: fa-exploratory
@@ -613,6 +614,7 @@ threads:
       - {lesson: validity-argument, how: argues for it}
       - {lesson: information, how: measures precision}
       - {lesson: item-banks-cat, how: delivers it quickly}
+      - {lesson: fairness, how: tests insensitivity for a whole scale}
   - id: probes
     idea: "Constructs are measured through probes"
     introduced: measurement
@@ -703,3 +705,22 @@ threads:
     introduced: validity-argument
     returns:
       - {lesson: validity-evidence, how: looks for an independent criterion}
+
+  # Pass 5 (09-25): proposed by the wave-3 drafts (#146-#148, #156); returns kept only
+  # where they are descendants of the introducing lesson (E2).
+  - id: impact-not-bias
+    idea: "A group difference is impact unless the measure works differently"
+    introduced: fairness
+    returns:
+      - {lesson: dif, how: matches on the other items to separate the two}
+      - {lesson: invariance-experience, how: uses treatment as the grouping}
+  - id: shared-shift
+    idea: "A bias shared by every item is invisible to invariance tests"
+    introduced: fairness
+    returns:
+      - {lesson: dif, how: shows DIF is relative to the anchor}
+  - id: treatment-dif
+    idea: "Items can function differently by treatment"
+    introduced: dif
+    returns:
+      - {lesson: invariance-experience, how: models item-level treatment effects}

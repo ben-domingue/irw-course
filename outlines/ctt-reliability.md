@@ -32,6 +32,7 @@ Nothing dropped in the retrofit.
 - Many sources of error at once → `g-theory`.
 - Attenuation (problem 2) → `validity-evidence`, `sem`.
 - Reliability is necessary but not sufficient for validity → `validity-argument` (a Recall of alpha).
+- Reliability bounds any correlation, and unreliability can mimic group differences in intercepts → `fairness`.
 
 ## Tables
 

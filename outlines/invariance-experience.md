@@ -25,6 +25,7 @@ Crossref-checked 09-24 unless marked.
 - Group differences that remain after linking (from `parameter-invariance`, extension: E2).
 - Multigroup SEM (from `sem`, extension: E2).
 - Reliable change assumes the same construct at both waves (from `score-meaning`, not an ancestor: E2).
+- Treatment as a grouping variable; impact vs. bias (from `fairness`, via `dif`).
 
 ## Promises / leaves open
 

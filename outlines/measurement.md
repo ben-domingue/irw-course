@@ -30,6 +30,7 @@ Scope (digest E11): this lesson keeps the levels of measurement, the claim that 
 - Is the attribute quantitative? (Michell) → `scale-properties`; is it really there? (realism) → `validity-causal`.
 - Insensitive to nonfocal attributes → `dif`, `validity-argument`.
 - Calibrated to the task; precise quickly → `information`, `item-banks-cat`.
+- Insensitivity to nonfocal attributes, tested for a whole scale → `fairness`.
 
 ## Tables
 

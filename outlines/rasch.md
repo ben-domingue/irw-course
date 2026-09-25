@@ -47,6 +47,7 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 - What sufficiency, specific objectivity and "no origin" license for an equal-interval scale; outfit and infit as evidence → `scale-properties`.
 - Attribute counts against sum scores → `cdm`; the Rasch model as a model for paired comparisons → `competitions`; the Rasch curve under response time → `response-time`; monotonicity and local independence relaxed → `unfolding`.
 - The scale has no origin, as rotation has no frame in factor analysis: an "if you've done `fa-exploratory`" Recall (E2).
+- Raters as a facet: the many-facet Rasch model → `rater-models` (an extension).
 
 ## Tables
 
