@@ -31,6 +31,7 @@ All references above were checked on Crossref (09-24).
 - Graded response model in its own right → `polytomous`.
 - Invariance item by item, with a matching variable instead of a factor model → `dif` (which recalls idea 5 as "if you've done `fa-confirmatory`", E2), `invariance-experience`.
 - Omega as the reliability of a reported score → `score-meaning` (an "if you've done" Recall there).
+- Multigroup CFA and the invariance ladder, recalled for whole-scale fairness → `fairness` (an "if you've done" Recall there, E2).
 
 ## Tables
 

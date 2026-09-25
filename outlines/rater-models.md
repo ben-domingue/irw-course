@@ -21,6 +21,7 @@ References verified 09-25 against Crossref; table citations from IRW biblio (`le
 - The Rasch model, one logit scale, the Wright map, infit and outfit, sufficiency (from `rasch`).
 - The rating-scale model, restated in a paragraph (if you've done `polytomous`, E2; see Open questions).
 - Raters as random effects in `glmer` (if you've done `explanatory-irt`, E2).
+- Human and machine raters in automated scoring (from `ai-psychometrics`, not an ancestor: an "if you've done" Recall, E2).
 
 ## Promises / leaves open
 
