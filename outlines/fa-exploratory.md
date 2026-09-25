@@ -19,8 +19,8 @@ All references checked on Crossref (09-24, #11). Two claims were dropped rather 
 
 - Alpha is not unidimensionality; tau-equivalence (from `ctt-reliability`): Recall callout in idea 1; problem 2.
 - Reverse keying (from `ctt-reliability`): Recall callout where the BFI-2's keying is checked.
-- Wording direction as a second dimension (from `instrument-building`, a stub): Recall of its outline's idea 4 in *What this is for*.
-- Constructs; unidimensionality as a property of a construct map (from `constructs`, a stub): not recalled explicitly; the lesson defines unidimensionality in factor terms.
+- Wording direction as a second dimension (from `instrument-building`; thread `wording-direction`): Recall in *What this is for*, updated in the Recall pass (#11) to what that lesson found (the Rosenberg scale's two blocks, 0.71 and 0.61 within, 0.23 across; second eigenvalue 2.32). *With real data* now checks the BFI-2 for the same pattern (chunk `wording`, key from Soto & John, 2017): within domains, same- and opposite-direction pairs both have median correlation 0.35, so the BFI-2 shows at most a trace of a wording dimension.
+- Constructs; unidimensionality as a property of a construct map (from `constructs`): not recalled explicitly; the lesson defines unidimensionality in factor terms.
 
 ## Promises / leaves open
 

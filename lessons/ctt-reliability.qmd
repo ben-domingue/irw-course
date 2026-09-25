@@ -214,10 +214,10 @@ quiz({
 ### Item analysis, and reading your items
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [Item response data and the IRW](irw-data.qmd): IRW tables are *long*, one row per respondent–item response, so an item analysis starts by reshaping to one row per respondent; item means and sum scores are then column and row sums.
+**Recall** from [Item response data and the IRW](irw-data.qmd): IRW tables are *long*, one row per respondent–item response, so an item analysis starts by reshaping to one row per respondent; item means and sum scores are then column and row sums. Item means and item-rest correlations were two of that lesson's four first descriptives.
 :::
 
-CTT also offers the simplest tools for looking at individual items. For each item we compute:
+CTT gives those two first-look numbers their classical roles. For each item we compute:
 
 - its **mean** (for 0/1 items, the proportion correct, often called the item's *p*-value), a first indication of difficulty, where larger values mean easier items;
 - its **item-rest correlation**: the correlation between the item and the sum of the *other* items. This tells us whether the item is hanging together with the rest. An item with a correlation near zero, or negative, is either measuring something else or is keyed backwards.
@@ -287,6 +287,10 @@ The left-hand curve is the raw correlation between the two halves of each random
 ### Reverse keying: the Mach IV
 
 The Mach IV is answered on a six-point scale, from 0 (strongly disagree) to 5 (strongly agree). Half its items are worded so that agreeing is the Machiavellian answer; for the other half, agreeing is the *less* Machiavellian answer. The IRW table stores the responses as given, unkeyed.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): the Mini-IPIP's ten reverse-worded items arrived already reverse-scored, although the deposit's codebook suggested otherwise; every within-trait correlation came out positive, and that settled it. The rule there: learn from the documentation which way each item should run, then check it in the data, because neither is enough alone.
+:::
 
 ```{ojs}
 //| echo: false

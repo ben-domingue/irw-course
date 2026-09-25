@@ -344,7 +344,7 @@ Go one step further and fit a separate regression for each problem.
 #| fig-height: 6
 ```
 
-The slopes run from essentially zero to about 2. Two of the flat ones are flat for different reasons. Y31 is the easiest problem in the test (98% of players solve it), and when nearly everyone succeeds there is little room for Elo to matter. Y15 is another matter. It is about as hard as Y29 (8% and 7% of players solve them), yet success on Y29 rises steeply with Elo and success on Y15 barely moves. Hold on to Y15: when we fit the Rasch model to these data in [The Rasch model](rasch.qmd), it is the item that fits worst. Slopes that differ from item to item are the subject of [From the 1PL to the 4PL](1pl-to-4pl.qmd).
+The slopes run from essentially zero to about 2. Two of the flat ones are flat for different reasons. Y31 is the easiest problem in the test (98% of players solve it), and when nearly everyone succeeds there is little room for Elo to matter. Y15 is another matter. It is about as hard as Y29 (8% and 7% of players solve them), yet success on Y29 rises steeply with Elo and success on Y15 barely moves. Hold on to Y15: when we fit the Rasch model to these data in [The Rasch model](rasch.qmd), it is among the items that fit worst. Slopes that differ from item to item are the subject of [From the 1PL to the 4PL](1pl-to-4pl.qmd).
 
 Finally, a question to carry forward. Elo is an unusually good predictor, and most item response data come with nothing like it. What if we had no Elo at all, and instead gave each *player* an unknown parameter of their own, estimated from their responses alongside the problems' intercepts? That is a logistic regression with nothing observed on the right-hand side, and it is [the Rasch model](rasch.qmd).
 

@@ -42,6 +42,19 @@ off <- lower.tri(R)
 round(c(within_domain = median(R[off & outer(domain, domain, "==")]),
         between_domains = median(R[off & outer(domain, domain, "!=")])), 2)
 
+## ---- wording
+# Reverse-worded items, from the BFI-2 scoring key (Soto & John, 2017). They arrive
+# already reversed; here we only ask whether items worded in the same direction
+# correlate more than items worded in opposite directions.
+reversed <- seq_len(60) %in% c(3, 4, 5, 8, 9, 11, 12, 16, 17, 22, 23, 24, 25, 26, 28,
+                               29, 30, 31, 36, 37, 42, 44, 45, 47, 48, 49, 50, 51, 55, 58)
+same_dom <- outer(domain, domain, "==")
+same_dir <- outer(reversed, reversed, "==")
+round(c(same_domain_same_direction = median(R[off & same_dom & same_dir]),
+        same_domain_opposite       = median(R[off & same_dom & !same_dir]),
+        other_domain_same_direction = median(R[off & !same_dom & same_dir]),
+        other_domain_opposite       = median(R[off & !same_dom & !same_dir])), 2)
+
 ## ---- parallel
 set.seed(252)
 pa <- fa.parallel(R, n.obs = nrow(resp), fa = "fa", n.iter = 20, plot = TRUE,

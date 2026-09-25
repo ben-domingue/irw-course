@@ -18,7 +18,7 @@ Nothing dropped in the retrofit.
 
 - Long to wide, item means, sum scores (from `irw-data`; Recall callout at *Item analysis*).
 - Constructs; a scale is meant to measure one thing (from `constructs`; linked in *What this is for*).
-- Keying: already-reversed items in the Mini-IPIP (from `irw-data`). Not recalled explicitly: `irw-data` is still a stub; the cross-check should add a Recall once it is drafted.
+- Keying: already-reversed items in the Mini-IPIP, and the rule "documentation first, then check in the data" (from `irw-data`; thread `keying-check`): Recall callout at the start of the Mach IV section (Recall pass, #11). The *Item analysis* Recall also notes that item means and item-rest correlations were among `irw-data`'s first descriptives.
 
 ## Promises / leaves open
 

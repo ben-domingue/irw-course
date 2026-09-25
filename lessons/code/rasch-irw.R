@@ -79,6 +79,14 @@ all.equal(plogis(outer(theta + 1, b + 1, "-")), plogis(outer(theta, b, "-")))
 fit <- itemfit(m1, fit_stats = "infit")
 head(fit[order(-abs(fit$z.outfit)), ], 5)   # the five worst-fitting items, by |z|
 fit[which.max(fit$outfit), ]                # the largest outfit of all 40 items
+# itemfit() computes residuals from mirt's default EAP abilities, which shrink toward
+# the mean; method = "ML" uses maximum-likelihood abilities instead.
+fit_ml <- itemfit(m1, fit_stats = "infit", method = "ML")
+round(c(median_outfit_EAP = median(fit$outfit), median_outfit_ML = median(fit_ml$outfit)), 2)
+ml <- data.frame(item = fit_ml$item, outfit_ML = round(fit_ml$outfit, 2),
+                 z_ML = round(fit_ml$z.outfit, 1))
+ml[ml$item %in% c("Y8", "Y9", "Y10", "Y38"), ]   # the four overfitting items above
+head(ml[order(-ml$outfit_ML), ], 3)              # the largest outfits
 itemfit(m1, empirical.plot = 15)            # Y15: observed vs. model
 
 ## ---- wirs

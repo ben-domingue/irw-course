@@ -18,7 +18,7 @@ A short note closes Core ideas: estimation is hard because nothing is known; `mi
 ## Picks up
 
 - Logistic regression and the likelihood (from `likelihood`).
-- Sum scores treat items as interchangeable; the sum score vs. item relationship is not linear (from `ctt-limits`).
+- Sum scores treat items as interchangeable; the sum score vs. item relationship is not linear (from `ctt-limits`). Recall callouts (Recall pass, #11): after *What this is for* (item curves against the sum score, which the ICC replaces with $\theta$; thread `items-rise-with-score`), at the Wright map (the easy and hard halves; `sum-score-depends-on-items`), and after the `wirs` table ($r = 0$ and $r = 6$ agree by construction; `sum-score-part-whole`).
 - Long IRW format, reshaping to wide, dropping empty respondents (from `irw-data`).
 - The score equation for an intercept, $\sum(y - p) = 0$ (from `likelihood`): Recall callout in idea 5.
 - Probit regression, for the optional $D \approx 1.7$ aside (from outside the course; not taught earlier).
@@ -88,7 +88,7 @@ Data notes: `get_processing_notes` was not available in this session; the landin
 ## Open questions
 
 - A2 (Ben, 09-24): the equal-slopes prose stands, no separate verdict. Rule A is met by a new verdict on sum score vs. $\hat\theta$ (idea 5), Claude's draft: Ben to confirm or replace.
-- `ctt-limits` is still a stub, so there is no Recall of it yet; the opening paragraph links it. The cross-check pass should add a Recall once it is drafted (its promises: item curves against ability; the sum score contains the item, paid in the `wirs` table's note that $r = 0$ and $r = 6$ agree by construction).
+- `ctt-limits` is now drafted, and the Recall pass (#11) added three Recalls of it (see *Picks up*). To stay within 3,000 words, the $D \approx 1.7$ challenge moved into a collapsible and a few sentences were tightened. The chess outfits come from `mirt`'s default EAP abilities; the page now also prints them with maximum-likelihood abilities (median 1.01 against 0.95), following `fit-prediction`'s finding that EAP pulls outfit below 1.
 - `lessons/code/rasch-difficulty-spread.R` and `lessons/data/rasch-difficulty-spread.csv` (the earlier 40-table baseline) are no longer used by the page; proposed for removal (the csv is outside this PR's scope).
 
 Dropped in the retrofit: problem 3 "proportions against raw `d`" (see Problems); the `wirs` empirical plot (replaced by the conditional table, which prints its numbers); the empirical plot of item 13 (replaced by Y15, the item the thread promises).
