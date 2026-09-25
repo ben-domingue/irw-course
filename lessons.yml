@@ -150,7 +150,7 @@ lessons:
     title: "Estimating abilities: MLE and EAP"
     module: irt
     prereqs: [information]
-    origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
+    origin: {slides: [c4, c5], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
     tables: [c19prc_uk_mcbride_2021_wordsum]
     status: draft
     tranche: core
@@ -655,3 +655,28 @@ threads:
     introduced: fa-confirmatory
     returns:
       - {lesson: dimensionality, how: fits multidimensional IRT as factor analysis}
+
+  # Pass 4 (09-25): proposed by the wave-2 drafts (#135-#139); returns kept only
+  # where they are descendants of the introducing lesson (E2).
+  - id: shrinkage
+    idea: "EAP estimates shrink toward the mean"
+    introduced: ability-estimation
+    returns:
+      - {lesson: item-banks-cat, how: stops a CAT on the posterior SD}
+      - {lesson: guessing-priors, how: puts priors on items as well}
+  - id: perfect-patterns
+    idea: "No maximum-likelihood estimate for all-right or all-wrong patterns"
+    introduced: ability-estimation
+    returns:
+      - {lesson: item-banks-cat, how: starts a CAT without an estimate}
+  - id: wording-direction
+    idea: "Wording direction can act as a second dimension"
+    introduced: instrument-building
+    returns:
+      - {lesson: fa-exploratory, how: finds it in the BFI-2}
+      - {lesson: dimensionality, how: models it as a method factor}
+  - id: contaminated-criterion
+    idea: "A criterion built from the same items inflates validity evidence"
+    introduced: validity-argument
+    returns:
+      - {lesson: validity-evidence, how: looks for an independent criterion}

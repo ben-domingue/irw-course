@@ -310,6 +310,10 @@ which is near 1 far from the cut and falls to 1/2 where $p(\theta) = 1/2$.
 
 Reviews of how score reports are designed and read suggest giving the score with its band, the reference group and its date, the cut and what crossing it means, and what the score does not show ([Goodman & Hambleton, 2004](https://doi.org/10.1207/s15324818ame1702_3); [Zenisky & Hambleton, 2012](https://doi.org/10.1111/j.1745-3992.2012.00231.x); Standard [6.10](https://www.testingstandards.net/uploads/7/6/6/4/76643089/standards_2014edition.pdf#page=129)). A PHQ-9 report would add that the manual treats 10 or more as a flag for a possible clinically significant condition, not a diagnosis ([PHQ instruction manual, n.d., p. 2](https://www.phqscreeners.com/images/sites/g/files/g10016261/f/201412/instructions.pdf)).
 
+::: {.callout-tip appearance="simple"}
+**If you've done** [Estimating abilities](ability-estimation.qmd): EAP estimates shrink toward the mean, so averaging them understates differences between groups. That lesson's simulation makes the point with numbers.
+:::
+
 Reports about groups differ: the best estimate for each respondent is not the best input for describing the group. Estimates that borrow from a prior, such as the posterior mean (EAP; [Estimating abilities](ability-estimation.qmd)), are pulled toward the centre, most where the test is imprecise, so their spread is smaller than the population's. **Plausible values** are draws from each respondent's posterior instead of its mean; a statistic computed on each set of draws and combined recovers the population's spread and carries measurement error into its standard error ([Mislevy, Beaton, Kaplan & Sheehan, 1992](https://doi.org/10.1111/j.1745-3984.1992.tb00371.x); [Wu, 2005](https://doi.org/10.1016/j.stueduc.2005.05.005)). They are for group statistics only.
 
 ## Simulate

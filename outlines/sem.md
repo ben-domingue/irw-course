@@ -65,4 +65,7 @@ Clustering: twins are nested in families. IRW ids come in pairs ending 00/01 (e.
 
 ## Open questions
 
+
+- **Notes for drafting (Ben, 09-25).** (1) Prediction as a complement to fit: Zhang, Rahal, Kanopka, Ulitzsch, Zhang & Domingue (2026), *Multivariate Behavioral Research*, doi:10.1080/00273171.2026.2645212 (IMV for CFA with binary outcomes; verified on Crossref); `fa-confirmatory` cites it and has a problem on it, so recall rather than re-teach. (2) Composites vs. factors: composite-based SEM (PLS, PLSc, GSCA) models a construct as a weighted sum of its items rather than a common factor; a paragraph at most, with the `cSEM` package or the Composite-SEM jamovi module (github.com/AbdullahAlarfaj101/Composite-SEM; small, no licence file as of 09-25) as a pointer, flagged as a different model. Point-and-click users: jamovi's SEM tools (verify which module before naming one).
+
 - **First-person verdict.** The outline has none yet. *Default:* "I fit and inspect the measurement model before I read a single structural path; a path between badly measured factors is not worth interpreting" (idea 4, Anderson & Gerbing's two-step). For Ben to confirm or reword.
