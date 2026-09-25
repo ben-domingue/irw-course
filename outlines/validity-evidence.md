@@ -2,7 +2,7 @@
 
 # Gathering validity evidence (`validity-evidence`)
 
-Module: validity · Prereqs: validity-argument, ctt-reliability, instrument-building · Core · Status: outline
+Module: validity · Prereqs: validity-argument, ctt-reliability, instrument-building · Core · Status: draft
 
 ## Core ideas
 
@@ -36,7 +36,7 @@ For *Going further* (verified): Lane (2014), doi:10.7334/psicothema2013.258 (con
 |---|---|---|---|
 | `de_vries_2022_hexaco_self` | main example (method 1: self) | HEXACO-PI-R, 96 items, 6 traits, 434 Dutch working adults (de Vries et al., 2022, doi:10.1371/journal.pone.0272095; instrument: Lee & Ashton, 2004, doi:10.1207/s15327906mbr3902_8). Arrives unkeyed; keyed, trait alphas are 0.80–0.84. | — |
 | `de_vries_2022_hexaco_other` | main example (method 2: colleagues) | Up to three colleagues per target. With colleague 1 (393 targets), the validity diagonal runs 0.26 (Honesty-Humility) to 0.52 (Openness), against mean \|r\| 0.06 (different traits, different methods) and 0.13 (different traits, same method). The same-method comparison fails for Honesty-Humility: colleagues' Honesty-Humility and Agreeableness ratings correlate at \|r\| = 0.37. | — |
-| `ieswriting_molloy_2022` | criterion evidence, incremental validity, range restriction | ETS writing study (IRW biblio cites the ETS repository): a writing-attitudes survey adapted from MacArthur, Philippakos & Graham (2016), doi:10.1177/0731948715583115, with course grade, GPA and SAT; 526 complete first-year students. The self-efficacy scale (alpha 0.95) correlates 0.08 with course grade; SAT 0.43. Adding it to SAT leaves R² at 0.19 (p = 0.42). Above-median SAT only: r falls to 0.25; case II gives 0.34. | — |
+| `ieswriting_molloy_2022` | criterion evidence, incremental validity, range restriction | ETS writing study (IRW biblio cites the ETS repository): a writing-attitudes survey adapted from MacArthur, Philippakos & Graham (2016), doi:10.1177/0731948715583115, with course grade, GPA and SAT; 526 complete first-year students. The confidence (self-efficacy) scale has alpha 0.95. **Drafting found** 116 of the 526 complete students with SAT = 1036.86, the mean of the others (mean substitution, undocumented); excluding them (n = 410): confidence r = 0.07 with course grade, SAT 0.49; adding confidence leaves R² at 0.24 (p = 0.77). Above-median SAT only (202): r 0.27, case II 0.39 (grade has a ceiling: slope and residual SD differ between halves). With the filled-in values kept, the outline's 0.43 → 0.26 → 0.34. | — |
 
 The findings: (1) self and colleagues agree well above the heterotrait–heteromethod baseline, but colleagues' Honesty-Humility ratings overlap more with their own Agreeableness ratings than with the self-report, the method effect Campbell and Fiske's comparison catches; (2) alpha 0.95 and almost no prediction of grades: the scale was built to measure motivation, so this is a finding about a use, not a flaw; (3) the correction rests on assumptions and doesn't simply recover the full-sample value.
 
@@ -70,3 +70,15 @@ Sanity: no model fit; the keying check (every item positive on its trait) and co
 ## Open questions
 
 - **First-person verdict.** *Default:* "When I correct a validity coefficient, for attenuation or for range restriction, I report the observed value first and the corrected one beside it, with the assumption it rests on; never the corrected value alone." For Ben to confirm or reword.
+
+## Drafting notes (09-25, #60)
+
+- **Keying.** The HEXACO key is the published 100-item key (hexaco.org, ScoringKeys_100.pdf), matched to codes by the item order of the authors' .sav file; the .sav's `_1R` columns reverse exactly the same 48 items. The MTMM numbers above are unchanged by the switch from a PC key.
+- **SAT.** The IES table's SAT column carries 1036.86 for 116 of 526 students (161 of 735 in the ETS source file), the mean of the other scores: missing scores filled with the mean, undocumented. The lesson notes it gently, shows its effect on r (0.43 vs 0.49) and drops those rows; all criterion numbers are on the 410. Worth flagging to the IRW with the licence mismatch (digest D).
+- **Attenuation thread** is paid twice: the Recall in idea 3, and the MTMM correction in *With real data* (alpha-corrected validity values; the H–A same-method correlation rises too, so correcting with alpha doesn't remove rater variance). Problem 2 shows that averaging colleagues does: Honesty-Humility's validity value rises to 0.37 and passes.
+- **Contaminated-criterion thread** is paid in idea 4 (Recall of the Silk table; independent criterion); the AUC box is recalled, not re-taught (F6).
+- **Consequences** get only a *Going further* entry (Lane, 2014); response processes a sentence. Incremental validity is computed in the real data, not only named.
+- **Verdict** placed at the end of *With real data*, after both corrections' assumptions are shown failing; Standard 1.21 (p. 29) asks for both values, which the text cites (not quotes).
+- **Widgets:** MTMM builder, range restriction (with a criterion-ceiling toggle, which reproduces the real-data undercorrection), ROC and base rate. No predict-then-check in Core ideas.
+- **Ben's review (09-25):** added "What a complete argument would need" at the end of Core ideas: a short paragraph plus a callout table specifying the rest of an argument for a hypothetical use (placement in a writing support course): scoring, generalization, across groups, extrapolation, decision, consequences, each marked available in the IRW yes/partly/no. Shepard (1993, doi:10.3102/0091732X019001405) is verified on Crossref but closed access (no abstract on Crossref, OpenAlex or Semantic Scholar), so her worked example isn't used; she is cited only as a review, pending the PDF from Ben.
+- **Shepard PDF (09-25, from Ben):** the section now follows the placement argument Shepard (1993, pp. 431–432) reproduces from Kane (1992, pp. 531–532): an algebra test sending college students to calculus or remedial algebra, seven assumptions. The table paraphrases each assumption with the evidence it needs and whether the IRW could supply it. The prose adds Shepard's points that studies of assumptions 1–3 can't make up for missing evidence on 5–6 (p. 432) and that placement validity turns on the placement's effects (p. 441), and names her cases (SAT, GATB, special education and two-year kindergartens, pp. 432–443). No quotation. The writing-placement hypothetical is gone. To stay under 3,000 words, the Simulate and range-restriction intros were trimmed.
