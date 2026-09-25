@@ -83,3 +83,9 @@ DOIs Crossref-checked 09-24.
 - **Changed:** problem 3 is now about the mindset wording split (the grit/mindset verdict is given in the text); problem 2 asks the reader to refit with qgrit11 rekeyed or dropped. Problem 6 paraphrases the c6 slide rather than quoting it.
 - **Deep dive #23:** `deepdives/dimensionality/compute.R` (IMV of an exploratory 2D over a 1D 2PL, items split near the median, 6–40 items, ≥500 respondents); pilot only (5 tables), partial-run callout shows.
 - **Dropped:** the compensation-trade widget as a separate widget (folded into the surface widget's readout).
+
+## Revision after Ben's review (09-25)
+
+- Wording: a respondent's two abilities are referred to in parallel throughout ("Respondent's θ1/θ2" in the widget; "their θ2" in the quiz).
+- New subsection **The bifactor model** (Core ideas): general + orthogonal specific factors; facets and testlets; the second-order model as a constrained bifactor (Yung, Thissen & McLeod, 1999); omega hierarchical recalled from the DASS. **Fitting propensity**: Bonifay & Cai (2017, doi:10.1080/00273171.2017.1309262); Bader & Moshagen (2025, doi:10.1037/met0000529); Bonifay, Cai, Falk & Preacher (2025, doi:10.1037/met0000735; taken to be PsycNET 2025-79585-001). Described from their abstracts only. Demo: `code/dimensionality-bifactor.R` (lavaan): data from two correlated factors with no general factor, where the bifactor fits as well as the true model (AIC 29,597 vs 29,596) and reports omega_h 0.59. Real data: the mindset method-factor model vs two wording dimensions (AIC 16,943 vs 16,960).
+- Trimmed to pay for it: the testlet citations sentence, the simulate description, twins/keying/qgrit11 paragraphs, the AIC paragraph, problems 2, 4, 5 and 6.

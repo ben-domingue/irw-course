@@ -164,6 +164,7 @@ round(coef(g2, simplify = TRUE)$cov[1, 2], 2)
 # A method factor: one general mindset dimension for all eight items, plus a factor for
 # the four incremental-worded items only, uncorrelated with it (a bifactor model).
 bf <- bfactor(Mi, c(NA, NA, 1, NA, 1, NA, 1, 1), itemtype = "graded", verbose = FALSE)
+anova(g2, bf)   # the method-factor model against the two correlated wording dimensions
 L <- summary(bf, verbose = FALSE)$rotF
 round(L, 2)
 # Omega from the standardized loadings (normal-ogive scale).

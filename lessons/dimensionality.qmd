@@ -22,7 +22,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Every item response model so far has given each respondent one number, $\theta$. Is one enough? [Factor analysis II](fa-confirmatory.qmd) asked the question of grit with two correlated factors, and showed that an ordinal factor model *is* a graded response model. This lesson takes the next step: item response models with more than one ability. The picture changes from a curve to a surface, and the model acquires a frame that the data cannot fix. A new question also becomes answerable: not *whether* a second dimension fits better (with enough data it nearly always does) but *how much* it buys. Along the way we meet items that share more than the construct.
+Every item response model so far has given each respondent one number, $\theta$. Is one enough? [Factor analysis II](fa-confirmatory.qmd) asked the question of grit with two correlated factors, and showed that an ordinal factor model *is* a graded response model. This lesson fits item response models with more than one ability. The curve becomes a surface, the model acquires a frame the data cannot fix, and a new question becomes answerable: not *whether* a second dimension fits better (with enough data it nearly always does) but *how much* it buys. Along the way we meet items that share more than the construct.
 
 ## Goals
 
@@ -32,7 +32,8 @@ By the end of this lesson you should be able to:
 - explain why the axes of a multidimensional model have to be fixed, and why abilities and slopes must be read in the same frame;
 - fit exploratory and confirmatory multidimensional graded models with `mirt` and read them as item factor analyses;
 - judge a second dimension by out-of-sample prediction (the IMV) as well as by AIC and BIC;
-- recognize local dependence (testlets, shared wording), find it with residual correlations, and say what it does to alpha.
+- recognize local dependence (testlets, shared wording), find it with residual correlations, and say what it does to alpha;
+- describe the bifactor model and say why its good fit is weak evidence for a general factor.
 
 ## Core ideas
 
@@ -52,8 +53,8 @@ viewof rs_a1 = Inputs.range([0, 2.5], {value: 1.5, step: 0.1, label: "Slope on �
 viewof rs_a2 = Inputs.range([0, 2.5], {value: 1, step: 0.1, label: "Slope on θ2 (a2)"})
 viewof rs_b = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "Multidimensional difficulty b"})
 viewof rs_model = Inputs.radio(["compensatory", "partially compensatory"], {value: "compensatory", label: "Model"})
-viewof rs_t1 = Inputs.range([-3, 3], {value: 1, step: 0.1, label: "A respondent's θ1"})
-viewof rs_t2 = Inputs.range([-3, 3], {value: -1, step: 0.1, label: "The respondent's θ2"})
+viewof rs_t1 = Inputs.range([-3, 3], {value: 1, step: 0.1, label: "Respondent's θ1"})
+viewof rs_t2 = Inputs.range([-3, 3], {value: -1, step: 0.1, label: "Respondent's θ2"})
 ```
 
 ```{ojs}
@@ -77,20 +78,20 @@ Plot.plot({
 //| echo: false
 rs_p = p2d(rs_t1, rs_t2, rs_a1, rs_a2, rs_b, rs_m)
 rs_r = reckase(rs_a1, rs_a2)
-md`This respondent's probability of success (the orange dot): **${rs_p.toFixed(3)}**. ${
+md`The respondent's probability of success (the orange dot): **${rs_p.toFixed(3)}**. ${
   rs_m === "compensatory"
     ? (rs_a2 > 0 ? `Multidimensional discrimination A = ${rs_r.mdisc.toFixed(2)}, pointing ${rs_r.angle.toFixed(0)} degrees from the θ1 axis. A loss of 1 on θ1 is made up exactly by a gain of a1/a2 = **${(rs_a1 / rs_a2).toFixed(2)}** on θ2.` : "With a2 = 0, θ2 plays no part: the surface is a 2PL curve in θ1, drawn out along θ2.")
-    : `However high θ2 goes, this respondent's probability can't pass **${(1 / (1 + Math.exp(-rs_a1 * (rs_t1 - rs_b)))).toFixed(3)}**, the θ1 part alone.`}`
+    : `However high the respondent's θ2 goes, the probability can't pass **${(1 / (1 + Math.exp(-rs_a1 * (rs_t1 - rs_b)))).toFixed(3)}**, the θ1 part alone.`}`
 ```
 
-What should you have seen? In the compensatory model the contours are straight parallel lines, so moving along one trades $\theta_1$ for $\theta_2$ at a fixed rate, $a_1/a_2$. Set $a_2$ to 0 and the lines stand upright: the surface is a 2PL curve pulled out sideways. Switch to the partially compensatory model and the contours bend into corners. The respondent at $(1, -1)$ has a probability of 0.622 under the compensatory model and 0.220 under the other, and no amount of $\theta_2$ lifts the second above 0.818.
+What should you have seen? In the compensatory model the contours are straight parallel lines, so moving along one trades $\theta_1$ for $\theta_2$ at a fixed rate, $a_1/a_2$. Set $a_2$ to 0 and the lines stand upright: the surface is a 2PL curve pulled out sideways. Switch to the partially compensatory model and the contours bend into corners. A respondent with $\theta_1 = 1$ and $\theta_2 = -1$ has a probability of 0.622 under the compensatory model and 0.220 under the other, and no amount of $\theta_2$ lifts the second above 0.818.
 
 Which form is right is a question about the item. `mirt` fits both (`itemtype = "PC2PL"`); the rest of this lesson uses the compensatory form, the one that follows from factor analysis.
 
 ```{ojs}
 //| echo: false
 quiz({
-  q: "A compensatory item has $a_1 = 2$ and $a_2 = 1$. A respondent's $\\theta_1$ drops by 0.5. How much must $\\theta_2$ rise for the probability of success to stay the same?",
+  q: "A compensatory item has $a_1 = 2$ and $a_2 = 1$. A respondent's $\\theta_1$ drops by 0.5. How much must their $\\theta_2$ rise for the probability of success to stay the same?",
   options: [
     {text: "1.0", correct: true, why: "Only $2\\theta_1 + \\theta_2$ matters. Losing 0.5 on $\\theta_1$ lowers it by 1, so $\\theta_2$ must rise by $1/a_2 = 1$."},
     {text: "0.25", correct: false, why: "That divides the wrong way. The rate of exchange is $a_1/a_2 = 2$ units of $\\theta_2$ per unit of $\\theta_1$."},
@@ -137,7 +138,7 @@ Plot.plot({
 md`Log likelihood of the 300 × 6 responses: **${rf_ll.toFixed(1)}** (unrotated: ${rf_ll0.toFixed(1)}). ${rf_both ? "Slopes and abilities rotated together: the fit can't tell the frames apart." : "Slopes rotated, abilities left in the old frame: the predictions are now wrong."}`
 ```
 
-With the toggle on, the arrows swing and the log likelihood stays at −961.3 whatever the angle. At 0 degrees the items line up with the axes, which is the frame a rotation criterion would pick. Turn the toggle off and rotate by 45 degrees: the log likelihood falls to −1148.3, because the slopes now describe one frame and the abilities another. That mismatch is easy to make by accident. For an exploratory model, `mirt`'s `coef()` reports unrotated slopes while `fscores()` rotates the abilities by default, as the real-data output shows; predictions built from the pair are wrong. The code below asks for `fscores(..., rotate = "none")`.
+With the toggle on, the arrows swing and the log likelihood stays at −961.3 whatever the angle. Turn the toggle off and rotate by 45 degrees: the log likelihood falls to −1148.3, because the slopes now describe one frame and the abilities another. The mismatch is easy to make: for an exploratory model, `mirt`'s `coef()` reports unrotated slopes while `fscores()` rotates the abilities by default, so the real-data code asks for `fscores(..., rotate = "none")`.
 
 ::: {.callout-note collapse="true"}
 ## Go deeper: why the likelihood can't choose a frame
@@ -182,7 +183,7 @@ fit <- mirt(resp, spec, itemtype = "graded")
 
 ### How much better is a second dimension?
 
-A second dimension adds parameters, so it fits its own data at least as well as one dimension. AIC and BIC charge for the extra parameters and say *whether* the gain is worth them. They don't say *how much* better, on a scale that means the same thing from one test to the next.
+AIC and BIC charge a second dimension for its extra parameters and say *whether* the gain is worth them, not *how much* better it is on a scale that means the same thing from test to test.
 
 If you've done [Model fit and out-of-sample prediction](fit-prediction.qmd), you've met the answer used here. Hold out a random fifth of the *responses* (not respondents), fit both models to the rest, and predict the held-out ones ([Stenhaug & Domingue, 2022](https://doi.org/10.1177/01466216211066603)). The InterModel Vigorish ([Domingue et al., 2025](https://doi.org/10.1371/journal.pone.0316491); for item response models, [Domingue et al., 2024](https://doi.org/10.1007/s11336-024-09977-2)) turns each model's predictive accuracy into the weight of an equivalent coin, $w_0$ and $w_1$, and reports $(w_1 - w_0)/w_0$, the expected return on a fair bet placed with the better predictions. For scale: in their simulations the 2PL gained about 0.01 over the Rasch model when slopes varied substantially.
 
@@ -192,7 +193,7 @@ If you've done [Model fit and out-of-sample prediction](fit-prediction.qmd), you
 **Recall** from [The Rasch model](rasch.qmd): responses are assumed locally independent. Once we know $\theta$, how someone answered item 3 tells us nothing more about item 4. Items that share a reading passage were the example of how it can fail.
 :::
 
-A second dimension is one way to see local dependence. Items built around a shared stimulus (a passage, a graph, a scenario) form a **testlet** ([Wainer & Kiely, 1987](https://doi.org/10.1111/j.1745-3984.1987.tb00274.x)), and items worded the same way can behave like one. Each group shares something beyond $\theta$, so their residuals correlate once $\theta$ is accounted for. [Yen (1984)](https://doi.org/10.1177/014662168400800201) proposed that residual correlation, $Q_3$, as a check, and [Chen and Thissen (1997)](https://doi.org/10.3102/10769986022003265) gave χ² indexes for pairs of items. A model can then give each testlet a dimension of its own, uncorrelated with $\theta$: the testlet model of [Bradlow, Wainer and Wang (1999)](https://doi.org/10.1007/BF02294533), a constrained case of the bifactor model ([Gibbons & Hedeker, 1992](https://doi.org/10.1007/BF02295430)).
+A second dimension is one way to see local dependence. Items built around a shared stimulus (a passage, a graph, a scenario) form a **testlet** ([Wainer & Kiely, 1987](https://doi.org/10.1111/j.1745-3984.1987.tb00274.x)), and items worded the same way can behave like one. Each group shares something beyond $\theta$, so their residuals correlate once $\theta$ is accounted for. [Yen (1984)](https://doi.org/10.1177/014662168400800201) proposed that residual correlation, $Q_3$, as a check, and [Chen and Thissen (1997)](https://doi.org/10.3102/10769986022003265) gave χ² indexes for pairs of items. A model can give each testlet a dimension of its own ([Bradlow, Wainer & Wang, 1999](https://doi.org/10.1007/BF02294533)), a case of the bifactor model below.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Classical test theory and reliability](ctt-reliability.qmd): alpha is a lower bound on reliability *if the item errors are uncorrelated*, and the proof leans on that assumption. **Omega** ([Factor analysis II](fa-confirmatory.qmd)) comes in two versions for a bifactor model: omega total counts the general and specific factors as signal, and omega hierarchical counts only the general factor.
@@ -226,7 +227,7 @@ Plot.plot({
 md`Residual correlation (Q3) of two items in the same testlet, once θ is accounted for: **${tl.q3.toFixed(2)}**${tl.gamma < tl_g - 1e-9 ? ` (testlet loading capped at ${tl.gamma.toFixed(2)}, so that no item's variance exceeds 1)` : ""}.`
 ```
 
-With no testlet factor all three coefficients are 0.871. At the starting values (loadings of 0.6 and 0.4) alpha is 0.884: below omega total (0.909) but above omega hierarchical (0.818), and items in the same testlet have a residual correlation of 0.25. If the testlet variance counts as signal, alpha is still a lower bound. If the score is meant to measure $\theta$, as it usually is, alpha overstates its reliability, and the gap grows with the testlet loading. [Sireci, Thissen and Wainer (1991)](https://doi.org/10.1111/j.1745-3984.1991.tb00356.x) reported the same pattern for testlet-based tests, and [Zimmerman, Zumbo and Lalonde (1993)](https://doi.org/10.1177/0013164493053001003) studied alpha under correlated errors more generally.
+With no testlet factor all three coefficients are 0.871. At the starting values (loadings of 0.6 and 0.4) alpha is 0.884: below omega total (0.909) but above omega hierarchical (0.818), and items in the same testlet have a residual correlation of 0.25. If the testlet variance counts as signal, alpha is still a lower bound. If the score is meant to measure $\theta$, as it usually is, alpha overstates its reliability, and the gap grows with the testlet loading. (See [Sireci, Thissen & Wainer, 1991](https://doi.org/10.1111/j.1745-3984.1991.tb00356.x), on testlets, and [Zimmerman, Zumbo & Lalonde, 1993](https://doi.org/10.1177/0013164493053001003), on correlated errors.)
 
 ```{ojs}
 //| echo: false
@@ -240,17 +241,35 @@ quiz({
 })
 ```
 
+### The bifactor model
+
+The testlet widget used a **bifactor** model ([Holzinger & Swineford, 1937](https://doi.org/10.1007/BF02287965); for item responses, [Gibbons & Hedeker, 1992](https://doi.org/10.1007/BF02295430)): every item loads on a general factor and on one specific factor for its group, and all the factors are uncorrelated. The general factor is the construct; each specific factor is what a group of items shares beyond it (a facet, a testlet, a wording). That makes it a reasonable choice for one construct with facets, and it is how [Factor analysis II](fa-confirmatory.qmd) asked whether the DASS-21 yields one score or three (omega hierarchical 0.879). The **second-order** model, in which one higher factor explains the correlations among first-order factors, is a bifactor model with proportionality constraints on the loadings ([Yung, Thissen & McLeod, 1999](https://doi.org/10.1007/BF02294531)).
+
+The bifactor model's flexibility has a cost. [Bonifay and Cai (2017)](https://doi.org/10.1080/00273171.2017.1309262) fitted item response models to 1,000 data sets sampled at random from all possible response patterns, and found that the bifactor and exploratory factor models tended to fit almost any of them, while a unidimensional 3PL with one *more* parameter did not. Counting parameters, they argued, understates a model's complexity; its **fitting propensity** also depends on its functional form. For factor models fitted to continuous data, [Bader and Moshagen (2025)](https://doi.org/10.1037/met0000529) found the differences in fitting propensity among single-factor, correlated-factors, higher-order and bifactor models mostly driven by the number of free parameters, and [Bonifay, Cai, Falk and Preacher (2025)](https://doi.org/10.1037/met0000735) reassess the question with analytic examples. Either way, a good bifactor fit is weak evidence, on its own, that a general factor exists. In miniature: data from two factors correlated 0.3, with no general factor at all.
+
+```{r}
+#| include: false
+knitr::read_chunk("code/dimensionality-bifactor.R")
+```
+
+```{r bifactor-sim}
+#| echo: true
+#| code-fold: true
+```
+
+The bifactor model fits as well as the true model (CFI 0.998 for both; AIC 29,597 against 29,596), and reports a general factor with loadings from 0.20 to 0.73 and an omega hierarchical of 0.59. A bifactor fit says the data can be described with a general factor, not that one is there.
+
 ## Simulate
 
-The code simulates 500 respondents answering 10 items: items 1–5 measure one dimension and 6–10 another, correlated `rho`. It holds out a fifth of the responses, fits one- and two-dimensional (confirmatory) 2PL models to the rest, and prints the estimated correlation, AIC and BIC, and the IMV of the second dimension on the held-out responses. The first run takes 20–30 seconds while `mirt` loads; the fits then take a few seconds.
+The code simulates 500 respondents answering 10 items (items 1–5 on one dimension, 6–10 on another, correlated `rho`), holds out a fifth of the responses, fits one- and two-dimensional 2PL models to the rest, and prints the IMV of the second dimension on the held-out responses. The first run takes 20–30 seconds while `mirt` loads.
 
-With the seed as written, the correlation is estimated at 0.46 (true 0.5), AIC prefers two dimensions by 75 points, and the IMV is 0.027. Set `rho <- 0` and the IMV rises to 0.059; set `rho <- 0.8` and it is 0.006, although AIC still prefers two dimensions. Near a correlation of 1 the two-dimensional fit can fail outright, since the two dimensions are then one.
+With the seed as written, the correlation is estimated at 0.46 (true 0.5), AIC prefers two dimensions by 75 points, and the IMV is 0.027. Set `rho <- 0` and the IMV rises to 0.059; set `rho <- 0.8` and it is 0.006, although AIC still prefers two dimensions.
 
 ```{webr}
 {{< include code/dimensionality-sim.R >}}
 ```
 
-[Download this code](code/dimensionality-sim.R). One held-out fifth is a noisy estimate. The sweep below repeats the simulation five times at each of seven correlations. That takes about two minutes, too long for the browser, so it was run when this page was built; [its code](code/dimensionality-sweep.R) runs unchanged in local R.
+[Download this code](code/dimensionality-sim.R). The sweep below repeats it five times at each of seven correlations; at about two minutes that is too slow for the browser, so it was run when this page was built ([its code](code/dimensionality-sweep.R)).
 
 ```{r}
 #| include: false
@@ -277,7 +296,7 @@ Our two tables come from the same young people. [florida_twins_grit](https://ite
 #| code-fold: show
 ```
 
-Grit was asked only in the second wave, so we keep wave 2 of the mindset items too: 777 respondents answered both. They come from 386 families with both twins in the sample, plus 5 with one. Twins resemble each other, so these responses carry less information than 777 unrelated people's would; nothing below rests on a standard error, but one would need to account for the families.
+Grit was asked only in the second wave, so we keep wave 2 of the mindset items too: 777 respondents answered both. They come from 386 families with both twins in the sample, plus 5 with one. Nothing below rests on a standard error, but one would need to account for the families.
 
 On keying: both tables arrive as answered, with 1 meaning "Very much like me" (grit) or "Strongly agree" (mindset), per the option text in the IRW. We reverse the six grit items worded toward grit and the four mindset items worded toward an incremental view, so that higher means more grit and more of a "growth" view of intelligence.
 
@@ -324,9 +343,9 @@ Does the split survive when every item is free to load on both dimensions?
 #| code-fold: show
 ```
 
-It does. After an oblimin rotation every mindset item loads 0.65 to 0.87 on one factor, and the grit items load on the other, which correlates 0.19 with it. Varimax gives other numbers from the same fitted model, with the same log likelihood. The last two outputs show the frame at work: the one slope `mirt` fixed, and abilities from `fscores()` that are a rotation of the unrotated ones, not the same numbers.
+It does. After an oblimin rotation every mindset item loads 0.65 to 0.87 on one factor, and the grit items load on the other, which correlates 0.19 with it. Varimax gives other numbers with the same log likelihood; the last two outputs show the slope `mirt` fixed and the rotated abilities from `fscores()`.
 
-qgrit11 loads −0.37 here, and its item-rest correlation is −0.10. It reads "I become very interested in new pursuits every few months" (the IRW's item text for the Grit-O; Duckworth et al., 2007). The scale treats agreement as low consistency of interest. But in these data, respondents who describe themselves as persevering tend to *agree* with it: it correlates negatively with every perseverance item once they are keyed. Becoming very interested in new things may simply read as a good trait at 13. It is an item worth reading closely, and problem 2 asks what to do with it.
+qgrit11 loads −0.37 here, and its item-rest correlation is −0.10. It reads "I become very interested in new pursuits every few months" (the IRW's item text for the Grit-O; Duckworth et al., 2007). The scale treats agreement as low consistency of interest, but here it correlates negatively with every keyed perseverance item. Becoming very interested in new things may simply read as a good trait at 13. It is an item worth reading closely (problem 2).
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Factor analysis II](fa-confirmatory.qmd): among adults answering the Grit-O online, item 11 had the weakest loading on its facet, 0.46, but a positive one.
@@ -344,7 +363,7 @@ Now the question the fit statistics can't answer: how much does the second dimen
 #| code-fold: show
 ```
 
-The confirmatory two-dimensional model's IMV over one dimension is 0.0116, positive in every fold, about the size of the 2PL's gain over the Rasch model in a test whose slopes vary substantially. The exploratory model gains less, 0.0075: its eighteen extra parameters cost more in noise than they return. This is the one-table version of a warehouse-wide question, taken up in *Across the IRW*.
+The confirmatory two-dimensional model's IMV over one dimension is 0.0116, positive in every fold, about the size of the 2PL's gain over the Rasch model in a test whose slopes vary substantially. The exploratory model gains less, 0.0075: its eighteen extra parameters cost more in noise than they return.
 
 ### Local dependence in the mindset items
 
@@ -368,18 +387,18 @@ Four mindset items say intelligence is fixed and four say it can change. Is that
 #| code-fold: show
 ```
 
-Two correlated dimensions, one per wording, fit far better than one (AIC 17,460 against 16,960), and correlate 0.68. A model with a method factor for the incremental-worded items, uncorrelated with a general mindset dimension, says the same thing another way: those four items load 0.51 to 0.68 on the method factor. Omega hierarchical is 0.80, the share of the mindset score's variance that the general dimension accounts for, against an omega total of 0.94. Alpha, 0.87, sits between them, as it did in the testlet widget. (Alpha is computed on the item scores and omega on the latent response scale, so the comparison is rough.)
+Two correlated dimensions, one per wording, fit far better than one (AIC 17,460 against 16,960), and correlate 0.68. A model with a method factor for the incremental-worded items, uncorrelated with a general mindset dimension, says the same thing another way: those four items load 0.51 to 0.68 on the method factor, and it fits a little better than the two correlated dimensions (AIC 16,943 against 16,960), which is the bifactor model's flexibility at work as much as evidence for either story. Omega hierarchical is 0.80, the share of the mindset score's variance that the general dimension accounts for, against an omega total of 0.94. Alpha, 0.87, sits between them, as it did in the testlet widget. (A rough comparison: alpha is on the item scores, omega on the latent response scale.)
 
-So, one score or two? Two assumptions sit under the answer. One grit-and-mindset score assumes a single construct; the two correlate 0.26, and a second dimension predicts held-out responses about as much better as a 2PL does over the Rasch model. Two mindset scores assume the entity and incremental items tap different beliefs, rather than one belief seen through two wordings; they correlate 0.68, and the general factor carries most of the score. I would report two scores, one for grit and one for mindset, and I would not split the mindset score by wording. The wording factor is real, but it is a fact about how the items are written, and it merits a note in the report rather than a score of its own. Every extra dimension fits; the question is which ones earn a score.
+So, one score or two? Two assumptions sit under the answer. One grit-and-mindset score assumes a single construct; the two correlate 0.26, and a second dimension predicts held-out responses about as much better as a 2PL does over the Rasch model. Two mindset scores assume the entity and incremental items tap different beliefs, rather than one belief seen through two wordings; they correlate 0.68, and the general factor carries most of the score. I would report two scores, one for grit and one for mindset, and I would not split the mindset score by wording. The wording factor is real, but it is a fact about how the items are written, and it merits a note in the report rather than a score of its own. Every extra dimension fits; the question is which earn a score.
 
 ## Problems
 
 1. **Reductions.** Show that a compensatory two-dimensional item with $a_2 = 0$ is a 2PL in $\theta_1$ with difficulty $b$. Then show that rotating the slopes and the abilities by the same orthogonal matrix leaves every response probability unchanged, and that with uncorrelated standard normal abilities it leaves the marginal likelihood unchanged too. Where does the argument need the abilities to be uncorrelated?
-2. **qgrit11.** Refit the confirmatory model with qgrit11 reversed relative to the lesson's keying (as if it were a perseverance item), and then with it dropped. How do its loading, the latent correlation and AIC change? Read its wording again and argue for a keying, or for dropping it, for respondents of this age. Would your answer be the same for the adults in [Factor analysis II](fa-confirmatory.qmd)? (PS6#1.)
+2. **qgrit11.** Refit the confirmatory model with qgrit11 reversed, then dropped. What changes? Argue for a keying, or for dropping it, for respondents of this age. Would your answer be the same for the adults in [Factor analysis II](fa-confirmatory.qmd)? (PS6#1.)
 3. **One mindset score or two?** AIC prefers two correlated wording dimensions for the mindset items. Compute the IMV of that model over one dimension by five-fold cross-validation on the dichotomized items, and look at the fold-to-fold spread and at the slopes. Would you report one mindset score or two? What would change your mind?
-4. **Design.** You suspect that items sharing a reading passage are locally dependent. Design a check: which statistic, which comparison, what you would count as a problem, and what you would do about it (drop items, model the testlets, score passages instead of items). How would you tell a passage effect from a second ability, such as vocabulary?
-5. **When does a second dimension pay?** Using the simulation, find the correlation at which the IMV of the second dimension falls below 0.005 with 500 respondents, then with 2,000, and then with 10 items per dimension. Use five folds or several seeds. Is there a correlation above which a second score is never worth reporting, or does it depend on the test?
-6. **Challenge (open).** In the compensatory model, suppose some items have $a_1 = 0$ and the others $a_2 = 0$, so that each dimension has its own set of items, as grit and mindset do here. What changes compared with items that draw on both abilities: in identification, in what the correlation between the dimensions means, and in whether separate scores are justified? The EDUC 252 slides flag this as a big question, and I don't know of a general answer.
+4. **Design.** Items sharing a reading passage may be locally dependent. Design a check (statistic, comparison, threshold) and a remedy. How would you tell a passage effect from a second ability, such as vocabulary?
+5. **When does a second dimension pay?** Using the simulation, find the correlation at which the IMV of the second dimension falls below 0.005 with 500 respondents, then with 2,000, and then with 10 items per dimension. Is there a correlation above which a second score is never worth reporting?
+6. **Challenge (open).** In the compensatory model, suppose some items have $a_1 = 0$ and the others $a_2 = 0$, so that each dimension has its own set of items, as grit and mindset do here. What changes, compared with items that draw on both abilities, in identification and in whether separate scores are justified? The EDUC 252 slides flag this as a big question, and I don't know of a general answer.
 
 ```{r}
 #| output: asis
@@ -437,6 +456,10 @@ The pilot checks the pipeline. `psychtools_bfi`, built for five traits, gains 0.
 - Gibbons, R. D., & Cai, L. (2017). Dimensionality analysis. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 47–66). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on assessing the dimensionality of item response data.
 - Cai, L. (2016). Two-tier item factor analysis modeling. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 421–435). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on two-tier item factor models, which include the bifactor model.
 - Gibbons, R. D., & Hedeker, D. R. (1992). Full-information item bi-factor analysis. *Psychometrika*, 57(3), 423–436. <https://doi.org/10.1007/BF02295430>. The bifactor model for item responses.
+- Yung, Y.-F., Thissen, D., & McLeod, L. D. (1999). On the relationship between the higher-order factor model and the hierarchical factor model. *Psychometrika*, 64(2), 113–128. <https://doi.org/10.1007/BF02294531>. The second-order model as a constrained bifactor model.
+- Bonifay, W., & Cai, L. (2017). On the complexity of item response theory models. *Multivariate Behavioral Research*, 52(4), 465–484. <https://doi.org/10.1080/00273171.2017.1309262>. Fitting propensity: the bifactor model fits almost any data.
+- Bader, M., & Moshagen, M. (2025). Assessing the fitting propensity of factor models. *Psychological Methods*, 30(2), 254–270. <https://doi.org/10.1037/met0000529>. Fitting propensity of single-factor, correlated-factors, higher-order and bifactor models, mostly tracking the number of parameters.
+- Bonifay, W., Cai, L., Falk, C. F., & Preacher, K. J. (2025). Reassessing the fitting propensity of factor models. *Psychological Methods*. Advance online publication. <https://doi.org/10.1037/met0000735>. Why counting parameters doesn't capture complexity, with analytic examples.
 - Yen, W. M. (1984). Effects of local item dependence on the fit and equating performance of the three-parameter logistic model. *Applied Psychological Measurement*, 8(2), 125–145. <https://doi.org/10.1177/014662168400800201>. Where $Q_3$ comes from.
 - Chen, W.-H., & Thissen, D. (1997). Local dependence indexes for item pairs using item response theory. *Journal of Educational and Behavioral Statistics*, 22(3), 265–289. <https://doi.org/10.3102/10769986022003265>. χ² indexes for local dependence, pair by pair.
 - Bradlow, E. T., Wainer, H., & Wang, X. (1999). A Bayesian random effects model for testlets. *Psychometrika*, 64(2), 153–168. <https://doi.org/10.1007/BF02294533>. The testlet model.
@@ -454,6 +477,6 @@ data_sources("dimensionality")
 - **Source:** EDUC 252 class 6 (slides c6, 3–21: multidimensional IRT and the IMV), class 4 (c4), problem set 6 (#1), and the code in `ben-domingue/252`: `c6/enem_mirt.R`, `c6/enem_imv.R`, `ps6/personality.R`.
 - **Timing:** about 60 minutes for the core ideas and widgets; the real-data section is a 30-minute lab (the two-dimensional graded models take about half a minute each locally, the cross-validation a minute or two).
 - **Changed from 252:** the slides compared one and two dimensions on ENEM booklet 175 and found an IMV of −0.002 for the second dimension; the course doesn't use ENEM (no tokenless CSV), and the grit and mindset data of PS6#1 carry the comparison instead. PS6#1's two models (exploratory and confirmatory, fitted there with priors on the slopes) are fitted here without priors, as graded models for the structure and as dichotomized 2PL models for the IMV. The partially compensatory model and the frame mismatch in `fscores()` are new.
-- **Held back:** bifactor and testlet models in their own right (a method factor appears once, here); multidimensional adaptive testing ([Item banks and adaptive testing](item-banks-cat.qmd)); local dependence from repeated trials, which [Explanatory item response models](explanatory-irt.qmd) models with random effects.
+- **Held back:** testlet models in their own right (the bifactor model gets a subsection and one real-data fit); multidimensional adaptive testing ([Item banks and adaptive testing](item-banks-cat.qmd)); local dependence from repeated trials, which [Explanatory item response models](explanatory-irt.qmd) models with random effects.
 - **Data:** one grit item is quoted, from the IRW's item text, which carries no licence to reproduce an instrument. The IRW notes that its item text's alignment with item ids isn't guaranteed; the correlations agree with the entity/incremental split and the grit facets, with qgrit11 the one item that doesn't follow its facet.
 - **Solutions:** held back in `solutions/dimensionality.qmd` (not published).
