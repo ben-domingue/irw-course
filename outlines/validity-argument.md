@@ -2,7 +2,7 @@
 
 # Validity as an argument (`validity-argument`)
 
-Module: validity · Prereqs: constructs, ctt-reliability · Core · Status: outline
+Module: validity · Prereqs: constructs, ctt-reliability · Core · Status: drafted (#33)
 
 ## Core ideas
 
@@ -69,3 +69,14 @@ Sanity table: none. There is no model fit; the check is the cross-tabulation its
 ## Open questions
 
 - None. (Settled 09-24: E1 prerequisite, F1 Simulate kept, F2 framing, F3 disclosure. The CDE original of the CAASPP purposes is Claude's to-do, digest D.)
+
+## Drafting notes (#33, 09-25)
+
+- The dog-ADHD alpha on slide 2 is Csibra, Bunford & Gácsi (2022), doi:10.3390/ani12070807 (sec. 3.2.1); it opens the lesson, paraphrased. The one quotation is the *Standards*' definition (p. 11), checked against the open-access PDF.
+- Slide 8's "Thou shalt not speak of validated measures" became the lesson's first-person verdict (on how to describe a measure), after the two assumptions (validity of the test vs of an interpretation).
+- Kane's fourth inference is called "decision" in the lesson, with a note that Cook, Brydges, Ginsburg & Hatala (2015), doi:10.1111/medu.12678, call it implications. The source-to-link mapping is presented as a guide, not attributed.
+- Messick (1989) is not cited; Messick (1995) is, checked against the abstract of its ETS report version (doi:10.1002/j.2333-8504.1994.tb01618.x).
+- Cook & Beckman's blood-pressure example is cited without a page (the page could not be checked; the text was checked from the slide's image of the paper).
+- Digest D: the CDE original of the CAASPP parent guide was found (grade 11, 2015, p. 5) via the Wayback Machine: https://web.archive.org/web/20150905090008/http://www.cde.ca.gov/ta/tg/ca/documents/sbparentgde11.pdf. The CDE site itself is behind a captcha.
+- Silk et al. (2019, Methods): three controls with six or more symptoms but insufficient impairment were excluded from the subsample, and the sample is screen-high vs screen-low on parent and teacher ratings (extreme groups). Both are stated in the lesson as design facts.
+- The AUC is defined in one sentence; ROC and classification accuracy stay in `validity-evidence`.

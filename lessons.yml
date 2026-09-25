@@ -115,7 +115,7 @@ lessons:
     prereqs: [constructs, ctt-reliability]
     origin: {slides: [c3], ps: [], code: []}
     tables: [silk_2019_inattentive, silk_2019_hyperactive]
-    status: stub
+    status: draft
     tranche: core
 
   - id: validity-causal
