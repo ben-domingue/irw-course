@@ -8,19 +8,378 @@ source("_course.R")
 lesson_header("constructs")
 ```
 
+```{ojs}
+//| echo: false
+import {grid, logistic, palette} from "./widgets/irt.js"
+import {simTwo} from "./widgets/constructs.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Before we ask how well a test measures something, we have to say what the something is. [What is measurement?](measurement.qmd) called the attribute we are after a construct. This lesson asks what a statement of one should contain. The answer we build on is the **construct map**, from Mark Wilson's approach to constructing measures: a line from less to more of the construct, with a description of what respondents at each point can do. A good map orders the items before anyone answers them, and it tells a teacher what to work on next. We try both tests, the first on nine number-series items from the IRW, and ask whether a construct has to be a continuum at all.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what a construct is, and write the kind of sentence that gives one its meaning;
+- draw a construct map for a construct you care about, with respondents and items on one line;
+- test a proposed construct: does it order items before data, and suggest what to teach next?
+- say why summary statistics find it hard to tell a continuous construct from latent classes;
+- contrast a test built from a construct map with one built from a blueprint, and say what each lets you claim.
+
 ## Core ideas
 
-## Worked example
+### What is a construct?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): a latent attribute can't be observed directly, so we present **probes** (questions, tasks, statements) that draw out responses bearing on it. A probe whose response is scored is an item, and from there on the course says "item".
+:::
+
+We can't observe reading comprehension, so we need an account of it that tells us which items to write and how to read the responses. [Cronbach and Meehl (1955)](https://doi.org/10.1037/h0040957) gave the classic definition: a construct is an attribute of people that we *postulate*, and assume shows up in test performance. Its meaning, they argued, lies in claims of one form: "Persons who possess this attribute will, in situation X, act in manner Y (with a stated probability)" ([Cronbach & Meehl, 1955, p. 284](https://doi.org/10.1037/h0040957)).
+
+That sentence carries much of this course. "Situation X" is the item; "manner Y" is the response. "With a stated probability" makes the link probabilistic, the premise of every item response model from [The Rasch model](rasch.qmd) on. And "possess this attribute" is left open: Cronbach and Meehl allow a *qualitative* attribute (their example is amnesia) as well as a *degree* of a quantitative one (cheerfulness). We come back to that choice below.
+
+The definition also makes a construct something we propose and could be wrong about. Nobody finds anxiety lying on the pavement; we postulate it because it organizes what people do, and keep it while its predictions hold up. [Validity as an argument](validity-argument.qmd) turns this into a method.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A colleague proposes a construct, *statistics anxiety*, and writes: \"Students high in statistics anxiety, when asked to interpret a regression table under time pressure, will skip it or answer at random more often than other students.\" Which part of the Cronbach–Meehl sentence is *situation X*?",
+  options: [
+    {text: "Being asked to interpret a regression table under time pressure", correct: true, why: "The situation is what we present to the respondent: here, the task and its conditions. It plays the role of the item."},
+    {text: "Skipping the table or answering at random", correct: false, why: "That is *manner Y*, the response we expect. It is what we record and score."},
+    {text: "Being high in statistics anxiety", correct: false, why: "That is the attribute itself, which we postulate and never see. The sentence links it to a situation and a response."}
+  ]
+})
+```
+
+### A construct map
+
+The Cronbach–Meehl definition says what a construct is for, but not what a statement of one should look like. Mark Wilson's approach to constructing measures, which grew out of the BEAR Assessment System ([Wilson & Sloane, 2000](https://doi.org/10.1207/S15324818AME1302_4)), makes the construct map its first building block ([Wilson, 2005](https://doi.org/10.4324/9781410611697)). It builds on the Rasch tradition of placing respondents and items on one scale, the picture the [Wright map](rasch.qmd#people-and-items-on-one-scale-the-wright-map) draws. A **construct map** is a line. At one end are respondents with little of the construct, at the other end respondents with a lot, and along it are qualitatively described **levels**: what a respondent at each point typically knows, believes or can do. Beside the respondents, on the same line, sit the items, each placed at the level its response indicates. The map assumes the construct is a single continuum (one line, not two), an assumption [Factor analysis I](fa-exploratory.qmd) and [Dimensionality](dimensionality.qmd) put to the test.
+
+What does a map look like in practice? California's Desired Results Developmental Profile (DRDP), which early-childhood teachers use to rate children's development, is a set of them ([California Department of Social Services & California Department of Education, 2025](https://www.desiredresults.us/desired-results-system/drdp-2025-instrument-and-forms), developed with the Berkeley Evaluation and Assessment Research Center). Each measure is a continuum cut into named levels (Responding, Exploring, Building and, for older children, Integrating and Extending), each with a descriptor and examples. In problem solving, a child at the earliest level notices people and objects; later, the child copies a strategy an adult has shown; later still, the child stops to look at a problem before choosing how to tackle it. The teacher marks the latest level mastered.
+
+#### Try it: respondents and items on one line
+
+On the left is a construct map for solving number series, the construct behind our real-data example. Move the respondent along the line; on the right is the chance that they solve an item at each level. The locations and curve are stylized.
+
+```{ojs}
+//| echo: false
+viewof cm_theta = Inputs.range([-3, 3], {value: 0.4, step: 0.1, label: "Respondent's location"})
+```
+
+```{ojs}
+//| echo: false
+cm_levels = [
+  {level: 1, b: -2, text: "the same step every time"},
+  {level: 2, b: -1, text: "the step changes by a simple pattern"},
+  {level: 3, b: 0, text: "the step changes by multiplication"},
+  {level: 4, b: 1, text: "two sequences interleaved"},
+  {level: 5, b: 2, text: "two sequences as fractions"}
+]
+cm_now = cm_levels.map(d => ({...d, p: logistic(cm_theta - d.b)}))
+cm_map = Plot.plot({
+  width: 400, height: 340, marginLeft: 10, marginRight: 10,
+  x: {domain: [0, 12], axis: null}, y: {domain: [-3.2, 3.2], label: "More of the construct ↑", ticks: []},
+  marks: [
+    Plot.ruleX([5], {y1: -3, y2: 3, stroke: palette.guide}),
+    Plot.dot(cm_levels, {x: 5, y: "b", r: 5, fill: palette.main}),
+    Plot.text(cm_levels, {x: 5.3, y: "b", text: d => `Level ${d.level}: ${d.text}`, textAnchor: "start", fontSize: 10, lineWidth: 14}),
+    Plot.dot([{y: cm_theta}], {x: 4.6, y: "y", r: 8, fill: palette.contrast}),
+    Plot.text([{y: cm_theta}], {x: 4.2, y: "y", text: () => "respondent", textAnchor: "end", fill: palette.contrast, fontSize: 10})
+  ]
+})
+cm_bars = Plot.plot({
+  width: 320, height: 340,
+  x: {domain: [0, 1], label: "Chance of solving an item at this level"}, y: {type: "band", domain: [5, 4, 3, 2, 1], label: "Level"},
+  marks: [
+    Plot.barX(cm_now, {x: "p", y: "level", fill: d => d.b <= cm_theta ? palette.main : palette.light, insetTop: 8, insetBottom: 8}),
+    Plot.ruleX([0.5], {stroke: palette.guide, strokeDasharray: "4,3"})
+  ]
+})
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem;">${cm_map}${cm_bars}</div>`
+```
+
+```{ojs}
+//| echo: false
+md`At this location the respondent is more likely than not to solve items at ${cm_now.filter(d => d.p > 0.5).length} of the five levels.`
+```
+
+Items below the respondent are likely to be solved, items above likely to be missed. Item response models draw this picture with estimated numbers: the Wright map in [The Rasch model](rasch.qmd) puts respondents and items on one scale, and [Information, precision, and short forms](information.qmd) asks where on the line a test measures well.
+
+### The number-series items on the map
+
+Here are the nine items we analyse later, placed on the lesson's map from their text alone. Each asks for the missing number.
+
+| Level | What the solver has to find | Items |
+|---|---|---|
+| 1 | the same step every time | NS_1: 10, 4, \_\_, −8, −14, −20 |
+| 2 | a step that changes by a simple pattern (it alternates, or grows by one) | NS_2: 3, 6, 10, 15, 21, \_\_<br>NS_3: 121, 100, 81, \_\_, 49<br>NS_4: 3, 10, 16, 23, \_\_, 36 |
+| 3 | a step that changes by multiplication | NS_6: 200, 198, 192, 174, \_\_<br>NS_8: 10000, 9000, \_\_, 8890, 8889 |
+| 4 | two sequences interleaved in one | NS_7: 3, 2, 10, 4, 19, 6, 30, 8, \_\_ |
+| 5 | two sequences side by side, as fractions | NS_5: 3/21, \_\_, 13/11, 18/6, 23/1, 28/−4<br>NS_9: 3/4, 4/6, 6/8, 8/12, \_\_ |
+
+: The lesson's construct map for the number series. Sequences from the test's materials ([forecastingresearch/fpt](https://github.com/forecastingresearch/fpt/blob/main/materials/js/number_series_task.js)). {tbl-colwidths="[8,42,50]"}
+
+If the map is right, items should get harder as you go down the table. Before looking at any data, commit to a guess.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Reading only the items, which will be hardest?",
+  choices: ["NS_5 (fractions)", "NS_6 (steps that triple)", "NS_7 (interleaved)", "NS_9 (fractions)"],
+  answer: "NS_6 (steps that triple)",
+  reveal: "NS_6, by a wide margin, though the map puts it only at level 3. Keep your guess: *With real data* shows how far out of place it is, and why."
+})
+```
+
+The map predicts that the hardest item comes from level 4 or 5. The data will say whether it does, and, when an item disagrees, whether the map is at fault.
+
+### Two tests for a proposed construct
+
+How do we know a construct map is any good before we have data? Two questions help.
+
+1. **Does the map order the items?** Items written for a higher level should be harder (on an attitude scale, less often endorsed) than items for a lower one. This is a prediction made before any data, and the data can refute it. [Gathering validity evidence](validity-evidence.qmd) treats the ordering as evidence about a test's internal structure.
+2. **Does the map suggest an intervention?** A well-articulated map should say how to move someone up it: what a respondent at level 2 has to learn, or give up, to reach level 3. If no plan for teaching can be read off the map, its levels probably describe performances rather than the construct behind them.
+
+The second test is easiest to see by comparison. One description is a construct map for students' understanding of the Earth in the Solar System, from a project that wrote multiple-choice items whose answer options are each linked to a level ([Briggs, Alonzo, Schwab & Wilson, 2006, Figure 2](https://doi.org/10.1207/s15326977ea1101_2)). Another is the achievement-level descriptors for grade 4 NAEP geography, which say what Basic, Proficient and Advanced students should be able to do ([National Assessment Governing Board, 2001](https://www.nagb.gov/content/dam/nagb/en/documents/publications/achievement/naep-geography-achievement-levels-1992-1998.pdf)). The DRDP is the third. All three are summarized in our own words.
+
+#### Try it: what would you teach next?
+
+Pick a description and a level to see what a student there knows, what holds them back (if the description says) and what the next level asks for.
+
+```{ojs}
+//| echo: false
+td_maps = ({
+  "Earth in the Solar System (Briggs et al., 2006)": [
+    {level: "1", now: "Doesn't yet see that objects in the sky appear and move in regular patterns.", block: "may not know that the Earth is a sphere"},
+    {level: "2", now: "Knows the Sun seems to cross the sky each day and the Moon's visible shape changes over about four weeks.", block: "may think the Sun travels around the Earth"},
+    {level: "3", now: "Knows the Earth goes around the Sun, the Moon around the Earth, and the Earth spins; hasn't used these facts to explain what we see.", block: "may not realize the Earth spins and orbits at the same time"},
+    {level: "4", now: "Connects how things appear to move in the sky with how they actually move, without yet a full model of the Solar System.", block: null},
+    {level: "5", now: "Uses the motions of the Earth and Moon together to explain day and night, the phases of the Moon and the seasons.", block: null}
+  ],
+  "NAEP geography, grade 4 (NAGB, 2001)": [
+    {level: "Basic", now: "Uses and defines basic geographic words; reads and draws simple maps with keys and legends; names major features on maps and globes; gives examples of people, goods and ideas moving between places.", block: null},
+    {level: "Proficient", now: "Uses geographic knowledge to identify patterns and processes; finds locations on letter-and-number grids; sketches simple maps; describes an issue from more than one point of view; explains how an event in one place can affect another.", block: null},
+    {level: "Advanced", now: "Describes global patterns and processes; builds models and draws labelled maps of their state, the country and the world; predicts what a change in one place will do to another; analyses how groups interact.", block: null}
+  ],
+  "DRDP problem-solving (CDSS & CDE, 2025)": [
+    {level: "Responding, earlier", now: "Turns toward people, sounds or objects.", block: null},
+    {level: "Responding, later", now: "Does things with people or objects and watches what happens.", block: null},
+    {level: "Exploring, earlier", now: "Tries more than one way to do something when it doesn't work.", block: null},
+    {level: "Exploring, later", now: "Uses a strategy that someone else showed or suggested.", block: null},
+    {level: "Building, earlier", now: "Thinks up ways to solve everyday problems, with an adult's help.", block: null},
+    {level: "Building, middle", now: "Picks out parts of an everyday problem and thinks up strategies to try.", block: null},
+    {level: "Building, later", now: "Stops to look at a problem before trying a strategy aimed at it.", block: null}
+  ]
+})
+viewof td_which = Inputs.radio(Object.keys(td_maps), {value: Object.keys(td_maps)[0], label: "Description"})
+```
+
+```{ojs}
+//| echo: false
+viewof td_i = Inputs.range([1, td_maps[td_which].length], {value: 1, step: 1, label: "Level (from the bottom)"})
+```
+
+```{ojs}
+//| echo: false
+td_rows = td_maps[td_which]
+td_here = td_rows[Math.min(td_i, td_rows.length) - 1]
+td_next = td_rows[Math.min(td_i, td_rows.length)]
+md`**At ${td_here.level}:** ${td_here.now}
+
+**Holding the student back:** ${td_here.block ? td_here.block + "." : "the description doesn't say."}
+
+${td_next ? `**The next level asks for:** ${td_next.now}` : "**This is the top level.**"}`
+```
+
+Step through the astronomy map from level 1 to level 3. Each level names a belief the student must give up to move on (that the Earth is flat, that the Sun circles the Earth, that the Earth can't spin and orbit at once), and that is a lesson plan: teach against the belief. The NAEP descriptors list performances; the Proficient list asks for more than the Basic list, but doesn't say what a Basic student is missing or what to teach first. The DRDP sits between them: its levels describe a progression, from trial and error to planning, but name no belief to overcome.
+
+Which is the better construct map? The descriptions were written for different jobs. Achievement-level descriptors say what a score above a cut point means, for reporting to the public, and for that job they are a reasonable choice. A construct map describes the construct itself, and for that job I think the astronomy map comes much closer to the ideal: because each level names the misconception to overcome next, it implies what to teach, and the descriptors don't.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A reading test's levels are: *Level 1: can answer literal questions about a short passage. Level 2: can answer literal and inferential questions. Level 3: can answer literal, inferential and evaluative questions.* Does this pass the intervention test?",
+  options: [
+    {text: "Only partly: it orders kinds of question, but it doesn't say what a Level 1 reader lacks that stops them making inferences", correct: true, why: "The levels order performances, which helps with writing items (the first test). A plan for teaching needs an account of what changes in the reader between levels: vocabulary, background knowledge, a strategy for linking sentences."},
+    {text: "Yes: it tells the teacher to teach inferential questions next", correct: false, why: "It says what to aim at, not how to get there. Compare the astronomy map, which names the belief a student at each level has to give up."},
+    {text: "No: a construct map needs at least five levels", correct: false, why: "Nothing fixes the number of levels. Three well-described levels can pass both tests."}
+  ]
+})
+```
+
+### A continuum, or classes?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): the two thermometers agreed on the order of every bath and disagreed about spacing, and only a theory of temperature could say which was right. Whether an attribute can be measured, and what kind of scale it supports, depends on the attribute itself.
+:::
+
+A construct map assumes the construct varies continuously: anyone could sit anywhere on the line. That is a claim about the attribute, like the thermometers' question, and it could be false. Some influential theories are categorical. [Moffitt (1993)](https://doi.org/10.1037/0033-295X.100.4.674) proposed that young people who behave antisocially fall into two groups with different causes: a small group antisocial at every age, and a larger group antisocial only in adolescence. A follow-up of a New Zealand birth cohort to age 26 kept both and found a third, men aggressive as children but not very delinquent as adolescents ([Moffitt, Caspi, Harrington & Milne, 2002](https://doi.org/10.1017/S0954579402001104)). These are **latent classes**: unobserved groups inside each of which people are alike.
+
+Which account fits is an empirical question. Taxometric analysis, developed by Meehl and colleagues, asks whether a latent variable is a category or a dimension ([Meehl, 1995](https://doi.org/10.1037/0003-066X.50.4.266)). A review of 311 taxometric findings estimated that about 14% were taxonic (categorical) once study design was accounted for, with little persuasive evidence for categories in normal personality or in mood or anxiety disorders ([Haslam, Holland & Kuppens, 2012](https://doi.org/10.1017/S0033291711001966)). My prior follows that review: the constructs we measure vary much more often continuously than categorically. It is a prior, though, and the widget shows why response data rarely settle it.
+
+#### Try it: continuum or classes?
+
+Two samples of 1,000 respondents answer ten items. One comes from a continuum (locations drawn from a normal distribution with SD 1), the other from four ordered latent classes, with item locations set so that every item has the same expected proportion correct in both. Which is which? Decide before you reveal.
+
+```{ojs}
+//| echo: false
+viewof cc_sep = Inputs.range([0.5, 3], {value: 1, step: 0.25, label: "Distance between the classes"})
+viewof cc_seed = Inputs.range([1, 20], {value: 1, step: 1, label: "Sample (seed)"})
+viewof cc_show = Inputs.toggle({label: "Reveal which is which", value: false})
+```
+
+```{ojs}
+//| echo: false
+cc_sim = simTwo({seed: cc_seed, n: 1000, sep: cc_sep})
+cc_flip = cc_seed % 2 === 0
+cc_A = cc_flip ? cc_sim.classes : cc_sim.continuum
+cc_B = cc_flip ? cc_sim.continuum : cc_sim.classes
+cc_name = s => s === cc_sim.classes ? "four classes" : "continuum"
+cc_mean = a => a.reduce((u, v) => u + v, 0) / a.length
+cc_sd = a => { const m = cc_mean(a); return Math.sqrt(a.reduce((u, v) => u + (v - m) ** 2, 0) / (a.length - 1)); }
+cc_panel = (s, label) => Plot.plot({
+  width: 340, height: 230, title: cc_show ? `${label}: ${cc_name(s)}` : label,
+  x: {label: "Sum score", domain: [-0.5, 10.5]}, y: {label: "Respondents", domain: [0, 260]},
+  marks: [
+    Plot.rectY(s.sums, Plot.binX({y: "count"}, {x: d => d, thresholds: grid(-0.5, 10.5, 12), fill: cc_show && s === cc_sim.classes ? palette.contrast : palette.main, inset: 1})),
+    Plot.ruleY([0])
+  ]
+})
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem;">${cc_panel(cc_A, "Sample A")}${cc_panel(cc_B, "Sample B")}</div>`
+```
+
+```{ojs}
+//| echo: false
+md`Sum-score SD: A ${cc_sd(cc_A.sums).toFixed(2)}, B ${cc_sd(cc_B.sums).toFixed(2)}. Average item-rest correlation: A ${cc_mean(cc_A.itemRest).toFixed(2)}, B ${cc_mean(cc_B.itemRest).toFixed(2)}.${cc_show ? ` Sample ${cc_flip ? "A" : "B"} is the four classes.` : ""}`
+```
+
+With the classes one unit apart, which gives them about the spread of the continuum, the histograms, SDs and item-rest correlations are close to indistinguishable; try a few seeds. Only when the classes are pulled well apart, around 2.5 or 3, do they show, as a flatter sum-score distribution with more respondents at the extremes. Ordered classes close together behave very much like a continuum cut into pieces, so data that fit one don't rule out the other. Telling them apart takes models fit to the item responses and predictions that differ between the accounts; [Latent classes and cognitive diagnosis](cdm.qmd) takes this up.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A study fits a four-class model to ten binary items and reports that the classes are ordered: the classes' proportions correct rise together on every item. What does that tell you about whether the construct is categorical?",
+  options: [
+    {text: "Not much: ordered classes are also what a continuum cut into four pieces looks like", correct: true, why: "In the widget, ordered classes close together gave almost the same data as a continuum. Evidence for categories needs something a continuum can't produce, such as classes that differ in *which* items they find hard."},
+    {text: "It confirms the construct is categorical, since the four-class model fit", correct: false, why: "A model can fit without being the only model that fits. A continuum would likely fit these data about as well."},
+    {text: "It shows the construct is continuous, since the classes are ordered", correct: false, why: "Ordered classes are consistent with a continuum, but they don't rule out real classes that happen to be ordered."}
+  ]
+})
+```
+
+### A different starting point: blueprints
+
+Not every test starts from a construct map. Licensure exams, admissions tests and many state school tests start from a **domain**, the knowledge and skills to be covered, and a **blueprint** (the test specifications) saying how many items of each kind to draw from each part of it. The *Standards for Educational and Psychological Testing* treat specifications as the first product of test design: content and its weighting, item formats, length and scoring ([AERA, APA & NCME, 2014, ch. 4](https://www.testingstandards.net/open-access-files.html)). The claim such a test supports is about the domain: this candidate answered 80% of a representative sample of what a new nurse should know. Sometimes the aim is a minimum standard: the written driving test checks that you know the rules of the road, and needs no theory of how that knowledge develops.
+
+A blueprint is a reasonable choice when the domain can be listed and the use is a decision about coverage, as in licensure. It doesn't offer the construct map's two tests: it predicts no item order and suggests nothing to teach beyond the list. It offers content evidence instead, the argument that the items represent the domain ([Validity as an argument](validity-argument.qmd)), and a view of items as a sample from a larger pool ([Many sources of error](g-theory.qmd)).
+
+## Simulate
+
+The code below simulates 2,000 respondents twice: on a continuum with ten items at five levels, and from four ordered latent classes whose item locations give every item the same expected proportion correct. It prints item means, item-rest correlations and sum-score distributions side by side, in base R, in about a second.
+
+With the seed as written and the classes one unit apart (`sep <- 1`), the item means agree to within 0.03, the item-rest correlations to within 0.04, and the sum-score SDs are 2.07 and 2.11. Now set `sep <- 3`. The item means still match (by construction), but the item-rest correlations under the classes run from 0.48 to 0.72, against 0.23 to 0.34 for the continuum, and the sum-score SD rises to 2.96. Try other class sizes in `share`, or two classes. How far apart must two classes be before you would bet on them from sum scores alone?
+
+```{webr}
+{{< include code/constructs-sim.R >}}
+```
+
+[Download this code](code/constructs-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/constructs-irw.R")
+```
+
+Our table is [himmelstein-number_series-2025](https://itemresponsewarehouse.org/tables/himmelstein-number_series-2025/): nine number-series items from the Forecasting Proficiency Test, a battery built to identify people who forecast well ([Himmelstein et al., 2025](https://doi.org/10.31234/osf.io/a7kdx_v8); materials and data at [forecastingresearch/fpt](https://github.com/forecastingresearch/fpt)), which adapted the task from earlier work including [Dieckmann, Gregory, Peters & Hartman (2017)](https://doi.org/10.1111/risa.12639). Its job here is to test a construct map: does a map written from the items' text order them before we see responses? [Download the code](code/constructs-irw.R); it needs only base R.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+```{r items}
+#| echo: true
+#| code-fold: show
+```
+
+Responses are scored 1 for correct, so higher means more of the construct. The `wave` column merits a look before we pool. Waves 3 and 5 of the seven-wave study held the cognitive tests, and each participant was randomly assigned to take this block in one of them ([Himmelstein et al., 2025, sec. 2.1](https://doi.org/10.31234/osf.io/a7kdx_v8)), so each respondent appears once and we can pool. Each item had a 30-second limit ([`number_series_task.js`](https://github.com/forecastingresearch/fpt/blob/main/materials/js/number_series_task.js)); an unanswered item is simply missing from the table.
+
+```{r design}
+#| echo: true
+#| code-fold: show
+```
+
+Of 1,189 respondents, 1,154 answered NS_2 but only 816 answered NS_7. The hard-looking items go unanswered most, so we compute proportions correct two ways: among those who answered, and counting unanswered as wrong. The map puts NS_6, whose steps triple (2, 6, 18), at level 3 with NS_8, whose steps shrink tenfold (1,000, 100, 10, 1). Was your guess right?
+
+
+
+
+```{r pcorrect}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+The map does fairly well: the rank correlation between level and proportion correct is −0.76 (−1 would mean every higher level is harder), unchanged when unanswered items count as wrong. Two items are out of place in the mild way a first draft should expect. NS_2 (3, 6, 10, 15, 21) is easier than the level-1 NS_1, perhaps because its step grows by exactly one each time, the gentlest change a step can make. NS_5, a fraction item at level 5, is easier than the interleaved NS_7: its numerators and denominators each change by a constant step, so it may belong lower. Without NS_6, the rank correlation is −0.85.
+
+NS_6 is out of place by a wide margin (1.5% correct, against 48% for NS_8 at the same level), and its text doesn't explain why: tripling steps are no harder in principle than steps that shrink tenfold. The IRW table keeps only the 0/1 score, so we read what respondents typed from the source data.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The scoring key for NS_6 (200, 198, 192, 174, __) accepts 165. Continuing the tripled steps (2, 6, 18, then 54) gives 120. Among respondents who answered NS_6, which answer was more common?",
+  choices: ["165, the keyed answer", "About as many of each", "120, the tripling answer"],
+  answer: "120, the tripling answer",
+  reveal: "101 respondents typed 120 and 13 typed 165. NS_6 looks hardest largely because of its key."
+})
+```
+
+```{r ns6}
+#| echo: true
+#| code-fold: show
+```
+
+Most who answered didn't type the keyed 165: 101 typed 120, the answer the tripled steps give (174 − 54), against 13 for 165. I can't find the rule that leads to 165; the key may encode a pattern I haven't seen, or record a slip. Scored with 120, NS_6 would be solved by 11.5% of those who answered: still the hardest item, but at about half the rate of NS_7 and NS_9 (0.24) rather than a sixteenth. Either way, its place in the data is mostly a fact about its key, not the construct. The map is what made the item look wrong.
+
+My working rule: when an item lands far from where the construct map puts it, I read the item and its key before I revise the map. [AI and psychometrics](ai-psychometrics.qmd) returns to these nine items as a check on its own pipeline.
 
 ## Problems
 
+1. **Two classes, one sum.** A proportion $\pi$ of respondents are in class 1, the rest in class 2, and a respondent in class $k$ answers item $i$ correctly with probability $p_{ik}$, independently across items. Derive the item's mean and the covariance of items $i$ and $j$. Show that every covariance is positive when every item is easier in class 2. What does that imply for positive inter-item correlations as evidence of a continuum?
+2. **The out-of-place item.** Which item other than NS_6 is most out of place relative to the lesson's map? Propose a reason from its text, and say what data would test it (the `rt` column may help).
+3. **Your sentence.** Write the Cronbach–Meehl sentence for a construct you work with, for three different situations. Does your construct pass the intervention test?
+4. **Design a map.** Sketch a four-level construct map for a construct of your choice: a description at each level, what holds a respondent there, and one item per level. Ask someone to order your items before seeing your levels.
+5. **Blueprint or map?** A nursing board licenses nurses with an exam built from a blueprint; a hospital wants a scale of clinical judgment built from a construct map. For each, what can a score claim, what evidence would the claim need, and what question could it not answer?
+6. **Challenge: is antisocial behaviour a continuum?** What data would convince you that antisocial behaviour is a continuum rather than Moffitt's categories, and what would convince you it isn't? Consider predictions about change over time, not only the distribution at one age. This is open.
+
+```{r}
+#| output: asis
+ask_claude("constructs", "It covers what a construct is (Cronbach and Meehl's definition), Wilson's construct maps, two tests for a proposed construct (does it order items before data; does it suggest an intervention), whether a construct is a continuum or a set of latent classes, and test blueprints, with nine number-series items from the Forecasting Proficiency Test as the worked example.")
+```
+
 ## Going further
+
+- Cronbach, L. J., & Meehl, P. E. (1955). Construct validity in psychological tests. *Psychological Bulletin*, 52(4), 281–302. <https://doi.org/10.1037/h0040957>. Where the idea of a construct, and of validating one, comes from.
+- Wilson, M. (2005). *Constructing measures: An item response modeling approach*. Lawrence Erlbaum. <https://doi.org/10.4324/9781410611697>. Construct maps, and the steps from a map to items to a measurement model, at book length.
+- Briggs, D. C., Alonzo, A. C., Schwab, C., & Wilson, M. (2006). Diagnostic assessment with ordered multiple-choice items. *Educational Assessment*, 11(1), 33–63. <https://doi.org/10.1207/s15326977ea1101_2>. The astronomy construct map, and items whose answer options point to levels.
+- National Assessment Governing Board. (2001). *NAEP achievement levels 1992–1998 for geography*. <https://www.nagb.gov/content/dam/nagb/en/documents/publications/achievement/naep-geography-achievement-levels-1992-1998.pdf>. The descriptors compared with the astronomy map, with sample items at each level.
+- California Department of Social Services & California Department of Education. (2025). *DRDP (2025): An early childhood developmental continuum*. <https://www.desiredresults.us/desired-results-system/drdp-2025-instrument-and-forms>. A working instrument built as a set of construct maps.
+- Moffitt, T. E. (1993). Adolescence-limited and life-course-persistent antisocial behavior: A developmental taxonomy. *Psychological Review*, 100(4), 674–701. <https://doi.org/10.1037/0033-295X.100.4.674>. A categorical theory of an important construct, and the reasons for it.
+- Haslam, N., Holland, E., & Kuppens, P. (2012). Categories versus dimensions in personality and psychopathology: A quantitative review of taxometric research. *Psychological Medicine*, 42(5), 903–920. <https://doi.org/10.1017/S0033291711001966>. What taxometric studies have found, across 311 findings.
+- Bartholomew, D. J., Knott, M., & Moustaki, I. (2011). *Latent variable models and factor analysis: A unified approach* (3rd ed.). Wiley. <https://doi.org/10.1002/9781119970583>. Latent class and latent trait models as members of one family.
+- AERA, APA, & NCME. (2014). *Standards for educational and psychological testing*. American Educational Research Association. <https://www.testingstandards.net/open-access-files.html>. Chapter 4 covers test specifications; open access.
 
 ```{r}
 #| output: asis
@@ -29,3 +388,9 @@ data_sources("constructs")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 2 (slides c2, "Constructs" through "A different view: Test 'blueprints'", slides 3–17). The number-series analysis is new.
+- **Timing:** about 45 minutes for the core ideas and widgets; the real-data section works as a 20-minute lab, and problem 4 as a small-group activity.
+- **Changed from 252:** the slides show the astronomy map and the NAEP descriptors as images; here both are paraphrased (the astronomy figure is © WestEd 2002, in Briggs et al., 2006), and the DRDP example uses the current (2025) instrument. The Cronbach–Meehl definition is paraphrased except for its one key sentence. The slide's "80s music" example is left out. The slides list four Moffitt groups (abstainers, recoveries, life-course-persistent, adolescence-limited); here the lesson gives the two groups of Moffitt (1993) and the third found at age 26 (Moffitt et al., 2002).
+- **Held back:** writing items from a map (in [From construct map to items](instrument-building.qmd)); latent class models fit to data (in [Latent classes and cognitive diagnosis](cdm.qmd)); whether an intervention changes the construct or only some items (in [Measurement invariance under treatment and life events](invariance-experience.qmd)); the causal reading of a construct (in [Validity as causation](validity-causal.qmd)).
+- **Item text:** the nine sequences and their keys are from the test's public materials ([forecastingresearch/fpt](https://github.com/forecastingresearch/fpt): `materials/js/number_series_task.js` and `data_cognitive_tasks/task_datasets/data_number_series.csv`); the paper describing the test is CC BY 4.0.
+- **Solutions:** held back in `solutions/constructs.qmd` (not published). Problem 6 is open.
