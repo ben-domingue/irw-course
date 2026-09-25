@@ -17,7 +17,7 @@ suppressPackageStartupMessages(library(lme4))
 ```{ojs}
 //| echo: false
 import {palette, grid} from "./widgets/irt.js"
-import {gCoef, errorParts, twoRaters} from "./widgets/g-theory.js"
+import {gCoef, coefBars, presets, twoRaters} from "./widgets/g-theory.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -66,50 +66,61 @@ lmer(resp ~ 1 + (1 | id) + (1 | item) + (1 | rater) +
 
 The residual variance is $\sigma^2_{ptr,e}$. In a balanced design the two routes agree whenever no ANOVA estimate is negative ([Searle et al., 1992](https://doi.org/10.1002/9780470316856)); the model-based route also handles missing ratings and unbalanced designs, which the second table below needs.
 
-#### Try it: where the variance goes
+### Two G coefficients
 
-Set six of the components (task × rater is fixed at 0 here), then the number of tasks and raters a score averages over. The top bar is one rating; the bottom bar, the average. Each piece is coloured by its role; hover for its size.
+Why are some components error only some of the time? It depends on the decision. For a **relative** decision (who ranks above whom), only the components that change a person's standing count: those that interact with $p$. For a score averaged over $n_t$ tasks and $n_r$ raters, the relative error variance is
+$$\sigma^2_\delta = \frac{\sigma^2_{pt}}{n_t} + \frac{\sigma^2_{pr}}{n_r} + \frac{\sigma^2_{ptr,e}}{n_t n_r}.$$
+For an **absolute** decision (is this score above 3? how clever is this list, on the rating scale?), a harsh rater or a hard task moves the score itself, so the main effects count too:
+$$\sigma^2_\Delta = \sigma^2_\delta + \frac{\sigma^2_t}{n_t} + \frac{\sigma^2_r}{n_r} + \frac{\sigma^2_{tr}}{n_t n_r}.$$
+Each coefficient sets the universe-score variance against one of them ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)): the **generalizability coefficient** $E\rho^2 = \sigma^2_p/(\sigma^2_p + \sigma^2_\delta)$ and the **dependability coefficient** $\Phi = \sigma^2_p/(\sigma^2_p + \sigma^2_\Delta)$. Since $\sigma^2_\Delta \ge \sigma^2_\delta$, $\Phi$ is never the larger. Error near a cut score is taken up in [What does a score mean?](score-meaning.qmd).
+
+#### Try it: the two coefficients side by side
+
+Each bar is one coefficient's denominator: the universe score and the error that coefficient counts. The light pieces (task, rater, task × rater) count only for Φ. The sliders start at the cleverness ratings' estimates from *With real data*; switch to the essays to see raters that differ in severity. (For the essays, "task" is a rating criterion.)
 
 ```{ojs}
 //| echo: false
-viewof vp = Inputs.range([0, 1], {value: 0.4, step: 0.05, label: "person"})
-viewof vt = Inputs.range([0, 0.5], {value: 0.05, step: 0.05, label: "task"})
-viewof vr = Inputs.range([0, 0.5], {value: 0.1, step: 0.05, label: "rater"})
-viewof vpt = Inputs.range([0, 0.5], {value: 0.15, step: 0.05, label: "person × task"})
-viewof vpr = Inputs.range([0, 0.5], {value: 0.1, step: 0.05, label: "person × rater"})
-viewof vres = Inputs.range([0, 0.5], {value: 0.2, step: 0.05, label: "residual"})
-viewof wnt = Inputs.range([1, 10], {value: 3, step: 1, label: "Tasks averaged over"})
-viewof wnr = Inputs.range([1, 10], {value: 2, step: 1, label: "Raters averaged over"})
+viewof gpre = Inputs.radio(Object.keys(presets), {value: "Cleverness ratings", label: "Start from"})
 ```
 
 ```{ojs}
 //| echo: false
-wv = ({p: vp, t: vt, r: vr, pt: vpt, pr: vpr, tr: 0, res: vres})
-w1 = gCoef(wv, 1, 1)
-wN = gCoef(wv, wnt, wnr)
-w_avg = `Average of ${wnt} × ${wnr}`
-w_rows = [
-  ...errorParts(wv, 1, 1).map(d => ({...d, design: "One rating"})),
-  ...errorParts(wv, wnt, wnr).map(d => ({...d, design: w_avg}))
-].filter(d => d.value > 0)
+viewof wv = Inputs.form({
+  p: Inputs.range([0, 1], {value: presets[gpre].p, step: 0.001, label: "person"}),
+  t: Inputs.range([0, 1], {value: presets[gpre].t, step: 0.001, label: "task"}),
+  r: Inputs.range([0, 1], {value: presets[gpre].r, step: 0.001, label: "rater"}),
+  pt: Inputs.range([0, 1], {value: presets[gpre].pt, step: 0.001, label: "person × task"}),
+  pr: Inputs.range([0, 1], {value: presets[gpre].pr, step: 0.001, label: "person × rater"}),
+  tr: Inputs.range([0, 1], {value: presets[gpre].tr, step: 0.001, label: "task × rater"}),
+  res: Inputs.range([0, 1], {value: presets[gpre].res, step: 0.001, label: "residual"})
+})
+viewof wn = Inputs.form({
+  nt: Inputs.range([1, 10], {value: presets[gpre].nt, step: 1, label: "Tasks averaged over"}),
+  nr: Inputs.range([1, 10], {value: presets[gpre].nr, step: 1, label: "Raters averaged over"})
+})
+```
+
+```{ojs}
+//| echo: false
+cb = coefBars(wv, wn.nt, wn.nr)
 Plot.plot({
-  width: 700, height: 190, marginLeft: 120,
-  x: {label: "Variance", grid: true}, y: {label: null, domain: ["One rating", w_avg]},
+  width: 700, height: 190, marginLeft: 150,
+  x: {label: "Variance (universe score + error)", grid: true}, y: {label: null, domain: [cb.rel, cb.abs]},
   color: {legend: true, domain: ["universe score", "relative and absolute error", "absolute error only"],
           range: [palette.main, palette.contrast, palette.light]},
   marks: [
-    Plot.barX(w_rows, {x: "value", y: "design", fill: "role", stroke: palette.white, title: d => `${d.name}: ${d.value.toFixed(3)}`}),
-    Plot.text(w_rows, Plot.stackX({x: "value", y: "design", text: d => d.value > 0.07 ? d.name : "", fill: palette.white, fontSize: 10}))
+    Plot.barX(cb.rows, {x: "value", y: "coef", fill: "role", stroke: palette.white, title: d => `${d.name}: ${d.value.toFixed(3)}`}),
+    Plot.text(cb.rows, Plot.stackX({x: "value", y: "coef", text: d => d.value > 0.05 ? d.name : "", fill: d => d.role === "absolute error only" ? palette.ink : palette.white, fontSize: 10}))
   ]
 })
 ```
 
 ```{ojs}
 //| echo: false
-md`One rating: relative G **${w1.erho2.toFixed(2)}**, absolute G **${w1.phi.toFixed(2)}**. Averaged over ${wnt} task${wnt > 1 ? "s" : ""} and ${wnr} rater${wnr > 1 ? "s" : ""}: relative G **${wN.erho2.toFixed(2)}**, absolute G **${wN.phi.toFixed(2)}**.`
+md`Averaged over ${wn.nt} task${wn.nt > 1 ? "s" : ""} and ${wn.nr} rater${wn.nr > 1 ? "s" : ""}: relative error **${cb.g.rel.toFixed(3)}**, absolute error **${cb.g.abs.toFixed(3)}**; Eρ² **${cb.g.erho2.toFixed(2)}**, Φ **${cb.g.phi.toFixed(2)}**.`
 ```
 
-At the starting values one rating has a relative G coefficient (defined in the next section) of 0.47, and averaging over 3 tasks and 2 raters raises it to 0.75. Every error component shrinks in the average, divided by the number of conditions it is averaged over, while the person component stays put. Set rater to 0.5 and watch the light part grow: it lowers the absolute coefficient and leaves the relative one alone.
+For the cleverness ratings, with 3 tasks and 5 raters, the light pieces are slivers and the coefficients nearly agree (0.71 and 0.71); for the essays, with one teacher, teachers' severity adds a light block and they part (0.47 and 0.40). The coefficients agree when raters and tasks don't differ in harshness or difficulty and part when they do, so use Φ when the decision is absolute (a cut) or raters vary across respondents, and Eρ² for ranking in a fully crossed design, the rule this lesson's verdict (end of the interrater section) makes its own.
 
 ```{ojs}
 //| echo: false
@@ -123,13 +134,6 @@ quiz({
 })
 ```
 
-### Two G coefficients
-
-Why are some components error only some of the time? It depends on the decision. For a **relative** decision (who ranks above whom), only the components that change a person's standing count: those that interact with $p$. For a score averaged over $n_t$ tasks and $n_r$ raters, the relative error variance is
-$$\sigma^2_\delta = \frac{\sigma^2_{pt}}{n_t} + \frac{\sigma^2_{pr}}{n_r} + \frac{\sigma^2_{ptr,e}}{n_t n_r}.$$
-For an **absolute** decision (is this score above 3? how clever is this list, on the rating scale?), a harsh rater or a hard task moves the score itself, so the main effects count too:
-$$\sigma^2_\Delta = \sigma^2_\delta + \frac{\sigma^2_t}{n_t} + \frac{\sigma^2_r}{n_r} + \frac{\sigma^2_{tr}}{n_t n_r}.$$
-Each coefficient sets the universe-score variance against one of them ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)): the **generalizability coefficient** $E\rho^2 = \sigma^2_p/(\sigma^2_p + \sigma^2_\delta)$ and the **dependability coefficient** $\Phi = \sigma^2_p/(\sigma^2_p + \sigma^2_\Delta)$. Since $\sigma^2_\Delta \ge \sigma^2_\delta$, $\Phi$ is never the larger. Error near a cut score is taken up in [What does a score mean?](score-meaning.qmd).
 
 What does the simplest case look like? Keep one facet, items, in a persons × items design. Then $\sigma^2_\delta = \sigma^2_{pi,e}/n_i$ and
 $$E\rho^2 = \frac{\sigma^2_p}{\sigma^2_p + \sigma^2_{pi,e}/n_i},$$
@@ -172,7 +176,7 @@ The G study estimates the components; a **decision study** (D study) uses them t
 
 #### Try it: a D study
 
-The components are the ones set in the first widget. Each line is a number of raters; the horizontal axis is the number of tasks.
+The components are the ones set in the previous widget. Each line is a number of raters; the horizontal axis is the number of tasks.
 
 ```{ojs}
 //| echo: false
@@ -198,7 +202,7 @@ Plot.plot({
 md`Ten tasks with one rater: **${gCoef(wv, 10, 1).erho2.toFixed(2)}** (relative). One task with ten raters: **${gCoef(wv, 1, 10).erho2.toFixed(2)}**.`
 ```
 
-At the starting values, ten tasks with one rater reach 0.75 and one task with ten raters 0.69: averaging over tasks divides person × task (0.15), while averaging over raters divides the smaller person × rater (0.10). Now set person × rater to 0.4 and person × task to 0.05: the lines spread apart, and raters become the lever. Every curve flattens, as Spearman–Brown's did. Past a point only the *other* facet can help.
+With the cleverness components, ten tasks with one rater reach 0.74 and one task with ten raters 0.49: averaging over tasks divides person × task (0.284), while averaging over raters divides the much smaller person × rater (0.053). Switch the previous widget to the essays and the lines spread apart: raters become the lever. Every curve flattens, as Spearman–Brown's did. Past a point only the *other* facet can help.
 
 ### Interrater reliability as a G study
 
@@ -282,22 +286,22 @@ The main example is [Forthmann-2024-cleverness_ratings](https://itemresponseware
 
 Ten ratings are missing, all for one respondent, so the design is crossed but not quite balanced; `lmer` handles that without change.
 
-```{ojs}
-//| echo: false
-predict({
-  q: "Which contributes more error to ranking these respondents: which objects they happened to get (person × task), or who happened to rate them (person × rater)?",
-  choices: ["Tasks", "Raters", "About the same"],
-  answer: "Tasks",
-  reveal: "Person × task is 29.4% of the variance of a single rating; person × rater is 5.5%. The raters largely agree about who is cleverer; respondents' standing shifts a good deal from object to object."
-})
-```
-
 ```{r fit-clever}
 #| echo: true
 #| code-fold: show
 ```
 
 People differ (person, 32.1% of the variance of one rating), but person × task is nearly as large (29.4%): being clever with a rope says only so much about being clever with a paperclip. Raters account for little: 2.1% for severity and 5.5% for disagreement about who is cleverer. The task component is estimated at zero, so the three objects are about equally hard to be clever with.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The design as run uses 3 tasks and 5 raters: 15 ratings per respondent. Suppose instead each respondent did 6 tasks, each scored by one rater: 6 ratings. What happens to the relative G coefficient?",
+  choices: ["It falls a lot", "It falls a little", "It rises"],
+  answer: "It falls a little",
+  reveal: "From 0.71 to 0.68, with fewer than half the ratings. Person × task (29.4% of a single rating's variance) is far larger than person × rater (5.5%), so tasks buy more than raters."
+})
+```
 
 ```{r dstudy-clever}
 #| echo: true
@@ -347,7 +351,7 @@ The picture reverses. Teachers differ in severity (rater, 9.7% of the variance, 
 
 With one teacher and four criteria, the relative coefficient is 0.47 and the absolute 0.40. A second teacher brings them to 0.62 and 0.56; five, to 0.78 and 0.73. More criteria can't do it: one teacher rating on as many criteria as you like reaches only 0.54. Here the lever is raters. And since each essay had its own teachers, the absolute coefficient is the one that describes these scores.
 
-The two tables call for different designs, and only their variance components could say so. The cleverness scores are cheap to make more dependable in raters' time and expensive in respondents'; the essays, the other way round.
+The two tables call for different designs, and only their variance components could say so.
 
 ## Problems
 

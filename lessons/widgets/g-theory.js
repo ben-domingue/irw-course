@@ -59,3 +59,23 @@ export function twoRaters({seed = 1, n = 40, harsh = 0, noise = 0.5}) {
   return {pts, ...icc(Y), r: cor(pts.map(d => d.a), pts.map(d => d.b)),
           meanGap: pts.reduce((u, d) => u + d.a - d.b, 0) / n};
 }
+
+// Components from the lesson's two G studies (lme4 estimates, rounded as printed),
+// with the design each was run with. For the essays, "task" is the rating criterion.
+export const presets = {
+  "Cleverness ratings": {p: 0.310, t: 0.000, r: 0.020, pt: 0.284, pr: 0.053, tr: 0.012, res: 0.286, nt: 3, nr: 5},
+  "Essay ratings": {p: 0.754, t: 0.010, r: 0.246, pt: 0.243, pr: 0.640, tr: 0.047, res: 0.602, nt: 4, nr: 1}
+};
+
+// Rows for the two-coefficient bars: universe score followed by the error term each
+// coefficient counts, for a score averaged over nt tasks and nr raters.
+export function coefBars(v, nt, nr) {
+  const parts = errorParts(v, nt, nr), g = gCoef(v, nt, nr);
+  const rel = `Relative, Eρ² = ${g.erho2.toFixed(2)}`, abs = `Absolute, Φ = ${g.phi.toFixed(2)}`;
+  const rows = [];
+  parts.forEach(d => {
+    if (d.role !== "absolute error only") rows.push({...d, coef: rel});
+    rows.push({...d, coef: abs});
+  });
+  return {rows: rows.filter(d => d.value > 0), rel, abs, g};
+}
