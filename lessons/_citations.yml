@@ -110,6 +110,12 @@ credentialform_lnirt:
   link: https://cran.r-project.org/web/packages/LNIRT/index.html
   license: GPL-3.0
   irw_version: IRW v418
+DART_Brysbaert_2020_1:
+  reference: Brysbaert, M., Sui, L., Dirix, N., & Hintz, F. (2020). Dutch Author Recognition
+    Test. Journal of Cognition, 3(1), 6. https://doi.org/10.5334/joc.95
+  link: https://doi.org/10.5334/joc.95
+  license: CC BY-NC-SA 4.0
+  irw_version: IRW v418
 de_vries_2022_hexaco_other:
   reference: 'de Vries A, et al. (2022) Self-, other-, and meta-perceptions of personality:
     Relations with burnout symptoms and eudaimonic workplace well-being. PLOS ONE'
@@ -174,6 +180,13 @@ frac20:
     Statistics), 51(3), 337-350.'
   link: https://doi.org/10.1111/1467-9876.00272
   license: GPL-3.0
+  irw_version: IRW v418
+gcbs_brotherton_2013_vcl:
+  reference: 'Brotherton, R., French, C. C., & Pickering, A. D. (2013). Measuring
+    belief in conspiracy theories: The generic conspiracist beliefs scale. Frontiers
+    in psychology, 4, 279.'
+  link: https://doi.org/10.3389/fpsyg.2013.00279
+  license: CC BY 4.0
   irw_version: IRW v418
 genpsych_russell_2024_gpt4o:
   reference: 'Russell-Lasalandra, L. L., Christensen, A. P., & Golino, H. (2024, September
