@@ -8,19 +8,448 @@ source("_course.R")
 lesson_header("equating")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, rng, palette} from "./widgets/irt.js"
+import {scoreDist, percentileRank, equipercentile, moments, bivariate, tcc, transform, slLoss, slFit, momentLinks, ringWalk} from "./widgets/equating.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+In 2011, Austrian fourth graders sitting TIMSS each took one of 14 mathematics booklets. Students given booklet 13 averaged 15.0 of its 26 items; those given booklet 11 averaged 11.6. Is the booklet-13 group better at mathematics, or is booklet 13 easier? The booklets were handed out at random, so it is the booklet. [The Rasch model](rasch.qmd) said that $\hat\theta$ earns its keep when respondents take different items, and this lesson collects. Putting scores from different forms on one scale is **linking**; its strictest form, **equating**, makes them interchangeable. Whether either is possible is settled mostly by the design. After that, everything rests on an assumption about the items the forms share, which the TIMSS booklets let us check: it is off by a small amount per link, and fourteen links add it up.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what equating requires (symmetry, equity, population invariance) and which data-collection designs make it possible;
+- equate two forms by mean, linear and equipercentile equating, and say when each is a reasonable choice;
+- put two IRT calibrations on one scale with mean-mean, mean-sigma, Haebara or Stocking–Lord linking, or with one concurrent fit, and convert raw scores by IRT true-score equating;
+- say what linking assumes about the common items, and check it in data (position effects, items that behave differently across groups);
+- tell equating from the looser kinds of linking: vertical scaling and concordance.
+
 ## Core ideas
 
-## Worked example
+### Two scenarios, one problem
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Where CTT breaks](ctt-limits.qmd): the sum score depends on which items were taken. The same 664 students averaged 9.6 on an easy half of a test and 5.7 on a hard half, and no single constant converted one half's score into the other's.
+:::
+
+A testing program writes a new form each year to the same blueprint and needs a score of 30 this year to mean what 30 meant last year. That is **equating**: afterwards, which form a respondent took shouldn't matter. A grade 3 test and a grade 4 test that share some items are built to different specifications; their scores can go on one scale, to talk about growth, but can't be made interchangeable. That is **vertical scaling**, one kind of the broader family called **linking** ([Linn, 1993](https://doi.org/10.1207/s15324818ame0601_5); [Dorans, Pommerich & Holland, 2007](https://doi.org/10.1007/978-0-387-49771-6); [Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7)). What growth on such a scale means is a question for [Scale properties](scale-properties.qmd). Looser still, a **concordance** pairs scores with the same percentile rank on tests built by different programs, such as the SAT and the ACT, without claiming the scores are interchangeable ([Dorans, 2004](https://doi.org/10.1177/0146621604265031)). This lesson is about equating, and about linking forms through the items they share.
+
+### What equating asks for
+
+What would make a converted score as good as the original? The literature asks for three properties ([Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7), ch. 1; [Dorans & Holland, 2000](https://doi.org/10.1111/j.1745-3984.2000.tb01088.x)):
+
+- **Symmetry.** Converting form X to form Y and back again returns the score we started with.
+- **Equity.** A respondent at any level of the construct should be indifferent to which form they get ([Lord, 1980](https://doi.org/10.4324/9780203056615)).
+- **Population invariance.** The conversion shouldn't depend on the group it was computed in; Dorans and Holland read one that does as a sign that the tests shouldn't be equated.
+
+Why not regression? To predict a respondent's score on Y from their score on X, regression is the right tool. But predictions shrink toward the mean, so predicting Y from X doesn't invert predicting X from Y, and symmetry fails.
+
+#### Try it: regression is not equating
+
+Three hundred respondents take both forms (a single-group design). Form X has mean 12 and SD 4.5, form Y mean 15 and SD 4.3.
+
+```{ojs}
+//| echo: false
+viewof rg_rho = Inputs.range([0.2, 1], {value: 0.6, step: 0.05, label: "Correlation between the forms"})
+```
+
+```{ojs}
+//| echo: false
+rg_pts = bivariate(300, Math.min(rg_rho, 0.9999), 12, 15, 4.5, 4.3, 3)
+rg_m = (v) => v.reduce((u, w) => u + w, 0) / v.length
+rg_sd = (v) => { const m = rg_m(v); return Math.sqrt(v.reduce((u, w) => u + (w - m) ** 2, 0) / (v.length - 1)); }
+rg_x = rg_pts.map(d => d.x)
+rg_y = rg_pts.map(d => d.y)
+rg_mx = rg_m(rg_x)
+rg_my = rg_m(rg_y)
+rg_sx = rg_sd(rg_x)
+rg_sy = rg_sd(rg_y)
+rg_r = rg_pts.reduce((u, d) => u + (d.x - rg_mx) * (d.y - rg_my), 0) / ((rg_pts.length - 1) * rg_sx * rg_sy)
+rg_lines = [
+  {name: "Predict Y from X", f: x => rg_my + rg_r * rg_sy / rg_sx * (x - rg_mx)},
+  {name: "Predict X from Y (inverted)", f: x => rg_my + rg_sy / (rg_r * rg_sx) * (x - rg_mx)},
+  {name: "Linear equating", f: x => rg_my + rg_sy / rg_sx * (x - rg_mx)}]
+Plot.plot({
+  width: 700, height: 380, x: {label: "Score on form X", domain: [0, 26]}, y: {label: "Score on form Y", domain: [0, 30]},
+  color: {legend: true, domain: rg_lines.map(d => d.name), range: [palette.main, palette.contrast, palette.ink]},
+  marks: [
+    Plot.dot(rg_pts, {x: "x", y: "y", r: 2, fill: palette.light, fillOpacity: 0.6}),
+    Plot.line(rg_lines.flatMap(l => grid(0, 26, 105).map(x => ({x, y: l.f(x), name: l.name}))).filter(d => d.y >= 0 && d.y <= 30),
+      {x: "x", y: "y", z: "name", stroke: "name", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Sample correlation ${rg_r.toFixed(2)}. A score of 20 on X becomes **${rg_lines[0].f(20).toFixed(1)}** by predicting Y from X, **${rg_lines[1].f(20).toFixed(1)}** by inverting the prediction of X from Y, and **${rg_lines[2].f(20).toFixed(1)}** by linear equating.`
+```
+
+The two regression lines disagree, each pulling toward the mean from its own side. Linear equating sits between them, matching means and SDs and ignoring the correlation. Only at a correlation of 1 do the three lines meet.
+
+**Design comes first.** Equating is impossible unless the data were collected so that a solution exists. Three designs do that ([Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7), ch. 1):
+
+- **Random groups.** Forms are handed out at random, so any difference in scores belongs to the forms. No common items are needed.
+- **Single group, counterbalanced.** Everyone takes both forms, half in each order, so that order effects cancel.
+- **Common-item nonequivalent groups** (NEAT: nonequivalent groups with an anchor test). The groups may differ (this year's cohort and last year's), and common items, the anchor, carry the link, so everything depends on the anchor behaving the same way in both groups.
+
+TIMSS combines two of these: booklets are spiralled through classrooms (random groups), and each booklet also shares a block of items with the next (common items).
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A state gives form A in spring 2024 and form B in spring 2025, to different cohorts. The forms share no items. Which equating design is this?",
+  options: [
+    {text: "Random groups", correct: false, why: "Random groups needs the forms assigned at random within one population, so that the groups are equivalent. Two cohorts in different years weren't assigned at random."},
+    {text: "Common-item nonequivalent groups", correct: false, why: "That design needs an anchor: items on both forms. With no common items there's nothing to estimate the cohort difference from."},
+    {text: "None: nothing in the data can separate a change in the cohort from a change in the form", correct: true, why: "The groups aren't randomly equivalent (different years), nobody took both forms, and there are no common items. Any difference in scores could be the cohort or the form."}
+  ]
+})
+```
+
+### Observed-score equating
+
+With random groups, the two score distributions estimate how one population would score on each form, so matching the distributions matches the forms.
+
+- **Mean equating** adds a constant: $y = x - \mu_X + \mu_Y$. Reasonable when the forms differ only in overall difficulty.
+- **Linear equating** matches means and SDs: $y = \mu_Y + \frac{\sigma_Y}{\sigma_X}(x - \mu_X)$, the black line in the widget above. Reasonable when the forms differ in spread too and the distributions have similar shapes.
+- **Equipercentile equating** sends a score on X to the score on Y with the same **percentile rank** ([Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7), ch. 2). It is the one to reach for when the shapes differ, for instance when one form has a ceiling. Small samples give bumpy distributions, so they are usually smoothed first, for instance by log-linear models that keep their first few moments ([Holland & Thayer, 2000](https://doi.org/10.3102/10769986025002133)).
+
+The `equate` package ([Albano, 2016](https://doi.org/10.18637/jss.v074.i08)) does all three.
+
+#### Try it: equipercentile by hand
+
+Two 25-item Rasch forms, taken by equivalent groups (ability normal, mean 0, SD 1). Each form's items are spread evenly over three logits around the mean difficulty you set.
+
+```{ojs}
+//| echo: false
+viewof ep_bx = Inputs.range([-2, 2], {value: 0.5, step: 0.1, label: "Form X mean difficulty"})
+viewof ep_by = Inputs.range([-2, 2], {value: -1.5, step: 0.1, label: "Form Y mean difficulty"})
+viewof ep_x = Inputs.range([0, 25], {value: 20, step: 1, label: "Score on form X"})
+```
+
+```{ojs}
+//| echo: false
+ep_items = m => Array.from({length: 25}, (_, i) => m - 1.5 + 3 * i / 24)
+ep_dX = scoreDist(ep_items(ep_bx))
+ep_dY = scoreDist(ep_items(ep_by))
+ep_pr = percentileRank(ep_dX, ep_x)
+ep_y = equipercentile(ep_dX, ep_dY, ep_x)
+ep_MX = moments(ep_dX)
+ep_MY = moments(ep_dY)
+ep_lin = ep_MY.mean + ep_MY.sd / ep_MX.sd * (ep_x - ep_MX.mean)
+ep_curve = (d, form) => grid(-0.5, 25.5, 261).map(s => ({score: s, pr: percentileRank(d, s), form}))
+Plot.plot({
+  width: 700, height: 340, x: {label: "Score", domain: [-0.5, 25.5]}, y: {label: "Percentile rank", domain: [0, 1]},
+  color: {legend: true, domain: ["Form X", "Form Y"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.line([...ep_curve(ep_dX, "Form X"), ...ep_curve(ep_dY, "Form Y")], {x: "score", y: "pr", z: "form", stroke: "form", strokeWidth: 2.5}),
+    Plot.line([{s: ep_x, p: 0}, {s: ep_x, p: ep_pr}, {s: ep_y, p: ep_pr}, {s: ep_y, p: 0}], {x: "s", y: "p", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.dot([{s: ep_x, p: ep_pr}, {s: ep_y, p: ep_pr}], {x: "s", y: "p", r: 5, fill: palette.ink})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`A score of ${ep_x} on X has percentile rank **${ep_pr.toFixed(2)}**. Equipercentile equating sends it to **${ep_y.toFixed(1)}** on Y; linear equating to **${ep_lin.toFixed(1)}**${ep_lin > 25 ? ", above the form's maximum of 25" : ""}.`
+```
+
+As the widget loads, form Y is two logits easier than form X and many respondents are near its top. Linear equating sends 20 on X to 27.0, two points more than form Y has; equipercentile equating sends it to 24.7, following the pile-up at the ceiling. Set the two difficulties equal and every method returns the score unchanged.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Form Y is much easier than form X, and many respondents score near its maximum. Which conversion is sure to stay within form Y's range of scores?",
+  options: [
+    {text: "Mean equating", correct: false, why: "It adds the same constant everywhere, so the top scores on X can be pushed past Y's maximum."},
+    {text: "Equipercentile equating", correct: true, why: "It converts to the score on Y with the same percentile rank, and every percentile rank belongs to a score within Y's range."},
+    {text: "Linear equating", correct: false, why: "It is a straight line and doesn't know where Y's range ends; the widget's default sends 20 on X to 27.0 on a 25-item form."}
+  ]
+})
+```
+
+### IRT linking: through common items, or in one fit
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): only $\theta - b$ is identified, so the scale has no origin, and `mirt` sets one by fixing the mean ability at 0. [From the 1PL to the 4PL](1pl-to-4pl.qmd) added the unit: the 2PL sees only $a(\theta - b)$, so software fixes the SD of ability at 1.
+:::
+
+Calibrate form X in one group and form Y in another, and each fit sets its origin and unit by its own group. The same item then gets parameters in the two fits related by a linear map: with $\theta_Y = A\,\theta_X + B$,
+$$b_Y = A\,b_X + B, \qquad a_Y = a_X / A,$$
+which leaves every $a(\theta - b)$, and so every probability, unchanged. Under the Rasch model $A = 1$ and only the shift $B$ is needed. The common items give two sets of estimates of the same parameters, from which to find $A$ and $B$:
+
+- **Mean-mean** ([Loyd & Hoover, 1980](https://doi.org/10.1111/j.1745-3984.1980.tb00825.x)): $A = \bar a_X / \bar a_Y$, then $B = \bar b_Y - A\,\bar b_X$.
+- **Mean-sigma** ([Marco, 1977](https://doi.org/10.1111/j.1745-3984.1977.tb00033.x)): $A = s(b_Y)/s(b_X)$, then $B$ as before.
+- **Haebara** ([1980](https://doi.org/10.4992/psycholres1954.22.144)): choose $A$ and $B$ to bring each common item's transformed curve close to its curve in the other calibration, over a grid of $\theta$.
+- **Stocking–Lord** ([Stocking & Lord, 1983](https://doi.org/10.1177/014662168300700208)): the same for the sum of the curves, the common items' test characteristic curve (TCC).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): an interval scale allows exactly the linear relabellings $\beta_0 + \beta_1 x$, and whether a scale has an equal unit changes group comparisons.
+:::
+
+What does each approach assume about the scale? Equipercentile equating allows any order-preserving map: it treats sum scores as ordinal. IRT linking allows only linear maps, the interval scale's family: it takes $\theta$ to have an equal unit that the two fits labelled differently. So we link on $\theta$ and convert to raw scores afterwards if needed. In **IRT true-score equating** ([Lord, 1980](https://doi.org/10.4324/9780203056615)), a raw score $x$ on form X is sent to the $\theta$ at which X's TCC equals $x$, and then to Y's TCC at that $\theta$.
+
+#### Try it: Stocking–Lord by hand
+
+Ten common items. The second calibration's group has mean 0.5 and SD 1.2 on the first group's scale, so the right answer is $A = 1.2$, $B = 0.5$. Both calibrations carry estimation error, with the SD you set.
+
+```{ojs}
+//| echo: false
+viewof sl_A = Inputs.range([0.5, 2], {value: 1, step: 0.01, label: "A"})
+viewof sl_B = Inputs.range([-1.5, 1.5], {value: 0, step: 0.01, label: "B"})
+viewof sl_noise = Inputs.range([0, 0.4], {value: 0.15, step: 0.05, label: "Estimation error (SD)"})
+```
+
+```{ojs}
+//| echo: false
+sl_truth = { const r = rng(47); return Array.from({length: 10}, () => ({a: Math.exp(0.3 * r.norm()), b: r.norm()})); }
+sl_cal = { const r = rng(7);
+  const base = sl_truth.map(d => ({a: d.a * Math.exp(sl_noise * 0.5 * r.norm()), b: d.b + sl_noise * r.norm()}));
+  const other = sl_truth.map(d => ({a: d.a * 1.2 * Math.exp(sl_noise * 0.5 * r.norm()), b: (d.b - 0.5) / 1.2 + sl_noise * r.norm()}));
+  return {base, other}; }
+sl_best = slFit(sl_cal.base, sl_cal.other)
+sl_mom = momentLinks(sl_cal.base, sl_cal.other)
+sl_now = transform(sl_cal.other, sl_A, sl_B)
+sl_grid = grid(-4, 4, 161)
+Plot.plot({
+  width: 700, height: 340, x: {label: "θ (first calibration's scale)", domain: [-4, 4]}, y: {label: "Expected score on the 10 common items", domain: [0, 10]},
+  color: {legend: true, domain: ["First calibration", "Second calibration, transformed"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.areaY(sl_grid.map(t => ({t, y1: tcc(t, sl_cal.base), y2: tcc(t, sl_now)})), {x: "t", y1: "y1", y2: "y2", fill: palette.light, fillOpacity: 0.5}),
+    Plot.line(sl_grid.flatMap(t => [{t, e: tcc(t, sl_cal.base), c: "First calibration"}, {t, e: tcc(t, sl_now), c: "Second calibration, transformed"}]),
+      {x: "t", y: "e", z: "c", stroke: "c", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Stocking–Lord criterion at your A and B: **${slLoss(sl_cal.base, sl_cal.other, sl_A, sl_B).toFixed(3)}**. Its minimum is ${sl_best.l.toFixed(4)}, at A = **${sl_best.A.toFixed(2)}**, B = **${sl_best.B.toFixed(2)}**. For comparison, mean-mean gives A = ${sl_mom.meanMean.A.toFixed(2)}, B = ${sl_mom.meanMean.B.toFixed(2)}; mean-sigma gives A = ${sl_mom.meanSigma.A.toFixed(2)}, B = ${sl_mom.meanSigma.B.toFixed(2)}.`
+```
+
+Close the shaded gap and you have done Stocking–Lord by eye. With no estimation error all three methods recover 1.2 and 0.5. With error they part: at the default SD of 0.15, Stocking–Lord gives 1.23 and 0.55, mean-sigma 1.28 and 0.57. Mean-sigma rests entirely on the spread of the difficulties, which estimation error inflates.
+
+**Or skip the linking.** IRT handles responses missing by design, so we can stack every form's data, leave each respondent's unseen items empty and fit once: **concurrent calibration**. In the TIMSS booklets most pairs of items are never answered by the same student ([Item response data and the IRW](irw-data.qmd) counted them), and one fit copes. In simulations it generally gave smaller errors than separate calibration and linking, though not always ([Kim & Cohen, 1998](https://doi.org/10.1177/01466216980222003); [Hanson & Béguin, 2002](https://doi.org/10.1177/0146621602026001001)). Both routes assume that a common item's parameters are the same in every group. A concurrent fit builds that into the model; separate calibrations estimate each group's parameters and leave you to compare them. Concurrent calibration is a reasonable choice when the groups come from one population or differ only in their ability distributions; separate calibration, when you want to see how the common items behaved.
+
+::: {.callout-note collapse="true"}
+## Go deeper: how the characteristic-curve methods weight items
+
+**Assumptions:** two calibrations of the same $n$ common items under the 2PL, with estimates $(\hat a_{iX}, \hat b_{iX})$ and $(\hat a_{iY}, \hat b_{iY})$; the true parameters satisfy $b_{iY} = A b_{iX} + B$ and $a_{iY} = a_{iX}/A$; a weight function $w(\theta)$ on Y's scale over a grid $\theta_1, \dots, \theta_Q$ (for instance a normal density).
+
+**Moment methods.** Mean-sigma sets $A = s(\hat b_Y)/s(\hat b_X)$. Every item counts equally, however well it is estimated. An item with a slope near zero has a difficulty that is a ratio with a small denominator ($b = -d/a$ in `mirt`), so its $\hat b$ can be far out and dominate both SDs. Mean-mean takes $A$ from the slopes, which avoids that particular problem, but it still weights every item equally.
+
+**Characteristic-curve methods.** Stocking–Lord minimizes
+$$F(A, B) = \sum_{q=1}^{Q} w(\theta_q)\, D_q^2, \qquad D_q = \sum_i P_i(\theta_q;\, \hat a_{iY}, \hat b_{iY}) - \sum_i P_i\big(\theta_q;\, \hat a_{iX}/A,\, A \hat b_{iX} + B\big).$$
+Write $P^*_{iq}$ for the transformed curve, $\text{logit}^{-1}\big((\hat a_{iX}/A)(\theta_q - A\hat b_{iX} - B)\big)$. Since $\partial P^*_{iq}/\partial B = -(\hat a_{iX}/A)\, P^*_{iq}(1 - P^*_{iq})$,
+$$\frac{\partial F}{\partial B} = 2\sum_q w(\theta_q)\, D_q \sum_i \frac{\hat a_{iX}}{A}\, P^*_{iq}(1 - P^*_{iq}),$$
+and $\partial F/\partial A$ has the same form, with a further factor $(\theta_q - B)/A$ inside the sum over items. An item enters in proportion to $a\,P(1-P)$, its information ([Information, precision, and short forms](information.qmd)), at the $\theta$ values that carry weight. A flat item, or one far from the respondents, barely moves the answer, however extreme its $\hat b$. Haebara's criterion squares each item's difference before summing over items, so each item's curve must match on its own; Stocking–Lord lets errors in different items cancel.
+
+**What follows.** The characteristic-curve methods match what the link is for, expected scores where the respondents are, and are less sensitive to poorly estimated items. Moment methods have closed forms and are a reasonable first look, and a large gap between the two families is itself a sign that some common items need a look. The same idea returns when choosing anchor items in [Differential item functioning](dif.qmd) and when adding items to a bank in [Item banks and adaptive testing](item-banks-cat.qmd).
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two separate 2PL calibrations share 15 items. In the second, every common item's slope is about 0.8 times its slope in the first. With $\\theta_1 = A\\,\\theta_2 + B$, what does that say?",
+  options: [
+    {text: "$A \\approx 1.25$", correct: false, why: "That is the ratio the other way up. From $a_1 = a_2 / A$, $A = a_2/a_1 \\approx 0.8$."},
+    {text: "$A \\approx 0.8$: on the first scale, the second group's SD is about 0.8", correct: true, why: "Slopes transform as $a_1 = a_2/A$, so $A = a_2/a_1 \\approx 0.8$. Each fit set its own group's SD to 1; on the first scale the second group's SD is $A$."},
+    {text: "$B \\approx 0.8$: the second group's mean is 0.8 higher", correct: false, why: "Slopes carry the unit, not the origin. $B$, the difference in means, comes from the difficulties once $A$ is known."},
+    {text: "Nothing: slopes don't change between calibrations", correct: false, why: "They do whenever the groups differ in spread: each 2PL fit fixes its own group's SD at 1, and the slopes absorb the difference."}
+  ]
+})
+```
+
+### How linking breaks
+
+Every method above assumes that a common item is the same item in both places. What can make it not so? Its position or context: an item late in a long test, or next to different items, can be harder there ([Leary & Dorans, 1985](https://doi.org/10.2307/1170392); [Debeer & Janssen, 2013](https://doi.org/10.1111/jedm.12009)). Drift: an item reused over years can become easier as it is taught to or exposed. Translation: an item in another language is, strictly, another item. [Michaelides (2010)](https://doi.org/10.3389/fpsyg.2010.00167) reviews what such items do to linking. Each is a form of differential item functioning, an item working differently in two groups matched on the construct ([Differential item functioning](dif.qmd)). And links chain: link C to B and B to A, and each link's error, and any bias it carries, is passed along. [Haberman (2009)](https://doi.org/10.1002/j.2333-8504.2009.tb02197.x) develops a regression that links many separately calibrated forms at once rather than pair by pair.
+
+#### Try it: a ring of links
+
+Fourteen forms in a ring, each linked to the next and the last back to the first. Exact links would bring us back to 0. Each link has a bias (the same for all) and a random error.
+
+```{ojs}
+//| echo: false
+viewof rw_bias = Inputs.range([-0.2, 0.2], {value: 0, step: 0.01, label: "Bias per link (logits)"})
+viewof rw_noise = Inputs.range([0, 0.3], {value: 0.1, step: 0.01, label: "Random error per link (SD)"})
+viewof rw_seed = Inputs.range([1, 20], {value: 1, step: 1, label: "Random seed"})
+```
+
+```{ojs}
+//| echo: false
+rw_path = ringWalk(14, rw_bias, rw_noise, rw_seed)
+Plot.plot({
+  width: 700, height: 300, x: {label: "Links travelled (form 1 → 2 → … → 14 → 1)", domain: [0, 14]}, y: {label: "Where form 1 has got to (logits)", domain: [-3, 3]},
+  marks: [
+    Plot.ruleY([0], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(rw_path, {x: "link", y: "position", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.dot(rw_path, {x: "link", y: "position", r: 4, fill: palette.main})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`After 14 links form 1 is **${rw_path[14].position.toFixed(2)}** logits from where it started. The bias alone contributes 14 × ${rw_bias.toFixed(2)} = ${(14 * rw_bias).toFixed(2)}; the random errors add up to an SD of ${rw_noise.toFixed(2)} × √14 = ${(rw_noise * Math.sqrt(14)).toFixed(2)}.`
+```
+
+With no bias the path wanders and the gap is modest (0.15 with the first seed). Random errors grow with the square root of the number of links, so they partly cancel. A bias doesn't: set it to 0.05 and the path climbs, whatever the seed. A ring is useful because it tells us where we should end up.
+
+A link is an assumption about the common items, and the design decides whether you can check it.
+
+## Simulate
+
+The code below gives each of 600 respondents 15 of a bank of 50 Rasch items, in three designs from EDUC 252's problem set 6: a chain of 8 forms, each overlapping the next by 10 items; 5 forms linked by 5 items, looping back to the first; and 15 random items each. A fourth design repeats the chain but makes an item 0.3 logits harder in the last third of a form. Each design is fit once, concurrently. The first run takes 20–30 seconds while R and `mirt` load, and the fits a little longer.
+
+With the seed as written, the three designs recover the bank about equally well (correlations 0.96 to 0.97; root mean squared errors 0.16 to 0.19). With the position effect the correlation drops to 0.90, and the errors run along the chain, from 0.42 too easy for the first five items to 0.65 too hard for the last five: the fit has no term for position, so the common items carry it from form to form. At `np <- 150` every correlation drops (0.81 to 0.87). At 3,000, in your own R session, the three designs reach 0.99, and the position effect still spreads the errors from −0.33 to 0.39: more data don't remove a bias.
+
+```{webr}
+{{< include code/equating-sim.R >}}
+```
+
+[Download this code](code/equating-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/equating-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### TIMSS 2011: random groups and a ring of booklets
+
+Our main example is [cdm_timss11](https://itemresponsewarehouse.org/tables/cdm_timss11/), 4,668 Austrian fourth graders' mathematics responses in TIMSS 2011, released with the `CDM` package by [George and Robitzsch (2014)](https://cran.r-project.org/web/packages/CDM/index.html). Its job is to show both kinds of design on one table and to test the assumption linking rests on; [Item response data and the IRW](irw-data.qmd) used it for missingness by design. TIMSS 2011 put its 14 mathematics blocks into 14 booklets, each block in two: M02 is the second mathematics block of booklet 1 and the first of booklet 2, and booklet 14 carries M01 round to booklet 1 ([Mullis, Martin, Ruddock, O'Sullivan & Preuschoff, 2009](https://timssandpirls.bc.edu/timss2011/downloads/TIMSS2011_Frameworks.pdf), Exhibit 11). Booklets were distributed so that their groups are approximately equivalent (the same source, ch. 4). A response is 1 when correct; parts of one question (IDs ending A, B, C) are treated as separate items. [Download the code](code/equating-irw.R) to run every chunk yourself.
+
+```{r fetch-timss}
+#| echo: true
+#| code-fold: show
+```
+
+Every student answered every item in their booklet, and each booklet shares 9 to 14 items with the next.
+
+**Random groups.** Booklets 11 and 13 share no items, but their groups are equivalent, so we can equate their score distributions.
+
+```{r random-groups}
+#| echo: true
+#| code-fold: show
+```
+
+A score of 12 on booklet 11 converts to 15.4 by mean equating, 15.3 by linear and 15.5 by smoothed equipercentile equating. At the top they part: 24 converts to 27.4 and 26.2 by the first two, more than booklet 13's 26 items allow, and to 25.0 by the third.
+
+**Through the common items.** Now fit all 14 booklets at once (a concurrent 2PL) and convert booklet 11 to 13 by IRT true-score equating. Here the common items, not the equivalence of the groups, tie the booklets together.
+
+```{r concurrent}
+#| echo: true
+#| code-fold: show
+```
+
+A score of 12 converts to 15.3, against 15.5. Two routes with different assumptions agree within 0.65 of a point from scores 6 to 18, where most students are, and differ more low down, where few are (by 2.3 at a score of 2).
+
+**The ring.** The design also lets us check the common items. Calibrate each booklet on its own (Rasch), so each fit centres its own group at 0. With equivalent groups those origins should agree, and mean-mean linking from each booklet to the next should find shifts near zero. Chain the links from booklet 1 through 14 and back to 1.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The groups are randomly equivalent, so each link's true shift is 0. After chaining 14 mean-mean links round the ring, how far from its starting point will booklet 1 be?",
+  choices: ["About 0: random errors cancel", "About 0.3 logits: random error adds up a little", "About 1 logit", "About 3 logits"],
+  answer: "About 1 logit",
+  reveal: "About 1 logit: the shifts add to 1.08, and nine of the 14 are positive, an average of 0.077 per link. The position model below finds why. Check the output below."
+})
+```
+
+```{r ring}
+#| echo: true
+#| code-fold: show
+```
+
+The ring misses by 1.08 logits. Why? Each link's common block is the second mathematics block of one booklet and the first of the next, so if an item is harder when it comes second, every link picks up the same bias. A Rasch model with a term for the second block, fit as a mixed logistic regression ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)), estimates it directly:
+
+```{r position}
+#| echo: true
+#| code-fold: show
+```
+
+An item is 0.077 logits harder in the second block (SE 0.014), and 14 × 0.077 = 1.08: the position effect accounts for the gap. Most of it is at the end. An item costs 0.12 logits more in position 4, the last block of the test, than in position 1 (SE 0.034); between positions 2 and 3, either side of the break, the difference is 0.035, within its error. Per item the effect is small; fourteen links make it large.
+
+So which would I use for booklets like these, concurrent calibration or separate calibration and linking? Both assume that a common item has one set of parameters wherever it appears. The concurrent fit builds that in, giving each item one difficulty, in effect an average over its two positions; separate calibrations let each booklet speak and show whether the common items agree. I'd report from the concurrent fit, which uses all the data at once, and run separate calibrations alongside it, because only they could have shown me this position effect.
+
+### PIRLS 2011: nonequivalent groups, three languages
+
+Our contrast table is [pirlsmissing_sirt](https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/): one reading booklet of [PIRLS 2011](https://timssandpirls.bc.edu/pirls2011/), the PIRLS Reader, taken by fourth graders in Austria, Germany, France and the Netherlands, as released with the `sirt` package ([Robitzsch, 2022](https://cran.r-project.org/web/packages/sirt/index.html)). Its job is the opposite design: every item is common, the groups are countries, and the link carries the whole comparison, in three languages (German in Austria and Germany). A response is 1 when correct; responses missing by intention and not reached (9%; [Item response data and the IRW](irw-data.qmd) looked at them) stay missing rather than counting as wrong. We don't use the student weights, so nothing below estimates a country's performance.
+
+```{r fetch-pirls}
+#| echo: true
+#| code-fold: show
+```
+
+We fit a 2PL in each country and link the other three to Austria by all four methods. Each fit sets its country's mean at 0 and SD at 1, so $B$ is the country's mean in Austrian SD units and $A$ its SD relative to Austria's.
+
+```{r link-pirls}
+#| echo: true
+#| code-fold: show
+```
+
+France sits within 0.09 of Austria by every method. For Germany the method matters: 0.44 and 0.45 by the moment methods, 0.34 and 0.36 by Haebara and Stocking–Lord, a tenth of an SD apart on the same responses. The Netherlands is 0.26 to 0.32 above Austria, with an SD 0.73 to 0.81 of Austria's. (The `equateIRT` package, [Battauz, 2015](https://doi.org/10.18637/jss.v068.i07), gives the same Stocking–Lord constants for Germany.) Do the common items behave the same in each country?
+
+```{r pirls-items}
+#| echo: true
+#| code-fold: show
+```
+
+After Stocking–Lord linking, Dutch difficulties differ from Austrian ones by −1.20 to 0.92 logits. Ten of the 35 items are more than half a logit out for the Netherlands, ten for France, and six for Germany, which shares Austria's language. Dropping the ten Dutch items and linking again leaves the Dutch mean at 0.27. Here the method matters more than the trimming: the item differences largely cancel. They are differential item functioning all the same, and whether the countries can be compared on this booklet is the question [Differential item functioning](dif.qmd) asks.
 
 ## Problems
 
+1. **Derivation.** Show that under the 2PL, with $\theta_Y = A\theta_X + B$, the maps $b_Y = Ab_X + B$ and $a_Y = a_X/A$ leave every probability unchanged, and derive the mean-mean constants. Then show that predicting Y from X by regression, and X back from that by the other regression, returns the starting score only if the correlation is 1.
+2. **A devious split** (from EDUC 252). Take TIMSS booklets 11 and 12, which share a block, and keep only booklet 12's top 70% by sum score. Link 12 to 11 through the common block (mean-mean, Rasch), and equate the sum scores by equipercentile equating as if the groups were random. What happens to each? Which notices the selection?
+3. **Judgment.** Make the best case for reporting TIMSS results from separate calibrations rather than the concurrent fit. What would you do about the 1.08-logit gap?
+4. **Design** (EDUC 252, problem set 6). You can test 1,500 respondents, 15 items each, from a 50-item bank. Using the simulation, compare the three designs, then shrink the loop's links to two items, or one. When does the design start to matter?
+5. **Real data.** In the PIRLS data, which would you trust more, Germany's link to Austria or France's? What would you check first?
+6. **Challenge** (open). A testing program moves a block of common items from the start of this year's form to the end of next year's. Design a study that could tell a position effect from a change in the population. What would you randomize, and what would it cost? I don't know of a design that settles this cheaply.
+
+```{r}
+#| output: asis
+ask_claude("equating", "It covers linking and equating: symmetry, equity and population invariance; random-groups, single-group and common-item nonequivalent-groups designs; mean, linear and equipercentile equating; IRT linking by mean-mean, mean-sigma, Haebara and Stocking-Lord, IRT true-score equating and concurrent calibration; and how linking breaks through position effects, drift and translation, with R examples on TIMSS 2011 booklets from Austria and one PIRLS 2011 booklet in four countries.")
+```
+
 ## Going further
+
+- Kolen, M. J., & Brennan, R. L. (2014). *Test equating, scaling, and linking: Methods and practices* (3rd ed.). Springer. <https://doi.org/10.1007/978-1-4939-0317-7>. The standard reference: designs, observed-score methods, smoothing, IRT linking and standard errors.
+- Dorans, N. J., Pommerich, M., & Holland, P. W. (Eds.). (2007). *Linking and aligning scores and scales*. Springer. <https://doi.org/10.1007/978-0-387-49771-6>. Where equating sits in the wider family of linkages.
+- Linn, R. L. (1993). Linking results of distinct assessments. *Applied Measurement in Education*, 6(1), 83–102. <https://doi.org/10.1207/s15324818ame0601_5>. The kinds of linking, from equating to the loosest.
+- Dorans, N. J. (2004). Equating, concordance, and expectation. *Applied Psychological Measurement*, 28(4), 227–246. <https://doi.org/10.1177/0146621604265031>. How to tell whether two tests can be equated or only concorded, with the SAT and the ACT.
+- Dorans, N. J., & Holland, P. W. (2000). Population invariance and the equatability of tests: Basic theory and the linear case. *Journal of Educational Measurement*, 37(4), 281–306. <https://doi.org/10.1111/j.1745-3984.2000.tb01088.x>. Measuring whether a conversion depends on the group.
+- Lord, F. M. (1980). *Applications of item response theory to practical testing problems*. Erlbaum. <https://doi.org/10.4324/9780203056615>. Equity and IRT true-score equating.
+- Stocking, M. L., & Lord, F. M. (1983). Developing a common metric in item response theory. *Applied Psychological Measurement*, 7(2), 201–210. <https://doi.org/10.1177/014662168300700208>. The TCC criterion.
+- Haebara, T. (1980). Equating logistic ability scales by a weighted least squares method. *Japanese Psychological Research*, 22(3), 144–149. <https://doi.org/10.4992/psycholres1954.22.144>. The item-by-item criterion.
+- Marco, G. L. (1977). Item characteristic curve solutions to three intractable testing problems. *Journal of Educational Measurement*, 14(2), 139–160. <https://doi.org/10.1111/j.1745-3984.1977.tb00033.x>. Mean-sigma linking.
+- Loyd, B. H., & Hoover, H. D. (1980). Vertical equating using the Rasch model. *Journal of Educational Measurement*, 17(3), 179–193. <https://doi.org/10.1111/j.1745-3984.1980.tb00825.x>. Mean-mean linking, and an early vertical scale.
+- Kim, S.-H., & Cohen, A. S. (1998). A comparison of linking and concurrent calibration under item response theory. *Applied Psychological Measurement*, 22(2), 131–143. <https://doi.org/10.1177/01466216980222003>. Separate against concurrent, by simulation.
+- Hanson, B. A., & Béguin, A. A. (2002). Obtaining a common scale for item response theory item parameters using separate versus concurrent estimation in the common-item equating design. *Applied Psychological Measurement*, 26(1), 3–24. <https://doi.org/10.1177/0146621602026001001>. The same comparison, with all four linking methods.
+- Haberman, S. J. (2009). Linking parameter estimates derived from an item response model through separate calibrations. *ETS Research Report Series*, 2009(2). <https://doi.org/10.1002/j.2333-8504.2009.tb02197.x>. Linking many forms at once.
+- Leary, L. F., & Dorans, N. J. (1985). Implications for altering the context in which test items appear: A historical perspective on an immediate concern. *Review of Educational Research*, 55(3), 387–413. <https://doi.org/10.2307/1170392>. Context and position effects.
+- Debeer, D., & Janssen, R. (2013). Modeling item-position effects within an IRT framework. *Journal of Educational Measurement*, 50(2), 164–185. <https://doi.org/10.1111/jedm.12009>. Position effects as part of the model, which [Explanatory item response models](explanatory-irt.qmd) takes up.
+- Michaelides, M. P. (2010). A review of the effects on IRT item parameter estimates with a focus on misbehaving common items in test equating. *Frontiers in Psychology*, 1, 167. <https://doi.org/10.3389/fpsyg.2010.00167>. What happens when common items change.
+- Holland, P. W., & Thayer, D. T. (2000). Univariate and bivariate loglinear models for discrete test score distributions. *Journal of Educational and Behavioral Statistics*, 25(2), 133–183. <https://doi.org/10.3102/10769986025002133>. The presmoothing used above.
+- von Davier, A. A., Holland, P. W., & Thayer, D. T. (2004). *The kernel method of test equating*. Springer. <https://doi.org/10.1007/b97446>. A framework that unifies the observed-score methods, with standard errors.
+- González, J., & Wiberg, M. (2017). *Applying test equating methods using R*. Springer. <https://doi.org/10.1007/978-3-319-51824-4>. The methods of this lesson, in R.
+- Albano, A. D. (2016). equate: An R package for observed-score linking and equating. *Journal of Statistical Software*, 74(8). <https://doi.org/10.18637/jss.v074.i08>. The package used for observed-score equating.
+- Battauz, M. (2015). equateIRT: An R package for IRT test equating. *Journal of Statistical Software*, 68(7). <https://doi.org/10.18637/jss.v068.i07>. IRT linking methods, including chains of forms.
+- Mullis, I. V. S., Martin, M. O., Ruddock, G. J., O'Sullivan, C. Y., & Preuschoff, C. (2009). *TIMSS 2011 assessment frameworks*. TIMSS & PIRLS International Study Center, Boston College. <https://timssandpirls.bc.edu/timss2011/downloads/TIMSS2011_Frameworks.pdf>. Chapter 4 sets out the booklet design.
+- Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software*, 67(1). <https://doi.org/10.18637/jss.v067.i01>. The package for the position model.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package for every IRT fit here.
 
 ```{r}
 #| output: asis
@@ -29,3 +458,8 @@ data_sources("equating")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 6 (slides c6, 33–47), problem set 6 (#4), and the code in `ben-domingue/252`: `c6/equate-obsscore.R`, `c6/equate-irt.R`, `c6/concurrent.R`, `ps6/equating.R`, `ps6/equating_simstudy.R`.
+- **Timing:** the core ideas and widgets take about 60 minutes; the TIMSS and PIRLS analysis works as a 30-minute lab. Locally, the position model takes about a minute and everything else seconds.
+- **Changed from 252:** the slides and problem set equate ENEM booklets; this lesson uses TIMSS 2011 instead (Ben, 09-24), whose ring of booklets teaches random groups and common items on one table and turns up a real position effect. PIRLS 2011 across four countries is new, as the nonequivalent-groups contrast. The simulation adds a fourth design with a position effect.
+- **Held back:** vertical scales and growth ([Scale properties](scale-properties.qmd)); calibrating new items onto a bank's scale ([Item banks and adaptive testing](item-banks-cat.qmd)); position effects as an explanatory model ([Explanatory item response models](explanatory-irt.qmd)); DIF in the anchor ([Differential item functioning](dif.qmd)). Kernel equating, equating standard errors and linking across languages (alignment) are not covered.
+- **Solutions:** held back in `solutions/equating.qmd` (not published).
