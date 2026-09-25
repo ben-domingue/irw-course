@@ -2,7 +2,7 @@
 
 # From the 1PL to the 4PL (`1pl-to-4pl`)
 
-Module: irt · Prereqs: rasch · Core · Status: outline
+Module: irt · Prereqs: rasch · Core · Status: outline (page is a draft)
 
 ## Core ideas
 
@@ -74,3 +74,14 @@ DOIs Crossref-checked 09-24. This lesson compares models by BIC only (*whether*,
 ## Open questions
 
 - **Deep dive #21 and the IMV.** Issue #21 pairs slope variation with whether the 2PL earns its keep out of sample (IMV), but the IMV is taught later, in `fit-prediction`. *Default:* *Across the IRW* here shows slope variation only; `fit-prediction` reports the IMV half and links back.
+
+## Drafting notes (09-24, #39)
+
+What changed from this outline when the page was drafted, with the numbers recomputed:
+
+- **RMET numbers.** Recomputed on a seeded 5,000-respondent sample (all four fits on the same sample): BIC 2PL 204,337, Rasch 205,192, 3PL 204,617, 4PL 204,707 (the 4PL doesn't converge in 500 EM cycles). 2PL slopes 0.19–1.13. **Median 3PL $c$ = 0.01**, not 0.05 (quartiles 0.00 / 0.16, max 0.57; the full 17,680-respondent 3PL, run separately, gives median 0.012). Ability correlations 0.972–0.999. The predict-then-check answer is "mostly near 0".
+- **Why $c$ is near 0, shown:** only 84 of 17,680 respondents (0.48%) score at or below chance (9 of 36).
+- **Idea 3 split.** "Reading `mirt`, and what fixes the scale" keeps the parameterization and the unit; the 3PL identification point got its own H3, "What the lower asymptote needs", with a widget (closest 2PL to a 3PL, weighted by where respondents sit) and Domingue et al. (2024). Four widgets instead of three.
+- **Chess:** 2PL slopes 0.02 (Y15, $b$ = 136.5, meaningless) to 3.79 (Y29). Y15 and Y29 cross at θ = 0.91, with 82% of players below; grouped proportions confirm the flip. Same-sum-score players: Rasch spread 0.00, 2PL up to 0.63. The common-slope 1PL reproduces the Rasch fit (slope 1.22 = Rasch SD of θ).
+- **Asymmetric curves:** described in words (no symbol for the exponent, since notation.md has none); links the IRW asymmetric-models vignette.
+- **Deep dive #21:** `deepdives/1pl-to-4pl/compute.R`, summary = SD of log(a) per table (unit-free) plus Rasch-vs-2PL BIC. Pilot only (6 of 316 candidates).
