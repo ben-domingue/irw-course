@@ -244,7 +244,7 @@ lessons:
     origin: {slides: [c6], ps: ["PS6#4"], code: [c6/equate-irt.R, c6/equate-obsscore.R, c6/concurrent.R, ps6/equating.R, ps6/equating_simstudy.R]}
     tables: [cdm_timss11, pirlsmissing_sirt]
     reuses: [cdm_timss11, pirlsmissing_sirt]  # first shown in irw-data (missingness patterns)
-    status: stub
+    status: draft
     tranche: core
 
   - id: explanatory-irt

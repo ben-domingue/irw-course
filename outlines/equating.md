@@ -2,7 +2,7 @@
 
 # Linking and equating (`equating`)
 
-Module: uses · Prereqs: 1pl-to-4pl · Core · Status: outline
+Module: uses · Prereqs: 1pl-to-4pl · Core · Status: drafted (see *Drafting notes* at the end)
 
 Scope (F20): equating and IRT linking in full; vertical scaling named, with growth handed to `scale-properties` (E11); concordance (e.g. SAT–ACT) in one sentence.
 
@@ -74,3 +74,11 @@ Data notes: 26 of the 174 TIMSS items are parts of constructed-response items, s
 ## Open questions
 
 - None. Settled 09-24: TIMSS over ENEM (F17); the position effect as the predict-then-check (F18); PIRLS with a pointer to `dif` (F19); scope (F20); core (S4).
+
+## Drafting notes (09-24, PR for #47)
+
+- All five core ideas taught. Numbers recomputed at the v59 pin: booklet 11 mean 11.6 (not 11.7); ring gap 1.08 (9 of 14 links positive); position effect −0.077 (SE 0.014), concentrated in position 4 vs 1 (−0.120, SE 0.034) rather than 2 vs 3 (−0.035, SE 0.034). IRT true-score (concurrent 2PL) vs smoothed equipercentile: within 0.65 from scores 6–18, 2.3 apart at a score of 2 (the outline's "0.3 for 4–13" came from a different fit).
+- Sanity table `cdm_timss03` run outside the lesson: 20 random splits, Stocking–Lord A = 1.02 (SD 0.10), B = 0.00 (SD 0.11).
+- Simulate found that concurrent calibration carries a position effect along a chain (first five items −0.42, last five +0.65 at N = 600), so the text says so.
+- Widgets: regression vs equating; equipercentile by hand; Stocking–Lord by hand; the ring. Problem 3 reframed (the verdict answers the outline's version). Linking across languages/alignment and kernel equating stay unpaid.
+- Revision after Ben's review (09-25): "Equipercentile by hand" gains a right panel with the whole equating function (identity dashed, current score marked); "Stocking–Lord by hand" gains nine small-multiple item panels (before/after the current A, B, with the first-calibration curve as the target), side by side with the TCC. Helpers `equatingCurve`, `itemCurve` in `widgets/equating.js`. Prose trimmed to stay at about 3,000 words.
