@@ -2,7 +2,7 @@
 
 # Model fit and out-of-sample prediction (`fit-prediction`)
 
-Module: irt · Prereqs: 1pl-to-4pl · Core · Status: outline
+Module: irt · Prereqs: 1pl-to-4pl · Core · Status: draft
 
 ## Core ideas
 
@@ -69,3 +69,13 @@ DOIs Crossref-checked 09-24.
 ## Open questions
 
 - None.
+
+## Drafted (2026-09-24, #41): what changed
+
+- **Everything recomputed** (IRW v59 pins; `mirt` 1.46.1). `gilbert_meta_2`: outfit 0.68–1.08 (EAP abilities), null SDs 0.019–0.057; 5-fold IMVs 0.125 (Rasch over item proportions), 0.012 (2PL over Rasch), 0.0001 (3PL over 2PL; 0.0035 in-sample); RMSE 0.454 → 0.451. `gilbert_meta_14` (baseline wave, 65 items, 3,651 students): slopes 0.39–6.43, IMV 0.0088; 0.0015 on the 21 items under 10% correct, 0.0154 on the rest (this breakdown is new and carries the predict-then-check's "why"). The 3PL isn't fitted to `gilbert_meta_14` (minutes of fitting for a result the lesson doesn't use).
+- **New finding, added to idea 1:** `mirt`'s `itemfit()` uses EAP abilities by default, and with 20 items EAP pulls outfit to about 0.90 when the Rasch model is true (0.97–0.99 with ML abilities). *Simulate* shows it; *With real data* reports both (`gilbert_meta_2` median 0.92 vs 1.00). The Go deeper derives the exact null variance, Var(z²) = 1/(pq) − 4, which shows √(2/n) is a rough rule whose accuracy depends on item location (PS3#3's open question, now problem 2).
+- **Idea 2:** Andersen's LR test is computed in base R from conditional ML (459 on 19 df); it points at the same high-slope items.
+- **Widgets:** four, not three. The fourth (idea 5) fits the closest 2PL to a non-logistic curve (reusing `closest2pl` from `1pl-to-4pl.js`).
+- **First-person verdicts:** reading size and z together (idea 1); the 2PL for `gilbert_meta_2`, on a 0.01 IMV being worth a parameter per item and 0.0001 not.
+- **Deep dive #21, IMV half:** `deepdives/fit-prediction/compute.R` written; pilot run (5 of 316 tables) committed. The full run is Ben's.
+- **Citation corrected:** Bazán, **Bolfarine & Branco** (2006) (Crossref order); the PLOS ONE paper has eight authors (adds Tripathi).

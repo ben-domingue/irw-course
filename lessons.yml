@@ -189,7 +189,7 @@ lessons:
     prereqs: [1pl-to-4pl]
     origin: {slides: [c6], ps: ["PS3#3", "PS3#4", "PS4#2"], code: [ps3/fit.R, ps3/different-links.R, ps4/prediction.R, c6/enem_imv.R]}
     tables: [gilbert_meta_2, gilbert_meta_14]
-    status: stub
+    status: draft
     tranche: core
 
   - id: guessing-priors
