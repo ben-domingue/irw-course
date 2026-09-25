@@ -2,7 +2,7 @@
 
 # Constructs and construct maps (`constructs`)
 
-Module: ctt · Prereqs: measurement · Core · Status: outline
+Module: ctt · Prereqs: measurement · Core · Status: draft (#30)
 
 ## Core ideas
 
@@ -69,3 +69,15 @@ One table: the lesson is conceptual. Item text (A5): the items are openly licens
 ## Open questions
 
 - None. Settled: idea 3's sources and verdict (Ben, 09-24); the Simulate section (C4); item text (A5).
+
+## Changes made while drafting (#30, 09-24)
+
+- **Waves pooled.** The table's two waves (3 and 5) are the two cognitive-test waves, and each participant was randomly assigned to one (Himmelstein et al., 2025, sec. 2.1), so every respondent appears once. The lesson pools them: 1,189 respondents. Proportions correct change slightly from the wave-3-only figures above: NS_2 0.84 (unchanged), NS_6 0.015 (was 0.02).
+- **Unanswered items.** Each item had a 30-second limit; unanswered items are absent from the IRW table (1,602 of 10,701 trials). The lesson reports proportions correct both among those who answered and counting unanswered as wrong (rank correlation with the map −0.76 either way).
+- **The finding: NS_6's key.** The source key accepts 165 for "200, 198, 192, 174, __"; continuing the tripled steps gives 120, which 101 respondents typed against 13 for 165. The lesson reads the raw answers from the source repository (forecastingresearch/fpt, pinned commit) and frames this gently as a fact about the key. Rescored, NS_6 would be 0.115.
+- **The construct map used:** 1 same step (NS_1); 2 step changes by a simple pattern (NS_2, NS_3, NS_4); 3 step changes by multiplication (NS_6, NS_8); 4 interleaved (NS_7); 5 fractions (NS_5, NS_9).
+- **Item text** comes from the test's public source code (`materials/js/number_series_task.js`), not a snapshot; the repository has no licence file, the paper is CC BY 4.0 (flagged for Ben).
+- **DRDP:** the current DRDP (2025) PTK view, problem-solving measure, paraphrased (the instrument is "all rights reserved").
+- **Moffitt:** the slide's four groups are given as the two of Moffitt (1993) plus the third found at age 26 (Moffitt, Caspi, Harrington & Milne, 2002, doi:10.1017/S0954579402001104).
+- **Widgets:** the DRDP explorer and the intervention widget are one widget (three descriptions); "build a construct map" is a set of dropdowns, checked against the data in *With real data*.
+- **Revision after Ben's review (09-25).** Attribution: the construct map is credited as the first building block of Wilson's approach to constructing measures, from the BEAR Assessment System (Wilson & Sloane, 2000, doi:10.1207/S15324818AME1302_4, Crossref; Wilson, 2005), building on the Rasch tradition of respondents and items on one scale (link to the Wright map in `rasch`). The dropdown "map the items" widget and its "How does your map do?" check are replaced by a plain table of the nine items under the map's levels and a Core-ideas predict ("Reading only the items, which will be hardest?"). The real-data predict now asks which NS_6 answer was more common (165 keyed vs 120 from tripling): 120, 101 to 13.

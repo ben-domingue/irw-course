@@ -88,7 +88,7 @@ lessons:
     prereqs: [measurement]
     origin: {slides: [c2], ps: [], code: []}
     tables: [himmelstein-number_series-2025]
-    status: stub
+    status: draft
     tranche: core
 
   - id: ctt-reliability
