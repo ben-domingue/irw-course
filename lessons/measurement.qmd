@@ -126,15 +126,15 @@ Stevens paired his definition with a classification that is still in use: scales
 - **Ordinal.** Mohs hardness orders minerals by which scratches which: talc is 1, gypsum 2, calcite 3, and so on up to diamond at 10. Any relabelling that keeps the order (any increasing function) will do. We can say quartz (7) is harder than apatite (5), but not that the step from calcite to fluorite equals the step from fluorite to apatite: an order-preserving relabelling can make those steps anything we like. Indentation hardness, measured on the Mohs minerals themselves, doesn't rise evenly with the Mohs number ([Broz, Cook & Whitney, 2006](https://doi.org/10.2138/am.2006.1844)).
 - **Interval.** A unit means the same thing anywhere on the scale. Only linear relabellings, $\beta_0 + \beta_1 x$ with $\beta_1 > 0$, are allowed, and differences can be compared. For minerals this takes a different kind of test: instead of asking which mineral scratches which, press a diamond point into the surface with a known force and measure the dent (indentation hardness; [Smith & Sandland, 1922](https://doi.org/10.1243/pime_proc_1922_102_033_02)), or drop a small body onto it and measure how fast it bounces back (rebound hardness; [Leeb, 1979](<https://doi.org/10.1016/0308-9126(79)90087-7>)). Each gives a number in physical units, so a difference of ten units means the same thing at the soft end as at the hard end. The two tests measure different physical properties, though, and needn't agree about spacing, much as the two thermometers above disagree between their marks. A ratio scale adds a true zero, so ratios ("twice as long") mean something too.
 
-Each level licenses more claims than the one before, because it allows fewer relabellings. A statement is safe at a level if it stays true under every relabelling that level allows. Test one. Suppose I haphazardly assemble a box of minerals from the geology department's collection and announce that their hardness is uniformly distributed. Would the geologists accept that?
+Each level licenses more claims than the one before, because it allows fewer relabellings. A statement is safe at a level if it stays true under every relabelling that level allows. Test one. A box holds three specimens of each Mohs mineral, thirty in all. Counted by Mohs number it looks uniform: three at every level. Is hardness uniformly distributed in the box? Would a geologist accept that?
 
 #### Try it: a box of minerals
 
-The box holds three of each Mohs mineral, so on the Mohs numbers it is uniform. The slider applies an order-preserving relabelling that keeps talc at 1 and diamond at 10.
+On the left, the box on the Mohs scale. On the right, the same thirty specimens on a scale with a unit, of the kind an indentation test gives, cut into ten bins of equal width. We don't draw real indentation values: the Mohs steps are known to be unequal in size, but no single spacing is right, because indentation hardness doesn't even rise consistently with Mohs number ([Broz, Cook & Whitney, 2006](https://doi.org/10.2138/am.2006.1844)). The slider sets how unequal the steps are, and in which direction; at 0 they are equal. The spacing is stylized.
 
 ```{ojs}
 //| echo: false
-viewof mh_k = Inputs.range([-4, 4], {value: 0, step: 0.25, label: "Relabelling (0 = Mohs numbers)"})
+viewof mh_k = Inputs.range([-4, 4], {value: 2, step: 0.25, label: "How unequal the Mohs steps are"})
 ```
 
 ```{ojs}
@@ -143,28 +143,27 @@ mh_names = ["talc", "gypsum", "calcite", "fluorite", "apatite", "orthoclase", "q
 mh_g = h => mh_k === 0 ? h : 1 + 9 * (Math.exp(mh_k * (h - 1) / 9) - 1) / (Math.exp(mh_k) - 1)
 mh_min = mh_names.map((name, i) => ({name, mohs: i + 1, h: mh_g(i + 1)}))
 mh_box = mh_min.flatMap(m => [m, m, m])
-mh_mean = mh_box.reduce((s, m) => s + m.h, 0) / mh_box.length
-mh_below = mh_min.filter(m => m.h <= mh_mean).at(-1)
-mh_above = mh_min.find(m => m.h > mh_mean)
-Plot.plot({
-  width: 700, height: 280, marginTop: 50,
-  x: {label: "Hardness on the relabelled scale", domain: [0.5, 10.5]}, y: {label: "Minerals in the box"},
+mh_bins = grid(0.5, 10.5, 11)
+mh_counts = mh_bins.slice(0, -1).map((lo, i) => mh_box.filter(m => m.h >= lo && m.h < mh_bins[i + 1]).length)
+mh_panel = (key, xlab, names) => Plot.plot({
+  width: 360, height: 300, marginTop: 50,
+  x: {label: xlab, domain: [0.5, 10.5]}, y: {label: "Specimens", domain: [0, 12]},
   marks: [
-    Plot.rectY(mh_box, Plot.binX({y: "count"}, {x: "h", thresholds: grid(0.5, 10.5, 11), fill: palette.light, inset: 1})),
-    Plot.ruleX([mh_mean], {stroke: palette.contrast, strokeWidth: 2}),
-    Plot.tickX(mh_min, {x: "h", stroke: palette.main, strokeWidth: 2}),
-    Plot.text(mh_min, {x: "h", frameAnchor: "top", dy: -34, text: "name", rotate: -30, fontSize: 10, fill: palette.ink}),
+    Plot.rectY(mh_box, Plot.binX({y: "count"}, {x: key, thresholds: mh_bins, fill: palette.light, inset: 1})),
+    Plot.ruleX(mh_min, {x: key, y1: 0, y2: 0.8, stroke: palette.main, strokeWidth: 2}),
+    names ? Plot.text(mh_min, {x: key, frameAnchor: "top", dy: -34, text: "name", rotate: -30, fontSize: 9, fill: palette.ink}) : null,
     Plot.ruleY([0])
   ]
 })
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem;">${mh_panel("mohs", "Mohs number", true)}${mh_panel("h", "Hardness on a scale with a unit (stylized)", false)}</div>`
 ```
 
 ```{ojs}
 //| echo: false
-md`Bars count the minerals in ten equal-width bins of the relabelled scale; blue ticks mark the ten minerals, the orange line the box's mean. The mean hardness is ${mh_mean.toFixed(2)}, between ${mh_below.name} and ${mh_above ? mh_above.name : "diamond"}. The median mineral is always between apatite and orthoclase.`
+md`On the right, the fullest bin holds ${Math.max(...mh_counts)} specimens and ${mh_counts.filter(c => c === 0).length} of the ten bins are empty. The blue stubs along the bottom mark the ten minerals, in Mohs order.`
 ```
 
-At 0 the bars are flat. Move the slider either way and the same thirty minerals pile up at one end, and the mean moves from mineral to mineral while the median stays put. On an ordinal scale, "uniformly distributed" is a claim about the labels, not the minerals, and the geologists would be right to object. Medians and orderings survive every relabelling; means and the shape of a distribution do not.
+The left panel is flat whatever the slider says, because it counts Mohs labels. The right panel is flat only when the steps are equal; otherwise the same thirty specimens pile up at one end. "Uniformly distributed" is a claim about spacing, and an ordinal scale has none to offer, so the geologist would be right to decline. What survives every relabelling is order: the median specimen lies between apatite and orthoclase in both panels, at every setting of the slider. Means and the shapes of distributions need a unit.
 
 ```{ojs}
 //| echo: false
