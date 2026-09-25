@@ -2,7 +2,7 @@
 
 # From construct map to items: building an instrument (`instrument-building`)
 
-Module: ctt · Prereqs: constructs, ctt-reliability · Core · Status: outline
+Module: ctt · Prereqs: constructs, ctt-reliability · Core · Status: draft
 
 ## Core ideas
 
@@ -64,3 +64,14 @@ One table: the pilot's data are the case study; the rest of the lesson is design
 ## Open questions
 
 - None. Settled: the Simulate section (C7); item-text alignment (checked 09-24); showing item text follows A5.
+
+## Drafting notes (09-25, #56)
+
+Drafted from this outline; every core idea is taught. What changed:
+
+- **Numbers recomputed** from the IRW table (v7.0 of `item_response_warehouse_3`): they match the outline. The table reproduces Song et al.'s published mean, SD and alpha as stored (29.92, 4.79, 0.863), so items 3, 5, 9 and 10 arrive keyed.
+- **Item 8 reinterpreted.** The outline called it "reversed" in the stored data. The lesson says instead that its stored values rise with self-esteem and that the data can't tell whether they mean agreement or disagreement; the likely reason it sits with the positive items is that the Chinese version is read and scored positively (Peng et al., 2024, doi:10.2147/PRBM.S494452, verified), which is also the reading of the IRW's `verify_song_2023_rses.R`. This pays the `reverse-keying` thread ("the data can't always tell").
+- **Licence (A5):** the RSES is public domain per the University of Maryland Department of Sociology page (checked 09-25). The lesson still quotes only items 3 and 8 (PROSE rule 1).
+- **Widgets:** the three planned ones plus an acquiescence widget (all-forward vs balanced scale), which motivates reversed items before the wording factor shows their cost. The blueprint builder computes cell-score reliability by Spearman–Brown. The wording widget and the simulation also allow a wording factor on the forward items, which the RSES needs (problem 1).
+- **Citations added (all verified on Crossref or PubMed):** Tourangeau, Rips & Rasinski (2000); Haladyna & Rodriguez (2013); Clark & Watson (2019, 1995); Paulhus (1991); Baumgartner & Steenkamp (2001); Tomás & Oliver (1999); DiStefano & Motl (2006); Swain, Weathers & Niedrich (2008); Weijters & Baumgartner (2012); Suárez-Álvarez et al. (2018); Peng et al. (2024).
+- **Dropped:** nothing.

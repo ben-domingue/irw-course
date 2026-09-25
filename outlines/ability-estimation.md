@@ -2,7 +2,7 @@
 
 # Estimating abilities: MLE and EAP (`ability-estimation`)
 
-Module: irt · Prereqs: information · Core · Status: outline
+Module: irt · Prereqs: information · Core · Status: draft (09-25)
 
 ## Core ideas
 
@@ -37,7 +37,7 @@ DOIs Crossref-checked 09-24.
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `c19prc_uk_mcbride_2021_wordsum` | main example | The GSS Wordsum vocabulary test (10 items), 2,058 UK adults. 95 score 0 and 156 score 10, so 251 respondents (12%) have no finite MLE. The difficulties fall in two clusters (−2.5 to −1.1 and 0.9 to 1.6) with a gap in the middle, which Cor, Haertel, Krosnick & Malhotra (2012) also point out. MLE, EAP and WLE agree in the middle (a score of 5: −0.57, −0.47, −0.60) and diverge at the ends (a score of 9: 2.55, 2.07, 2.26). EAPs are shrunk: SD 1.7 against a model SD of 1.9. Under a 2PL, the 282 respondents with a score of 5 get 39 different EAPs, from −1.1 to 0.0. | — |
+| `c19prc_uk_mcbride_2021_wordsum` | main example | The GSS Wordsum vocabulary test (10 items), 2,058 UK adults. 95 score 0 and 156 score 10, so 251 respondents (12%) have no finite MLE. The difficulties fall in two clusters (−2.5 to −1.1 and 0.9 to 1.6) with a gap in the middle, which Cor, Haertel, Krosnick & Malhotra (2012) also point out. MLE, EAP and WLE agree in the middle (a score of 5: −0.57, −0.47, −0.60) and diverge at the ends (a score of 9: 2.55, 2.07, 2.26). EAPs are shrunk: SD 1.7 against a model SD of 1.9. Under a 2PL, the 282 respondents with a score of 5 get 40 different EAPs (one per response pattern and weighted score), from −1.05 to −0.04. | — |
 
 Wordsum sources: Thorndike (1942), doi:10.1037/h0060053; Cor et al. (2012), doi:10.1016/j.ssresearch.2012.05.007. Table citation from IRW biblio.
 
@@ -69,3 +69,20 @@ Wordsum sources: Thorndike (1942), doi:10.1037/h0060053; Cor et al. (2012), doi:
 ## Open questions
 
 - None.
+
+## Drafting notes (09-25, #37)
+
+- Every core idea is taught. The simulation adds the WLE, the MAP and a two-group difference to PS5#2's MLE-vs-EAP comparison, so that the verdict's point about averaging EAPs for groups is shown rather than asserted.
+- The claim that Cor et al. (2012) also point out the gap in Wordsum difficulties is dropped: the paper's text couldn't be checked (no abstract on Crossref or OpenAlex). The lesson cites it only as an IRT analysis of Wordsum.
+- Widgets: the likelihood-surface widget as planned (three items, $b = -1, 0, 1.5$); the prior × likelihood widget uses the ten Wordsum difficulties; the shrinkage widget adds a test-length control (the ten items repeated) to show the EAP moving toward the MLE as the likelihood sharpens.
+- PS5#2b (out-of-sample prediction with MLE vs. EAP) is mentioned in the solution to problem 5 rather than posed.
+- A brief "if you've done" Recall of `fit-prediction` (not an ancestor) explains why EAP abilities pull outfit to about 0.9.
+
+
+## Revisions after Ben's review (09-25, #135)
+
+- New subsection *The weighted likelihood estimate* near the end of Core ideas: Warm's correction, its finiteness (Magis & Verhelst, 2017, for the 1PL–4PL), its link to Firth (1993) and separation (Heinze & Schemper, 2002), where it equals the Jeffreys-prior mode (Magis & Raîche, 2012), the evidence (Warm's Monte Carlo studies; Kim & Nicewander, 1993) and the cost (no shrinkage; RMSE 0.77 against the EAP's 0.61 in the simulation). No source found calls it optimal in general, so the lesson doesn't.
+- *Perfect patterns* now points to the WLE as a finite, prior-free alternative; the Go deeper cites Magis & Verhelst (2017).
+- A Recall of `1pl-to-4pl`'s Go deeper: under the 3PL no simple statistic is sufficient, so estimates depend on the whole pattern.
+- The verdict adds the WLE as the choice when a prior is unwelcome.
+- Trimmed to stay near 3,000 words: the four-estimator bullet list became a short MAP/EAP paragraph (the WLE has its own subsection), and Simulate, the real-data intro, the widget commentary and the Problems were tightened.

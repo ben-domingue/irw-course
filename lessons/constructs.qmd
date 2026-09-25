@@ -11,13 +11,13 @@ lesson_header("constructs")
 ```{ojs}
 //| echo: false
 import {grid, logistic, palette} from "./widgets/irt.js"
-import {simTwo, spearman} from "./widgets/constructs.js"
+import {simTwo} from "./widgets/constructs.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
 ## What this is for
 
-Before we ask how well a test measures something, we have to say what the something is. [What is measurement?](measurement.qmd) called the attribute we are after a construct. This lesson asks what a statement of one should contain. The answer we build on is Mark Wilson's **construct map**: a line from less to more of the construct, with a description of what respondents at each point can do. A good map orders the items before anyone answers them, and it tells a teacher what to work on next. We try both tests, the first on nine number-series items from the IRW, and ask whether a construct has to be a continuum at all.
+Before we ask how well a test measures something, we have to say what the something is. [What is measurement?](measurement.qmd) called the attribute we are after a construct. This lesson asks what a statement of one should contain. The answer we build on is the **construct map**, from Mark Wilson's approach to constructing measures: a line from less to more of the construct, with a description of what respondents at each point can do. A good map orders the items before anyone answers them, and it tells a teacher what to work on next. We try both tests, the first on nine number-series items from the IRW, and ask whether a construct has to be a continuum at all.
 
 ## Goals
 
@@ -57,7 +57,7 @@ quiz({
 
 ### A construct map
 
-The Cronbach–Meehl definition says what a construct is for, but not what a statement of one should look like. [Wilson (2005, ch. 2)](https://doi.org/10.4324/9781410611697) supplies a simpler form. A **construct map** is a line. At one end are respondents with little of the construct, at the other end respondents with a lot, and along it are qualitatively described **levels**: what a respondent at each point typically knows, believes or can do. Beside the respondents, on the same line, sit the items, each placed at the level its response indicates. The map assumes the construct is a single continuum (one line, not two), an assumption [Factor analysis I](fa-exploratory.qmd) and [Dimensionality](dimensionality.qmd) put to the test.
+The Cronbach–Meehl definition says what a construct is for, but not what a statement of one should look like. Mark Wilson's approach to constructing measures, which grew out of the BEAR Assessment System ([Wilson & Sloane, 2000](https://doi.org/10.1207/S15324818AME1302_4)), makes the construct map its first building block ([Wilson, 2005](https://doi.org/10.4324/9781410611697)). It builds on the Rasch tradition of placing respondents and items on one scale, the picture the [Wright map](rasch.qmd#people-and-items-on-one-scale-the-wright-map) draws. A **construct map** is a line. At one end are respondents with little of the construct, at the other end respondents with a lot, and along it are qualitatively described **levels**: what a respondent at each point typically knows, believes or can do. Beside the respondents, on the same line, sit the items, each placed at the level its response indicates. The map assumes the construct is a single continuum (one line, not two), an assumption [Factor analysis I](fa-exploratory.qmd) and [Dimensionality](dimensionality.qmd) put to the test.
 
 What does a map look like in practice? California's Desired Results Developmental Profile (DRDP), which early-childhood teachers use to rate children's development, is a set of them ([California Department of Social Services & California Department of Education, 2025](https://www.desiredresults.us/desired-results-system/drdp-2025-instrument-and-forms), developed with the Berkeley Evaluation and Assessment Research Center). Each measure is a continuum cut into named levels (Responding, Exploring, Building and, for older children, Integrating and Extending), each with a descriptor and examples. In problem solving, a child at the earliest level notices people and objects; later, the child copies a strategy an adult has shown; later still, the child stops to look at a problem before choosing how to tackle it. The teacher marks the latest level mastered.
 
@@ -107,43 +107,35 @@ htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem;">${cm_map}${cm_b
 md`At this location the respondent is more likely than not to solve items at ${cm_now.filter(d => d.p > 0.5).length} of the five levels.`
 ```
 
-Items below the respondent are likely to be solved and items above likely to be missed, and the chance changes gradually. Item response models draw this picture with estimated numbers: the Wright map in [The Rasch model](rasch.qmd) puts respondents and items on one scale, and [Information, precision, and short forms](information.qmd) asks where on the line a test measures well.
+Items below the respondent are likely to be solved, items above likely to be missed. Item response models draw this picture with estimated numbers: the Wright map in [The Rasch model](rasch.qmd) puts respondents and items on one scale, and [Information, precision, and short forms](information.qmd) asks where on the line a test measures well.
 
-#### Try it: map the number-series items
+### The number-series items on the map
 
-Here are the nine items we analyse later; each asks for the missing number. Put each at the level where you think it belongs, reading only its text. The settings start at the lesson's map. The real-data section checks your map against the responses of 1,189 adults.
+Here are the nine items we analyse later, placed on the lesson's map from their text alone. Each asks for the missing number.
 
-```{ojs}
-//| echo: false
-ns_text = [
-  {item: "NS_1", series: "10, 4, __, -8, -14, -20", mine: 1},
-  {item: "NS_2", series: "3, 6, 10, 15, 21, __", mine: 2},
-  {item: "NS_3", series: "121, 100, 81, __, 49", mine: 2},
-  {item: "NS_4", series: "3, 10, 16, 23, __, 36", mine: 2},
-  {item: "NS_5", series: "3/21, __, 13/11, 18/6, 23/1, 28/-4", mine: 5},
-  {item: "NS_6", series: "200, 198, 192, 174, __", mine: 3},
-  {item: "NS_7", series: "3, 2, 10, 4, 19, 6, 30, 8, __", mine: 4},
-  {item: "NS_8", series: "10000, 9000, __, 8890, 8889", mine: 3},
-  {item: "NS_9", series: "3/4, 4/6, 6/8, 8/12, __", mine: 5}
-]
-viewof ns_map = Inputs.form(Object.fromEntries(ns_text.map(d => [d.item,
-  Inputs.select([1, 2, 3, 4, 5], {value: d.mine, label: `${d.item}: ${d.series}`, format: v => `Level ${v}`})])))
-```
+| Level | What the solver has to find | Items |
+|---|---|---|
+| 1 | the same step every time | NS_1: 10, 4, \_\_, −8, −14, −20 |
+| 2 | a step that changes by a simple pattern (it alternates, or grows by one) | NS_2: 3, 6, 10, 15, 21, \_\_<br>NS_3: 121, 100, 81, \_\_, 49<br>NS_4: 3, 10, 16, 23, \_\_, 36 |
+| 3 | a step that changes by multiplication | NS_6: 200, 198, 192, 174, \_\_<br>NS_8: 10000, 9000, \_\_, 8890, 8889 |
+| 4 | two sequences interleaved in one | NS_7: 3, 2, 10, 4, 19, 6, 30, 8, \_\_ |
+| 5 | two sequences side by side, as fractions | NS_5: 3/21, \_\_, 13/11, 18/6, 23/1, 28/−4<br>NS_9: 3/4, 4/6, 6/8, 8/12, \_\_ |
+
+: The lesson's construct map for the number series. Sequences from the test's materials ([forecastingresearch/fpt](https://github.com/forecastingresearch/fpt/blob/main/materials/js/number_series_task.js)). {tbl-colwidths="[8,42,50]"}
+
+If the map is right, items should get harder as you go down the table. Before looking at any data, commit to a guess.
 
 ```{ojs}
 //| echo: false
-ns_placed = ns_text.map(d => ({...d, level: ns_map[d.item]}))
-Plot.plot({
-  width: 700, height: 150, marginLeft: 20,
-  x: {domain: [0.5, 5.9], label: "Level on your map", ticks: [1, 2, 3, 4, 5]}, y: {axis: null, domain: [0, 5]},
-  marks: [
-    Plot.dot(ns_placed, Plot.stackY({x: "level", y: () => 1, fill: palette.main, r: 6})),
-    Plot.text(ns_placed, Plot.stackY({x: "level", y: () => 1, text: "item", dx: 24, fontSize: 10}))
-  ]
+predict({
+  q: "Reading only the items, which will be hardest?",
+  choices: ["NS_5 (fractions)", "NS_6 (steps that triple)", "NS_7 (interleaved)", "NS_9 (fractions)"],
+  answer: "NS_6 (steps that triple)",
+  reveal: "NS_6, by a wide margin, though the map puts it only at level 3. Keep your guess: *With real data* shows how far out of place it is, and why."
 })
 ```
 
-Two readers can place an item differently for defensible reasons. What settles a disagreement is the first of the two tests below.
+The map predicts that the hardest item comes from level 4 or 5. The data will say whether it does, and, when an item disagrees, whether the map is at fault.
 
 ### Two tests for a proposed construct
 
@@ -323,19 +315,10 @@ Responses are scored 1 for correct, so higher means more of the construct. The `
 #| code-fold: show
 ```
 
-Of 1,189 respondents, 1,154 answered NS_2 but only 816 answered NS_7. The hard-looking items go unanswered most, so we compute proportions correct two ways: among those who answered, and counting unanswered as wrong. The map puts NS_6, whose steps triple (2, 6, 18), at level 3 with NS_8, whose steps shrink tenfold (1,000, 100, 10, 1).
+Of 1,189 respondents, 1,154 answered NS_2 but only 816 answered NS_7. The hard-looking items go unanswered most, so we compute proportions correct two ways: among those who answered, and counting unanswered as wrong. The map puts NS_6, whose steps triple (2, 6, 18), at level 3 with NS_8, whose steps shrink tenfold (1,000, 100, 10, 1). Was your guess right?
 
 
 
-```{ojs}
-//| echo: false
-predict({
-  q: "Which item will turn out hardest?",
-  choices: ["NS_6 (steps that triple)", "NS_7 (two sequences interleaved)", "NS_9 (fractions)"],
-  answer: "NS_6 (steps that triple)",
-  reveal: "NS_6, by far: 1.5% of the 877 respondents who answered it gave the keyed answer. The map puts it at level 3, and the other level-3 item, NS_8, was solved by 48%. The next section asks why."
-})
-```
 
 ```{r pcorrect}
 #| echo: true
@@ -351,33 +334,31 @@ predict({
 
 The map does fairly well: the rank correlation between level and proportion correct is −0.76 (−1 would mean every higher level is harder), unchanged when unanswered items count as wrong. Two items are out of place in the mild way a first draft should expect. NS_2 (3, 6, 10, 15, 21) is easier than the level-1 NS_1, perhaps because its step grows by exactly one each time, the gentlest change a step can make. NS_5, a fraction item at level 5, is easier than the interleaved NS_7: its numerators and denominators each change by a constant step, so it may belong lower. Without NS_6, the rank correlation is −0.85.
 
-NS_6 is out of place by a wide margin, and its text doesn't explain why: tripling steps are no harder in principle than steps that shrink tenfold. Is the map wrong about the item, or is something else going on? The IRW table keeps only the 0/1 score, so we read what respondents typed from the source data.
+NS_6 is out of place by a wide margin (1.5% correct, against 48% for NS_8 at the same level), and its text doesn't explain why: tripling steps are no harder in principle than steps that shrink tenfold. The IRW table keeps only the 0/1 score, so we read what respondents typed from the source data.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The scoring key for NS_6 (200, 198, 192, 174, __) accepts 165. Continuing the tripled steps (2, 6, 18, then 54) gives 120. Among respondents who answered NS_6, which answer was more common?",
+  choices: ["165, the keyed answer", "About as many of each", "120, the tripling answer"],
+  answer: "120, the tripling answer",
+  reveal: "101 respondents typed 120 and 13 typed 165. NS_6 looks hardest largely because of its key."
+})
+```
 
 ```{r ns6}
 #| echo: true
 #| code-fold: show
 ```
 
-The scoring key accepts 165. Continuing the tripled steps (2, 6, 18, then 54) gives 174 − 54 = 120, and 101 respondents typed 120, against 13 who typed 165. I can't find the rule that leads to 165; the key may encode a pattern I haven't seen, or record a slip. Scored with 120, NS_6 would be solved by 11.5% of those who answered: still the hardest item, but at about half the rate of NS_7 and NS_9 (0.24) rather than a sixteenth. Either way, its place in the data is mostly a fact about its key, not the construct. The map is what made the item look wrong.
+Most who answered didn't type the keyed 165: 101 typed 120, the answer the tripled steps give (174 − 54), against 13 for 165. I can't find the rule that leads to 165; the key may encode a pattern I haven't seen, or record a slip. Scored with 120, NS_6 would be solved by 11.5% of those who answered: still the hardest item, but at about half the rate of NS_7 and NS_9 (0.24) rather than a sixteenth. Either way, its place in the data is mostly a fact about its key, not the construct. The map is what made the item look wrong.
 
 My working rule: when an item lands far from where the construct map puts it, I read the item and its key before I revise the map. [AI and psychometrics](ai-psychometrics.qmd) returns to these nine items as a check on its own pipeline.
-
-#### How does your map do?
-
-```{ojs}
-//| echo: false
-ns_p = new Map(ns_pcorrect.item.map((d, i) => [d, ns_pcorrect.p[i]]))
-yours = ns_text.map(d => ({item: d.item, level: ns_map[d.item], mine: d.mine, p: ns_p.get(d.item)}))
-yours_no6 = yours.filter(d => d.item !== "NS_6")
-md`Your map's rank correlation with the proportions correct is **${spearman(yours.map(d => d.level), yours.map(d => d.p)).toFixed(2)}**; the lesson's map gives ${spearman(yours.map(d => d.mine), yours.map(d => d.p)).toFixed(2)}. Without NS_6, yours gives ${spearman(yours_no6.map(d => d.level), yours_no6.map(d => d.p)).toFixed(2)}.`
-```
-
-This uses your levels from *Try it: map the number-series items*. Moving NS_6 to level 5 improves the correlation, but only by fitting the map to a scoring key.
 
 ## Problems
 
 1. **Two classes, one sum.** A proportion $\pi$ of respondents are in class 1, the rest in class 2, and a respondent in class $k$ answers item $i$ correctly with probability $p_{ik}$, independently across items. Derive the item's mean and the covariance of items $i$ and $j$. Show that every covariance is positive when every item is easier in class 2. What does that imply for positive inter-item correlations as evidence of a continuum?
-2. **The out-of-place item.** Which item other than NS_6 is most out of place relative to your map? Propose a reason from its text, and say what data would test it (the `rt` column may help).
+2. **The out-of-place item.** Which item other than NS_6 is most out of place relative to the lesson's map? Propose a reason from its text, and say what data would test it (the `rt` column may help).
 3. **Your sentence.** Write the Cronbach–Meehl sentence for a construct you work with, for three different situations. Does your construct pass the intervention test?
 4. **Design a map.** Sketch a four-level construct map for a construct of your choice: a description at each level, what holds a respondent there, and one item per level. Ask someone to order your items before seeing your levels.
 5. **Blueprint or map?** A nursing board licenses nurses with an exam built from a blueprint; a hospital wants a scale of clinical judgment built from a construct map. For each, what can a score claim, what evidence would the claim need, and what question could it not answer?
@@ -399,12 +380,6 @@ ask_claude("constructs", "It covers what a construct is (Cronbach and Meehl's de
 - Haslam, N., Holland, E., & Kuppens, P. (2012). Categories versus dimensions in personality and psychopathology: A quantitative review of taxometric research. *Psychological Medicine*, 42(5), 903–920. <https://doi.org/10.1017/S0033291711001966>. What taxometric studies have found, across 311 findings.
 - Bartholomew, D. J., Knott, M., & Moustaki, I. (2011). *Latent variable models and factor analysis: A unified approach* (3rd ed.). Wiley. <https://doi.org/10.1002/9781119970583>. Latent class and latent trait models as members of one family.
 - AERA, APA, & NCME. (2014). *Standards for educational and psychological testing*. American Educational Research Association. <https://www.testingstandards.net/open-access-files.html>. Chapter 4 covers test specifications; open access.
-
-```{r ojs-data}
-#| echo: false
-# Proportions correct for the "How does your map do?" widget.
-ojs_define(ns_pcorrect = data.frame(item = items$item, p = round(items$p, 4)))
-```
 
 ```{r}
 #| output: asis
