@@ -475,6 +475,8 @@ ask_claude("equating", "It covers linking and equating: symmetry, equity and pop
 - Mullis, I. V. S., Martin, M. O., Ruddock, G. J., O'Sullivan, C. Y., & Preuschoff, C. (2009). *TIMSS 2011 assessment frameworks*. TIMSS & PIRLS International Study Center, Boston College. <https://timssandpirls.bc.edu/timss2011/downloads/TIMSS2011_Frameworks.pdf>. Chapter 4 sets out the booklet design.
 - Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software*, 67(1). <https://doi.org/10.18637/jss.v067.i01>. The package for the position model.
 - Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package for every IRT fit here.
+- van der Linden, W. J., & Barrett, M. D. (2017). Parameter linking. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 21–46). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on linking item response model parameters across calibrations.
+- van der Linden, W. J. (2017). IRT observed-score equating. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 143–164). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on observed-score equating with item response models.
 
 ```{r}
 #| output: asis

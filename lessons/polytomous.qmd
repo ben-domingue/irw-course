@@ -483,6 +483,11 @@ ask_claude("polytomous", "It covers item response models for ordered polytomous 
 - Rizopoulos, D. (2006). ltm: An R package for latent variable modeling and item response theory analyses. *Journal of Statistical Software*, 17(5). <https://doi.org/10.18637/jss.v017.i05>. The package that distributes the science data.
 - Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package used throughout, with every model here as an `itemtype`.
 - Akaike, H. (1974). A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>. The AIC.
+- Andrich, D. (2016). Rasch rating-scale model. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 75–94). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the rating scale model, by its originator.
+- Samejima, F. (2016). Graded response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 95–107). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the graded response model, by its originator.
+- Masters, G. N. (2016). Partial credit model. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 109–126). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the partial credit model, by its originator.
+- Muraki, E., & Muraki, M. (2016). Generalized partial credit model. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 127–137). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the generalized partial credit model, by its originator.
+- Tutz, G. (2016). Sequential models for ordered responses. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 139–151). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the sequential model, in the newer handbook.
 
 ```{r}
 #| output: asis
