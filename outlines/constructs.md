@@ -30,7 +30,7 @@ References verified 09-24 against Crossref unless noted; the table citation is f
 - The construct is unidimensional → `fa-exploratory`, `dimensionality`.
 - A scale meant to measure one thing, and how consistently it does → `ctt-reliability`.
 - From map to items → `instrument-building`.
-- Latent classes → `cdm`; mixture/latent-class item response models otherwise unpaid.
+- Latent classes → `cdm` (latent class analysis, with cognitive diagnosis as its restricted case); mixture IRT otherwise unpaid.
 - The construct suggests an intervention → `validity-causal` (Borsboom's causal view), `invariance-experience`.
 - Blueprints and domain sampling → `validity-argument` (content evidence), `validity-evidence`, `g-theory` (items as a facet).
 

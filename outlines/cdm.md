@@ -1,16 +1,16 @@
-<!-- Outlined 2026-09-24 from PS7#2 (parts B–D) and the code c7/3_cdm.R and ps7/cdm.R. c7.pptx is missing from the export, so the lesson is built from c7/3_cdm.R and PS7#2 (digest F26; Ben may send the deck if it has slide material worth keeping). Tidied 09-24 (#62). -->
+<!-- Outlined 2026-09-24 from PS7#2 (parts B–D) and the code c7/3_cdm.R and ps7/cdm.R. c7.pptx is missing from the export, so the lesson is built from c7/3_cdm.R and PS7#2 (digest F26; Ben may send the deck if it has slide material worth keeping). Tidied 09-24 (#62). Broadened 09-24 (Ben): latent class analysis as the general model, cognitive diagnosis as the constrained case; the lesson id stays `cdm`. -->
 
-# Cognitive diagnostic models (`cdm`)
+# Latent classes and cognitive diagnosis (`cdm`)
 
 Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
 
 ## Core ideas
 
-1. **A different kind of latent variable.** Each respondent has a profile of binary attributes; $K$ attributes give $2^K$ classes, so a CDM is a restricted latent class model. *(major)* Sources: Rupp, Templin & Henson (2010), *Diagnostic measurement* (Guilford; ISBN 9781606235270, Open Library); Haertel (1989), doi:10.1111/j.1745-3984.1989.tb00336.x.
-2. **The Q-matrix says which attributes each item needs.** It is the LLTM's design matrix again, now linking items to classes rather than to a difficulty. Tatsuoka's fraction subtraction is the classic case. *(major)* Sources: Tatsuoka (1983), doi:10.1111/j.1745-3984.1983.tb00212.x; Tatsuoka (2002), doi:10.1111/1467-9876.00272 (the IRW citation for `frac20`).
-3. **DINA: all or nothing.** With every required attribute, P(correct) = $1 - s$ (slip); missing any, $g$ (guess). DINO is "any one will do"; G-DINA and the LCDM free each combination. *(major)* Sources: Junker & Sijtsma (2001), doi:10.1177/01466210122032064; de la Torre (2011), doi:10.1007/s11336-011-9207-7; Henson, Templin & Willse (2009), doi:10.1007/s11336-008-9089-5.
-4. **The latent structure costs parameters.** Eight attributes give 255 class proportions. A higher-order model (attributes driven by one θ) or a hierarchy cuts that to a handful, and brings CDMs back towards IRT. Sources: de la Torre & Douglas (2004), doi:10.1007/bf02295640; Templin & Bradshaw (2014), doi:10.1007/s11336-013-9362-0.
-5. **Is the Q-matrix right, and is a CDM better than IRT?** Q-matrix validation (PVAF), shown briefly with the caution that it suggests too many changes under DINA (digest F28); AIC, BIC and held-out prediction against the 2PL. The lesson's verdict is on hold (see Open questions). Sources: de la Torre & Chiu (2016), doi:10.1007/s11336-015-9467-8; `GDINA`: Ma & de la Torre (2020), doi:10.18637/jss.v093.i14.
+1. **Latent classes: a categorical latent variable.** Instead of a continuum, respondents belong to one of a few unobserved classes, and each class has its own probability of success on each item; local independence holds within a class. Fit by EM (a Recall of `item-estimation` if taken), with the number of classes chosen by BIC and by what the classes mean. *(major)* Sources: Lazarsfeld & Henry (1968), *Latent structure analysis* (Houghton Mifflin; Open Library OL3915958W; no DOI); Goodman (1974), doi:10.1093/biomet/61.2.215; `poLCA`: Linzer & Lewis (2011), doi:10.18637/jss.v042.i10.
+2. **Classes or a continuum?** Unrestricted classes on the same data often come out *ordered* (low, middle, high), which is a continuum cut into pieces; the comparison with the Rasch model or 2PL says whether the classes add anything. This pays `constructs`' "latent classes vs. a continuum". *(major)* Sources: as idea 1; Haertel (1989), doi:10.1111/j.1745-3984.1989.tb00336.x.
+3. **Cognitive diagnosis: classes built from attributes.** Each respondent has a profile of binary attributes; $K$ attributes give $2^K$ classes, and a **Q-matrix** says which attributes each item needs (the LLTM's design matrix again, now linking items to classes). A CDM is a restricted latent class model. Tatsuoka's fraction subtraction is the classic case. *(major)* Sources: Rupp, Templin & Henson (2010), *Diagnostic measurement* (Guilford; ISBN 9781606235270, Open Library); Tatsuoka (1983), doi:10.1111/j.1745-3984.1983.tb00212.x; Tatsuoka (2002), doi:10.1111/1467-9876.00272 (the IRW citation for `frac20`).
+4. **DINA: all or nothing.** With every required attribute, P(correct) = $1 - s$ (slip); missing any, $g$ (guess). DINO is "any one will do"; G-DINA and the LCDM free each combination. *(major)* Sources: Junker & Sijtsma (2001), doi:10.1177/01466210122032064; de la Torre (2011), doi:10.1007/s11336-011-9207-7; Henson, Templin & Willse (2009), doi:10.1007/s11336-008-9089-5.
+5. **Is the Q-matrix right, and is a CDM better than IRT?** Eight attributes give 255 class proportions; a higher-order model (attributes driven by one θ; de la Torre & Douglas, 2004, doi:10.1007/bf02295640) or a hierarchy (Templin & Bradshaw, 2014, doi:10.1007/s11336-013-9362-0) cuts that to a handful and brings CDMs back towards IRT. Q-matrix validation (PVAF), shown briefly with the caution that it suggests too many changes under DINA (digest F28); AIC, BIC and held-out prediction against the 2PL. The lesson's verdict is on hold (see Open questions). Sources: de la Torre & Chiu (2016), doi:10.1007/s11336-015-9467-8; `GDINA`: Ma & de la Torre (2020), doi:10.18637/jss.v093.i14.
 
 References checked on Crossref (09-24) unless marked.
 
@@ -24,7 +24,7 @@ References checked on Crossref (09-24) unless marked.
 ## Promises / leaves open
 
 - Longitudinal CDMs (`hmcdm_spatialreasoning`) → unpaid.
-- Mixture and latent-class IRT beyond CDMs → unpaid.
+- Mixture IRT (a continuum within each class) → unpaid; named in Going further.
 - Classification accuracy of attribute profiles → unpaid (Templin & Bradshaw, 2013, doi:10.1007/s00357-013-9129-4).
 - Attribute profiles for feedback or placement: not a hook (`score-meaning` doesn't follow this lesson).
 
@@ -33,7 +33,7 @@ References checked on Crossref (09-24) unless marked.
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
 | `frac20` | main example | 536 × 20, 8 attributes. DINA slip ≤ 0.25 on 19 items; guessing near 0 except item 8 (0.44). 201 students (37.5%) master all eight; attribute count correlates 0.89 with Rasch θ. AIC: DINA 9,395 (295 parameters), G-DINA 9,422, Rasch 9,635, 2PL 9,360; higher-order DINA 9,115 (BIC 9,321 vs. 2PL 9,532). A scrambled Q raises AIC to 9,769. PVAF suggests changes to 9 of 20 items. | — |
-| `cdm_ecpe` | contrast | 2,922 × 28, 3 attributes. G-DINA puts 0.95 of respondents in four of eight profiles (000, 001, 011, 111): a linear hierarchy. The 2PL wins (AIC 85,205 vs. DINA 85,809, G-DINA 85,639). An ordinal scale in disguise. | — |
+| `cdm_ecpe` | contrast (also the unrestricted latent class example, ideas 1–2: fit 2–5 classes with no Q-matrix and ask whether they come out ordered; to compute when drafted) | 2,922 × 28, 3 attributes. G-DINA puts 0.95 of respondents in four of eight profiles (000, 001, 011, 111): a linear hierarchy. The 2PL wins (AIC 85,205 vs. DINA 85,809, G-DINA 85,639). An ordinal scale in disguise. | — |
 | `frac20` vs. `c7/frac20.rds` | sanity | Same data and Q; DINA log-likelihood −4,402.3 from both. | — |
 
 `cdm_timss07` (15 attributes) didn't finish in 10 minutes saturated; problems only, with `cdm_timss03`, `cdm_pisa00R`, `cdm_mentalhealth_tan_2023_bsi`.

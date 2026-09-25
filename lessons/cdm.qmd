@@ -1,5 +1,5 @@
 ---
-title: "Cognitive diagnostic models"
+title: "Latent classes and cognitive diagnosis"
 ---
 
 ```{r}

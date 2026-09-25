@@ -28,10 +28,14 @@ map_link <- function(l) {
 These are stand-alone lessons on psychometrics, each built around open data from the
 [Item Response Warehouse](https://itemresponsewarehouse.org). You can teach them in
 sequence as a full course or pick out individual lessons. The lessons come in three
-tranches: *preliminary* lessons set up the course, *core* lessons make a first course in
-psychometrics, and *extensions* go further. Each lesson lists what it
-assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to
-Psychometrics) at Stanford.
+tranches:
+
+- **Preliminary** lessons set up the course.
+- **Core** lessons make a first course in psychometrics.
+- **Extensions** go further.
+
+Each lesson lists what it assumes and what builds on it. The lessons grew out of
+EDUC 252 (Introduction to Psychometrics) at Stanford.
 
 The lessons were written largely by Claude (Anthropic), an AI model, working from the
 EDUC 252 materials and under Ben Domingue's direction. Ben reviews each lesson before

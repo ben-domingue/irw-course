@@ -8,6 +8,10 @@ took, and saves a full-page screenshot for a visual check of widgets and quizzes
 
   python3 tools/check_page.py URL EXPECT [TIMEOUT_S] [OUT.png]
 
+The Chrome debugging port is random by default, so parallel sessions don't
+connect to each other's browsers (a fixed port once screenshotted the wrong
+lesson); set CHECK_PAGE_PORT to pin it.
+
 URL can be a local preview (quarto preview, or `python3 -m http.server` in _site/)
 or the live site. Needs google-chrome and the websocket-client package.
 Exit status 0 if EXPECT appeared, 1 otherwise.
@@ -18,7 +22,12 @@ import websocket
 url, expect = sys.argv[1], sys.argv[2]
 timeout = float(sys.argv[3]) if len(sys.argv) > 3 else 180
 out = sys.argv[4] if len(sys.argv) > 4 else "check_page.png"
-port = 9341
+import os, socket
+if os.environ.get("CHECK_PAGE_PORT"):
+    port = int(os.environ["CHECK_PAGE_PORT"])
+else:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]
 chrome = subprocess.Popen(
     ["google-chrome", "--headless=new", "--disable-gpu", "--no-sandbox",
      f"--remote-debugging-port={port}", "--remote-allow-origins=*",
