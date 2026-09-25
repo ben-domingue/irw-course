@@ -270,6 +270,25 @@ quiz({
 })
 ```
 
+### What a complete argument would need
+
+Everything above comes from item responses and a few covariates, which is what an IRW table holds: internal structure, agreement with other measures, a criterion, a classification. That backs some links of an argument, not all of them. A complete argument for a use needs evidence gathered for that use, in its setting, and much of it isn't response data at all. What would the rest look like? Take a hypothetical case, close to our writing data: a college places incoming students in a first-year writing support course when they score below a cut on a writing test.
+
+::: {.callout-note appearance="simple"}
+## A worked specification (hypothetical): placement in a writing support course
+
+| Claim in the argument | Evidence needed | In the IRW? |
+|---|---|---|
+| **Scoring:** prompts and rubric reward writing, not unrelated skills | Expert review of prompts and rubric against the course's goals; think-alouds with students ([From construct map to items](instrument-building.qmd)); rater training and agreement | Partly: some tables hold ratings by several raters; reviews and think-alouds, no |
+| **Generalization:** a student would be placed the same way with another prompt or rater | Reliability across prompts and raters ([Many sources of error](g-theory.qmd)); the standard error near the cut ([What does a score mean?](score-meaning.qmd)) | Partly: only where a table has several prompts or raters per student |
+| **Across groups:** the test works the same way for multilingual students and others | Item-level bias ([Differential item functioning](dif.qmd)); differential prediction of the criterion by group | Partly: DIF needs a group covariate, which some tables have; differential prediction also needs the criterion by group |
+| **Extrapolation:** scores predict success in the regular course | Grades in the regular course for students across the whole score range | Partly: a few tables carry grades, as ours does, but not for students placed by this test |
+| **Decision:** the cut places the right students | The cut's rationale; accuracy against an independent judgment of who needs support | No |
+| **Consequences:** the support course helps the students it receives, and doesn't harm particular groups | Outcomes (pass rates, credits, time to degree, cost) for students just above and just below the cut, by group; students' and instructors' accounts | No |
+
+The rows marked "no" need institutional records, a study built around the cut, and interviews and expert panels. A response warehouse can't hold them, because they aren't responses. The partial rows are where IRW data can rehearse an analysis that a validity study would repeat on its own data. [Shepard (1993)](https://doi.org/10.3102/0091732X019001405) reviews how test validity is evaluated.
+:::
+
 ## Simulate
 
 The code is base R and runs in under a second. Part 1 draws 20,000 applicants whose predictor and criterion correlate 0.5 and selects the top half, either on the predictor (direct) or on a third variable related to the predictor and to what it misses in the criterion (indirect). Part 2 draws a screener whose cases score 2 SDs higher, cuts it at 1.2, and compares base rates of 3% and 30%.
@@ -431,6 +450,7 @@ ask_claude("validity-evidence", "It covers sources of validity evidence matched 
 - Widaman, K. F. (1985). Hierarchically nested covariance structure models for multitrait-multimethod data. *Applied Psychological Measurement*, 9(1), 1–26. <https://doi.org/10.1177/014662168500900101>. The MTMM matrix as a factor model with trait and method factors.
 - Sireci, S., & Faulkner-Bond, M. (2014). Validity evidence based on test content. *Psicothema*, 26(1), 100–107. <https://doi.org/10.7334/psicothema2013.256>. How content evidence is gathered and summarized.
 - Rios, J., & Wells, C. (2014). Validity evidence based on internal structure. *Psicothema*, 26(1), 108–116. <https://doi.org/10.7334/psicothema2013.260>. Dimensionality, reliability and invariance as internal-structure evidence.
+- Shepard, L. A. (1993). Evaluating test validity. *Review of Research in Education*, 19, 405–450. <https://doi.org/10.3102/0091732X019001405>. A review chapter on evaluating test validity.
 - Lane, S. (2014). Validity evidence based on testing consequences. *Psicothema*, 26(1), 127–135. <https://doi.org/10.7334/psicothema2013.258>. The source of evidence this lesson doesn't reach.
 - Hunsley, J., & Meyer, G. J. (2003). The incremental validity of psychological testing and assessment: Conceptual, methodological, and statistical issues. *Psychological Assessment*, 15(4), 446–455. <https://doi.org/10.1037/1040-3590.15.4.446>. How to design and read an incremental-validity study.
 - Sackett, P. R., & Yang, H. (2000). Correction for range restriction: An expanded typology. *Journal of Applied Psychology*, 85(1), 112–118. <https://doi.org/10.1037/0021-9010.85.1.112>. The kinds of selection, and the correction each needs.
