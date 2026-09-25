@@ -152,7 +152,7 @@ lessons:
     prereqs: [information]
     origin: {slides: [c3], ps: ["PS3#2", "PS5#2"], code: [ps3/1_abilities.R, ps5/eap_versus_mle.R]}
     tables: [c19prc_uk_mcbride_2021_wordsum]
-    status: stub
+    status: draft
     tranche: core
 
   - id: item-estimation
@@ -339,7 +339,7 @@ lessons:
     prereqs: [constructs, ctt-reliability]
     origin: {slides: [c2], ps: [], code: []}
     tables: [song_2023_rses]
-    status: stub
+    status: draft
     tranche: core
 
   - id: g-theory
