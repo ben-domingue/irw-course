@@ -456,7 +456,7 @@ The 2PL's AIC is lower by about 15,500, the slopes run from 2.4 to 7.1 (10th to 
 
 The design matters: in the copy, where the Rasch model is true, 78 items overfit and the 2PL still improves the likelihood (a likelihood-ratio statistic of 2,728). The real table goes much further (15,793, and 113 overfitting items).
 
-Fit statistics ask whether the Rasch curves match the data; the cancellation conditions ask whether any additive structure could. The ConjointChecks package tests them ([Domingue, 2014](https://doi.org/10.1007/s11336-013-9342-4)) but needs complete data, so we take a block that every record in it read: form A's positions 2 to 40, for records that reached position 40. It runs when the page is built, not in the browser.
+Fit statistics ask whether the Rasch curves match the data; the cancellation conditions ask whether any additive structure could. The ConjointChecks package tests them ([Domingue, 2014](https://doi.org/10.1007/s11336-013-9342-4)); how much the resulting statistic can tell you at a given sample size, and how to calibrate it by bootstrap, is studied by [Student and Read (2025)](https://doi.org/10.3758/s13428-025-02844-7). The package needs complete data, so we take a block that every record in it read: form A's positions 2 to 40, for records that reached position 40. It runs when the page is built, not in the browser.
 
 ```{r conjoint}
 #| echo: true
@@ -496,6 +496,7 @@ ask_claude("scale-properties", "It covers what an equal-interval scale would be 
 - Perline, R., Wright, B. D., & Wainer, H. (1979). The Rasch model as additive conjoint measurement. *Applied Psychological Measurement*, 3(2), 237–255. <https://doi.org/10.1177/014662167900300213>. The connection, with two worked data sets.
 - Karabatsos, G. (2001). The Rasch model, additive conjoint measurement, and new models of probabilistic measurement theory. *Journal of Applied Measurement*, 2(4), 389–423. <https://pubmed.ncbi.nlm.nih.gov/12011506/>. Testing the cancellation conditions when responses carry error.
 - Domingue, B. (2014). Evaluating the equal-interval hypothesis with test score scales. *Psychometrika*, 79(1), 1–19. <https://doi.org/10.1007/s11336-013-9342-4>. A Bayesian check of the conditions, evaluated by simulation and applied to a reading test.
+- Student, S. R., & Read, W. S. (2025). Applying Bayesian checks of cancellation axioms for interval scaling in limited samples. *Behavior Research Methods*, 57, 305. <https://doi.org/10.3758/s13428-025-02844-7>. How the Bayesian cancellation checks behave with 250 or 1,000 respondents, and bootstrap procedures for deciding whether the result supports an interval scale.
 - Kyngdon, A. (2008). The Rasch model from the perspective of the representational theory of measurement. *Theory & Psychology*, 18(1), 89–109. <https://doi.org/10.1177/0959354307086924>. A dissent: the Rasch model read against the representational theory of measurement.
 - Michell, J. (2000). Normal science, pathological science and psychometrics. *Theory & Psychology*, 10(5), 639–667. <https://doi.org/10.1177/0959354300105004>. The argument Borsboom and Mellenbergh answer.
 - Lord, F. M. (1975). The 'ability' scale in item characteristic curve theory. *Psychometrika*, 40(2), 205–217. <https://doi.org/10.1007/bf02291567>. The metric of $\theta$ as a choice.
