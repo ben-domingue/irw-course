@@ -105,3 +105,13 @@ export function ringWalk(n, bias, noise, seed = 1) {
   for (let k = 1; k <= n; k++) { pos += bias + noise * r.norm(); out.push({link: k, position: pos}); }
   return out;
 }
+
+// The whole equipercentile conversion: for each score x on form X (0..n), the
+// form-Y score with the same percentile rank. Returns [{x, y}].
+export function equatingCurve(distX, distY, step = 0.25) {
+  return grid(0, distX.length - 1, Math.round((distX.length - 1) / step) + 1)
+    .map((x) => ({x, y: equipercentile(distX, distY, x)}));
+}
+
+// One item's curve over a theta grid, for small-multiple plots: [{theta, p}].
+export const itemCurve = (item, thetas) => thetas.map((t) => ({theta: t, p: p2pl(t, item.b, item.a)}));
