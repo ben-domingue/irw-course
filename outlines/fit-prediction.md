@@ -79,3 +79,9 @@ DOIs Crossref-checked 09-24.
 - **First-person verdicts:** reading size and z together (idea 1); the 2PL for `gilbert_meta_2`, on a 0.01 IMV being worth a parameter per item and 0.0001 not.
 - **Deep dive #21, IMV half:** `deepdives/fit-prediction/compute.R` written; pilot run (5 of 316 tables) committed. The full run is Ben's.
 - **Citation corrected:** Bazán, **Bolfarine & Branco** (2006) (Crossref order); the PLOS ONE paper has eight authors (adds Tripathi).
+
+## Revised after Ben's review (2026-09-25, #132)
+
+- **Outfit widget:** the bars vanished at n = 5,000 because `binX` put 70 bins across the data's own narrow range (about 0.95–1.05) while the x axis stayed at 0.4–1.8, so each bar was under a pixel wide. Now the widget computes 50 bins over an x range that always includes 0.75–1.25 and widens (up to 3) to cover the data. It was tested at n = 50 and 5,000 with difficulty −2.5, 0 and 2.5, and has at least 10 visible bars in every case.
+- **Overfitting widget:** before the widget, the text now says what is simulated, what the seven models are, what the score means and what the two lines are. A second panel shows the training responses with the true curve and the 2- and 7-parameter fits, the legend names in-sample and out-of-sample, and the y axis says "higher is better". After the widget, the text says what the reader should have seen and why, and leads into the IMV section.
+- Prose trimmed elsewhere to stay under 3,000 words (2,998).
