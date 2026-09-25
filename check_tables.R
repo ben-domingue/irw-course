@@ -40,15 +40,17 @@ for (t in tabs) {
     problems <- c(problems, sprintf("%s: used in %s and again in %s; not recorded under `reuses`", t, ls[1], id))
 }
 
-# Pages against lessons.yml: tables linked to their IRW landing page, or loaded with
-# irw_csv(), in a lesson or its code but missing from its `tables`.
+# Pages against lessons.yml: tables a lesson or its code *loads* (irw_csv(), or a
+# pinned Redivis URL) but that are missing from its `tables`. A link to a table's
+# landing page alone is a mention, not a use: it needs no `tables` entry
+# (check_links.R confirms the page exists). 09-24: irw-data's tour of the IRW.
 for (l in course$lessons) {
   files <- c(file.path("lessons", paste0(l$id, ".qmd")),
              Sys.glob(file.path("lessons", "code", paste0(l$id, "*.R"))))
   txt <- unlist(lapply(files[file.exists(files)], readLines, warn = FALSE))
-  hits <- c(unlist(regmatches(txt, gregexpr("itemresponsewarehouse\\.org/tables/[A-Za-z0-9_.-]+", txt))),
-            unlist(regmatches(txt, gregexpr("irw_csv(_url)?\\(\"[^\"]+\"", txt))))
-  seen <- unique(tolower(sub('.*(/|")', "", sub('"$', "", hits))))
+  hits <- c(unlist(regmatches(txt, gregexpr("irw_csv(_url)?\\(\"[^\"]+\"", txt))),
+            unlist(regmatches(txt, gregexpr("item_response_warehouse:v[0-9_]+\\.[A-Za-z0-9_.-]+", txt))))
+  seen <- unique(tolower(sub('.*(\\.|")', "", sub('"$', "", sub("/rows.*", "", hits)))))
   for (t in setdiff(seen, tolower(unlist(l$tables))))
     problems <- c(problems, sprintf("%s: page uses %s, not in its `tables`", l$id, t))
 }

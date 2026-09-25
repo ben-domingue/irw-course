@@ -69,7 +69,7 @@ lessons:
     module: foundations
     prereqs: []
     origin: {slides: [c1], ps: ["PS1#3"], code: [c1/irw_data_exploration.R]}
-    tables: [verbagg, manolika_2021_mini_ipip, rr98_accuracy]
+    tables: [verbagg, manolika_2021_mini_ipip, rr98_accuracy, cdm_timss11, pirlsmissing_sirt]
     status: draft
     tranche: preliminary
 
@@ -243,6 +243,7 @@ lessons:
     prereqs: [1pl-to-4pl]
     origin: {slides: [c6], ps: ["PS6#4"], code: [c6/equate-irt.R, c6/equate-obsscore.R, c6/concurrent.R, ps6/equating.R, ps6/equating_simstudy.R]}
     tables: [cdm_timss11, pirlsmissing_sirt]
+    reuses: [cdm_timss11, pirlsmissing_sirt]  # first shown in irw-data (missingness patterns)
     status: stub
     tranche: core
 
