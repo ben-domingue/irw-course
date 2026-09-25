@@ -58,7 +58,10 @@ irw_citation <- function(table) {
   src <- regmatches(page, regexec("<th>Source data</th><td>(?:<a[^>]*>)?(https?://[^<\"]+)", page, perl = TRUE))[[1]][2]
   doi <- regmatches(ref, regexpr("https://doi\\.org/[^ ]+[^ .,;)]", ref))
   list(reference = if (!is.na(ref) && nzchar(ref)) ref else NA_character_,
-       link = or_na(na.omit(c(meta$citation, doi, src))[1]),
+       # First candidate that is a real URL: the IRW metadata sometimes holds
+       # "https://doi.org/No DOI" (09-25, Forthmann-2024-cleverness_ratings).
+       link = or_na(Filter(function(u) grepl("^https?://[^ ]+$", u) && !grepl("No%20DOI|NoDOI", u, ignore.case = TRUE),
+                           na.omit(c(meta$citation, doi, src)))[1]),
        license = or_na(meta$license),
        irw_version = or_na(meta$version))
 }
