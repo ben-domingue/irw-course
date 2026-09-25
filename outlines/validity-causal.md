@@ -2,7 +2,7 @@
 
 # Validity as causation: Borsboom's view (`validity-causal`)
 
-Module: validity · Prereqs: validity-argument · Extension · Status: outline
+Module: validity · Prereqs: validity-argument · Extension · Status: drafted 09-25 (#34; see *Drafting notes* at the end)
 
 ## Core ideas
 
@@ -68,3 +68,17 @@ Sanity: mean congruent RT (retest 0.70) for the Stroop pipeline; the age–θ co
 ## Open questions
 
 - **The practitioner verdict (E8a).** *Default:* the candidate under Core ideas, in Ben's words once he has edited it.
+
+## Drafting notes (09-25, #34)
+
+What the draft changed or found, against the plan above:
+
+- **oREV numbers.** The table's `item` column is the trial position, and the two presentation orders put different words at the same position; the draft uses `targetword` as the item. With words as items, age of acquisition correlates **0.88** with difficulty (47 words; 5 at ceiling dropped), not 0.80; age correlates 0.63 with the number correct (the draft uses the sum score, not θ).
+- **No Rasch fit in the lesson.** `rasch` is not an ancestor of this lesson, so difficulty is the logit of the proportion wrong. A Rasch fit (`mirt`) gives difficulties that correlate 1.00 with these logits; that comparison is problem 2.
+- **Two findings added.** (1) By design, position and age of acquisition correlate 0.83, so fatigue could mimic the result; a collapsible check shows it doesn't (within-word position differences vs. proportion correct: −0.05; 0.87 and 0.88 within each order). (2) Wrong answers go 47% / 31% / 22% to the semantic / phonological / unrelated distractors, so the "know it or guess" theory is broken on its guessing part (partial knowledge); pointer to `nominal`. The distractor codes (`dist1`–`dist3`) are read from `chosenword`; their order differs from the preprint's description.
+- **Stroop numbers.** Correct trials with 0.2 s < RT < 5 s (1.2% of correct trials set aside): effect 0.11 s at session 1, d_z = 0.37, t = 5.7 (244 respondents), 70% positive; retest 0.17 (234 with both sessions) vs 0.73 congruent RT and 0.64 conflicting RT. Sanity: the task score (correct minus incorrect) retests at 0.81 against 0.80 in Robison et al.'s Table 6. The task is the timed "Stroop squared" (Burgoyne et al., 2023, doi:10.1037/xge0001408; cited). The table averages 57 and 64 trials per respondent per session against the paper's 43 and 49, so it may include practice trials (noted in *For instructors*).
+- **Quotation.** Borsboom et al.'s full definition runs to about 30 words, over PROSE rule 1's 25; the lesson quotes the causal clause (14 words, p. 1061, checked against the PDF) and paraphrases the rest. Kelley (1927, p. 14) is cited as Borsboom et al. cite it (F5); the book is World Book Company (Open Library), though Borsboom et al.'s reference list says Macmillan.
+- **Source correction.** The slides 13–14 passage attributed above to Jansen & van der Maas (2002) is Borsboom et al. (2004, p. 1068); the lesson cites Jansen & van der Maas (2002) only for its abstract's findings (805 respondents aged 5–19; rule use, age differences, inconsistent use).
+- **Balance-scale item types** are described in the lesson's own words; Siegler's item-type names are not used, since Siegler (1976) could not be read (paywalled). The rule predictions follow from the rules as Borsboom et al. (2004, p. 1068) state them.
+- **Widgets:** three (four rules on one beam; rule classes to response patterns; between/within with retest). The planned widgets are all kept.
+- **Verdict:** the candidate above, in the draft at the end of *With real data*, for Ben to confirm.

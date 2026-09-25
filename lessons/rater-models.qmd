@@ -8,21 +8,402 @@ source("_course.R")
 lesson_header("rater-models")
 ```
 
+```{webr}
+#| context: setup
+webr::install("TAM", quiet = TRUE)
+suppressPackageStartupMessages(library(TAM))
+options(mc.cores = 1)
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {harshRater, ratingDist, hrmSE, drift} from "./widgets/rater-models.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+When each essay is read by whichever teacher it was assigned to, a harsh teacher is not noise to be averaged away: it is a bias in the scores of the essays that teacher happened to read. [Many sources of error: generalizability theory](g-theory.qmd) summarized raters with a variance component, which answers a design question (how many raters?) but not a respondent's question: was I scored by a harsh rater, and what would my score have been otherwise? This lesson gives each rater parameters of their own inside an item response model: severity in the many-facet Rasch model, centrality and halo, the hierarchical rater model for several ratings of one response, and drift. In the cleverness ratings the raters differ modestly and adjusting changes little; in the essays, teachers differ by about half a point, and an expert benchmark lets us check the adjustment.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Many sources of error: generalizability theory](g-theory.qmd): rater severity, $\sigma^2_r$, is error for absolute decisions and, when respondents have different raters, for ranking too. It was 2.1% of a rating's variance in the cleverness ratings and 9.7% in the essays. Problem 6 asked when severity should be estimated and adjusted for instead.
+:::
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write the many-facet Rasch model, and say what a rater's severity is and what the rating design must provide to estimate it;
+- fit the model with `TAM`, read a Wright map with a rater column, and adjust scores for the raters a respondent drew;
+- tell severity, centrality and halo apart, and say what data would show each;
+- explain why the hierarchical rater model gives extra ratings of one response less credit than the many-facet model does;
+- say when a rater is better treated as a fixed parameter, a random effect or a variance component.
+
 ## Core ideas
 
-## Worked example
+### Which rater, and by how much?
+
+G theory and a rater model can be fitted to the same ratings ([Sudweeks, Reeve & Bradshaw, 2004](https://doi.org/10.1016/j.asw.2004.11.001)), and G theory can itself be written as an item response model ([Briggs & Wilson, 2007](https://doi.org/10.1111/j.1745-3984.2007.00031.x)). They report different things. G theory says how large the rater component is, which is what you need to choose a design. A rater model says that rater 5 is 0.37 logits harsher than average, with a standard error, which is what you need to fix one respondent's score. When every respondent has the same raters, severity shifts everyone alike and the two agree on ranking; when raters vary across respondents, they part.
+
+### The many-facet Rasch model
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd) and [Models for polytomous responses](polytomous.qmd): the Rasch log-odds is $\theta_j - b_i$, persons and items share one scale (the Wright map), and the sum score is sufficient. The rating scale model ([Andrich, 1978](https://doi.org/10.1007/BF02293814)) makes each step between adjacent categories a Rasch item, with the same steps for every item.
+:::
+
+Add a rater. For respondent $j$, task $i$ and rater $r$, the **many-facet Rasch model** ([Linacre, 1989](https://www.winsteps.com/a/Linacre-MFRM-book.pdf); [Eckes, 2011](https://doi.org/10.3726/978-3-653-04844-5)) writes the log-odds of category $k$ over $k-1$ as
+$$\log\frac{\Pr(x_{ijr} = k)}{\Pr(x_{ijr} = k-1)} = \theta_j - b_i - \rho_r - \tau_k .$$
+$\rho_r$ is the rater's **severity**: a harsh rater acts like a harder item. The steps $\tau_k$ are shared by every task and rater. Raters are a third **facet**, and go on the Wright map beside the tasks ([Engelhard, 1994](https://doi.org/10.1111/j.1745-3984.1994.tb00436.x), for essays; [Eckes, 2005](https://doi.org/10.1207/s15434311laq0203_2), for writing and speaking tests).
+
+The Rasch algebra carries over: given the raters a respondent drew, the sum of the ratings is sufficient, and the estimate solves "expected total = observed total". The expected total depends on the raters, so equal raw totals from different raters give different estimates. That is the adjustment. Its usual report is the **fair average**, the rating a respondent would be expected to get from an average rater on average tasks ([Linacre, Facets manual](https://www.winsteps.com/facetman/fairaverage.htm)).
+
+The adjustment has a price in design: severity and ability are separated only if the raters are linked, their respondents overlapping directly or through a chain of raters.
+
+#### Try it: one harsh rater
+
+Two hundred simulated respondents do three tasks, rated 1–5 by some of five raters drawn at random; rater 5 is harsher by the amount set below. Left: the raw mean rating. Right: the model's estimate of $\theta$, with the severities known (as after calibration).
+
+```{ojs}
+//| echo: false
+viewof hr_harsh = Inputs.range([0, 2], {value: 1, step: 0.1, label: "How much harsher rater 5 is (logits)"})
+viewof hr_per = Inputs.radio([2, 3, 5], {value: 2, label: "Raters per respondent"})
+```
+
+```{ojs}
+//| echo: false
+hr = harshRater({seed: 150, n: 200, harsh: hr_harsh, per: hr_per})
+hr_plot = (y, label) => Plot.plot({
+  width: 340, height: 300, x: {label: "True θ"}, y: {label},
+  color: {domain: ["did not", "drew the harsh rater"], range: [palette.light, palette.contrast], legend: true},
+  marks: [Plot.dot(hr.pts, {x: "theta", y, fill: "drew", r: 3, fillOpacity: 0.8})]
+})
+html`<div style="display:flex;flex-wrap:wrap;gap:1rem">${hr_plot("raw", "Raw mean rating")}${hr_plot("est", "Model estimate of θ")}</div>`
+```
+
+```{ojs}
+//| echo: false
+md`${hr.nHarsh} of 200 respondents drew rater 5. Their average distance from others with the same θ, in SDs of each score: **${hr.gapRaw.toFixed(2)}** on the raw mean, **${hr.gapEst.toFixed(2)}** on the model's estimate.`
+```
+
+At the starting values, respondents who drew rater 5 sit 0.19 SDs lower on the raw mean than others with the same $\theta$; the model's estimate removes the gap (0.02). Push the harshness to 2 and the raw gap doubles, to 0.40. Give everyone all five raters and the gap is zero for both.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Rater A scored only the essays from school 1 and rater B only those from school 2. School 2's essays average one point lower. What can a many-facet Rasch analysis conclude?",
+  options: [
+    {text: "Nothing about which is harsher: rater and school are confounded", correct: true, why: "No essay links the two raters, so a lower average from B could be B's severity or school 2's essays. Severity is estimable only through overlap, direct or through a chain of raters."},
+    {text: "Rater B is one point harsher", correct: false, why: "That assumes the two schools' essays are equally good, which is the question. The model can't separate the two without essays both raters scored."},
+    {text: "School 2's essays are one point weaker", correct: false, why: "That assumes the raters are equally severe. Without linking essays, either reading fits the data equally well."}
+  ]
+})
+```
+
+Should you adjust? That rests on three assumptions: the design is linked, severities differ by more than their standard errors, and a rater's severity is the same for every respondent. When scores go to individuals, raters vary across respondents, and those assumptions hold, I adjust for severity and say in the report that I did. When every respondent had the same raters, I report the raw mean, since the adjustment can't change the order.
+
+### Beyond severity: centrality and halo
+
+Severity is where a rater sits. **Centrality** is how a rater uses the scale: a central rater avoids the ends and piles ratings in the middle, which shows up as rater-specific steps pulled apart. **Halo**: a rater's overall impression colours every criterion, so criteria move together more than the performance does ([Thorndike, 1920](https://doi.org/10.1037/h0071663), described it; [Saal, Downey & Lahey, 1980](https://doi.org/10.1037/0033-2909.88.2.413), review how halo and other rating errors have been defined and measured). Each is a question for the data, not a charge against a rater: highly correlated criteria may reflect essays whose qualities do go together.
+
+#### Try it: a central rater
+
+One rater's ratings over a population of respondents, next to a typical rater's. Severity moves the steps together; spread stretches them apart (above 1) or squeezes them (below 1).
+
+```{ojs}
+//| echo: false
+viewof rd_sev = Inputs.range([-1.5, 1.5], {value: 0, step: 0.1, label: "Severity (logits)"})
+viewof rd_spread = Inputs.range([0.5, 2], {value: 1.6, step: 0.05, label: "Spread of the steps"})
+```
+
+```{ojs}
+//| echo: false
+rd = ratingDist({sev: rd_sev, spread: rd_spread})
+Plot.plot({
+  width: 640, height: 260, x: {label: null, axis: null}, fx: {label: "Rating"}, y: {label: "Proportion", grid: true},
+  color: {domain: ["typical rater", "this rater"], range: [palette.light, palette.main], legend: true},
+  marks: [Plot.barY(rd.rows, {fx: "rating", x: "rater", y: "p", fill: "rater"})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Typical rater: mean **${rd.typical.m.toFixed(2)}**, SD **${rd.typical.sd.toFixed(2)}**. This rater: mean **${rd.me.m.toFixed(2)}**, SD **${rd.me.sd.toFixed(2)}**.`
+```
+
+With the steps spread by 1.6, the rater gives a 3 to 48% of respondents (against 36%) and the SD falls from 0.98 to 0.77, while the mean barely moves (2.95 against 2.97). Set spread to 1 and severity to 0.8, and the mean falls to 2.55 instead. Centrality is invisible in a rater's mean, so one severity per rater misses it.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A rater gives nearly every essay a 3 or a 4 on a 1–6 scale, and their average matches the other raters'. What does a many-facet Rasch model with one severity per rater and shared steps say about this rater?",
+  options: [
+    {text: "Average severity; the pattern needs rater-specific steps to show", correct: true, why: "A shared-steps model has only a location for each rater, and this rater's location is average. Giving each rater their own steps shows this rater's outer steps far apart."},
+    {text: "Harsh, because they never give a 6", correct: false, why: "They never give a 1 either. Severity is a shift of the whole scale, and this rater's average isn't shifted."},
+    {text: "Inconsistent, so they add a large person × rater variance", correct: false, why: "Centrality is a systematic squeeze, not noise. A central rater can order essays just as the others do while using fewer categories."}
+  ]
+})
+```
+
+### The hierarchical rater model: raters rate the response
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): responses are assumed **locally independent**, so once we know $\theta$, one response says nothing more about another.
+:::
+
+The many-facet model applies that assumption to ratings: five ratings of one response count as five items, and each extra rater shrinks the standard error of $\hat\theta$ as an extra item would. But the five raters read the same response. If the respondent had an off day on the rope task, all five see a weaker list.
+
+The **hierarchical rater model** ([Patz, Junker, Johnson & Mariano, 2002](https://doi.org/10.3102/10769986027004341)) puts the response between respondent and raters. Each response has an **ideal rating** $\xi_{ij}$, the category a perfectly accurate rater would give, generated from $\theta_j$ by a polytomous item response model; each rater reports $\xi_{ij}$ with a severity and precision of their own; [DeCarlo, Kim and Johnson (2011)](https://doi.org/10.1111/j.1745-3984.2011.00143.x) use a signal-detection model for that layer. More raters pin down $\xi_{ij}$, and $\xi_{ij}$ is one observation of $\theta_j$, so the information about $\theta_j$ from one response can never exceed what the ideal rating carries. [Wilson and Hoskens (2001)](https://doi.org/10.3102/10769986026003283) model the same dependence with a rater bundle model and argue that ignoring it understates measurement error.
+
+#### Try it: more raters, same responses
+
+A binary version of both models: ten items at difficulty 0, a respondent at $\theta = 0$, each ideal rating a Rasch item, and each rater reporting it correctly with the probability set below.
+
+```{ojs}
+//| echo: false
+viewof hs_acc = Inputs.range([0.6, 0.99], {value: 0.8, step: 0.01, label: "Chance a rater reports the ideal rating"})
+```
+
+```{ojs}
+//| echo: false
+hs = hrmSE({acc: hs_acc, nItems: 10, maxR: 20})
+Plot.plot({
+  width: 640, height: 300, x: {label: "Raters per response"}, y: {label: "SE of θ", domain: [0, 1.8], grid: true},
+  color: {legend: true, range: [palette.main, palette.contrast]},
+  marks: [Plot.line(hs.rows, {x: "R", y: "se", stroke: "model", strokeWidth: 2.5}),
+          Plot.ruleY([hs.floor], {stroke: palette.guide, strokeDasharray: "4 3"})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`With 20 raters: **${hs.rows.find(d => d.R === 20 && d.model.startsWith("hier")).se.toFixed(3)}** under the hierarchical rater model, **${hs.rows.find(d => d.R === 20 && d.model.startsWith("local")).se.toFixed(3)}** if the ratings were independent. The dashed line, **${hs.floor.toFixed(3)}**, is the SE if every ideal rating were known.`
+```
+
+With raters who are right 80% of the time, 20 raters give a standard error of 0.634 under the hierarchical model, a hair above the floor of 0.632 set by the ideal ratings, against 0.236 if the ratings were independent. With one rater the models agree. Sharper raters (0.95) reach the floor with five raters; nothing goes below it (Go deeper, below).
+
+::: {.callout-note collapse="true"}
+## Go deeper: why extra raters can't beat the ideal rating
+
+**Assumptions:** one response to one item with ideal rating $\xi$, whose distribution $\Pr(\xi \mid \theta)$ depends on $\theta$; ratings $\mathbf{x} = (x_1, \dots, x_R)$ that depend on $\theta$ only through $\xi$, so $\Pr(\mathbf{x} \mid \xi, \theta) = \Pr(\mathbf{x} \mid \xi)$. Nothing is assumed about how the raters err.
+
+**Fisher information as a variance.** The information about $\theta$ in data $Y$ is $I_Y(\theta) = \text{Var}\big(\partial_\theta \log \Pr(Y \mid \theta)\big)$, the variance of the score.
+
+**The ratings' score is a conditional mean.** Since $\Pr(\mathbf{x} \mid \theta) = \sum_\xi \Pr(\xi \mid \theta)\Pr(\mathbf{x} \mid \xi)$,
+$$\partial_\theta \log \Pr(\mathbf{x} \mid \theta) = \sum_\xi \frac{\Pr(\xi \mid \theta)\Pr(\mathbf{x} \mid \xi)}{\Pr(\mathbf{x} \mid \theta)}\,\partial_\theta \log \Pr(\xi \mid \theta) = E\big[S \,\big|\, \mathbf{x}\big], \qquad S = \partial_\theta \log \Pr(\xi \mid \theta).$$
+The weights are the posterior probabilities of each $\xi$ given the ratings, so the ratings' score is the ideal rating's score averaged over what the ratings leave uncertain about $\xi$.
+
+**A conditional mean has less variance.** By the law of total variance, $\text{Var}(S) = \text{Var}\big(E[S \mid \mathbf{x}]\big) + E\big[\text{Var}(S \mid \mathbf{x})\big] \ge \text{Var}\big(E[S \mid \mathbf{x}]\big)$. So
+$$I_{\mathbf{x}}(\theta) \le I_\xi(\theta)$$
+for any number of raters. Equality needs $\text{Var}(S \mid \mathbf{x}) = 0$: the ratings must reveal $\xi$ exactly, which is the limit as raters become many or perfect. $\blacksquare$
+
+Under local independence the information from $R$ raters is instead $R$ times the information from one, which grows without bound. The two agree at $R = 1$ and part as $R$ grows, as in the widget. With several items, sum over items: the bound is the information in the ideal ratings, the test a perfect rater would have scored.
+:::
+
+The hierarchical model's item response layer can be multidimensional ([Nieto & Casabianca, 2019](https://doi.org/10.1111/jedm.12225)) or longitudinal ([Casabianca, Junker, Nieto & Bond, 2017](https://doi.org/10.1080/00273171.2017.1342202)). The many-facet model is a reasonable choice when each response gets one rating, or when the raters are the object of study (monitoring a scoring session), since its parameters are simple to read and it fits in seconds.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A program has 100 raters score every response on a 20-item constructed-response test. Under the hierarchical rater model, what is the standard error of a respondent's $\\hat\\theta$ close to?",
+  options: [
+    {text: "The SE the test would have if a perfect rater had scored it", correct: true, why: "With 100 raters each ideal rating is nearly known, so the information is nearly that of the 20 ideal ratings. The raters can't add information the responses don't carry."},
+    {text: "Close to zero: 2,000 ratings is a lot of data", correct: false, why: "That is what local independence would say. Under the hierarchical model the 100 ratings of one response are 100 looks at one ideal rating."},
+    {text: "About the SE with one rater per response", correct: false, why: "One fallible rater leaves each ideal rating uncertain, so the SE is larger than the floor. More raters help until the ideal ratings are pinned down, and then stop helping."}
+  ]
+})
+```
+
+### Raters change, and raters are many
+
+A severity is a parameter only if it stays put. Add time to the rater term and test it: [Myford and Wolfe (2009)](https://doi.org/10.1111/j.1745-3984.2009.00088.x) give indices for raters whose accuracy or use of the scale changes during scoring. In two years of classroom-observation ratings of 458 teachers, [Casabianca, Lockwood and McCaffrey (2015)](https://doi.org/10.1177/0013164414539163) found drift that was very large in raters' first days and persisted for nearly two years, and the variability among raters grew rather than shrank. Their model is a G study with time trends: drift is a variance component and a rater parameter at once.
+
+#### Try it: drift
+
+Eight raters score for 30 days, each moving by a fixed amount per day: a shared drift plus a part of their own.
+
+```{ojs}
+//| echo: false
+viewof dr_common = Inputs.range([-0.03, 0.03], {value: 0, step: 0.005, label: "Shared drift per day (logits)"})
+viewof dr_spread = Inputs.range([0, 0.05], {value: 0.02, step: 0.005, label: "SD of raters' own drift per day"})
+```
+
+```{ojs}
+//| echo: false
+dr = drift({seed: 2015, nr: 8, days: 30, common: dr_common, spread: dr_spread})
+Plot.plot({
+  width: 640, height: 280, x: {label: "Day of scoring"}, y: {label: "Severity (logits)", domain: [-1.8, 1.8], grid: true},
+  marks: [Plot.line(dr.rows, {x: "day", y: "severity", z: "rater", stroke: palette.light, strokeWidth: 1.5}),
+          Plot.line(dr.sds, {x: "day", y: "mean", stroke: palette.main, strokeWidth: 3})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`SD of severity across raters: **${dr.sds[0].sd.toFixed(2)}** on day 1, **${dr.sds[29].sd.toFixed(2)}** on day 30. Mean severity (dark line): ${dr.sds[0].mean.toFixed(2)} on day 1, ${dr.sds[29].mean.toFixed(2)} on day 30.`
+```
+
+A shared drift moves the dark line and leaves the spread alone. Raters' own drift fans the lines out: at the starting values the SD across raters grows from 0.36 to 0.54, the pattern Casabianca et al. found, and a severity estimated on day 1 is out of date by day 30.
+
+Two design points follow. First, raters must stay linked over time. A **linkage set**, responses scored by most or all raters, helps: [Casabianca, Donoghue, Shin, Chao and Choi (2023)](https://doi.org/10.1111/jedm.12360) found that a large one spanning the score scale improved connectedness, that two human ratings connected raters better than one human plus an automated engine, and that engine scores alone did not connect raters adequately. Second, with hundreds of raters rating a handful each, severities are better treated as **random effects**, shrunk toward the mean in proportion to how little each rater rated ([De Boeck, 2008](https://doi.org/10.1007/s11336-008-9092-x), does the same for items; fitted with `lme4`, [Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)). The random-effect variance is G theory's $\sigma^2_r$ again. [What is an item?](explanatory-irt.qmd) develops random effects in item response models, and [AI and psychometrics](ai-psychometrics.qmd) treats an automated scoring engine as one more rater.
+
+## Simulate
+
+The code simulates 200 respondents, three tasks and five raters, one harsh (rater 5) and one central (rater 4, steps stretched by 1.6), with two raters per respondent. It fits the many-facet Rasch model with `TAM` ([Robitzsch, Kiefer & Wu, 2025](https://doi.org/10.32614/CRAN.package.TAM)), then rater-specific steps, and compares raw means with the model's estimates. Loading `TAM` takes 20 to 30 seconds the first time; the fits take a second or two.
+
+With the seed as written, the severities come back within 0.14 of the truth; rater 5's has the largest standard error (0.13), since `TAM` derives the last rater's value from the others'. Rater 4's first-to-last step span is 8.6 logits against 4.9 to 5.8 for the rest (truth 8.8 and 5.5). The raw mean and the estimate correlate about equally with $\theta$ (0.90 and 0.91), but respondents who drew rater 5 sit 0.17 SDs low on the raw mean and 0.02 on the estimate. Set `per <- 5` and both correlations rise to 0.96, with no gap. Try a harsher rater 5, or `spread` of 1 for everyone.
+
+```{webr}
+{{< include code/rater-models-sim.R >}}
+```
+
+[Download this code](code/rater-models-sim.R).
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/rater-models-irw.R")
+```
+
+```{r helpers}
+#| echo: true
+#| code-fold: true
+#| message: false
+```
+
+Both tables return from [Many sources of error: generalizability theory](g-theory.qmd). [Download the code](code/rater-models-irw.R); it needs `TAM`, `sirt` ([Robitzsch, 2025](https://doi.org/10.32614/CRAN.package.sirt)) and `lme4`, and the hierarchical rater model takes one to two minutes.
+
+### Cleverness ratings: modest severities
+
+The main example is [Forthmann-2024-cleverness_ratings](https://itemresponsewarehouse.org/tables/forthmann-2024-cleverness_ratings/) ([Forthmann & Myszkowski, 2024](https://osf.io/a9qnc); CC BY 4.0): 202 respondents' lists of unusual uses for a paperclip, a garbage bag and a rope, each rated for cleverness (1 to 5, higher is cleverer) by the same five raters. Its job: a fully crossed design, where rater parameters are cleanly estimable.
+
+```{r fetch-clever}
+#| echo: true
+#| code-fold: show
+```
+
+```{r mfrm-clever}
+#| echo: true
+#| code-fold: show
+```
+
+Severities run from −0.32 (rater 3) to 0.37 (rater 5), with standard errors of about 0.04 (0.08 for rater 5, derived from the others'), so the raters differ reliably, but modestly against the respondents: the SD of the severities is 0.29, against 1.19 for $\theta$. That is G theory's 2.1% seen one rater at a time, and on the Wright map the raters make a tight column well inside the spread of respondents.
+
+```{r wright-clever}
+#| echo: true
+#| code-fold: true
+#| fig-width: 7
+#| fig-height: 5
+```
+
+Does adjusting change anyone's score? With every respondent rated by every rater it can't change the order: the raw mean and the estimate correlate 0.996. So keep two raters per respondent, at random, and compare each score with the full-data estimate.
+
+```{r adjust-clever}
+#| echo: true
+#| code-fold: show
+```
+
+The raw mean correlates 0.948 with the full-data estimate, the model's estimate 0.951: with severities this close, the adjustment buys little. Centrality is another matter:
+
+```{r central-clever}
+#| echo: true
+#| code-fold: show
+```
+
+Rater 3's steps span 6.93 logits and rater 1's 5.05, and the raw SDs agree (0.89 and 1.06): rater 3 keeps to the middle, rater 1 uses the ends. AIC prefers rater-specific steps (7,112 against 7,149); BIC, which charges more for the 12 extra parameters, is indifferent (7,188 against 7,186).
+
+Now the hierarchical rater model (`sirt`'s signal-detection version), next to the many-facet model fitted by the same package.
+
+```{r hrm-clever}
+#| echo: true
+#| code-fold: show
+```
+
+The two models order respondents almost identically (estimates correlate 0.99) but disagree about precision: reliability 0.92 for the many-facet model, 0.73 for the hierarchical one. The hierarchical model also fits much better (AIC 6,539 against 7,135): five ratings of one list agree more than local independence allows. Its reliability sits near the relative G coefficient of 0.71 that G theory gave this design, and below the 0.77 no number of raters could beat with three tasks. The many-facet model counts 15 ratings as 15 items; G theory and the hierarchical model count three responses, each read five times. Rater precision runs from 2.31 (rater 4) to 2.85 (rater 2).
+
+### Essays: leniency, a benchmark, and halo
+
+The contrast is [teacherjudgements_lohmann_2026_essayratings](https://itemresponsewarehouse.org/tables/teacherjudgements_lohmann_2026_essayratings/) ([Lohmann et al., 2026](https://doi.org/10.1037/edu0000969); CC BY 4.0): 315 preservice English teachers each rated five essays by learners of English on four criteria (language quality, structure, content, holistic), from 1 (very low quality) to 7 (very high). Its job: a sparse design with many raters, and an outside standard.
+
+That standard is the `expert_benchmark` rows, one score per essay and criterion, which the study's [codebook](https://osf.io/eu2zb/) describes as the fair score from a FACETS rater model of trained experts' ratings: the output of this lesson's model, stored as whole numbers. The G theory lesson set these rows aside; here we keep them out of every model of the teachers and use them three ways: to check the estimated leniency, to see whether adjusting brings teachers closer to the experts, and as the baseline for halo.
+
+```{r fetch-essays}
+#| echo: true
+#| code-fold: show
+```
+
+Teachers' ratings average 0.21 points below the benchmark: 1.34 below on structure, within 0.33 elsewhere. Teachers and experts seem to have read the structure criterion differently, a question about the rubric these data raise and can't settle.
+
+```{r lenient-essays}
+#| echo: true
+#| code-fold: show
+```
+
+With teachers as random effects, the SD of leniency is 0.51 points, against 0.90 for essays (the G theory lesson had 0.50 and 0.87); the 10th and 90th percentiles are −0.43 and 0.46. Is that leniency real? The model never saw the benchmark, yet its estimates correlate 0.90 with each teacher's average distance from the benchmark over their 20 ratings.
+
+```{r adjust-essays}
+#| echo: true
+#| code-fold: show
+```
+
+Subtracting each teacher's leniency raises the correlation with the benchmark from 0.40 to 0.44 and lowers the root mean squared difference from 1.65 to 1.54 points: modest, because most of the disagreement is essay × teacher (SD 0.75), which no severity removes. That component was the G theory lesson's hint of halo, and the benchmark lets us test it.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The average correlation among the four criteria can be computed within the teachers' ratings (across their essays) and within the benchmark's (on the same essays). Which is higher?",
+  choices: ["The teachers', clearly", "About the same", "The benchmark's, clearly"],
+  answer: "The teachers', clearly",
+  reveal: "The teachers' criteria correlate 0.66 on average, the benchmark's 0.43 on the same essays. Removing each teacher's own mean first barely changes this (0.64 against 0.44), so differences in leniency don't explain it. See the output below."
+})
+```
+
+```{r halo-essays}
+#| echo: true
+#| code-fold: show
+```
+
+The teachers' criteria correlate 0.66 on average, the benchmark's 0.43 on the same essays, and the gap is largest where the benchmark treats criteria as most distinct (language quality and structure: 0.16 against 0.44). An average over trained raters keeps what an essay does to all four criteria and thins out one reader's impression, so this is the pattern halo would produce; [Lohmann et al. (2026)](https://doi.org/10.1037/edu0000969) study halo in these data. Centrality doesn't show:
+
+```{r central-essays}
+#| echo: true
+#| code-fold: show
+```
+
+152 of 315 teachers spread their ratings less than the benchmark does on the same essays, about half.
 
 ## Problems
 
+1. **Derivation.** Under the many-facet Rasch model, show that the sum of a respondent's ratings is sufficient for $\theta$ given the severities. Then show that two respondents with the same total, one rated by a harsh rater and one by a lenient one, get different estimates, and say which is higher.
+2. **Real data with a twist.** In the cleverness data, add a task × rater interaction (`formulaA = ~ item + rater + item:rater + step`). Is a harsh rater harsh on every task? What does the answer mean for adjusting scores?
+3. **Judgment.** An essay was scored by one teacher, whose estimated leniency is −0.6 points with a standard error of 0.25. Report the raw rating, the adjusted rating, or pay for a second rating? What would change your answer?
+4. **Design.** You must score 1,000 essays with 20 raters and two ratings per essay. Assign raters so every severity is estimable. How large a linkage set, containing what? Would an automated engine as the second rater help ([Casabianca et al., 2023](https://doi.org/10.1111/jedm.12360))? Check with the simulation.
+5. **Real data: who is lenient?** The essay table carries rater covariates (`ratercov_experience`, `ratercov_semester` and others). Add them to the `lmer` model: does leniency relate to them? Is the 1.34-point structure gap the same for every teacher?
+6. **Challenge (open).** Is the teachers' higher criterion correlation halo, or have experts trained on the rubric learned to separate criteria more than the essays warrant? What design would tell the two apart?
+
+```{r}
+#| output: asis
+ask_claude("rater-models", "It covers rater models: the many-facet Rasch model (rater severity as a facet, estimated with TAM), rater-specific steps for centrality, halo across rating criteria, the hierarchical rater model (ideal ratings and a signal-detection rater layer, fitted with sirt) and why it gives extra raters less credit than local independence does, rater drift, linkage sets, and raters as random effects in lme4, with cleverness ratings of alternate-uses responses and teachers' ratings of essays checked against an expert benchmark.")
+```
+
 ## Going further
 
-- Casabianca, J. M., Junker, B. W., & Patz, R. J. (2016). Hierarchical rater models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 449–465). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the hierarchical rater model.
+- Eckes, T. (2011). *Introduction to many-facet Rasch measurement*. Peter Lang. <https://doi.org/10.3726/978-3-653-04844-5>. A book-length introduction to the many-facet model for rater-mediated assessment.
+- Linacre, J. M. (1989). *Many-facet Rasch measurement*. MESA Press. <https://www.winsteps.com/a/Linacre-MFRM-book.pdf>. Where the model starts (the author's copy of the 1994 second edition).
+- Patz, R. J., Junker, B. W., Johnson, M. S., & Mariano, L. T. (2002). The hierarchical rater model for rated test items and its application to large-scale educational assessment data. *Journal of Educational and Behavioral Statistics*, 27(4), 341–384. <https://doi.org/10.3102/10769986027004341>. The hierarchical rater model, and how it relates to G theory and to the facets model.
+- Casabianca, J. M., Junker, B. W., & Patz, R. J. (2016). Hierarchical rater models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 449–465). Chapman and Hall/CRC. <https://www.taylorfrancis.com/chapters/edit/10.1201/9781315374512-34/hierarchical-rater-models-jodi-casabianca-brian-junker-richard-patz>. A handbook chapter on the hierarchical rater model.
+- Casabianca, J. M. (2021). Digital module 27: Hierarchical rater models. *Educational Measurement: Issues and Practice*, 40(4), 103–104. <https://doi.org/10.1111/emip.12478>. An ITEMS module on the hierarchical rater model and its longitudinal and multidimensional extensions.
+- DeCarlo, L. T., Kim, Y., & Johnson, M. S. (2011). A hierarchical rater model for constructed responses, with a signal detection rater model. *Journal of Educational Measurement*, 48(3), 333–356. <https://doi.org/10.1111/j.1745-3984.2011.00143.x>. The signal-detection rater layer that `sirt::rm.sdt` fits.
+- Wilson, M., & Hoskens, M. (2001). The rater bundle model. *Journal of Educational and Behavioral Statistics*, 26(3), 283–306. <https://doi.org/10.3102/10769986026003283>. Another way to model the dependence among repeated ratings.
+- Uto, M., & Ueno, M. (2020). A generalized many-facet Rasch model and its Bayesian estimation using Hamiltonian Monte Carlo. *Behaviormetrika*, 47(2), 469–496. <https://doi.org/10.1007/s41237-020-00115-7>. Severity, consistency and range restriction in one model.
+- Myford, C. M., & Wolfe, E. W. (2009). Monitoring rater performance over time: A framework for detecting differential accuracy and differential scale category use. *Journal of Educational Measurement*, 46(4), 371–389. <https://doi.org/10.1111/j.1745-3984.2009.00088.x>. Drift in accuracy and in the use of the scale, with indices for monitoring it.
+- Casabianca, J. M., Lockwood, J. R., & McCaffrey, D. F. (2015). Trends in classroom observation scores. *Educational and Psychological Measurement*, 75(2), 311–337. <https://doi.org/10.1177/0013164414539163>. Rater drift over two years, in a G study with time trends.
+- Casabianca, J. M., Donoghue, J. R., Shin, H. J., Chao, S.-F., & Choi, I. (2023). Using linkage sets to improve connectedness in rater response model estimation. *Journal of Educational Measurement*, 60(3), 428–454. <https://doi.org/10.1111/jedm.12360>. How rating designs and linkage sets decide whether rater effects can be estimated.
+- Lewis, J., & Casabianca, J. M. (2026). Limitations of QWK in evaluating automated and human scoring systems. *Educational Measurement: Issues and Practice*, 45(1). <https://doi.org/10.1111/emip.70017>. How quadratic weighted kappa depends on the marginal distributions and the length of the scale.
+- McCaffrey, D. F., Casabianca, J. M., & Johnson, M. S. (2025). Measuring the accuracy of true score predictions for AI scoring evaluation. *Journal of Educational Measurement*, 62(4), 763–786. <https://doi.org/10.1111/jedm.70011>. Judging an automated scorer against human true scores rather than against observed human ratings.
+- Sudweeks, R. R., Reeve, S., & Bradshaw, W. S. (2004). A comparison of generalizability theory and many-facet Rasch measurement in an analysis of college sophomore writing. *Assessing Writing*, 9(3), 239–261. <https://doi.org/10.1016/j.asw.2004.11.001>. Both approaches on the same ratings.
+- Two IRW tables carry rating dates as well as raters, for anyone who wants to look for drift in real data: [moralvignettes_rakhmankulova_2025](https://itemresponsewarehouse.org/tables/moralvignettes_rakhmankulova_2025/) and [thomeczek2025_les](https://itemresponsewarehouse.org/tables/thomeczek2025_les/). Their raters rate vignettes and parties rather than respondents' work.
 
 ```{r}
 #| output: asis
@@ -31,3 +412,8 @@ data_sources("rater-models")
 
 ## For instructors
 
+- **Source:** new material, not in EDUC 252. Ben added the lesson on 09-25 while reviewing the G theory lesson, as the answer to its problem 6.
+- **Timing:** about 60 minutes for the core ideas and widgets; the real-data section works as a 30-minute lab (the hierarchical rater model takes one to two minutes in local R, so start it first).
+- **Software:** the many-facet model runs in the browser with `TAM`. The hierarchical rater model runs only in the downloadable code (`sirt::rm.sdt`), and the page shows its output from the render. A fixed-effects many-facet fit to the essay table's 315 teachers takes over a minute in local R; the lesson uses random effects in `lme4` there instead.
+- **Held back:** rater × criterion interactions (differential rater functioning) and rater-specific discrimination are in the problems and *Going further*; drift is shown by widget and cited, not fitted, since neither table has rating dates; automated scoring, and QWK against PRMSE for judging engines, are left to [AI and psychometrics](ai-psychometrics.qmd) and the readings.
+- **Solutions:** held back in `solutions/rater-models.qmd` (not published). Problem 6 is open.

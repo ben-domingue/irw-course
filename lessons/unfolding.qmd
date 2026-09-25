@@ -8,22 +8,441 @@ source("_course.R")
 lesson_header("unfolding")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, dnorm, p2pl, rng, palette} from "./widgets/irt.js"
+import {hcm, pcm3, best2PL, oneRun, shuffle} from "./widgets/unfolding.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Two different accounts of how a respondent answers an item:
+
+- **Dominance.** The more of the trait a respondent has, the more likely they are to agree or answer correctly: each item's curve only rises. Every model in this course so far has assumed this.
+- **Ideal point.** A respondent agrees most with statements close to their own position, and less the farther a statement is from it, in either direction. A statement that stakes out a middle position is rejected from both sides, by respondents who find it too strong and by those who find it too weak, so its curve rises and then falls.
+
+For tests of ability dominance is natural; for attitude statements it can fail. [Where CTT breaks](ctt-limits.qmd) found two such statements among eight about capital punishment and left them there. This lesson picks them up: what an unfolding response process leaves in the data, the models written for it (the hyperbolic cosine model, a folded partial credit model, and the GGUM), and what happens when we fit them to real attitude statements. The main example is a survey of immigration attitudes written to span the middle, where a statement that splits the difference is single-peaked even in the raw data and an ideal-point curve predicts it better than a dominance curve. The eight capital-punishment statements show the other side: most sit near the ends, only 54 people answered, and a dominance model does just as well.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what distinguishes an ideal-point (unfolding) response process from a dominance process, and sketch the item curve each implies;
+- say what unfolding leaves in the data: runs of agreement in the right order, negative correlations between the ends, and middle statements that correlate with nothing;
+- derive the hyperbolic cosine model by folding a three-category partial credit model, and place the GGUM and `mirt`'s ideal-point item beside it;
+- fit dominance, ideal-point and mixed models in R, compare them on held-out responses, and find a statement order with MUDFOLD;
+- explain why the two kinds of model are hard to tell apart when statements sit near the ends of the scale, and design statements that could tell them apart.
+
 ## Core ideas
 
-## Worked example
+### Dominance and ideal points
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Where CTT breaks](ctt-limits.qmd): keyed toward support, six of the eight capital-punishment statements rose with the score on the others. The two middle statements did not. DONTBELIEV rose from 0.44 among the most opposed to 0.75 in the middle and fell back to 0.33 and 0.38; WISHNOTNEC reached 1.00 at a score of 4 and dropped to 0.85 among the most in favour. That item curves rise with the sum score was an assumption, and these two statements are where it gave way.
+:::
+
+In a **dominance** process a respondent agrees when their level exceeds what the statement asks for, as a student solves an item when their ability exceeds its difficulty; every model since [The Rasch model](rasch.qmd) has had this form. In an **ideal-point** process a respondent agrees when the statement is close to their own position. [Thurstone (1928)](https://doi.org/10.1086/214483) scaled attitude statements by where they sit on a continuum, and [Coombs (1964)](https://openlibrary.org/works/OL1361275W) put respondents and stimuli on one scale, with preference falling off with distance. Each respondent's preferences are the scale folded at their own position; recovering the scale is **unfolding**.
+
+Under an ideal-point process the item curve is single-peaked: highest for respondents at the statement's location $b$, lower on both sides. So a disagreement is ambiguous. Someone who rejects "I think capital punishment is necessary but I wish it were not" (WISHNOTNEC in [Andrich, 1988](https://doi.org/10.1177/014662168801200105), worded as in the `mudfold` help page) may oppose capital punishment outright, or may support it without regret. [Drasgow, Chernyshenko and Stark (2010)](https://doi.org/10.1111/j.1754-9434.2010.01273.x) argue that respondents answer many attitude and personality items this way.
+
+#### Try it: dominance and ideal points
+
+One statement, located at $b$. The dominance curve is a 2PL with slope 1.5; the ideal-point curve is the hyperbolic cosine model introduced below, at the same location. The filled markers are a respondent at the chosen $\theta$; the open marker is a respondent as far from the statement on the other side.
+
+```{ojs}
+//| echo: false
+viewof dp_b = Inputs.range([-2, 2], {value: 0.5, step: 0.1, label: "Statement location b"})
+viewof dp_th = Inputs.range([-4, 4], {value: -1.5, step: 0.1, label: "Respondent θ"})
+```
+
+```{ojs}
+//| echo: false
+dp_tau = 1.5
+dp_grid = grid(-4, 4, 241)
+dp_mirror = 2 * dp_b - dp_th
+Plot.plot({
+  width: 700, height: 280, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(agree)", domain: [0, 1]},
+  color: {legend: true, domain: ["Dominance (2PL)", "Ideal point"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.ruleX([dp_b], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(dp_grid.flatMap(t => [{theta: t, p: p2pl(t, dp_b, 1.5), m: "Dominance (2PL)"}, {theta: t, p: hcm(t, dp_b, dp_tau), m: "Ideal point"}]),
+      {x: "theta", y: "p", stroke: "m", strokeWidth: 2.5}),
+    Plot.dot([{theta: dp_th, p: p2pl(dp_th, dp_b, 1.5)}, {theta: dp_th, p: hcm(dp_th, dp_b, dp_tau)}], {x: "theta", y: "p", r: 5, fill: palette.ink}),
+    Plot.dot([{theta: dp_mirror, p: p2pl(dp_mirror, dp_b, 1.5)}, {theta: dp_mirror, p: hcm(dp_mirror, dp_b, dp_tau)}].filter(d => Math.abs(d.theta) <= 4),
+      {x: "theta", y: "p", r: 5, stroke: palette.ink, fill: palette.white})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`At θ = ${dp_th.toFixed(1)}, P(agree) is **${p2pl(dp_th, dp_b, 1.5).toFixed(2)}** under the dominance curve and **${hcm(dp_th, dp_b, dp_tau).toFixed(2)}** under the ideal-point curve. At θ = ${dp_mirror.toFixed(1)}, as far on the other side of the statement, it is **${p2pl(dp_mirror, dp_b, 1.5).toFixed(2)}** and **${hcm(dp_mirror, dp_b, dp_tau).toFixed(2)}**.`
+```
+
+Under the dominance curve the two respondents answer very differently (0.05 and 0.95 at the defaults); under the ideal-point curve they answer alike (0.37 each), since only the distance to $b$ matters. A disagreement doesn't say which side the respondent is on. This ideal-point curve never reaches 1: even respondents at the statement's location sometimes disagree.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under an ideal-point process, a respondent disagrees with a statement located at $b = 0.5$. What can you conclude about their $\\theta$?",
+  options: [
+    {text: "That it is probably some distance from 0.5, on one side or the other", correct: true, why: "The ideal-point curve is symmetric about $b$, so a disagreement is equally consistent with $\\theta$ well below and well above the statement. Other responses have to say which side."},
+    {text: "That it is probably below 0.5", correct: false, why: "That is the dominance reading. Under an ideal-point process, respondents far above the statement disagree too."},
+    {text: "Nothing at all", correct: false, why: "It does say something: respondents near $b$ agree most often, so a disagreement makes a $\\theta$ near 0.5 less likely."}
+  ]
+})
+```
+
+### What unfolding leaves in the data
+
+Suppose statements and respondents sit on one line, and each respondent agrees with the statements near them. In that order, each respondent's agreements form one unbroken run: a respondent in the middle agrees with a few middle statements and rejects both ends. Stack the respondents in order and the runs move down the matrix as a diagonal band, a **parallelogram** in Coombs's (1964) terms. A dominance process leaves a different shape: in difficulty order, each respondent agrees with everything up to some point, a triangle, as in [Guttman's (1944)](https://doi.org/10.2307/2086306) scalogram.
+
+Two more consequences follow. Statements at opposite ends are rarely both endorsed, since no respondent sits near both, so they correlate negatively. A statement in the middle is endorsed by respondents who are neither strongly for nor against, so it correlates with nothing.
+
+#### Try it: the parallelogram
+
+These are the 54 respondents and eight capital-punishment statements from the data section. Each row is a respondent, each column a statement; filled cells are agreements. Rows are sorted by the average position of each respondent's agreements in the chosen order.
+
+```{ojs}
+//| echo: false
+viewof pg_order = Inputs.radio(["Shuffled", "Andrich's order"], {value: "Shuffled", label: "Order the statements"})
+viewof pg_seed = Inputs.range([1, 50], {value: 1, step: 1, label: "Shuffle seed"})
+```
+
+```{ojs}
+//| echo: false
+pg_names = ["HIDEOUS", "LIFESACRED", "INEFFECTIV", "DONTBELIEV", "WISHNOTNEC", "MUSTHAVEIT", "DETERRENT", "CRIMDESERV"]
+pg_ord = pg_order === "Andrich's order" ? pg_names : shuffle(pg_names, rng(pg_seed).unif)
+pg_rows = transpose(mud_rows)
+pg_pos = pg_rows.map((r, i) => {
+  const hits = pg_ord.map((k, j) => r[k] === 1 ? j : null).filter(j => j !== null);
+  return {i, centre: hits.reduce((u, v) => u + v, 0) / hits.length, run: oneRun(r, pg_ord)};
+}).sort((u, v) => u.centre - v.centre)
+pg_rank = new Map(pg_pos.map((d, k) => [d.i, k]))
+pg_cells = pg_rows.flatMap((r, i) => pg_ord.map(k => ({row: pg_rank.get(i), st: k, x: r[k]})))
+Plot.plot({
+  width: 560, height: 520, marginLeft: 30, marginBottom: 90, padding: 0.04,
+  x: {label: null, domain: pg_ord, tickRotate: -40}, y: {label: null, axis: null},
+  color: {domain: [0, 1], range: [palette.white, palette.main]},
+  marks: [Plot.cell(pg_cells, {x: "st", y: "row", fill: "x", stroke: palette.rule, strokeWidth: 0.3})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`In this order, **${pg_pos.filter(d => d.run).length}** of the 54 patterns are a single unbroken run of agreements.`
+```
+
+Shuffled (seed 1), the matrix looks scattered, and 5 patterns are single runs; across the 50 seeds most orders give fewer than 10 and none more than 25. In Andrich's order a band appears, and 39 of the 54 are single runs: respondents who oppose capital punishment agree with the first three or four statements, those in favour with the last three or four, and a few in between with the middle.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): scales mix items worded in both directions, and each has to be reverse-keyed before the items are summed. One Mach IV item, m19, had an item-rest correlation of −0.05 keyed one way and 0.05 the other, so the data couldn't say which way it ran.
+:::
+
+Unfolding produces items like m19 by design. A statement in the middle of the scale is neither forward nor reversed: reversing it turns a peak into a trough, and neither correlates with the total. Keying presumes a dominance process.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Six statements about a policy sit in order from strongly against (1) to strongly in favour (6), and responses follow an ideal-point process. Which pattern of agreement (1 = agree) is the model *least* likely to produce?",
+  options: [
+    {text: "1 0 0 0 0 1", correct: true, why: "Agreeing with both extremes and nothing between breaks the run: no single position is near both ends of the scale."},
+    {text: "0 0 1 1 0 0", correct: false, why: "A single run in the middle: a respondent near statements 3 and 4."},
+    {text: "1 1 1 0 0 0", correct: false, why: "A single run at one end: a respondent who is fairly strongly against."}
+  ]
+})
+```
+
+### Models for single-peaked curves
+
+How do we write down a single-peaked curve? One route starts from a model we already have.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Models for polytomous responses](polytomous.qmd): under the partial credit model, category $k$ has probability proportional to $\exp\big(\sum_{v \le k}(\theta - b_v)\big)$, and each adjacent pair of categories is a Rasch item. With three categories and ordered steps, the middle one is the most likely response between its two steps.
+:::
+
+A disagreement under an ideal-point process has two sources: disagreeing from below (the statement goes too far) and disagreeing from above (it doesn't go far enough). Treat these as categories 0 and 2 of a three-category PCM, with agreement as category 1 between them, and put the two steps at $b - \tau$ and $b + \tau$. We observe only agree or disagree, so categories 0 and 2 are merged, and what remains is
+$$\Pr(\text{agree} \mid \theta) = \frac{e^{\tau}}{e^{\tau} + 2\cosh(\theta - b)}.$$
+This is the **hyperbolic cosine model** (HCM) of [Andrich and Luo (1993)](https://doi.org/10.1177/014662169301700307); see also [Andrich (1997)](https://doi.org/10.1007/978-1-4757-2691-6_23). It is symmetric about $b$ and peaks there, at $e^{\tau}/(e^{\tau} + 2)$; $\tau$ sets how wide the region of agreement is. The Go deeper callout derives it. (Andrich and Luo's notation differs; we write $\tau$ to keep $\lambda$ for loadings.)
+
+#### Try it: folding the partial credit model
+
+```{ojs}
+//| echo: false
+viewof fo_b = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "Location b"})
+viewof fo_tau = Inputs.range([0, 3], {value: 1.5, step: 0.1, label: "τ (half the gap between the steps)"})
+viewof fo_fold = Inputs.toggle({label: "Fold: merge the two disagree categories", value: false})
+```
+
+```{ojs}
+//| echo: false
+fo_th = grid(-5, 5, 241)
+fo_rows = fo_fold
+  ? fo_th.flatMap(t => { const p = pcm3(t, fo_b, fo_tau); return [{theta: t, p: p[1], c: "agree"}, {theta: t, p: p[0] + p[2], c: "disagree (either side)"}]; })
+  : fo_th.flatMap(t => pcm3(t, fo_b, fo_tau).map((p, k) => ({theta: t, p, c: ["disagree from below", "agree", "disagree from above"][k]})))
+Plot.plot({
+  width: 700, height: 280, x: {label: "θ", domain: [-5, 5]}, y: {label: "Probability", domain: [0, 1]},
+  color: {legend: true, domain: ["disagree from below", "agree", "disagree from above", "disagree (either side)"], range: [palette.light, palette.contrast, palette.main, palette.guide]},
+  marks: [Plot.ruleX([fo_b - fo_tau, fo_b + fo_tau], {stroke: palette.guide, strokeDasharray: "4,3"}),
+          Plot.line(fo_rows, {x: "theta", y: "p", stroke: "c", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Peak probability of agreeing, at θ = ${fo_b.toFixed(1)}: **${hcm(fo_b, fo_b, fo_tau).toFixed(2)}** from the hyperbolic cosine formula, **${pcm3(fo_b, fo_b, fo_tau)[1].toFixed(2)}** from the three categories. The dashed lines are the PCM's steps.`
+```
+
+Unfolded, the three curves are an ordinary PCM item. Folded, the two outer curves add up to a trough, and agreement is the single-peaked curve that remains; both routes give the same peak (0.69 at the defaults). With $\tau = 0$ the peak is $1/3$; widen the steps and it rises toward 1.
+
+The HCM has a location and a width for each statement, and no slope. The **generalized graded unfolding model** (GGUM; [Roberts, Donoghue & Laughlin, 2000](https://doi.org/10.1177/01466216000241001)) adds a discrimination for each statement and allows graded agreement, folding each observed category from a response below and one above; the `GGUM` R package ([Tendeiro & Castro-Alvarez, 2019](https://doi.org/10.1177/0146621618772290)) and `mirt` fit it. `mirt` offers a simpler single-peaked item, `itemtype = "ideal"`, following [Maydeu-Olivares, Hernández and McDonald (2006)](https://doi.org/10.1207/s15327906mbr4104_2): $\Pr(\text{agree}) = \exp\{-\tfrac{1}{2}a^2(\theta - b)^2\}$, a bell that reaches 1 at $\theta = b$: an assumption that every respondent located at a statement agrees with it.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): the model assumed that a single $\theta$ drives every response and that responses are locally independent given $\theta$, and it paired these with an item curve that rises.
+:::
+
+The unfolding models keep the first two assumptions and drop the third. Given $\theta$, agreements are still independent and the likelihood is still a product over statements; only the shape of each curve changes.
+
+There is also a nonparametric counterpart. **MUDFOLD** ([van Schuur, 1992](https://doi.org/10.1093/pan/4.1.41); the `mudfold` package, [Balafas, Krijnen, Post & Wit, 2020](https://doi.org/10.32614/rj-2020-002)) looks for the longest order of statements in which triples behave as unfolding predicts, and reports a scalability coefficient $H$: one minus the ratio of observed to expected violations, so that 1 means none. It asks for no curve shape, only an order, which makes it a reasonable first look when the question is whether the statements can be placed on one line at all.
+
+::: {.callout-note collapse="true"}
+## Go deeper: the hyperbolic cosine model is a folded PCM
+
+**Assumptions:** one statement at location $b$; a respondent at $\theta$ gives one of three latent responses, disagree from below (0), agree (1) or disagree from above (2), following a partial credit model with steps $b - \tau$ and $b + \tau$; we observe only agree (1) or disagree (0 or 2).
+
+**The PCM.** With $\Pr(x = k) \propto \exp\big(\sum_{v \le k}(\theta - b_v)\big)$, $b_1 = b - \tau$ and $b_2 = b + \tau$:
+$$\Pr(0) \propto 1, \qquad \Pr(1) \propto e^{\theta - b + \tau}, \qquad \Pr(2) \propto e^{(\theta - b + \tau) + (\theta - b - \tau)} = e^{2(\theta - b)}.$$
+
+**Fold.** The odds of agreeing against either kind of disagreement are
+$$\frac{\Pr(1)}{\Pr(0) + \Pr(2)} = \frac{e^{\theta - b + \tau}}{1 + e^{2(\theta - b)}} = \frac{e^{\tau}}{e^{-(\theta - b)} + e^{\theta - b}} = \frac{e^{\tau}}{2\cosh(\theta - b)},$$
+dividing top and bottom by $e^{\theta - b}$. So $\Pr(\text{agree}) = e^{\tau}/\big(e^{\tau} + 2\cosh(\theta - b)\big)$.
+
+**Properties.** $\cosh$ is even and smallest at 0, so the curve is symmetric about $b$ and peaks there, at $e^{\tau}/(e^{\tau} + 2)$. As $|\theta - b|$ grows, $2\cosh(\theta - b) \approx e^{|\theta - b|}$, and the log odds of agreeing approach $\tau - |\theta - b|$: on each side, far from $b$, the curve is a Rasch curve with slope 1, facing the other way. That is why a dominance model can stand in for it when respondents are all on one side of a statement.
+
+**What's lost.** Under the PCM the sum score is sufficient ([Models for polytomous responses](polytomous.qmd)). The fold merges categories scored 0 and 2, so the sum of the latent categories is no longer observed, and the number of agreements is not sufficient for $\theta$: which statements a respondent agrees with matters, not only how many.
+:::
+
+### Choosing between them is hard
+
+If the curves are so different, why is the choice hard? Because the data only see a curve where there are respondents. Almost every respondent sits to the right of a statement near the "against" end, on the falling side, where the ideal-point curve is a decreasing S. A 2PL with a negative slope draws the same S, and one with a positive slope matches a statement near the "in favour" end. Only in the middle, with respondents on both sides, does the rise and fall show.
+
+#### Try it: can a 2PL mimic an ideal-point curve?
+
+The solid curve is a hyperbolic cosine item; the dashed curve is the 2PL that best matches it for respondents distributed as $N(0, 1)$ (shaded).
+
+```{ojs}
+//| echo: false
+viewof mi_b = Inputs.range([-3, 3], {value: 2.5, step: 0.1, label: "Statement location b"})
+viewof mi_tau = Inputs.range([0.5, 3], {value: 2, step: 0.1, label: "τ"})
+```
+
+```{ojs}
+//| echo: false
+mi_fit = best2PL(t => hcm(t, mi_b, mi_tau))
+mi_gap = Math.max(...mi_fit.th.map((t, i) => Math.abs(t) <= 2 ? Math.abs(mi_fit.y[i] - mi_fit.fit[i]) : 0))
+Plot.plot({
+  width: 700, height: 280, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(agree)", domain: [0, 1]},
+  color: {legend: true, domain: ["Ideal point (HCM)", "Best 2PL"], range: [palette.contrast, palette.main]},
+  marks: [
+    Plot.areaY(mi_fit.th.map(t => ({theta: t, d: dnorm(t) / dnorm(0) * 0.5})), {x: "theta", y: "d", fill: palette.light, fillOpacity: 0.4}),
+    Plot.line(mi_fit.th.map((t, i) => ({theta: t, p: mi_fit.y[i], m: "Ideal point (HCM)"})), {x: "theta", y: "p", stroke: "m", strokeWidth: 2.5}),
+    Plot.line(mi_fit.th.map((t, i) => ({theta: t, p: mi_fit.fit[i], m: "Best 2PL"})), {x: "theta", y: "p", stroke: "m", strokeWidth: 2.5, strokeDasharray: "6,4"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Best 2PL slope: **${mi_fit.a.toFixed(2)}**. Largest gap between the curves for θ between −2 and 2: **${mi_gap.toFixed(2)}**.`
+```
+
+At $b = 2.5$ the best 2PL (slope 0.93) stays within 0.03 of the ideal-point curve wherever respondents are. At $b = 0$ the gap is 0.22 and the best 2PL is flat: it can't bend. At $b = -2.5$ the 2PL fits again, with slope −0.93. A dominance model with free signs describes end statements about as well as an ideal-point model; the two separate on middle statements, when enough respondents sit on both sides. [Stark, Chernyshenko, Drasgow and Williams (2006)](https://doi.org/10.1037/0021-9010.91.1.25) make this comparison for personality items.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "You want to know whether a set of attitude statements follows an ideal-point process. Which design gives the data the best chance to say?",
+  options: [
+    {text: "Several statements written to sit in the middle of the scale, and many respondents near the middle", correct: true, why: "Middle statements with respondents on both sides are where the rise and fall show. At the ends a sloped 2PL matches the ideal-point curve."},
+    {text: "Many strongly worded statements at both ends", correct: false, why: "End statements see mostly one side of their curve, which a 2PL with a positive or negative slope matches closely."},
+    {text: "A larger sample, whatever the statements", correct: false, why: "More respondents sharpen the estimates, but if no statement has respondents on both sides, the two models still predict nearly the same responses."}
+  ]
+})
+```
+
+A single-peaked curve can only be told from a sloped one where there are respondents on both sides of the peak.
+
+## Simulate
+
+The code below simulates 500 respondents answering 20 statements from $b = -2.5$ to $2.5$ with `mirt`'s ideal-point curve ($a = 1.5$), fits the 2PL and the ideal-point model, compares AIC ([Akaike, 1974](https://doi.org/10.1109/TAC.1974.1100705)), then refits with only the four statements at each end. The first run takes 20–30 seconds while R and `mirt` load, and the fits about another minute and a half in the browser (15 seconds in local R). Ideal-point fits can stop at a poor local maximum, so the code starts each statement at the average 2PL score of the respondents who agreed with it; remove `pars = sv` to see what happens without that start.
+
+With the seed as written, the ideal-point model wins easily with all 20 statements (AIC 7,405 against 8,844) and recovers the locations (correlation 0.998). With only the end statements the two are one AIC point apart (2,296 and 2,297), the 2PL with positive slopes at one end and negative at the other. In the plot, the 2PL misses the middle statement and matches the end one. Try `np <- 200`, or `ends <- c(1:2, 9:12, 19:20)`, which puts four statements back in the middle.
+
+```{webr}
+{{< include code/unfolding-sim.R >}}
+```
+
+[Download this code](code/unfolding-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/unfolding-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### Immigration policy
+
+The main example is a survey written with unfolding in mind. [Duck-Mayr and Montgomery (2023)](https://doi.org/10.1017/pan.2022.33) put ten statements about immigration policy to US adults recruited online through Lucid, and fit the GGUM with their `bggum` package ([Duck-Mayr & Montgomery, 2020](https://doi.org/10.32614/CRAN.package.bggum)); their data are public under CC0 ([replication data](https://doi.org/10.7910/DVN/HXORK9)). The IRW table, `duckmayr_2023_immigration`, isn't public yet, so the lesson reads an interim copy ([provenance](https://github.com/ben-domingue/irw-course/blob/main/lessons/data/duckmayr_2023_immigration.md)). Its job is to be a set of statements written to span the middle, answered by enough respondents to tell the models apart.
+
+The sample is the authors' analysis sample: 2,621 respondents who passed three attention checks and didn't straight-line. Responses run from 0 (strongly disagree) to 4 (strongly agree), and nothing is reverse-keyed: which way a statement runs is the question. Two statements stake out the ends: IMM_1, "All undocumented immigrants currently living in the U.S. should be required to return to their home country", and IMM_3, "The U.S. does not need a wall along the entire U.S.-Mexican border". One is written for the middle: IMM_2, "There should be a way for undocumented immigrants currently living in the U.S. to stay in the country legally, but only if certain requirements are met like learning English and paying a significant fine" (all three from the survey export in the replication data). The other seven, in brief: current enforcement is fine (IMM_4); detention conditions are humane enough (IMM_5); Congress should trade more immigration for more enforcement (IMM_6); undocumented immigrants commit more serious crime (IMM_7); deport only serious criminals (IMM_8); high-skilled (IMM_9) and low-skilled (IMM_10) immigration help. Respondents also placed themselves on a seven-point scale from very liberal (1) to very conservative (7). [Download the code](code/unfolding-irw.R) to run every chunk yourself.
+
+```{r fetch-imm}
+#| echo: true
+#| code-fold: show
+```
+
+Before any model, does agreement with the middle statement rise and fall across the political spectrum? Self-placed ideology is a rough measure of where respondents stand, but enough to look.
+
+```{r ideo-imm}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot-imm}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+IMM_1 rises steadily with conservatism (from 0.12 to 0.71 agreeing) and IMM_3 falls (0.88 to 0.13): dominance curves, one in each direction. IMM_2 is single-peaked in the raw data: 0.44 of the very liberal agree, 0.59 of the slightly conservative, and 0.51 of the very conservative. It is rejected from both sides: by those for whom the requirements are too harsh, and by those for whom any legal status goes too far. The correlations agree:
+
+```{r cor-imm}
+#| echo: true
+#| code-fold: show
+```
+
+The two ends correlate −0.62, and IMM_2 correlates with neither (−0.09 with IMM_1, 0.04 with IMM_3, 0.00 with IMM_7): the signature of a middle statement. Now the models: the GRM, a dominance model whose slopes may be negative; the GGUM; and a mixed model that gives an ideal-point curve only to the four statements that read as compromises (IMM_2, IMM_4, IMM_6, IMM_8) and a dominance curve to the rest. All three are fitted with `mirt`; the GGUM's locations start from the data, since its likelihood has poor local maxima.
+
+```{r models-imm}
+#| echo: true
+#| code-fold: show
+```
+
+In sample, the GGUM beats the GRM by 294 AIC points (72,774.3 against 73,068.4) and by 235 BIC points, and the mixed model beats both (AIC 72,500.4, BIC 72,817.4) with fewer parameters than the GGUM. The GGUM puts IMM_1 (2.46) and IMM_3 (−2.64) at the ends and IMM_4 (0.03) and IMM_2 (−0.18) in the middle. All three models' scores correlate 0.64 to 0.65 with self-placed ideology: they agree on who is where and differ on how the middle statements work. But AIC is computed on the responses the models were fitted to. Do the ideal-point curves predict responses they haven't seen?
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): hold out responses, not respondents, fit to the rest, and score each model by the log probability it gives the held-out responses.
+:::
+
+```{ojs}
+//| echo: false
+predict({
+  q: "We hold out a random 10% of the responses and fit each model to the rest. Which predicts the held-out responses best: the GRM everywhere, the GGUM everywhere, or the GGUM for the four compromise statements and the GRM for the other six?",
+  choices: ["The GRM everywhere", "The GGUM everywhere", "The mixed model"],
+  answer: "The mixed model",
+  reveal: "The mixed model: mean log probability −1.3487 per held-out response, against −1.3606 for the GRM and −1.3718 for the GGUM everywhere. The GGUM wins in sample but not out of it. Check the output below."
+})
+```
+
+```{r heldout-imm}
+#| echo: true
+#| code-fold: show
+```
+
+All three models are well ahead of a baseline that ignores the respondent (−1.5300). The GGUM everywhere does slightly *worse* than the GRM on held-out responses (a difference of −0.0112, standard error 0.0078): its in-sample advantage doesn't carry over. Statement by statement, it predicts IMM_2, IMM_4 and IMM_6 better than the GRM (by 0.060, 0.035 and 0.030) and the end statements, such as IMM_5 and IMM_10, worse (by 0.065 and 0.060). The mixed model keeps the gains and avoids the losses, beating the GRM by 0.0118 (standard error 0.0051). One caution: the four compromise statements were chosen by reading them, but after the correlations had been seen, so a set fixed before looking at any data would be a fairer test (problem 2).
+
+<!-- TODO (Ben, F32): the lesson's first-person verdict, on hold with Ben. Candidate, revised for the immigration data (Claude's reading of PS9#3, the andrich_mudfold AIC result and the held-out comparison here): "If the statements weren't written to span the middle, the dominance model is enough. When they were, I'd give the middle statements an ideal-point curve and leave the end statements to a dominance model." The capital-punishment section below now illustrates the first half; this section the second. It belongs here or after the capital-punishment section; confirm or reword. -->
+
+### Capital punishment, again
+
+The small classic returns from [Where CTT breaks](ctt-limits.qmd): [andrich_mudfold](https://itemresponsewarehouse.org/tables/andrich_mudfold/), in which 54 graduate students in a measurement course agreed (1) or disagreed (0) with eight statements about capital punishment ([Andrich, 1988](https://doi.org/10.1177/014662168801200105)), as distributed with the `mudfold` package ([Balafas, Krijnen & Wit, 2017](https://doi.org/10.32614/CRAN.package.mudfold)); they fill the parallelogram widget. Its job is to show what happens when only two statements sit in the middle and 54 people answer.
+
+```{r fetch-mud}
+#| echo: true
+#| code-fold: show
+```
+
+```{r runs-mud}
+#| echo: true
+#| code-fold: show
+```
+
+The ends correlate −0.84 (LIFESACRED and CRIMDESERV), and DONTBELIEV's largest correlation with any statement is 0.18. In Andrich's order 39 of the 54 patterns are a single run of agreements; across all 40,320 orders the average is 5.4 and the best is 40. The patterns look very much like unfolding.
+
+```{r models-mud}
+#| echo: true
+#| code-fold: show
+```
+
+Yet the 2PL ties the GGUM on AIC (422.0 against 422.1), and BIC prefers the 2PL (453.8 against 469.8); `mirt`'s ideal-point model (436.5) and the Rasch model (594.6) trail. The 2PL does what the mimicry widget did: negative slopes for the three statements against (−1.44 to −7.23), positive for the three in favour (CRIMDESERV's keeps growing, so the EM stops at its limit). Six of the eight statements sit near an end, where a sloped 2PL traces the ideal-point curve, and the two in the middle have too few respondents beyond them to show the fall. With 54 respondents the data can't tell the models apart; with 2,621 they could.
+
+### Party activists
+
+For contrast, [eurpar2_mudfold](https://itemresponsewarehouse.org/tables/eurpar2_mudfold/): 1,786 activists in European political parties, each of whom picked the two of six party families in the European Parliament they most preferred, in 1980 ([van Schuur, 1984](https://openlibrary.org/works/OL13368770W); [Post, 1992](https://openlibrary.org/works/OL3986205W)), also distributed with `mudfold`. Its job is to show unfolding data in which a sum score carries no information at all: everyone's is 2, and where an activist stands is in *which* two parties they chose.
+
+```{r fetch-eur}
+#| echo: true
+#| code-fold: show
+```
+
+```{r mudfold-eur}
+#| echo: true
+#| code-fold: show
+```
+
+MUDFOLD orders five of the six parties from left to right (communists, social democrats, liberals, Christian democrats, conservatives), with $H = 0.79$. The four commonest pairs are the four neighbouring pairs in that order (437 + 341 + 217 + 202 = 1,197 of the 1,786 choices); communists with conservatives came up 4 times. MUDFOLD leaves out the democratic progressives, paired with the liberals (124), social democrats (106) and conservatives (77) alike: a second dimension, or a party chosen for reasons other than left and right, would do that.
 
 ## Problems
 
+1. **Folding the PCM.** Starting from a three-category PCM with steps $b - \tau$ and $b + \tau$, derive $\Pr(\text{agree}) = e^{\tau}/(e^{\tau} + 2\cosh(\theta - b))$. Show that the curve peaks at $\theta = b$, find the height of the peak, and show that far from $b$ the log odds of agreeing fall by one for each unit of $\theta$.
+2. **Read, then fit (PS9#3).** Read the ten immigration statements (the full wording is in the replication data's `lucid_data.tab`, and summarized above) and, before looking at any more output, say which you'd give an ideal-point curve and why. Fit the mixed model with your set in place of `compromise`, using a new seed for the held-out responses. Does your set beat the GRM out of sample? Then do the same for the eight capital-punishment statements ([Andrich, 1988](https://doi.org/10.1177/014662168801200105)), where the 2PL and `mirt`'s `"ideal"` item can be mixed the same way. Where did the data agree with your reading, and where couldn't they say?
+3. **Judgment.** DONTBELIEV correlates with no other statement above 0.18, gets a 2PL slope of −0.11, and gets a GGUM location near 0. With 54 respondents, what could change your mind about whether it follows an ideal-point process? What would you look for in a new sample, and roughly how large would it need to be?
+4. **Design.** Write eight statements about a policy you know well, for 300 respondents, so that a dominance model and an unfolding model could be told apart. Where on the scale must the statements sit, and where must the respondents be? Check your design in the simulation: set `delta` to your planned locations and `np` to 300, and see whether the ideal-point model wins.
+5. **Order from pairs.** In `eurpar2_mudfold`, recover a left-to-right order of the six parties from the pair counts alone (for example, treat the counts as similarities and scale them in one dimension with `cmdscale`). Compare with MUDFOLD's order. Where do the democratic progressives land, and does that fit what the counts showed?
+6. **Challenge (open).** The GGUM wins in sample on the immigration statements and loses out of sample. Is that overfitting, a problem with scoring respondents whose posterior for $\theta$ has two humps, or something else? How would you find out? Or: are some personality items ideal-point items? [Stark et al. (2006)](https://doi.org/10.1037/0021-9010.91.1.25) argue that some are. Pick an IRW personality table with Likert items and say how you would find out; then try it, fitting the GRM and the GGUM (`mirt`'s `itemtype = "ggum"`) and comparing the curves. Or model the rankings in [franco_2024_unfolding](https://itemresponsewarehouse.org/tables/franco_2024_unfolding/). I don't know the answer for either.
+
+```{r}
+#| output: asis
+ask_claude("unfolding", "It covers unfolding (ideal-point) models for attitude statements: dominance versus ideal-point response processes, what unfolding leaves in the data (runs of agreement, the parallelogram, negative correlations between the ends), the hyperbolic cosine model as a folded partial credit model, the generalized graded unfolding model (GGUM), mirt's ideal-point item type, MUDFOLD and its H coefficient, and why a 2PL with negative slopes can mimic an ideal-point model when statements sit near the ends of the scale, with fits in R (mirt, GGUM, mudfold) to Duck-Mayr and Montgomery's (2023) immigration-policy statements (GRM, GGUM and a mixed model, compared in and out of sample), Andrich's capital-punishment statements and European party activists' pick-two-of-six choices.")
+```
+
 ## Going further
 
+- Thurstone, L. L. (1928). Attitudes can be measured. *American Journal of Sociology*, 33(4), 529–554. <https://doi.org/10.1086/214483>. Attitude statements placed on a continuum by where they sit.
+- Coombs, C. H. (1964). *A theory of data*. Wiley. <https://openlibrary.org/works/OL1361275W>. Unfolding, the parallelogram and the geometry of preference. [Flament's (1966) review](https://doi.org/10.1007/bf02289474) summarizes it.
+- Guttman, L. (1944). A basis for scaling qualitative data. *American Sociological Review*, 9(2), 139–150. <https://doi.org/10.2307/2086306>. The scalogram, the dominance pattern the parallelogram is set against.
+- Duck-Mayr, J., & Montgomery, J. (2023). Ends against the middle: Measuring latent traits when opposites respond the same way for antithetical reasons. *Political Analysis*, 31(4), 606–625. <https://doi.org/10.1017/pan.2022.33>. The immigration statements, and the GGUM for survey and roll-call data. Data: Duck-Mayr & Montgomery (2023), replication data, Harvard Dataverse, <https://doi.org/10.7910/DVN/HXORK9> (CC0); the IRW table `duckmayr_2023_immigration` is to follow.
+- Duck-Mayr, J., & Montgomery, J. (2020). *bggum: Bayesian estimation of generalized graded unfolding model parameters* [R package]. <https://doi.org/10.32614/CRAN.package.bggum>. The package the authors fit the GGUM with.
+- Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. *Applied Psychological Measurement*, 12(1), 33–51. <https://doi.org/10.1177/014662168801200105>. The capital-punishment statements and a model for them.
+- Andrich, D., & Luo, G. (1993). A hyperbolic cosine latent trait model for unfolding dichotomous single-stimulus responses. *Applied Psychological Measurement*, 17(3), 253–276. <https://doi.org/10.1177/014662169301700307>. The hyperbolic cosine model.
+- Andrich, D. (1997). A hyperbolic cosine IRT model for unfolding direct responses of persons to items. In W. J. van der Linden & R. K. Hambleton (Eds.), *Handbook of modern item response theory* (pp. 399–414). Springer. <https://doi.org/10.1007/978-1-4757-2691-6_23>. The model as a handbook chapter.
 - Andrich, D. (2016). Hyperbolic cosine model for unfolding responses. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 353–367). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the hyperbolic cosine unfolding model, by its originator.
+- Roberts, J. S., Donoghue, J. R., & Laughlin, J. E. (2000). A general item response theory model for unfolding unidimensional polytomous responses. *Applied Psychological Measurement*, 24(1), 3–32. <https://doi.org/10.1177/01466216000241001>. The GGUM.
 - Roberts, J. S. (2016). Generalized graded unfolding model. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 369–390). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the generalized graded unfolding model.
+- Tendeiro, J. N., & Castro-Alvarez, S. (2019). GGUM: An R package for fitting the generalized graded unfolding model. *Applied Psychological Measurement*, 43(2), 172–173. <https://doi.org/10.1177/0146621618772290>. The package used here.
+- Maydeu-Olivares, A., Hernández, A., & McDonald, R. P. (2006). A multidimensional ideal point item response theory model for binary data. *Multivariate Behavioral Research*, 41(4), 445–472. <https://doi.org/10.1207/s15327906mbr4104_2>. A bell-shaped ideal-point item for binary data, the form of `mirt`'s `"ideal"` itemtype.
+- van Schuur, W. H. (1992). Nonparametric unidimensional unfolding for multicategory data. *Political Analysis*, 4, 41–74. <https://doi.org/10.1093/pan/4.1.41>. MUDFOLD, and unfolding without a parametric curve.
+- Balafas, S. E., Krijnen, W. P., Post, W. J., & Wit, E. C. (2020). mudfold: An R package for nonparametric IRT modelling of unfolding processes. *The R Journal*, 12(1), 49–75. <https://doi.org/10.32614/rj-2020-002>. The `mudfold` package, which distributes both data sets.
+- Drasgow, F., Chernyshenko, O. S., & Stark, S. (2010). 75 years after Likert: Thurstone was right! *Industrial and Organizational Psychology*, 3(4), 465–476. <https://doi.org/10.1111/j.1754-9434.2010.01273.x>. The case for ideal-point models of attitude and personality items.
+- Stark, S., Chernyshenko, O. S., Drasgow, F., & Williams, B. A. (2006). Examining assumptions about item responding in personality assessment: Should ideal point methods be considered for scale development and scoring? *Journal of Applied Psychology*, 91(1), 25–39. <https://doi.org/10.1037/0021-9010.91.1.25>. Dominance and ideal-point models compared on personality items (problem 6).
+- Brown, A. (2016). Item response models for forced-choice questionnaires: A common framework. *Psychometrika*, 81(1), 135–160. <https://doi.org/10.1007/s11336-014-9434-9>. Choice formats under dominance and ideal-point processes.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package, whose `itemtype` list includes the ideal-point, GGUM and hyperbolic cosine items.
+- Akaike, H. (1974). A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>. The AIC.
+
+```{r ojs-data}
+#| echo: false
+# The capital-punishment responses for the parallelogram widget.
+ojs_define(mud_rows = mud)
+```
 
 ```{r}
 #| output: asis
@@ -32,3 +451,11 @@ data_sources("unfolding")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 9 (slides c9, 13–14, "The unfolding model"), problem set 9 (#3, "Dominant or unfolding?") and problem set 2 (#5c, now in [Where CTT breaks](ctt-limits.qmd)); code in `ben-domingue/252`: `ps9/unfold.R`. Slide 14's pointer to Andrich's handbook chapter is Andrich (1997).
+- **Timing:** the core ideas and widgets take about 45 minutes; the analyses work as a 30-minute lab. The real-data code takes under three minutes in local R, most of it the held-out comparison and the GGUM fits.
+- **Changed from 252:** PS9#3 compared the Rasch and ideal-point models on the capital-punishment statements. The main example is now Duck-Mayr and Montgomery's (2023) immigration survey (Ben, 09-25), with the GRM, the GGUM and a mixed model compared in and out of sample; the capital-punishment analysis adds the 2PL (so the dominance model can have negative slopes) and the GGUM. The `GGUM` package doesn't run in the browser, so the GGUM is fitted only in the real-data section, at render time; Simulate uses `mirt`.
+- **Interim data:** `duckmayr_2023_immigration` isn't public on the IRW yet. The lesson reads a copy in `lessons/data/` (provenance in `lessons/data/duckmayr_2023_immigration.md`), so the Data sources block doesn't list it and `lessons.yml` doesn't yet name it under `tables:`. Switch to the IRW URL when the landing page is live. Only the immigration battery is used, not the deposit's roll-call or IFE data.
+- **Reuse:** `andrich_mudfold` also appears in [Where CTT breaks](ctt-limits.qmd), where the two middle statements' curves turn over against a score on the other six.
+- **Held back:** multidimensional unfolding; rankings and paired comparisons as unfolding data (`franco_2024_unfolding`, problem 6 only); ideal-point models for personality items (problem 6 only); graded (Likert) unfolding beyond a mention of the GGUM.
+- **Item text:** three immigration statements (IMM_1, IMM_2, IMM_3) are quoted from the survey export in the replication data (CC0), checked word for word; the other seven are summarized. Of the capital-punishment statements only WISHNOTNEC is quoted (as in [Where CTT breaks](ctt-limits.qmd)), in the wording of the `mudfold` package's `ANDRICH` help page, cited to Andrich (1988); it hasn't been checked against the printed article.
+- **Solutions:** held back in `solutions/unfolding.qmd` (not published). Problem 6 is open.

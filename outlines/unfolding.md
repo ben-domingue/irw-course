@@ -2,7 +2,7 @@
 
 # Unfolding models (`unfolding`)
 
-Module: beyond · Prereqs: polytomous · Extension · Status: outline
+Module: beyond · Prereqs: polytomous · Extension · Status: draft (#52)
 
 ## Core ideas
 
@@ -63,3 +63,24 @@ References checked on Crossref (09-24) unless marked. Claude's checks before dra
 ## Open questions
 
 - **Verdict (F32, on hold with Ben).** Candidate: "if the statements weren't written to span the middle, the dominance model is enough" (Claude's reading of PS9#3 and the AIC result). *Default while on hold:* the draft carries the candidate in a hidden TODO, not on the page, and the lesson's first-person verdict waits for Ben.
+
+## Drafting notes (09-25, #52)
+
+What the draft changed or dropped, against the plan above:
+
+- **Runs.** The GGUM places the three "against" statements within 0.02 of each other, so "GGUM order" isn't one order. The lesson counts runs in Andrich's order (39 of 54) and over all 40,320 orders (mean 5.4, best 40, which is Andrich's order with neighbours swapped).
+- **AIC.** Recomputed: Rasch 594.6, ideal 436.5, 2PL 422.0 (EM stops at its limit: CRIMDESERV's slope grows without bound), GGUM (GGUM package) 422.1 with 24 parameters. BIC prefers the 2PL. One ideal-point item at a time: none below 422.0 (closest DETERRENT 422.5, WISHNOTNEC 422.6).
+- **GGUM in webR.** The `GGUM` package isn't on the webR repo (it imports `xlsx`), and `mirt`'s `ggum` itemtype fails on these dichotomous data (NaN gradient). So the GGUM is fitted only in the real-data section at render time (about 30 s); Simulate uses `mirt`'s `ideal` item. The ideal-point fit in Simulate needs data-based starting values (default starts land on a poor local maximum; recorded in the code). `mirt`'s `hcm` works but took about 50 s and didn't converge on the simulated data, so it isn't used.
+- **Simulate result.** With a correct start, the ideal-point model still edges the 2PL on end statements only in large samples; with 500 respondents the two tie (AIC 2,296 vs 2,297), and the ideal model wins by about 1,400 points with all 20 statements.
+- **Notation.** Statement location is $b$ (notation.md) and the HCM's unit parameter is written $\tau$, to keep $\lambda$ for loadings. Proposed for notation.md in the PR.
+- **Negative slopes pick-up.** `1pl-to-4pl` as drafted doesn't discuss negative slopes, so there is no Recall for it; the lesson states the point directly.
+- **Andrich's (1988) scale values.** Not checked (article paywalled); the lesson compares the data's order with the order the statements come in.
+- **Item text (F31).** All eight statements quoted in one table, from the `mudfold` help page, cited to Andrich (1988); within SAGE's pre-approved reuse (≤ 200 words from one article). Not checked against the printed article.
+- **Verdict (F32).** Hidden TODO in the page at the end of the capital-punishment analysis.
+
+## Rebuild with Duck-Mayr & Montgomery (2023) (09-25, Ben)
+
+- **Main example is now `duckmayr_2023_immigration`**: ten immigration statements, 2,621 respondents, 0–4. It's an interim local copy in `lessons/data/` until the IRW landing page is live, so it isn't in `tables:` yet. IMM_2 is single-peaked by self-placed ideology in the raw data (0.44 … 0.59 … 0.51) and correlates about 0 with the ends. In sample: GRM AIC 73,068, GGUM 72,774, mixed (GGUM for IMM_2/4/6/8, GRM for the rest) 72,500. On a 10% held-out split: GRM −1.3606, GGUM −1.3718, mixed −1.3487. The GGUM needs data-based starts in `mirt`.
+- **`andrich_mudfold` is cut to a short section**: correlations, runs, and AIC for Rasch, 2PL, ideal and GGUM. Dropped: the statement table (only WISHNOTNEC is quoted now), the MUDFOLD fit, the parameter and curve chunks, and the one-at-a-time mixed models.
+- **`eurpar2_mudfold`** is shortened.
+- **Verdict (F32)**: the hidden TODO candidate now has two halves, one for each data set.

@@ -8,19 +8,374 @@ source("_course.R")
 lesson_header("parameter-invariance")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {p2pl, grid, rng, logisticFit, normalQuantiles, palette} from "./widgets/irt.js"
+import {sampleRange, fitItem, binned, slopeSpread, selectionCorrelations} from "./widgets/parameter-invariance.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+An item's difficulty is supposed to belong to the item, not to whoever happened to answer it. That is the promise behind calibrating items once and using them for years, and behind the specific objectivity of [The Rasch model](rasch.qmd). Does it hold? It depends on how you check. On the Multiracial Reading the Mind in the Eyes Test, item estimates from random halves of the sample agree almost perfectly, and estimates from women and from men nearly as well. Split the same respondents into high and low scorers on the test itself, and the 2PL's estimates collapse: slopes near zero, difficulties unrelated. The items haven't changed. The split has. This lesson separates what the model promises from what estimates can deliver, and shows why one way of splitting a sample undoes the check it was meant to perform.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what parameter invariance claims, and why it is a property of the model rather than of any set of estimates;
+- explain why two groups' estimates sit on different scales, and derive how 2PL slopes and difficulties change with a group's mean and SD of ability;
+- explain why a group drawn from a narrow range of ability gives imprecise item estimates;
+- explain why selecting respondents on the sum score of the same items distorts 2PL estimates, and why the Rasch model fitted by conditional maximum likelihood is not affected;
+- check invariance in real data with `mirt`, and choose a split that tests it.
+
 ## Core ideas
 
-## Worked example
+### Invariance belongs to the model
+
+What does it mean for an item's parameters to be the same in two groups? Think of a regression line. If $y$ depends linearly on $x$ in a population, a sample drawn only from small values of $x$ and a sample drawn only from large ones estimate the same line, though each sees only part of it. An item characteristic curve is a regression of the response on $\theta$, so the same holds: if the 2PL is true in a population, the same $a$ and $b$ govern responses in every subgroup of it, whatever its range of ability ([Lord, 1980](https://doi.org/10.4324/9780203056615); [Rupp & Zumbo, 2006](https://doi.org/10.1177/0013164404273942)).
+
+[Baker (2001, ch. 3, pp. 51–55)](https://eric.ed.gov/?id=ED458219) illustrates this with two groups of respondents, one with abilities from −3 to −1 and one from +1 to +3. Fitting the item's curve to each group separately gives $b = -0.39$ and $a = 1.27$ both times: one group sees the lower tail, the other the upper tail, and both tails belong to one curve. The widget repeats the exercise. As in Baker's illustration, the abilities are known, so each fit is a logistic regression on $\theta$.
+
+#### Try it: two groups, one curve
+
+```{ojs}
+//| echo: false
+viewof bk_c1 = Inputs.range([-3, 3], {value: -2, step: 0.1, label: "Group 1: centre of its ability range"})
+viewof bk_c2 = Inputs.range([-3, 3], {value: 2, step: 0.1, label: "Group 2: centre of its ability range"})
+viewof bk_n = Inputs.range([100, 5000], {value: 1000, step: 100, label: "Respondents per group"})
+viewof bk_noise = Inputs.toggle({label: "Sampling error (off = Baker's idealized proportions)", value: true})
+```
+
+```{ojs}
+//| echo: false
+bk_a = 1.27
+bk_b = -0.39
+bk_fit = (c, r) => {
+  if (!bk_noise) {
+    const th = grid(c - 1, c + 1, 21), f = logisticFit(th, th.map(t => p2pl(t, bk_b, bk_a)), th.map(() => 1));
+    return {pts: th.map(t => ({theta: t, p: p2pl(t, bk_b, bk_a)})), fit: {a: f.b1, b: -f.b0 / f.b1}};
+  }
+  const s = sampleRange(r, bk_n, c - 1, c + 1, bk_a, bk_b);
+  return {pts: binned(s.theta, s.y), fit: fitItem(s.theta, s.y)};
+}
+bk_groups = { const r = rng(7); return [bk_fit(bk_c1, r), bk_fit(bk_c2, r)]; }
+bk_g1 = bk_groups[0]
+bk_g2 = bk_groups[1]
+bk_curve = (g, name) => g.fit ? grid(-4, 4).map(t => ({theta: t, p: p2pl(t, g.fit.b, g.fit.a), curve: name})) : []
+Plot.plot({
+  width: 700, height: 330, x: {label: "Ability θ", domain: [-4, 4]}, y: {label: "P(correct)", domain: [0, 1]},
+  color: {legend: true, domain: ["Group 1 fit", "Group 2 fit"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.line(grid(-4, 4).map(t => ({theta: t, p: p2pl(t, bk_b, bk_a)})), {x: "theta", y: "p", stroke: palette.guide, strokeDasharray: "4 3"}),
+    Plot.line([...bk_curve(bk_g1, "Group 1 fit"), ...bk_curve(bk_g2, "Group 2 fit")], {x: "theta", y: "p", stroke: "curve", strokeWidth: 2}),
+    Plot.dot(bk_g1.pts, {x: "theta", y: "p", fill: palette.main, r: 3}),
+    Plot.dot(bk_g2.pts, {x: "theta", y: "p", fill: palette.contrast, r: 3})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+bk_txt = g => g.fit ? `a = ${g.fit.a.toFixed(2)}, b = ${g.fit.b.toFixed(2)}` : "no estimate (every response the same)"
+md`True item (dashed): a = 1.27, b = −0.39. Group 1: ${bk_txt(bk_g1)}. Group 2: ${bk_txt(bk_g2)}.`
+```
+
+With sampling error off, both groups recover the true curve exactly, wherever you put them: that is Baker's figure. Turn sampling error on and the estimates wobble, most for a group far from the item. At the defaults, group 2 sits where nearly everyone answers correctly, and its proportions say little about the curve's shape. Add respondents and both fits close in on the dashed line. Invariance is a statement about the curve; estimates only approach it.
+
+Compare the classical difficulty, the proportion correct. At the defaults it is about 0.15 in group 1 and above 0.9 in group 2 (read the points). Baker makes the same contrast: the proportion correct describes an item *in a group*, while $b$ describes the item.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An item is answered correctly by 30% of one school's students and 80% of another's. Can we conclude that its IRT parameters differ between the schools?",
+  options: [
+    {text: "Yes: the item behaves differently in the two schools", correct: false, why: "Not from this. The proportion correct depends on the students' abilities as well as on the item, so a stronger school gets a higher proportion from the same curve."},
+    {text: "No: the proportions could come from one curve and two different ability distributions", correct: true, why: "If the model holds, the same $a$ and $b$ produce different proportions correct in groups of different ability. That is the point of Baker's two groups."},
+    {text: "Yes, unless both schools have more than 1,000 students", correct: false, why: "Sample size affects how precisely we estimate each proportion, not whether a difference in proportions reflects the item or the students."}
+  ]
+})
+```
+
+### Estimates live on local scales
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): only $\theta - b$ is identified, so the scale has no origin, and `mirt` sets one by fixing the mean ability at 0. [From the 1PL to the 4PL](1pl-to-4pl.qmd) added the unit: the 2PL sees only $a(\theta - b)$, so `mirt` fixes the SD of ability at 1.
+:::
+
+Baker's groups share a scale because their abilities are known. In practice they aren't, and each group's fit sets the origin and unit by that group. Suppose group $g$'s abilities have mean $\mu_g$ and SD $\sigma_g$ on the population's scale. The fit reports $\theta^* = (\theta - \mu_g)/\sigma_g$, and to keep every $a(\theta - b)$ unchanged it must report
+$$a^* = a\,\sigma_g, \qquad b^* = \frac{b - \mu_g}{\sigma_g}.$$
+A stronger group makes every item look easier by the same amount, and a more homogeneous group makes every slope look flatter. Under the Rasch model the slopes are fixed at 1, so only the shift remains. Nothing about the items has changed; the numbers are on local scales. Putting them on one scale is **linking** ([Stocking & Lord, 1983](https://doi.org/10.1177/014662168300700208); [Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7)).
+
+#### Try it: two local scales
+
+```{ojs}
+//| echo: false
+viewof ls_mu = Inputs.range([-2, 2], {value: 1, step: 0.1, label: "Group B's mean ability, relative to group A"})
+viewof ls_sd = Inputs.range([0.4, 2], {value: 0.6, step: 0.05, label: "Group B's SD of ability, relative to group A"})
+viewof ls_link = Inputs.toggle({label: "Link B to A (mean–sigma)", value: false})
+```
+
+```{ojs}
+//| echo: false
+ls_b = normalQuantiles(15, 0, 1)
+ls_est = { const r = rng(40); return ls_b.map(b => ({A: b + 0.08 * r.norm(), B: (b - ls_mu) / ls_sd + 0.08 * r.norm()})); }
+ls_mean = v => v.reduce((u, w) => u + w, 0) / v.length
+ls_sdv = v => { const m = ls_mean(v); return Math.sqrt(v.reduce((u, w) => u + (w - m) ** 2, 0) / (v.length - 1)); }
+ls_Aconst = ls_sdv(ls_est.map(d => d.A)) / ls_sdv(ls_est.map(d => d.B))
+ls_Bconst = ls_mean(ls_est.map(d => d.A)) - ls_Aconst * ls_mean(ls_est.map(d => d.B))
+ls_pts = ls_est.map(d => ({A: d.A, B: ls_link ? ls_Aconst * d.B + ls_Bconst : d.B}))
+Plot.plot({
+  width: 520, height: 420, x: {label: "Difficulty estimated in group A", domain: [-5, 5]}, y: {label: ls_link ? "Group B's estimate, linked to A's scale" : "Difficulty estimated in group B", domain: [-5, 5]},
+  marks: [
+    Plot.line([[-5, -5], [5, 5]], {stroke: palette.guide, strokeDasharray: "4 3"}),
+    Plot.dot(ls_pts, {x: "A", y: "B", fill: ls_link ? palette.main : palette.contrast, r: 5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`${ls_link ? `Linked: B's estimates are multiplied by ${ls_Aconst.toFixed(2)} and shifted by ${ls_Bconst.toFixed(2)}, and the points fall on the identity line (dashed) up to estimation error.` : `Unlinked: the points lie near a line with slope ${(1 / ls_sd).toFixed(2)} (one over B's relative SD) and intercept ${(-ls_mu / ls_sd).toFixed(2)}, not on the identity line (dashed).`}`
+```
+
+Before linking, the fifteen items lie on a straight line, just not the identity line: its intercept comes from the difference in means and its slope from the ratio of SDs. With B's mean at 0 and SD at 1 the line is the identity. Link, and the points fall on it whatever the sliders say. A straight line in this plot is what invariance predicts. What it doesn't predict is an item off the line.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Linking and equating](equating.qmd): these are the mean–sigma constants that lesson used on TIMSS booklets, and its Stocking–Lord method does the same job through the characteristic curves.
+:::
+
+::: {.callout-note collapse="true"}
+## Go deeper: the linear indeterminacy of 2PL estimates across groups
+
+**Assumptions:** the 2PL holds in a population with item parameters $a_i, b_i$; group $g$'s abilities are normal with mean $\mu_g$ and SD $\sigma_g$ on the population's scale; the software fixes each group's mean at 0 and SD at 1.
+
+**One group.** Write $\theta = \mu_g + \sigma_g\theta^*$, so that $\theta^*$ has mean 0 and SD 1 in group $g$. Then
+$$a_i(\theta - b_i) = a_i(\mu_g + \sigma_g\theta^* - b_i) = a_i\sigma_g\Big(\theta^* - \frac{b_i - \mu_g}{\sigma_g}\Big),$$
+so the group's responses follow a 2PL in $\theta^*$ with $a_i^* = a_i\sigma_g$ and $b_i^* = (b_i - \mu_g)/\sigma_g$.
+
+**Two groups.** Eliminate $b_i$ using $b_i = \mu_1 + \sigma_1 b_{i1}^*$:
+$$b_{i2}^* = \frac{\sigma_1}{\sigma_2}\,b_{i1}^* + \frac{\mu_1 - \mu_2}{\sigma_2}, \qquad a_{i2}^* = \frac{\sigma_2}{\sigma_1}\,a_{i1}^*.$$
+Every item obeys the same $A = \sigma_1/\sigma_2$ and $B = (\mu_1 - \mu_2)/\sigma_2$: difficulties map by $b_2 = A b_1 + B$ and slopes by $a_2 = a_1/A$, the linking relation of [Linking and equating](equating.qmd). Because $A$ and $B$ are common to all items, two sets of estimates carry a test of invariance: after the best common $A$ and $B$, the items should agree up to estimation error. An item that doesn't is functioning differently in the two groups ([Differential item functioning](dif.qmd)).
+
+**What bends it.** The normal shape enters only through the software's assumption: a group selected on $\theta$ has a truncated distribution, which bends the estimates slightly. A group selected on the responses themselves breaks a deeper assumption, taken up two sections below.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two groups' 2PL difficulty estimates satisfy $b_B \\approx 0.5\\,b_A - 1$ for every item. What is the most likely explanation?",
+  options: [
+    {text: "Every item works differently in the two groups", correct: false, why: "A common linear relation for all items is what invariance predicts when the groups differ in ability. Differential functioning would put individual items off the line."},
+    {text: "Group B is stronger and more spread out than group A", correct: true, why: "The slope is $\\sigma_A/\\sigma_B = 0.5$, so B's SD is twice A's, and the negative intercept says B's mean is higher: items look easier to B. Linking removes both."},
+    {text: "Group B's estimates didn't converge", correct: false, why: "Non-convergence wouldn't produce a clean linear relation across every item."}
+  ]
+})
+```
+
+### Narrow groups give imprecise estimates
+
+Baker's groups were two logits wide. What if a group covers only a sliver of the scale? The slope is how fast the curve rises, and a group that spans a narrow range sees little rise to measure.
+
+#### Try it: how wide a range?
+
+```{ojs}
+//| echo: false
+viewof rr_w = Inputs.range([0.25, 6], {value: 4, step: 0.25, label: "Width of the ability range sampled"})
+viewof rr_c = Inputs.range([-3, 3], {value: 0, step: 0.1, label: "Centre of the range"})
+```
+
+```{ojs}
+//| echo: false
+rr = slopeSpread(11, 200, 300, rr_c - rr_w / 2, rr_c + rr_w / 2, 1.27, -0.39)
+rr_sd = (() => { const v = rr.slopes, m = v.reduce((u, w) => u + w, 0) / v.length; return Math.sqrt(v.reduce((u, w) => u + (w - m) ** 2, 0) / (v.length - 1)); })()
+Plot.plot({
+  width: 700, height: 260, x: {label: "Estimated slope a (true 1.27), 200 samples of 300 respondents", domain: [-1, 4]}, y: {label: "Samples"},
+  marks: [
+    Plot.rectY(rr.slopes.filter(a => a > -1 && a < 4), Plot.binX({y: "count"}, {x: d => d, thresholds: grid(-1, 4, 51), fill: palette.main})),
+    Plot.ruleX([1.27], {stroke: palette.contrast, strokeWidth: 2})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`SD of the slope estimates: **${rr_sd.toFixed(2)}**. ${(100 * rr.slopes.filter(a => Math.abs(a - 1.27) < 0.25).length / 200).toFixed(0)}% of samples land within 0.25 of the truth${rr.failed ? `; ${rr.failed} gave no estimate at all` : ""}.`
+```
+
+At a width of 4 the estimates cluster around 1.27, with an SD of 0.15. Narrow the range to 1 and the SD triples; at 0.5 some samples give a slope below zero. Move the centre away from $b = -0.39$ and the spread grows again, since a group far from the item sees only a flat stretch of curve. The item is the same in every setting; what shrinks is the information about it. A restricted group mostly costs precision.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Information, precision, and short forms](information.qmd): there, an item told us most about respondents near its difficulty. Turn it around and a respondent tells us most about an item near their ability: to pin down a slope, we need respondents on both sides of $b$.
+:::
+
+### Splitting on the sum score selects on the outcome
+
+A narrow range of $\theta$ costs precision. Selecting on the *responses* does something else. Suppose we split respondents into high and low scorers on the test we are calibrating. Within the high half the sum score can't be low, so a respondent who missed one item must have made it up on others: among respondents with similar sum scores, answering one item correctly makes answering another less likely. Selection has introduced a dependence between items that has nothing to do with $\theta$, so local independence no longer holds within the group. The sum score is a common effect of every item, and selecting on a common effect induces dependence between its causes, a problem known well beyond psychometrics ([Elwert & Winship, 2014](https://doi.org/10.1146/annurev-soc-071913-043455)). A 2PL fit reads the items' correlations as evidence of a common $\theta$, and in a selected half those correlations are close to zero.
+
+#### Try it: what selection does to the correlations
+
+```{ojs}
+//| echo: false
+viewof sel_k = Inputs.range([4, 40], {value: 20, step: 1, label: "Number of items"})
+viewof sel_a = Inputs.range([0.3, 2.5], {value: 0.6, step: 0.1, label: "Slope of every item"})
+```
+
+```{ojs}
+//| echo: false
+sel = selectionCorrelations(3, 2000, sel_k, sel_a)
+Plot.plot({
+  width: 700, height: 230, marginLeft: 180, x: {label: "Mean correlation between pairs of items (2,000 simulated respondents)", domain: [-0.25, 0.5]},
+  y: {label: null, domain: sel.map(d => d.group)},
+  color: {domain: ["none", "ability", "sum score"], range: [palette.ink, palette.main, palette.contrast]},
+  marks: [Plot.ruleX([0], {stroke: palette.rule}), Plot.dot(sel, {x: "r", y: "group", fill: "split", r: 6})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Everyone: **${sel[0].r.toFixed(3)}**. Upper half split on true ability: **${sel[1].r.toFixed(3)}**. Upper half split on the sum score: **${sel[3].r.toFixed(3)}**.`
+```
+
+Splitting on true ability lowers the correlations, because each half has a narrower range of $\theta$ (the previous section). Splitting on the sum score lowers them further, to about zero at the defaults. With four or five items it pushes them well below zero, since a fixed sum spread over a few items forces a trade-off between them. Raise the slope and every correlation rises, but the sum-score halves stay below the ability halves at every setting.
+
+What about the Rasch model? There the sum score is sufficient, and conditional maximum likelihood estimates the difficulties from the responses *given* the sum score. Selecting respondents by that sum score leaves the conditional likelihood unchanged.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): specific objectivity asks that comparisons between items not depend on which respondents are used. Conditioning on the sum score removes $\theta$, so under the Rasch model the conditional ML difficulties from high and low scorers should agree, and [Andersen (1973)](https://doi.org/10.1007/BF02291180) turned that comparison into a likelihood-ratio test.
+:::
+
+So the split that distorts a 2PL calibration is the one Andersen's test is built on. The difference lies in what each fit conditions on. The 2PL's marginal likelihood assumes the responses are independent given $\theta$, and selection on the sum score undoes that. The Rasch conditional likelihood takes the sum score as given, so the selection has nothing left to undo.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "You split respondents at the median of their sum score on 20 items and fit a 2PL to the same 20 items in the top half. Most slopes come out near 0. What is the most likely explanation?",
+  options: [
+    {text: "Among strong respondents, the items don't measure the construct", correct: false, why: "It could happen, but it isn't needed. Selecting on the sum score by itself pushes the items' correlations toward zero, and the 2PL reads that as flat curves."},
+    {text: "The selection removed the correlations the 2PL relies on", correct: true, why: "Within a band of sum scores, a correct answer on one item makes others less likely. The items look unrelated, so the slopes shrink toward 0."},
+    {text: "The top half is too small to estimate slopes", correct: false, why: "Half of a large sample is still large. Small samples make slopes noisy, not systematically near zero."}
+  ]
+})
+```
+
+### When invariance fails for real
+
+Estimation error, local scales and selection all make estimates differ when the items don't. What is left after linking, in groups formed without selecting on the responses, is a difference in the items themselves. An item that is relatively harder for one group than another at the same $\theta$ shows **differential item functioning** ([Holland & Wainer, 1993](https://doi.org/10.4324/9780203357811)), the subject of [Differential item functioning](dif.qmd). One limit is worth stating now. A shift common to every item can't be told apart from a difference between the groups' abilities, so invariance is checked item against item, never for the test as a whole.
+
+## Simulate
+
+The code below simulates one population answering 20 items from a 2PL, then splits the respondents three ways: at random, on their true ability, and on their sum score. It fits the 2PL separately in each half and compares the estimates with the true parameters *re-expressed on that half's scale* ($a\sigma_g$ and $(b - \mu_g)/\sigma_g$, from the Go deeper callout). It runs in your browser; the first run takes a minute or more: 20–30 seconds while R and `mirt` load, then six fits.
+
+With the seed as written, the random halves recover the slopes well (correlations of 0.94 and 0.91 with the truth). Halves split on true ability recover them less precisely (0.46 and 0.63) but at about the right level: median slopes of 0.65 and 0.56, against 0.56 and 0.58 on each half's own scale. Halves split on the sum score get them too small: medians of 0.38 and 0.32, against 0.64 and 0.67. The last lines show why. The mean correlation between items is 0.149 in everyone, 0.052 in the upper half by ability and 0.019 in the upper half by sum score.
+
+Try `ni <- 5`, and the sum-score halves get worse, as the widget suggested. Try `np <- 10000` in your own R session: the ability halves close in on the truth, while the sum-score halves stay too flat, because more data doesn't undo selection.
+
+```{webr}
+{{< include code/parameter-invariance-sim.R >}}
+```
+
+[Download this code](code/parameter-invariance-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/parameter-invariance-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Our main example is [wilmer-mrmet-normative-data-set-2022](https://itemresponsewarehouse.org/tables/wilmer-mrmet-normative-data-set-2022/), the normative sample for the Multiracial Reading the Mind in the Eyes Test (MRMET; [Kim et al., 2024](https://doi.org/10.3758/s13428-023-02323-x)). Like the RMET of [From the 1PL to the 4PL](1pl-to-4pl.qmd), each item shows the eye region of a face and offers four words for the mental state it shows; the MRMET uses racially inclusive faces and answer choices that aren't gendered. Its job here is to be a large sample with background variables, which we can split several ways to see which splits the item estimates survive. A response is 1 when the respondent chose the correct word. [Download the code](code/parameter-invariance-irw.R) to run every chunk yourself.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+All 9,295 respondents answered all 37 items. The IRW marks the table as longitudinal because respondents were tested on different dates, but each has one date. The items run from 30% to 92% correct, and they correlate weakly with one another: 0.065 on average, close to what the selection widget's 20 items with slopes of 0.6 produce and less than half the simulation's 0.149. Weak correlations leave a restricted sample less to work with.
+
+We fit the Rasch model and the 2PL in each half of four splits: random halves; women and men (the 419 respondents who reported genderqueer are left out of this split only, a group too small for its own 2PL calibration); high and low scorers on these 37 items; and, for the 18 even-numbered items, high and low scorers on the 19 odd-numbered ones.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Which pair of groups will give 2PL item difficulties that agree better: women and men, or high and low scorers on the test?",
+  choices: ["Women and men", "High and low scorers", "About the same"],
+  answer: "Women and men",
+  reveal: "Women and men: the 2PL difficulties correlate 0.96. Between high and low scorers they correlate −0.05, and the slopes in the high half have a median of −0.04. The table below has all four splits."
+})
+```
+
+```{r compare}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot}
+#| echo: true
+#| code-fold: show
+#| fig-width: 9
+#| fig-height: 4.5
+```
+
+Read the table a row at a time.
+
+- **Random halves.** Rasch difficulties correlate 1.00, 2PL difficulties 0.99 and 2PL slopes 0.97. This is the baseline: two samples from one population, differing only by estimation error.
+- **Women and men.** Rasch difficulties correlate 0.99, with a shift of −0.24: on the women's scale every item is about a quarter of a logit easier, which the model reads as women scoring higher on average, not as items that differ. The 2PL slopes agree less well (0.92), but slopes are the noisier parameter even between random halves (0.97).
+- **High and low scorers.** The Rasch difficulties still correlate 0.96, shifted by 1.18 logits, the difference between the groups' means. The 2PL collapses: its difficulties correlate −0.05, and the median slope is −0.04 in the high half and 0.19 in the low half. The mean correlation between items is −0.003 in the high half, as the selection widget predicted.
+- **Even items, split on the odd items.** Selecting on other items avoids the common-effect problem, but the halves are narrower in ability, since the odd-item score tracks $\theta$. The 2PL difficulties correlate 0.77 and the slopes 0.76, better than the sum-score split and worse than random halves: the cost of a restricted range.
+
+```{r slopes-score}
+#| echo: true
+#| code-fold: show
+```
+
+Among high scorers the 2PL slopes run from −0.68 to 0.75; in the full sample the same items run from 0.21 to 1.19, median 0.60. A negative slope says that stronger respondents are less likely to answer correctly, and selection produced it here from items that all rise with ability in the full sample. With slopes near zero, $b = -d/a$ divides by almost nothing, which is why some difficulties fall off the plot, as Y15's did in [From the 1PL to the 4PL](1pl-to-4pl.qmd).
+
+What does the Rasch model's 0.96 on that split mean? Under conditional ML the split is Andersen's test, and legitimate:
+
+```{r cml}
+#| echo: true
+#| code-fold: show
+```
+
+The conditional ML difficulties from the two halves correlate 0.963, and the likelihood-ratio statistic is 1,588 on 36 degrees of freedom, far beyond what the Rasch model allows. Which items move? The shift in each item's difficulty between the halves correlates −0.98 with its 2PL slope in the full sample. Items that discriminate well look relatively easier to high scorers and harder to low scorers, which is what crossing curves do. Specific objectivity fails here in the way [From the 1PL to the 4PL](1pl-to-4pl.qmd) anticipated: the MRMET's items differ in slope.
+
+So how would I split a sample to check invariance? The assumptions first. A 2PL fit in each group assumes the responses are independent given $\theta$ within the group; the Rasch model fitted by conditional ML needs that only given the sum score. A split on the sum score of the calibrated items keeps the second and breaks the first. My choice is random halves for a baseline, then a background variable (gender, age, country) or a score on other items. I wouldn't split a 2PL calibration on the sum score of the items being calibrated. If the model is Rasch and the estimator is conditional ML, that split is Andersen's test, and I'd use it.
 
 ## Problems
 
+1. **Asymptotes and the Rasch model.** Using the Go deeper callout, show that a 3PL's lower asymptote $c$ is the same on every group's scale. Then show that under the Rasch model, where `mirt` fixes the slopes at 1 and estimates the SD of $\theta$, two groups' difficulties differ only by a shift. Where does the group's SD go?
+2. **Linking women and men.** Link the men's MRMET 2PL difficulties to the women's scale by mean–sigma. How close do the items get? Which item is furthest off after linking, and what is its slope?
+3. **Age.** Split the MRMET respondents into those under 25 and those over 40, and repeat the comparison. After removing the Rasch shift, which items differ most? Are the difficulties invariant, and how would you tell a real difference from estimation error?
+4. **A colleague's split.** A colleague checks a new test's calibration by fitting the 2PL separately to the top and bottom thirds of scorers, finds slopes near zero in both, and concludes that the items don't measure anything. What would you tell them, and what would you run instead?
+5. **Calibrating for a new population.** A test calibrated on adults will be used with 12- to 15-year-olds. You can collect data from 1,500 respondents. Whom would you sample, and why? What would you compare before trusting the adult parameters?
+6. **Challenge: fewer parameters, more invariance?** On every split, the Rasch difficulties agree better than the 2PL's. Is that a property of the MRMET's items, or of estimating one parameter per item instead of two? [Wright (1997)](https://doi.org/10.1111/j.1745-3992.1997.tb00606.x) makes the case for measurement whose item comparisons don't depend on the sample. Design a simulation that could tell the two apart. This one is open: I don't know of a general answer.
+
+```{r}
+#| output: asis
+ask_claude("parameter-invariance", "It covers parameter invariance in item response theory: why invariance is a property of the model rather than of estimates (Baker's two-group illustration), why estimates from different groups sit on local scales related by a linear transformation, why narrow ability ranges make item estimates imprecise, why splitting respondents on the sum score of the same items distorts 2PL estimates while the Rasch model with conditional maximum likelihood is unaffected (Andersen's test), and comparisons of Rasch and 2PL estimates across random halves, gender and score groups on the Multiracial Reading the Mind in the Eyes Test with mirt and psychotools in R.")
+```
+
 ## Going further
+
+- Baker, F. B. (2001). *The basics of item response theory* (2nd ed.). ERIC Clearinghouse on Assessment and Evaluation. <https://eric.ed.gov/?id=ED458219>. Chapter 3 has the two-group illustration and a warning about what estimates can show; free to read. The third edition, with R code, is Baker, F. B., & Kim, S.-H. (2017), *The basics of item response theory using R*, Springer, <https://doi.org/10.1007/978-3-319-54205-8>.
+- Rupp, A. A., & Zumbo, B. D. (2006). Understanding parameter invariance in unidimensional IRT models. *Educational and Psychological Measurement*, 66(1), 63–84. <https://doi.org/10.1177/0013164404273942>. Invariance stated exactly, as equality up to the model's linear transformations, and what item parameter drift does to response probabilities.
+- Lord, F. M. (1980). *Applications of item response theory to practical testing problems*. Erlbaum. <https://doi.org/10.4324/9780203056615>. Chapters on equating, tailored testing and item bias, each of which relies on item parameters that carry over from one group to another.
+- Andersen, E. B. (1973). A goodness of fit test for the Rasch model. *Psychometrika*, 38(1), 123–140. <https://doi.org/10.1007/BF02291180>. Comparing difficulties across score groups, as a likelihood-ratio test.
+- Stocking, M. L., & Lord, F. M. (1983). Developing a common metric in item response theory. *Applied Psychological Measurement*, 7(2), 201–210. <https://doi.org/10.1177/014662168300700208>. Putting two calibrations on one scale.
+- Kolen, M. J., & Brennan, R. L. (2014). *Test equating, scaling, and linking* (3rd ed.). Springer. <https://doi.org/10.1007/978-1-4939-0317-7>. Linking methods in full.
+- Holland, P. W., & Wainer, H. (Eds.). (1993). *Differential item functioning*. Erlbaum; Routledge reprint. <https://doi.org/10.4324/9780203357811>. What is left when invariance fails for real.
+- Elwert, F., & Winship, C. (2014). Endogenous selection bias: The problem of conditioning on a collider variable. *Annual Review of Sociology*, 40, 31–53. <https://doi.org/10.1146/annurev-soc-071913-043455>. The general form of the sum-score split's problem.
+- Wright, B. D. (1997). A history of social science measurement. *Educational Measurement: Issues and Practice*, 16(4), 33–45. <https://doi.org/10.1111/j.1745-3992.1997.tb00606.x>. The case for measurement whose item comparisons don't depend on the sample.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package for the marginal ML fits.
+- Zeileis, A., Strobl, C., Wickelmaier, F., Komboz, B., Kopf, J., Schneider, L., & Debelak, R. *psychotools: Infrastructure for psychometric modeling*. R package. <https://CRAN.R-project.org/package=psychotools>. The conditional ML fits.
+- Kim, H. A., Kaduthodil, J., Strong, R. W., Germine, L. T., Cohan, S., & Wilmer, J. B. (2024). Multiracial Reading the Mind in the Eyes Test (MRMET): An inclusive version of an influential measure. *Behavior Research Methods*, 56(6), 5900–5917. <https://doi.org/10.3758/s13428-023-02323-x>. The source of the MRMET data.
 
 ```{r}
 #| output: asis
@@ -29,3 +384,8 @@ data_sources("parameter-invariance")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 4 (slides c4, 35–43, "Parameter invariance", including the Baker illustration) and `c4/enem2.R` in `ben-domingue/252`.
+- **Timing:** the core ideas and widgets take about 50 minutes; the MRMET analysis works as a 25-minute lab. Its sixteen fits take a minute or two in local R.
+- **Changed from 252 (Ben, 09-24):** the slides use ENEM; this lesson uses the MRMET, which has a tokenless CSV and background variables to split on. Linking forms is left to [Linking and equating](equating.qmd). The sum-score split, and its contrast with Andersen's test, is this lesson's own finding in the data (C17).
+- **Held back:** linking methods ([Linking and equating](equating.qmd)); testing individual items across groups ([Differential item functioning](dif.qmd)); invariance of person parameters across item sets ([Linking and equating](equating.qmd), [Item banks and adaptive testing](item-banks-cat.qmd)).
+- **Solutions:** held back in `solutions/parameter-invariance.qmd` (not published).
