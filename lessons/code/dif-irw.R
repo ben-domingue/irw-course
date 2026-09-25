@@ -5,6 +5,72 @@
 # base R (no login or token needed), except the last chunk, which needs the mirt and
 # robustDIF packages; one chunk also checks the result against difR if installed.
 # Source: EDUC 252 class 5 (slides c5) and problem set 5 (#3, code ps5/dif_itemtext.R).
+# The first two chunks are the lesson's opening example, the Dutch Author Recognition
+# Test (slides c5; code c5/art.R).
+
+## ---- dart
+# The Dutch Author Recognition Test (Brysbaert, Sui, Dirix & Hintz, 2020): 132 names,
+# "is this person an author?". 42 names are made-up foils (the paper's Appendix A);
+# in the IRW table a checked name scores 1 whether or not it is a real author, so we
+# drop the foils and keep the 90 authors. 1 = recognized.
+dart_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v59_0.DART_Brysbaert_2020_1/rows?format=csv"
+dart <- read.csv(dart_url)
+dart$name <- sub("^Is de volgende persoon een auteur- \\[(.*)\\]$", "\\1", dart$item)
+foils <- c("Andrée Oudin", "Chiara Ricci", "E.L. Wilford", "E. Buxton", "Elizabeth Wigelsworth",
+  "Emily Oldani", "Emmanuelle Duvernay", "Eric Ferey", "Georges Roudaut", "H. M. van der Grinten",
+  "Hans Ulfsson", "Hendrik van Weenen", "1ne Jessup", "John Kestley", "John Punnett",
+  "Jorge Eudoro Remache", "Judith L. Schecter", "Kathryn Lightner", "Kelly Weaver",
+  "Kettil Christoffersen", "Kim Wassing", "Konstantin Ryschkov", "Kyra Appels", "Ludwig Lorenz",
+  "Mahmoud Abdellah", "Marcus Fernandes", "Mark Robin", "Martijn van der Worp",
+  "Mathijs L. van Bueren", "Melanie Marrero Morales", "Pablo Daniel Gonzalez", "Pim Duijster",
+  "Richard Grigley", "Robert Teesdale", "Roberto Borsani", "Roy Leeman", "Sara Lakin",
+  "Theresa Ziegler", "Tim Singler", "Tomas Arensman", "Yasushi Sugawara", "Zofia Kwiatkowski")
+c(foils_found = sum(foils %in% dart$name), names = length(unique(dart$name)))
+# (The IRW labels "1ne Jessup", "1ne Austen" and "1mes Patterson" stand for Jane and James.)
+aut <- dart[!dart$name %in% foils, ]
+A <- tapply(aut$resp, list(aut$id, aut$name), function(x) x[1])
+sex <- tapply(aut$cov_gender, aut$id, function(x) x[1])[rownames(A)]
+table(sex)
+women <- as.integer(sex == "Vrouw")
+total <- rowSums(A)
+c(authors = ncol(A), respondents = nrow(A), missing = sum(is.na(A)))
+round(tapply(total, sex, mean), 1)   # mean number of the 90 authors recognized
+# For each author: the difference between women and men in the proportion who
+# recognize the author, first raw, then at the same total (women's totals as
+# weights: the standardization approach of Dorans & Kulick, 1986), and a
+# Mantel-Haenszel test of no difference at the same total.
+std_gap <- function(y) {
+  pw <- tapply(y[women == 1], total[women == 1], mean)
+  pm <- tapply(y[women == 0], total[women == 0], mean)
+  k <- intersect(names(pw), names(pm))
+  wt <- table(total[women == 1])[k]
+  sum(wt * (pw[k] - pm[k])) / sum(wt)
+}
+mh_p <- function(y) {
+  keep <- total %in% as.numeric(names(which(table(total) > 1)))
+  tab <- table(factor(y[keep], 0:1), factor(women[keep], 0:1), total[keep])
+  mantelhaen.test(tab)$p.value
+}
+dres <- data.frame(raw_gap = colMeans(A[women == 1, ]) - colMeans(A[women == 0, ]),
+                   matched_gap = sapply(colnames(A), function(a) std_gap(A[, a])),
+                   p = sapply(colnames(A), function(a) mh_p(A[, a])))
+dres$p_holm <- p.adjust(dres$p, "holm")
+round(dres[order(dres$matched_gap), ][c(1:4, 87:90), ], 3)
+c(p_below_05 = sum(dres$p < 0.05), holm_below_05 = sum(dres$p_holm < 0.05))
+
+## ---- dart-plot
+# Recognition of four authors by total (in four bands), women and men.
+band <- cut(total, quantile(total, 0:4 / 4), include.lowest = TRUE)
+op <- par(mfrow = c(1, 4), mar = c(4, 3, 2, 0.5))
+for (a in c("Tom Clancy", "J.R.R. Tolkien", "1ne Austen", "Emily Brontë")) {
+  pr <- tapply(A[, a], list(band, women), mean)
+  plot(1:4, pr[, "0"], type = "b", pch = 19, col = "#999", ylim = c(0, 1), xaxt = "n",
+       xlab = "Total (quartile)", ylab = "", main = sub("1ne", "Jane", a), cex.main = 0.9)
+  lines(1:4, pr[, "1"], type = "b", pch = 19, col = "#2780e3")
+  axis(1, 1:4)
+}
+legend("bottomright", c("men", "women"), col = c("#999", "#2780e3"), pch = 19, bty = "n")
+par(op)
 
 ## ---- fetch
 # The IRW table, from the CSV link on its landing page (pinned to one version).

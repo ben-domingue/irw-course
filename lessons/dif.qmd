@@ -8,6 +8,12 @@ source("_course.R")
 lesson_header("dif")
 ```
 
+```{r}
+#| include: false
+knitr::read_chunk("code/dif-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
 ```{ojs}
 //| echo: false
 import {grid, p2pl, palette} from "./widgets/irt.js"
@@ -44,7 +50,25 @@ By the end of this lesson you should be able to:
 
 An item shows DIF if respondents with the same $\theta$ but in different groups have different chances of answering it correctly ([Lord, 1980, "Study of item bias"](https://doi.org/10.4324/9780203056615-20); [AERA, APA & NCME, 2014, p. 51](https://www.testingstandards.net/open-access-files.html)). Give each group its own curve. If they differ only in $b$, one group finds the item harder at every $\theta$: **uniform DIF**. If they differ in $a$, the curves cross and the item favours one group at low $\theta$ and the other at high: **non-uniform DIF**. The group we are asking about is the **focal** group; the comparison is the **reference** group.
 
-Why not compare the groups' proportions correct, item by item? Because the raw gap mixes impact with DIF: if one group knows more words, it does better on nearly every item.
+#### An example: who recognizes which authors?
+
+The Dutch Author Recognition Test shows respondents 132 names and asks which are authors ([Brysbaert, Sui, Dirix & Hintz, 2020](https://doi.org/10.5334/joc.95); [DART_Brysbaert_2020_1](https://itemresponsewarehouse.org/tables/dart_brysbaert_2020_1/)). Its job here is intuition. Tastes in books differ by gender, which could presumably lead to some DIF: among respondents who recognize the same number of authors, do women and men recognize particular authors at different rates? Two notes on the data. Forty-two names are made-up foils, and in the IRW table a checked foil scores 1 like a recognized author, so we drop them using the paper's list. And the sample is small: 199 respondents, 67 of them men.
+
+```{r dart}
+#| echo: true
+#| code-fold: true
+```
+
+```{r dart-plot}
+#| echo: true
+#| code-fold: true
+#| fig-width: 9
+#| fig-height: 2.6
+```
+
+At the same total, men recognize J.R.R. Tolkien 23 percentage points more often than women and Tom Clancy 20 points more often; women recognize Jane Austen 41 points more often, and Emily Brontë 22. Matching matters: men recognize a few more authors overall (34 of 90 on average, against 31), and Clancy's raw gap of 30 points shrinks to 20 once totals are equal. How firm is this? Nine of the 90 authors differ at $p < .05$ (a test built below), about twice the 4.5 expected by chance, but after a Holm correction for 90 tests only Austen remains. Read it as a picture of what DIF is (an item that works differently for people equal on the construct), not as a finding about these authors.
+
+The widget shows why raw proportions won't do: the raw gap mixes impact with DIF.
 
 #### Try it: impact and DIF
 
@@ -219,7 +243,7 @@ M_2:&\quad \text{logit} \Pr(x_{ij} = 1) = \beta_0 + \beta_1 r_j + \beta_2 g_j + 
 \end{aligned}$$
 with $r_j$ the matching score and $g_j = 1$ for the focal group. $M_1$ adds uniform DIF: $\beta_2$ is where the action is, the difference in log odds between groups at the same score. $M_2$ adds non-uniform DIF: $\beta_3$ lets the slope on the score differ by group. Likelihood-ratio tests compare the models in turn, or $M_0$ with $M_2$ for both kinds at once.
 
-How big is the DIF? The group coefficient is a log odds ratio at a fixed score, as $\ln \hat\alpha_{MH}$ is, so $e^{\beta_2}$ is an odds ratio and $2.35\,\beta_2$ sits on the delta scale. Or take the change in Nagelkerke's pseudo-$R^2$ from $M_0$ to $M_2$; [Jodoin and Gierl (2001)](https://doi.org/10.1207/S15324818AME1404_2) proposed categories for it, which `difR` implements as negligible below 0.035, moderate from 0.035 to 0.07 and large above ([Magis, Béland, Tuerlinckx & De Boeck, 2010](https://doi.org/10.3758/BRM.42.3.847)). The two metrics needn't agree about which items are large, as the real data show.
+How big is the DIF? $e^{\beta_2}$ is an odds ratio at a fixed score, like $\hat\alpha_{MH}$, so $2.35\,\beta_2$ sits on the delta scale. Or take the change in Nagelkerke's pseudo-$R^2$ from $M_0$ to $M_2$; [Jodoin and Gierl (2001)](https://doi.org/10.1207/S15324818AME1404_2) proposed categories for it, which `difR` implements as negligible below 0.035, moderate from 0.035 to 0.07 and large above ([Magis, Béland, Tuerlinckx & De Boeck, 2010](https://doi.org/10.3758/BRM.42.3.847)). 
 
 Why the workhorse? It is a model we already know, fitted with `glm()`; it tests non-uniform DIF, which Mantel–Haenszel pools away; it takes continuous matching variables and extra covariates; and it extends to ordered categories as a cumulative logit model (problem 3; [Crane, Gibbons, Jolley & van Belle, 2006](https://doi.org/10.1097/01.mlr.0000245183.28384.ed)). Comparing item parameters estimated in each group is a third family ([Lord, 1980, "Study of item bias"](https://doi.org/10.4324/9780203056615-20); [Thissen, Steinberg & Wainer, 1993](https://doi.org/10.4324/9780203357811)).
 
@@ -269,13 +293,13 @@ quiz({
 
 ### Treatment as a grouping variable
 
-In a randomized trial, treatment assignment is a grouping too: among children with the same total, is an item easier for treated children? It is if the program raises some items much more than others. DIF by treatment is variation in the treatment effect from item to item ([Gilbert, Kim & Miratrix, 2023](https://doi.org/10.3102/10769986231171710); [Ahmed et al., 2025](https://doi.org/10.1080/19345747.2024.2361337)). It isn't bias in the usual sense; it says what the effect on the total is made of.
+In a randomized trial, treatment assignment is a grouping too: among children with the same total, is an item easier for treated children? It is if the program raises some items much more than others. DIF by treatment is variation in the treatment effect from item to item ([Gilbert, Kim & Miratrix, 2023](https://doi.org/10.3102/10769986231171710); [Ahmed et al., 2025](https://doi.org/10.1080/19345747.2024.2361337)). It says what the effect on the total is made of.
 
 ## Simulate
 
 The code below simulates 20 2PL items for two groups, the focal group 1 SD lower on $\theta$ and items 9 and 10 harder for it by 0.6 logits, and runs Mantel–Haenszel on every item in 100 replications, matching on the total and on a purified total. It is base R and takes a few seconds.
 
-With the seed as written, the DIF items' mean delta is −1.3 (true values −1.3 and −1.4), significant in 99% of replications. On the contaminated total the clean items drift upward (mean delta 0.13) and are significant 8.7% of the time, against a nominal 5%; purified, 7.4%. The clean items' deltas also slope downward from item 1 to 20, as the slopes rise from 0.6 to 1.6: the 2PL's inexact null. Set `slopes_vary <- FALSE` and the purified rate falls to 3.6%. Try `n_dif <- 6` (33% false flags on the total), and `n_dif <- 0` with `impact <- 2`.
+With the seed as written, the DIF items' mean delta is −1.3 (true values −1.3 and −1.4), significant in 99% of replications. On the contaminated total the clean items drift upward (mean delta 0.13) and are significant 8.7% of the time, against a nominal 5%; purified, 7.4%.  Set `slopes_vary <- FALSE` and the purified rate falls to 3.6%. Try `n_dif <- 6` (33% false flags on the total), and `n_dif <- 0` with `impact <- 2`.
 
 ```{webr}
 {{< include code/dif-sim.R >}}
@@ -285,13 +309,7 @@ With the seed as written, the DIF items' mean delta is −1.3 (true values −1.
 
 ## With real data
 
-```{r}
-#| include: false
-knitr::read_chunk("code/dif-irw.R")
-options(digits = 7)  # R's default, so the page prints what a fresh R session prints
-```
-
-Our table is [gilbert_meta_11](https://itemresponsewarehouse.org/tables/gilbert_meta_11/): a vocabulary test from a cluster-randomized trial of a content literacy program, in which treated schools taught thematic science and social studies lessons ([Kim, Relyea, Burkhauser, Scherer & Rich, 2021](https://doi.org/10.1007/s10648-021-09609-6); data at [doi:10.7910/DVN/HQEMN6](https://doi.org/10.7910/DVN/HQEMN6)), in the trial collection of [Gilbert, Himmelsbach, Soland, Joshi & Domingue (2025)](https://doi.org/10.1002/pam.70025). Its job is to be a test we can split many ways: it records gender, race and ethnicity, English-learner status, an individualized education program (IEP), low income and treatment. The trial enrolled first and second graders; the IRW describes this table as the grade 1 test and its item text is headed as the grade 1 form (the grade 2 form is the trial in [What is measurement?](measurement.qmd)). I could not check the grade against the paper's full text. Each item asks a child to circle the two of four words that go with a target word; 1 is correct, so higher means more vocabulary. There is one outcome occasion. [Download the code](code/dif-irw.R); it needs only base R, except the last chunk (`mirt` and `robustDIF`).
+Our table is [gilbert_meta_11](https://itemresponsewarehouse.org/tables/gilbert_meta_11/): a vocabulary test from a cluster-randomized trial of a content literacy program, in which treated schools taught thematic science and social studies lessons ([Kim, Relyea, Burkhauser, Scherer & Rich, 2021](https://doi.org/10.1007/s10648-021-09609-6); data at [doi:10.7910/DVN/HQEMN6](https://doi.org/10.7910/DVN/HQEMN6)), in the trial collection of [Gilbert, Himmelsbach, Soland, Joshi & Domingue (2025)](https://doi.org/10.1002/pam.70025). Its job is to be a test we can split many ways: it records gender, race and ethnicity, English-learner status, an individualized education program (IEP), low income and treatment. The trial enrolled first and second graders; the IRW and the item text mark this table as the grade 1 form (grade 2 is the trial in [What is measurement?](measurement.qmd)), which I could not check against the paper's full text. Each item asks a child to circle the two of four words that go with a target word; 1 is correct, so higher means more vocabulary. There is one outcome occasion. [Download the code](code/dif-irw.R); it needs only base R, except the last chunk (`mirt` and `robustDIF`).
 
 ```{r fetch}
 #| echo: true
@@ -303,7 +321,7 @@ Our table is [gilbert_meta_11](https://itemresponsewarehouse.org/tables/gilbert_
 #| code-fold: show
 ```
 
-We keep the 2,347 of 2,588 children who answered all 24 items. For race and ethnicity the reference group is White children; the 76 children with none of the four indicators are left out of those comparisons.
+We keep the 2,347 of 2,588 children who answered all 24 items. For race and ethnicity the reference group is White children (76 children with none of the four indicators are left out).
 
 ```{r groupings}
 #| echo: true
@@ -383,7 +401,7 @@ Matched, the gap for *expedition* holds at every band of totals below 21: among 
 #| code-fold: show
 ```
 
-The two methods agree on the size of uniform DIF: 2.35 times the group coefficient tracks the Mantel–Haenszel delta item for item (correlation 0.9991), and for *expedition* the odds ratio at a fixed total is 13.08. They sort items differently. By the Jodoin–Gierl categories every demographic item is negligible, and so is every treatment item except *expedition* ($\Delta R^2$ = 0.244); the other five ETS C items have $\Delta R^2$ between 0.021 and 0.031. The categories use different metrics, and a report should say which it used. The interaction is significant at .05 for 14 of the 24 items: with 2,347 children, small differences in slope are significant too, which is why sizes, not p-values, should decide what gets reviewed.
+The two methods agree on the size of uniform DIF: 2.35 times the group coefficient tracks the Mantel–Haenszel delta item for item (correlation 0.9991), and for *expedition* the odds ratio at a fixed total is 13.08. They sort items differently. By the Jodoin–Gierl categories every demographic item is negligible, and so is every treatment item except *expedition* ($\Delta R^2$ = 0.244); the other five ETS C items have $\Delta R^2$ between 0.021 and 0.031. The interaction is significant at .05 for 14 of the 24 items: with 2,347 children, small differences in slope are significant too, which is why sizes, not p-values, should decide what gets reviewed.
 
 Last, the relativity of DIF. The total contains *expedition* and the other C items, so for the remaining items it overstates treated children's vocabulary. Purify:
 
@@ -410,7 +428,7 @@ What should a trialist take from this? Two assumptions first: that the total is 
 1. **The Mantel–Haenszel null.** Show that under the Rasch model with no DIF, $\Pr(x_i = 1 \mid r)$ is the same in both groups at every total $r$, so the MH odds ratio is 1 whatever the groups' $\theta$ distributions ([Zwick, 1990](https://doi.org/10.3102/10769986015003185)). Construct a 2PL example with two groups whose $\theta$ distributions differ in which it is not. What happens under the Rasch model if you match on the rest score?
 2. **Demographic DIF, with treatment held out (PS5#3).** Treated children are 62% of the low-income group and 50% of the others. Repeat the demographic analyses within the control group only. Which B items survive? How can DIF by treatment show up as DIF by a demographic grouping?
 3. **Polytomous DIF on the CES-D.** [alexandrowicz_2018_cesd](https://itemresponsewarehouse.org/tables/alexandrowicz_2018_cesd/) holds the 20-item CES-D ([Radloff, 1977](https://doi.org/10.1177/014662167700100306)), answered 0–3 by a general-population sample in Austria ([Alexandrowicz, Jahn & Wancata, 2018](https://doi.org/10.1371/journal.pone.0197908)). The positively worded items arrive keyed. For ordered categories, logistic regression becomes a cumulative logit model, $\text{logit} \Pr(x_{ij} \ge k) = \beta_{0k} + \beta_1 s_j + \beta_2 g_j + \beta_3 g_j s_j$, with $s_j$ the rest score ([Crane, Gibbons, Jolley & van Belle, 2006](https://doi.org/10.1097/01.mlr.0000245183.28384.ed); the `lordif` package, [Choi, Gibbons & Crane, 2011](https://doi.org/10.18637/jss.v039.i08)). Fit it per item with `MASS::polr`, grouping on `cov_sex` (264 of 518 in the source file are coded 2, the paper's number of women; no codebook confirms it). Which item flags most strongly, in which direction, and why might it? Compare [Cole, Kawachi, Maller & Berkman (2000)](https://doi.org/10.1016/S0895-4356(99)00151-1). (If you've done [Models for polytomous responses](polytomous.qmd): this is DIF in the category boundaries.)
-4. **Authors and readers.** The Dutch Author Recognition Test asks which of 132 names are authors; 42 are made-up foils ([Brysbaert, Sui, Dirix & Hintz, 2020](https://doi.org/10.5334/joc.95); [DART_Brysbaert_2020_1](https://itemresponsewarehouse.org/tables/dart_brysbaert_2020_1/)). In the IRW a checked foil scores 1, like a recognized author, so first remove the foils (the paper's Appendix A lists them). Among the 90 authors, check whether Jane Austen and Emily Brontë look easier for women at the same total, and Tom Clancy and J.R.R. Tolkien for men. Is this DIF, bias, or part of the construct? What would you do with a C item that has a content explanation, and with one that has none?
+4. **An anchor outside the test.** `gilbert_meta_11` also records `std_baseline`, each child's standardized score before the trial. Match on it instead of the total: cut it into ten groups and run the Mantel–Haenszel procedure by treatment. How do the deltas compare with those matched on the total, and why are they nearly all positive? What does an external matching variable assume, and what question does it answer?
 5. **Design.** You are building a mathematics test for a state with many English learners. Where in development would you look for bias, and with what data? [Martiniello (2008)](https://doi.org/10.17763/haer.78.2.70783570r1111t32) combined DIF statistics with children's think-alouds; what does each tell you that the other can't?
 6. **Challenge: schooled worlds.** [Kroupin et al. (2025)](https://doi.org/10.1073/pnas.2407955122) compared children with and without formal schooling on typical executive-function tasks, and argue that the tasks reflect culturally specific development. If such items showed DIF between these groups, would that be bias, a different construct, or both? What data could tell? This one is open.
 
@@ -481,8 +499,8 @@ data_sources("dif")
 
 - **Source:** EDUC 252 class 5 (slides c5, 1–31) and problem set 5 (#3), with the code in `ben-domingue/252`: `c5/art.R` and `ps5/dif_itemtext.R`. Polytomous DIF (PS8#3, `ps8/polydif.R`) is problem 3.
 - **Timing:** about 60 minutes for the core ideas and widgets; the vocabulary analysis works as a 30-minute lab, and problem 2 extends it.
-- **Changed from 252 (Ben, 09-24 and 09-25):** impact vs. bias, sources of bias and predictive bias moved to [Fairness in testing](fairness.qmd); logistic regression is a core idea of its own; anchor selection and robust scaling ([Halpin, 2024](https://doi.org/10.1007/s11336-024-09957-6)) are a Go deeper; multigroup CFA invariance moved to [Factor analysis II](fa-confirmatory.qmd) and is recalled here in one paragraph; polytomous DIF became problem 3, taught self-contained; the slides' author-recognition example is problem 4, with the foils removed. The main example takes the demographic groupings first and turns to treatment. The slides' SAT analogy example is left out, because its source couldn't be checked.
+- **Changed from 252 (Ben, 09-24 and 09-25):** impact vs. bias, sources of bias and predictive bias moved to [Fairness in testing](fairness.qmd); logistic regression is a core idea of its own; anchor selection and robust scaling ([Halpin, 2024](https://doi.org/10.1007/s11336-024-09957-6)) are a Go deeper; multigroup CFA invariance moved to [Factor analysis II](fa-confirmatory.qmd) and is recalled here in one paragraph; polytomous DIF became problem 3, taught self-contained; the slides' author-recognition example (DART) opens the lesson (Ben, 09-25), with the foils removed and the small sample stated; problem 4 now matches on the baseline score. The main example takes the demographic groupings first and turns to treatment. The slides' SAT analogy example is left out, because its source couldn't be checked.
 - **Held back:** DIF by treatment and by life events ([Measurement invariance under treatment and life events](invariance-experience.qmd)); anchors in linking ([Linking and equating](equating.qmd)); explaining DIF with item features ([What is an item?](explanatory-irt.qmd)); DIF screens for item banks ([Item banks and adaptive testing](item-banks-cat.qmd)).
-- **Data:** in `gilbert_meta_11` the scoring rule (whether a 1 needs both words right) isn't documented, and the grade rests on the IRW description and item text. In the DART table two author labels begin with "1" where the name begins "Ja" (`1ne Austen`, `1mes Patterson`), which matters when matching them to the paper's list.
+- **Data:** in `gilbert_meta_11` the scoring rule (whether a 1 needs both words right) isn't documented, and the grade rests on the IRW description and item text. In the DART table three labels begin with "1" where the name begins "Ja" (`1ne Austen`, `1ne Jessup`, `1mes Patterson`), which matters when matching them to the paper's foil list; the respondents are mostly 18 years old.
 - **Across the IRW:** `deepdives/dif/compute.R` is run by hand (it needs a Redivis token); the page reads its `results.rds`. The pilot took under a minute for six tables.
 - **Solutions:** held back in `solutions/dif.qmd` (not published). Problem 6 is open.
