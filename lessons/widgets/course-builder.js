@@ -54,6 +54,13 @@ export function placeLesson(items, id, at) {
 
 export const removeItem = (items, i) => items.filter((_, j) => j !== i);
 
+// The bank: every lesson not on the canvas, in lessons.yml order. A lesson is in
+// the course or in the bank, never both (Ben, 09-25).
+export function bankIds(items, course) {
+  const on = new Set(lessonIds(items));
+  return course.lessons.map((l) => l.id).filter((id) => !on.has(id));
+}
+
 // Teaching order for a set of lessons: every lesson after its prerequisites (in
 // the set); among lessons that are ready, the one earliest in the first-course
 // path, then in lessons.yml. Used to lay out "Everything".
@@ -220,7 +227,7 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
   // ---- Bank ----
   const filter = el("input", { type: "search", placeholder: "Filter lessons", "aria-label": "Filter lessons by title",
     style: `width:100%;padding:0.3rem 0.5rem;border:1px solid ${palette.rule};border-radius:4px;margin-bottom:0.6rem` });
-  const bankRows = new Map(); // id -> {row, add, inCourse, text}
+  const bankRows = new Map(); // id -> {row, text}
   const bankLists = [];
   const bankBody = el("div", { class: "cb-bank" });
   for (const m of course.modules) {
@@ -231,11 +238,10 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
         from ? link(t.introduced) : links(t.returns.map((r) => r.lesson)), ")");
       const add = el("button", { type: "button", style: ICON, "aria-label": `Add ${l.title} to the end of your course`,
         onclick: () => setItems(placeLesson(items, l.id, items.length)) }, "Add");
-      const inCourse = el("span", { style: `${TAG};color:${palette.main}`, hidden: true }, "in course");
       const row = el("li", { "data-id": l.id, style: "margin:0.1rem 0" },
         el("div", { style: "display:flex;align-items:flex-start;gap:0.2rem" },
           el("span", { class: "cb-grip", "aria-hidden": "true", title: "Drag to your course", style: GRIP }, "⠿"),
-          el("span", { style: `flex:1;${l.status === "stub" ? `color:${palette.guide}` : ""}` }, l.title, ...tags(l), inCourse),
+          el("span", { style: `flex:1;${l.status === "stub" ? `color:${palette.guide}` : ""}` }, l.title, ...tags(l)),
           add),
         el("details", { style: "margin:0 0 0.2rem 1.6rem;font-size:0.84rem" },
           el("summary", { style: `color:${palette.guide};cursor:pointer` }, "Dependencies and threads",
@@ -246,23 +252,41 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
             nb.starts.length ? el("div", {}, el("strong", {}, "Starts threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.starts.map((t) => thread(t, false)))) : null,
             nb.picks.length ? el("div", {}, el("strong", {}, "Picks up threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.picks.map((t) => thread(t, true)))) : null,
             el("div", {}, el("a", { href: href(l.id) }, "Open the lesson")))));
-      bankRows.set(l.id, { row, add, inCourse, text: (l.title + " " + l.id).toLowerCase() });
+      bankRows.set(l.id, { row, text: (l.title + " " + l.id).toLowerCase() });
       ul.append(row);
     }
     const fs = el("fieldset", { style: `border:1px solid ${palette.rule};border-radius:6px;padding:0.3rem 0.7rem 0.5rem;margin:0 0 0.7rem` },
       el("legend", { style: "font-size:0.92rem;font-weight:600;float:none;width:auto;padding:0 0.3rem;margin:0" }, m.title), ul);
-    bankLists.push({ fs, ul });
+    const allIn = el("p", { hidden: true, style: `margin:0.1rem 0 0;font-size:0.84rem;color:${palette.guide}` }, "All in your course.");
+    fs.append(allIn);
+    bankLists.push({ fs, ul, allIn, ids: course.lessons.filter((x) => x.module === m.id).map((x) => x.id) });
     bankBody.append(fs);
   }
-  filter.addEventListener("input", () => {
+  const bankEmpty = el("p", { hidden: true, style: `font-size:0.88rem;color:${palette.guide}` });
+  bankBody.append(bankEmpty);
+  // Show the lessons that are in the bank (not on the canvas) and match the
+  // filter. A module whose lessons are all in the course keeps its legend and says
+  // so; one emptied only by the filter is hidden.
+  function showBank() {
     const q = filter.value.trim().toLowerCase();
-    for (const { row, text } of bankRows.values()) row.hidden = !!q && !text.includes(q);
-    for (const { fs, ul } of bankLists) fs.hidden = ![...ul.children].some((r) => !r.hidden);
-  });
+    const inBank = new Set(bankIds(items, course));
+    for (const [id, { row, text }] of bankRows) row.hidden = !inBank.has(id) || (!!q && !text.includes(q));
+    let shown = 0;
+    for (const { fs, ul, allIn, ids } of bankLists) {
+      const left = ids.filter((id) => inBank.has(id)).length;
+      const visible = [...ul.children].filter((r) => r.dataset.id && !r.hidden).length;
+      allIn.hidden = left > 0;
+      fs.hidden = q ? visible === 0 : false;
+      shown += visible;
+    }
+    bankEmpty.hidden = shown > 0;
+    bankEmpty.textContent = inBank.size ? "No lessons in the bank match the filter." : "Every lesson is in your course.";
+  }
+  filter.addEventListener("input", showBank);
   const bank = el("section", { "aria-label": "Lesson bank", style: "flex:1 1 20rem;min-width:0" },
     el("h3", { style: "font-size:1.05rem" }, "Lesson bank"),
     el("p", { style: `font-size:0.85rem;color:${palette.guide};margin:0 0 0.4rem` },
-      "Drag a lesson by its handle (⠿) into your course, or use Add."),
+      "Drag a lesson by its handle (⠿) into your course, or use Add. Drag a lesson back here, or use ✕, to return it."),
     filter, bankBody);
 
   // ---- Canvas ----
@@ -349,7 +373,6 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
 
   function render() {
     let n = 0;
-    const onCanvas = new Set(lessonIds(items));
     list.replaceChildren(...items.map((it, i) => {
       if (it.type === "heading") {
         const input = el("input", { type: "text", value: it.title, "aria-label": "Heading title",
@@ -370,10 +393,7 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
     const stubs = lessonIds(items).filter((id) => course.byId.get(id).status === "stub").length;
     count.replaceChildren(`Your course: ${n} session${n === 1 ? "" : "s"}`,
       el("span", { style: `font-weight:normal;font-size:0.85rem;color:${palette.guide}` }, stubs ? ` (${stubs} not yet written)` : ""));
-    for (const [id, r] of bankRows) {
-      r.inCourse.hidden = !onCanvas.has(id);
-      r.add.disabled = onCanvas.has(id);
-    }
+    showBank();
     for (const [id, b] of presetButtons) { b.style.cssText = id === current ? BTN_ON : BTN; b.setAttribute("aria-pressed", String(id === current)); }
     const notes = courseNotes(items, course);
     renderNotes(notes);
@@ -391,8 +411,16 @@ export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {})
   if (Sortable) {
     // forceFallback: the same pointer-driven dragging for mouse and touch.
     const common = { handle: ".cb-grip", animation: 120, ghostClass: "cb-ghost", chosenClass: "cb-drag", forceFallback: true, fallbackOnBody: true };
-    for (const { ul } of bankLists) Sortable.create(ul, { ...common, group: { name: "course", pull: "clone", put: false }, sort: false });
-    Sortable.create(list, { ...common, group: { name: "course", pull: false, put: true },
+    for (const { ul } of bankLists) Sortable.create(ul, { ...common, sort: false,
+      group: { name: "course", pull: "clone", put: (to, from) => from.el === list },
+      // A lesson dragged back from the canvas: take it off the canvas; the redraw
+      // shows it again in its own module, in lessons.yml order.
+      onAdd: (e) => {
+        const key = Number(e.item.dataset.key);
+        e.item.remove();
+        setItems(items.filter((it) => it.key !== key));
+      } });
+    Sortable.create(list, { ...common, group: { name: "course", pull: true, put: true },
       onAdd: (e) => {
         // The dragged bank row goes back to the bank (Sortable left a clone there).
         const id = e.item.dataset.id;
