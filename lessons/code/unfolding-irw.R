@@ -1,45 +1,139 @@
-# Unfolding models with real data: Andrich's (1988) eight capital-punishment
+# Unfolding models with real data: ten immigration-policy statements put to 2,621 US
+# respondents (Duck-Mayr & Montgomery, 2023), Andrich's (1988) eight capital-punishment
 # statements (andrich_mudfold) and European party activists' pick-2-of-6 choices
-# (eurpar2_mudfold), from the Item Response Warehouse. Needs the mirt, GGUM and
-# mudfold packages. No login or token needed. The GGUM fit takes about 30 seconds;
-# every other chunk runs in a few seconds. Adapted from ben-domingue/252: ps9/unfold.R.
+# (eurpar2_mudfold). Needs the mirt, GGUM and mudfold packages. No login or token
+# needed. The whole file takes about four minutes in local R, most of it the
+# held-out comparison and the GGUM fits. Adapted from ben-domingue/252: ps9/unfold.R.
 
-## ---- fetch-mud
+## ---- fetch-imm
 library(mirt)
 library(GGUM)
 library(mudfold)
+options(digits = 7)  # R's default, in case a .Rprofile changes it
 set.seed(52)
 # IRW tables are long (one row per response); reshape to one row per respondent.
 long2wide <- function(df) {
   wide <- tapply(df$resp, list(df$id, df$item), function(x) x[1])
   as.data.frame(wide)
 }
-# Each IRW table has a landing page (itemresponsewarehouse.org/tables/<name>/) with a
-# CSV download. This link is pinned to one version of the data.
+# Interim copy: the table isn't public on the IRW yet, so the course keeps a copy
+# (see data/duckmayr_2023_immigration.md). Outside the course repo, read it from GitHub.
+imm_path <- "data/duckmayr_2023_immigration.csv"
+if (!file.exists(imm_path))
+  imm_path <- "https://raw.githubusercontent.com/ben-domingue/irw-course/main/lessons/data/duckmayr_2023_immigration.csv"
+imm_long <- read.csv(imm_path)
+imm <- long2wide(imm_long)[, paste0("IMM_", 1:10)]
+# 0 = strongly disagree ... 4 = strongly agree, the same way for every statement.
+# Nothing is reverse-keyed: which way a statement runs is the question.
+c(respondents = nrow(imm), statements = ncol(imm), missing = sum(is.na(imm)))
+# Self-placed ideology, 1 = very liberal, 4 = moderate, 7 = very conservative.
+ideology <- tapply(imm_long$cov_ideology, imm_long$id, function(x) x[1])[rownames(imm)]
+table(ideology, useNA = "ifany")
+
+## ---- ideo-imm
+# Share agreeing (somewhat or strongly, resp >= 3) with each statement, by ideology.
+agree_by_ideo <- sapply(imm, function(x) tapply(x >= 3, ideology, mean, na.rm = TRUE))
+round(t(agree_by_ideo), 2)
+
+## ---- plot-imm
+cols <- c(IMM_1 = "#c2410c", IMM_2 = "black", IMM_3 = "#2780e3")
+matplot(1:7, agree_by_ideo[, names(cols)], type = "b", pch = 19, lty = 1, lwd = 2,
+        col = cols, ylim = c(0, 1.3), xaxt = "n", yaxt = "n", xlab = "Self-placed ideology",
+        ylab = "Share agreeing")
+axis(2, at = seq(0, 1, 0.2))
+axis(1, at = 1:7, labels = c("very\nliberal", "2", "3", "moderate", "5", "6", "very\nconservative"),
+     padj = 0.5, cex.axis = 0.8)
+legend("top", c("IMM_1 (all must return)", "IMM_2 (stay, with requirements)",
+                "IMM_3 (no wall needed)"), col = cols, lwd = 2, pch = 19, bty = "n", cex = 0.85)
+
+## ---- cor-imm
+r_imm <- cor(imm, use = "pairwise.complete.obs")
+round(r_imm["IMM_2", c("IMM_1", "IMM_3", "IMM_7")], 2)   # the middle against the ends
+round(r_imm["IMM_1", "IMM_3"], 2)                         # the two ends
+
+## ---- models-imm
+# The GRM (dominance, slopes free to be negative) and the GGUM (ideal point), both in
+# mirt. The GGUM likelihood has poor local maxima, so we start each statement's
+# location at the mean GRM score of the respondents who agreed with it, oriented so
+# that IMM_1 ("all must return") is on the positive side, as Duck-Mayr and
+# Montgomery anchored it. mirt keeps the GGUM's discriminations positive.
+fit_imm <- function(dat, types) {
+  grm <- mirt(dat, 1, "graded", verbose = FALSE)
+  th <- fscores(grm)[, 1]
+  start <- sapply(dat, function(x) mean(th[!is.na(x) & x >= 3]))
+  if (start["IMM_1"] < 0) start <- -start
+  sv <- mirt(dat, 1, types, pars = "values")
+  b1 <- sv$name == "b1"
+  sv$value[b1] <- 2 * start[sv$item[b1]]
+  mirt(dat, 1, types, pars = sv, verbose = FALSE)
+}
+# A third model gives an ideal-point curve only to the four statements that, read
+# for their content, stake out a compromise (IMM_2, IMM_4, IMM_6, IMM_8), and a
+# dominance curve to the rest.
+compromise <- c("IMM_2", "IMM_4", "IMM_6", "IMM_8")
+mixed_types <- ifelse(names(imm) %in% compromise, "ggum", "graded")
+fits_imm <- list(GRM = mirt(imm, 1, "graded", verbose = FALSE),
+                 GGUM = fit_imm(imm, "ggum"),
+                 mixed = fit_imm(imm, mixed_types))
+round(t(sapply(fits_imm, function(f) c(parameters = extract.mirt(f, "nest"),
+                                       logLik = extract.mirt(f, "logLik"),
+                                       AIC = extract.mirt(f, "AIC"),
+                                       BIC = extract.mirt(f, "BIC")))), 1)
+# GGUM locations (b1), from the "all must return" end to the "no wall" end.
+round(sort(coef(fits_imm$GGUM, simplify = TRUE)$items[, "b1"], decreasing = TRUE), 2)
+# How well each model's scores track self-placed ideology (the sign of the GRM's
+# scale is arbitrary, so we look at the size).
+round(sapply(fits_imm, function(f) abs(cor(fscores(f)[, 1], ideology, use = "complete.obs"))), 2)
+
+## ---- heldout-imm
+# Out of sample: hold out a random 10% of the responses, fit each model to the rest,
+# and score the held-out responses with the log probability each model gave them.
+M <- as.matrix(imm)
+obs <- which(!is.na(M))
+hold <- sample(obs, round(0.1 * length(obs)))
+train <- M
+train[hold] <- NA
+train <- as.data.frame(train)
+fits_train <- list(GRM = mirt(train, 1, "graded", verbose = FALSE),
+                   GGUM = fit_imm(train, "ggum"),
+                   mixed = fit_imm(train, mixed_types))
+i_row <- row(M)[hold]
+i_col <- col(M)[hold]
+heldout_ll <- sapply(fits_train, function(f) {
+  th <- fscores(f)[, 1]
+  mapply(function(i, j) log(probtrace(extract.item(f, j), matrix(th[i]))[1, M[i, j] + 1]),
+         i_row, i_col)
+})
+# Mean log probability per held-out response (closer to 0 is better). The baseline
+# predicts each statement's category shares, ignoring the respondent.
+shares <- apply(train, 2, function(x) prop.table(table(factor(x, levels = 0:4))))
+round(c(baseline = mean(log(shares[cbind(M[hold] + 1, i_col)])), colMeans(heldout_ll)), 4)
+# Differences from the GRM, with standard errors over the held-out responses.
+d <- heldout_ll[, c("GGUM", "mixed")] - heldout_ll[, "GRM"]
+round(rbind(mean = colMeans(d), se = apply(d, 2, sd) / sqrt(nrow(d))), 4)
+# By statement: where does the GGUM predict better (positive) or worse than the GRM?
+round(sort(tapply(d[, "GGUM"], colnames(M)[i_col], mean)), 3)
+
+## ---- fetch-mud
 mud_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.andrich_mudfold/rows?format=csv"
 mud <- long2wide(read.csv(mud_url))
 # 1 = agree, 0 = disagree. The statements come in Andrich's order, from most against
-# capital punishment to most in favour. No keying: agreement is the response.
+# capital punishment to most in favour.
 statements <- c("HIDEOUS", "LIFESACRED", "INEFFECTIV", "DONTBELIEV",
                 "WISHNOTNEC", "MUSTHAVEIT", "DETERRENT", "CRIMDESERV")
 mud <- mud[, statements]
 c(respondents = nrow(mud), statements = ncol(mud), missing = sum(is.na(mud)))
-round(colMeans(mud), 2)               # proportion agreeing with each statement
-table(agreements = rowSums(mud))      # how many statements each respondent agreed with
-
-## ---- cor-mud
-r <- cor(mud)
-round(r, 2)
-# DONTBELIEV against the other seven: its largest correlation in absolute value.
-round(max(abs(r["DONTBELIEV", -4])), 2)
+r_mud <- cor(mud)
+round(r_mud["LIFESACRED", "CRIMDESERV"], 2)             # two ends
+round(max(abs(r_mud["DONTBELIEV", -4])), 2)              # DONTBELIEV's largest |r|
 
 ## ---- runs-mud
 # A pattern "unfolds" in an order if its agreements form one unbroken run
 # (e.g. 0 1 1 1 0 0 0 0), which is what one ideal point per respondent predicts.
 # A run starts wherever a 1 follows a 0 (or opens the pattern); one run = one start.
-M <- as.matrix(mud)
+X <- as.matrix(mud)
 n_runs <- function(order) {
-  x <- M[, order]
+  x <- X[, order]
   starts <- x[, 1] + rowSums(x[, -1] == 1 & x[, -ncol(x)] == 0)
   sum(starts == 1)
 }
@@ -47,74 +141,25 @@ n_runs(statements)                    # in Andrich's order
 # Every one of the 8! = 40,320 orders of the statements.
 perms <- function(v) if (length(v) == 1) list(v) else
   do.call(c, lapply(seq_along(v), function(i) lapply(perms(v[-i]), function(p) c(v[i], p))))
-all_orders <- perms(statements)
-runs_all <- vapply(all_orders, n_runs, 0)
+runs_all <- vapply(perms(statements), n_runs, 0)
 c(mean_over_all_orders = round(mean(runs_all), 1), best = max(runs_all))
-# The best orders (an order and its reverse count as one).
-best <- all_orders[runs_all == max(runs_all)]
-unique(t(sapply(best, function(o) if (match("HIDEOUS", o) > 4) rev(o) else o)))
-
-## ---- mudfold-mud
-# MUDFOLD (Post, 1992; Balafas et al., 2020) searches for the longest order in which
-# triples of statements behave as unfolding predicts, and reports H, the scalability
-# coefficient: 1 minus observed over expected errors in those triples.
-mf <- mudfold(mud)
-s <- summary(mf)
-s$SCALE_STATS[c("H(scale)", "O(scale)", "EO(scale)"), ]   # H = 1 - observed / expected errors
-s$ITEM_STATS[, c("items", "H(items)")]   # the statements in MUDFOLD's order
 
 ## ---- models-mud
-# Three models in mirt. "ideal" is mirt's ideal-point item,
-# P(agree) = exp(-0.5 * (a * theta + d)^2), which peaks at theta = -d / a.
-fits <- list(Rasch = mirt(mud, 1, "Rasch", verbose = FALSE),
-             `2PL` = mirt(mud, 1, "2PL", verbose = FALSE),
-             ideal = mirt(mud, 1, "ideal", verbose = FALSE))
-# The GGUM (Roberts, Donoghue & Laughlin, 2000) with the GGUM package; C = 1 means
-# two response categories. capture.output() hides its progress bars.
+# Three models in mirt ("ideal" is mirt's ideal-point item,
+# P(agree) = exp(-0.5 * (a * theta + d)^2)), and the GGUM with the GGUM package
+# (C = 1: two response categories; capture.output() hides its progress bars).
+fits_mud <- list(Rasch = mirt(mud, 1, "Rasch", verbose = FALSE),
+                 `2PL` = mirt(mud, 1, "2PL", verbose = FALSE),
+                 ideal = mirt(mud, 1, "ideal", verbose = FALSE))
 invisible(capture.output(gg <- GGUM(as.matrix(mud), C = 1)))
-comp <- rbind(t(sapply(fits, function(f) c(parameters = extract.mirt(f, "nest"),
-                                           logLik = extract.mirt(f, "logLik"),
-                                           AIC = extract.mirt(f, "AIC"),
-                                           BIC = extract.mirt(f, "BIC")))),
-              GGUM = unlist(gg$InformationCrit[c("N.param", "log.L", "AIC", "BIC")]))
-round(comp, 1)
-# The 2PL's EM stopped at its iteration limit: one slope keeps growing (see below).
-sapply(fits, extract.mirt, "converged")
-
-## ---- params-mud
-# 2PL slopes a and difficulties b (IRTpars = TRUE converts mirt's d to b = -d / a).
-round(coef(fits$`2PL`, IRTpars = TRUE, simplify = TRUE)$items[, c("a", "b")], 2)
-# GGUM discriminations and locations; the package caps discriminations at 10.
-round(data.frame(alpha = gg$alpha, delta = gg$delta, row.names = statements), 2)
-# The ideal-point model's peak, -d / a, for each statement.
-ip <- coef(fits$ideal, simplify = TRUE)$items
-round(-ip[, "d"] / ip[, "a1"], 2)
-
-## ---- curves-mud
-# Each statement's curve under the 2PL, mirt's ideal-point model and the GGUM.
-th <- seq(-4, 4, length.out = 201)
-p_mirt <- function(f, i) probtrace(extract.item(f, i), matrix(th))[, 2]
-p_ggum <- function(i) probs.GGUM(gg$alpha, gg$delta, gg$taus, th, C = 1)[, i, 2]
-op <- par(mfrow = c(2, 4), mar = c(3, 3, 2, 1), mgp = c(1.8, 0.6, 0))
-for (i in seq_along(statements)) {
-  plot(th, p_mirt(fits$`2PL`, i), type = "l", lwd = 2, col = "#2780e3", ylim = c(0, 1),
-       xlab = expression(theta), ylab = "P(agree)", main = statements[i], cex.main = 0.9)
-  lines(th, p_mirt(fits$ideal, i), lwd = 2, col = "#c2410c")
-  lines(th, p_ggum(i), lwd = 2, lty = 2, col = "black")
-}
-legend("right", c("2PL", "ideal", "GGUM"), col = c("#2780e3", "#c2410c", "black"),
-       lty = c(1, 1, 2), lwd = 2, bty = "n", cex = 0.8)
-par(op)
-
-## ---- mixed-mud
-# The 2PL for seven statements and the ideal-point model for one, each in turn.
-mixed <- sapply(seq_along(statements), function(i) {
-  types <- rep("2PL", 8); types[i] <- "ideal"
-  extract.mirt(mirt(mud, 1, types, verbose = FALSE), "AIC")
-})
-round(c(all_2PL = extract.mirt(fits$`2PL`, "AIC"), setNames(mixed, statements)), 1)
-# How closely do the two models order the respondents?
-round(cor(fscores(fits$`2PL`)[, 1], fscores(fits$ideal)[, 1]), 2)
+round(rbind(t(sapply(fits_mud, function(f) c(parameters = extract.mirt(f, "nest"),
+                                             logLik = extract.mirt(f, "logLik"),
+                                             AIC = extract.mirt(f, "AIC"),
+                                             BIC = extract.mirt(f, "BIC")))),
+            GGUM = unlist(gg$InformationCrit[c("N.param", "log.L", "AIC", "BIC")])), 1)
+# 2PL slopes: negative for the statements against, positive for those in favour.
+# (The 2PL's EM stops at its iteration limit: CRIMDESERV's slope keeps growing.)
+round(coef(fits_mud$`2PL`, IRTpars = TRUE, simplify = TRUE)$items[, "a"], 2)
 
 ## ---- fetch-eur
 eur_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.eurpar2_mudfold/rows?format=csv"
@@ -123,14 +168,14 @@ parties <- c("communists", "socdemocr", "demprogres", "liberals", "christians", 
 eur <- eur[, parties]
 c(respondents = nrow(eur), missing = sum(is.na(eur)))
 table(parties_picked = rowSums(eur))   # every activist picked exactly two
-colSums(eur)                           # how often each party was picked
-
-## ---- pairs-eur
 # How often each pair of parties was picked together.
 pairs <- apply(eur, 1, function(x) paste(parties[x == 1], collapse = " + "))
 sort(table(pairs), decreasing = TRUE)
 
 ## ---- mudfold-eur
+# MUDFOLD (van Schuur, 1992; Balafas et al., 2020) looks for the longest order in
+# which triples of parties behave as unfolding predicts. H = 1 - observed / expected
+# errors in those triples.
 mf_eur <- summary(mudfold(eur))
 mf_eur$SCALE_STATS["H(scale)", ]
-mf_eur$ITEM_STATS[, c("items", "H(items)")]
+mf_eur$ITEM_STATS[, c("items", "H(items)")]   # the parties in MUDFOLD's order
