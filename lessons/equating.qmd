@@ -16,7 +16,7 @@ lesson_header("equating")
 ```{ojs}
 //| echo: false
 import {grid, rng, palette} from "./widgets/irt.js"
-import {scoreDist, percentileRank, equipercentile, moments, bivariate, tcc, transform, slLoss, slFit, momentLinks, ringWalk} from "./widgets/equating.js"
+import {scoreDist, percentileRank, equipercentile, moments, bivariate, tcc, transform, slLoss, slFit, momentLinks, ringWalk, equatingCurve, itemCurve} from "./widgets/equating.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -129,7 +129,7 @@ The `equate` package ([Albano, 2016](https://doi.org/10.18637/jss.v074.i08)) doe
 
 #### Try it: equipercentile by hand
 
-Two 25-item Rasch forms, taken by equivalent groups (ability normal, mean 0, SD 1). Each form's items are spread evenly over three logits around the mean difficulty you set.
+Two 25-item Rasch forms, equivalent groups (ability normal, mean 0, SD 1). Each form's items span three logits around the mean difficulty you set.
 
 ```{ojs}
 //| echo: false
@@ -149,8 +149,8 @@ ep_MX = moments(ep_dX)
 ep_MY = moments(ep_dY)
 ep_lin = ep_MY.mean + ep_MY.sd / ep_MX.sd * (ep_x - ep_MX.mean)
 ep_curve = (d, form) => grid(-0.5, 25.5, 261).map(s => ({score: s, pr: percentileRank(d, s), form}))
-Plot.plot({
-  width: 700, height: 340, x: {label: "Score", domain: [-0.5, 25.5]}, y: {label: "Percentile rank", domain: [0, 1]},
+ep_left = Plot.plot({
+  width: 470, height: 340, x: {label: "Score", domain: [-0.5, 25.5]}, y: {label: "Percentile rank", domain: [0, 1]},
   color: {legend: true, domain: ["Form X", "Form Y"], range: [palette.main, palette.contrast]},
   marks: [
     Plot.line([...ep_curve(ep_dX, "Form X"), ...ep_curve(ep_dY, "Form Y")], {x: "score", y: "pr", z: "form", stroke: "form", strokeWidth: 2.5}),
@@ -158,6 +158,17 @@ Plot.plot({
     Plot.dot([{s: ep_x, p: ep_pr}, {s: ep_y, p: ep_pr}], {x: "s", y: "p", r: 5, fill: palette.ink})
   ]
 })
+ep_conv = equatingCurve(ep_dX, ep_dY)
+ep_right = Plot.plot({
+  width: 380, height: 340, x: {label: "Score on form X", domain: [0, 25.5]}, y: {label: "Equivalent score on form Y", domain: [0, 25.5]},
+  marks: [
+    Plot.line([{x: 0, y: 0}, {x: 25, y: 25}], {x: "x", y: "y", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(ep_conv, {x: "x", y: "y", stroke: palette.ink, strokeWidth: 2.5}),
+    Plot.ruleX([ep_x], {stroke: palette.rule}),
+    Plot.dot([{x: ep_x, y: ep_y}], {x: "x", y: "y", r: 6, fill: palette.contrast})
+  ]
+})
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">${ep_left}${ep_right}</div>`
 ```
 
 ```{ojs}
@@ -165,7 +176,7 @@ Plot.plot({
 md`A score of ${ep_x} on X has percentile rank **${ep_pr.toFixed(2)}**. Equipercentile equating sends it to **${ep_y.toFixed(1)}** on Y; linear equating to **${ep_lin.toFixed(1)}**${ep_lin > 25 ? ", above the form's maximum of 25" : ""}.`
 ```
 
-As the widget loads, form Y is two logits easier than form X and many respondents are near its top. Linear equating sends 20 on X to 27.0, two points more than form Y has; equipercentile equating sends it to 24.7, following the pile-up at the ceiling. Set the two difficulties equal and every method returns the score unchanged.
+The right panel draws the whole conversion, your score marked, against the identity line (dashed). As the widget loads, form Y is two logits easier and many respondents are near its top. Linear equating sends 20 on X to 27.0, more than form Y has; equipercentile equating sends it to 24.7, and the curve bends to stay under 25. Equal difficulties put the curve on the identity line.
 
 ```{ojs}
 //| echo: false
@@ -222,8 +233,8 @@ sl_best = slFit(sl_cal.base, sl_cal.other)
 sl_mom = momentLinks(sl_cal.base, sl_cal.other)
 sl_now = transform(sl_cal.other, sl_A, sl_B)
 sl_grid = grid(-4, 4, 161)
-Plot.plot({
-  width: 700, height: 340, x: {label: "θ (first calibration's scale)", domain: [-4, 4]}, y: {label: "Expected score on the 10 common items", domain: [0, 10]},
+sl_tcc = Plot.plot({
+  width: 520, height: 340, x: {label: "θ (first calibration's scale)", domain: [-4, 4]}, y: {label: "Expected score on the 10 common items", domain: [0, 10]},
   color: {legend: true, domain: ["First calibration", "Second calibration, transformed"], range: [palette.main, palette.contrast]},
   marks: [
     Plot.areaY(sl_grid.map(t => ({t, y1: tcc(t, sl_cal.base), y2: tcc(t, sl_now)})), {x: "t", y1: "y1", y2: "y2", fill: palette.light, fillOpacity: 0.5}),
@@ -231,6 +242,20 @@ Plot.plot({
       {x: "t", y: "e", z: "c", stroke: "c", strokeWidth: 2.5})
   ]
 })
+sl_small = sl_grid.filter((t, k) => k % 4 === 0)
+sl_cell = (k) => Plot.plot({
+  width: 118, height: 104, marginLeft: 8, marginBottom: 18, marginTop: 16, marginRight: 8,
+  x: {domain: [-4, 4], ticks: [-4, 0, 4], label: null}, y: {domain: [0, 1], axis: null},
+  marks: [
+    Plot.line(itemCurve(sl_cal.base[k], sl_small), {x: "theta", y: "p", stroke: palette.guide, strokeDasharray: "3,2"}),
+    Plot.line(itemCurve(sl_cal.other[k], sl_small), {x: "theta", y: "p", stroke: palette.light, strokeWidth: 1.5}),
+    Plot.line(itemCurve(sl_now[k], sl_small), {x: "theta", y: "p", stroke: palette.main, strokeWidth: 2}),
+    Plot.frame({stroke: palette.rule}),
+    Plot.text([`Item ${k + 1}`], {frameAnchor: "top-left", dy: -10, fontSize: 10})
+  ]
+})
+sl_cells = htl.html`<div style="display: grid; grid-template-columns: repeat(3, 118px); gap: 8px 4px; font-size: 10px;">${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(sl_cell)}</div>`
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">${sl_tcc}${sl_cells}</div>`
 ```
 
 ```{ojs}
@@ -238,9 +263,9 @@ Plot.plot({
 md`Stocking–Lord criterion at your A and B: **${slLoss(sl_cal.base, sl_cal.other, sl_A, sl_B).toFixed(3)}**. Its minimum is ${sl_best.l.toFixed(4)}, at A = **${sl_best.A.toFixed(2)}**, B = **${sl_best.B.toFixed(2)}**. For comparison, mean-mean gives A = ${sl_mom.meanMean.A.toFixed(2)}, B = ${sl_mom.meanMean.B.toFixed(2)}; mean-sigma gives A = ${sl_mom.meanSigma.A.toFixed(2)}, B = ${sl_mom.meanSigma.B.toFixed(2)}.`
 ```
 
-Close the shaded gap and you have done Stocking–Lord by eye. With no estimation error all three methods recover 1.2 and 0.5. With error they part: at the default SD of 0.15, Stocking–Lord gives 1.23 and 0.55, mean-sigma 1.28 and 0.57. Mean-sigma rests entirely on the spread of the difficulties, which estimation error inflates.
+The small panels show nine of the items: each one's second-calibration curve before (light) and after (blue) your $A$ and $B$, and its first-calibration curve (dashed), the target. Move one slider and every item moves at once: a link transforms the whole scale, not one item. Close the shaded gap and you have done Stocking–Lord by eye. With no estimation error all three methods recover 1.2 and 0.5. With error they part: at the default SD of 0.15, Stocking–Lord gives 1.23 and 0.55, mean-sigma 1.28 and 0.57. Mean-sigma rests on the difficulties' spread, which estimation error inflates.
 
-**Or skip the linking.** IRT handles responses missing by design, so we can stack every form's data, leave each respondent's unseen items empty and fit once: **concurrent calibration**. In the TIMSS booklets most pairs of items are never answered by the same student ([Item response data and the IRW](irw-data.qmd) counted them), and one fit copes. In simulations it generally gave smaller errors than separate calibration and linking, though not always ([Kim & Cohen, 1998](https://doi.org/10.1177/01466216980222003); [Hanson & Béguin, 2002](https://doi.org/10.1177/0146621602026001001)). Both routes assume that a common item's parameters are the same in every group. A concurrent fit builds that into the model; separate calibrations estimate each group's parameters and leave you to compare them. Concurrent calibration is a reasonable choice when the groups come from one population or differ only in their ability distributions; separate calibration, when you want to see how the common items behaved.
+**Or skip the linking.** IRT handles responses missing by design, so we can stack every form's data, leave each respondent's unseen items empty and fit once: **concurrent calibration**. In the TIMSS booklets most pairs of items are never answered by the same student ([Item response data and the IRW](irw-data.qmd) counted them), and one fit copes. In simulations it generally gave smaller errors than separate calibration and linking, though not always ([Kim & Cohen, 1998](https://doi.org/10.1177/01466216980222003); [Hanson & Béguin, 2002](https://doi.org/10.1177/0146621602026001001)). Both routes assume a common item's parameters are the same in every group; a concurrent fit builds that in, while separate calibrations let you compare. Concurrent calibration is a reasonable choice when the groups come from one population or differ only in their ability distributions; separate calibration, when you want to see how the common items behaved.
 
 ::: {.callout-note collapse="true"}
 ## Go deeper: how the characteristic-curve methods weight items
@@ -337,7 +362,7 @@ Our main example is [cdm_timss11](https://itemresponsewarehouse.org/tables/cdm_t
 #| code-fold: show
 ```
 
-Every student answered every item in their booklet, and each booklet shares 9 to 14 items with the next.
+Each booklet shares 9 to 14 items with the next.
 
 **Random groups.** Booklets 11 and 13 share no items, but their groups are equivalent, so we can equate their score distributions.
 
@@ -383,7 +408,7 @@ The ring misses by 1.08 logits. Why? Each link's common block is the second math
 
 An item is 0.077 logits harder in the second block (SE 0.014), and 14 × 0.077 = 1.08: the position effect accounts for the gap. Most of it is at the end. An item costs 0.12 logits more in position 4, the last block of the test, than in position 1 (SE 0.034); between positions 2 and 3, either side of the break, the difference is 0.035, within its error. Per item the effect is small; fourteen links make it large.
 
-So which would I use for booklets like these, concurrent calibration or separate calibration and linking? Both assume that a common item has one set of parameters wherever it appears. The concurrent fit builds that in, giving each item one difficulty, in effect an average over its two positions; separate calibrations let each booklet speak and show whether the common items agree. I'd report from the concurrent fit, which uses all the data at once, and run separate calibrations alongside it, because only they could have shown me this position effect.
+So which would I use for booklets like these, concurrent calibration or separate calibration and linking? Both assume a common item has one set of parameters wherever it appears. The concurrent fit builds that in, giving each item one difficulty averaged over its two positions; separate calibrations show whether the common items agree. I'd report from the concurrent fit, which uses all the data at once, and run separate calibrations alongside it, because only they could have shown me this position effect.
 
 ### PIRLS 2011: nonequivalent groups, three languages
 
