@@ -37,6 +37,13 @@ data.frame(parameters = sapply(fits, extract.mirt, "nest"),
            BIC = round(sapply(fits, extract.mirt, "BIC")),
            converged = sapply(fits, extract.mirt, "converged"))
 
+## ---- ceiling-rmet
+# The 4PL's upper asymptotes (mirt's u, our u), and how many respondents are up
+# where a ceiling would show: 34 or more of 36 correct.
+u_hat <- coef(fits$`4PL`, simplify = TRUE)$items[, "u"]
+round(quantile(u_hat, c(0, 0.25, 0.5, 0.75, 1)), 2)
+c(at_or_above_34 = sum(rowSums(resp) >= 34), share = round(mean(rowSums(resp) >= 34), 3))
+
 ## ---- slopes-rmet
 # mirt writes the 2PL as a*theta + d. In our notation the difficulty is b = -d/a.
 cf2 <- coef(fits$`2PL`, simplify = TRUE)$items
@@ -118,13 +125,8 @@ round(tab20[order(tab20$weighted_score), ], 2)
 
 ## ---- chess-identify
 # The Rasch fit fixes every slope at 1 and estimates the SD of ability. A "1PL"
-# with one common slope instead fixes the SD of ability at 1 and estimates the slope.
+# with one common slope fixes the SD at 1 and estimates the slope instead: the same
+# model in another unit, so its slope equals the Rasch SD of ability.
 m_1 <- mirt(chess, mirt.model("F = 1-40\nCONSTRAIN = (1-40, a1)"), itemtype = "2PL", verbose = FALSE)
 round(c(SD_theta_Rasch = sqrt(coef(m_r, simplify = TRUE)$cov[1, 1]),
-        common_slope_1PL = coef(m_1, simplify = TRUE)$items[1, "a1"]), 3)
-round(c(logLik_Rasch = extract.mirt(m_r, "logLik"), logLik_1PL = extract.mirt(m_1, "logLik")), 2)
-# The difficulties agree too, once both are on one scale: the Rasch b divided by the
-# SD of ability is the 1PL's b = -d/a.
-b_r <- -coef(m_r, simplify = TRUE)$items[, "d"] / sqrt(coef(m_r, simplify = TRUE)$cov[1, 1])
-b_1 <- -coef(m_1, simplify = TRUE)$items[, "d"] / coef(m_1, simplify = TRUE)$items[, "a1"]
-round(max(abs(b_r - b_1)), 3)
+        common_slope_1PL = coef(m_1, simplify = TRUE)$items[1, "a1"]), 2)

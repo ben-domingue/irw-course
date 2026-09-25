@@ -85,3 +85,9 @@ What changed from this outline when the page was drafted, with the numbers recom
 - **Chess:** 2PL slopes 0.02 (Y15, $b$ = 136.5, meaningless) to 3.79 (Y29). Y15 and Y29 cross at θ = 0.91, with 82% of players below; grouped proportions confirm the flip. Same-sum-score players: Rasch spread 0.00, 2PL up to 0.63. The common-slope 1PL reproduces the Rasch fit (slope 1.22 = Rasch SD of θ).
 - **Asymmetric curves:** described in words (no symbol for the exponent, since notation.md has none); links the IRW asymmetric-models vignette.
 - **Deep dive #21:** `deepdives/1pl-to-4pl/compute.R`, summary = SD of log(a) per table (unit-free) plus Rasch-vs-2PL BIC. Pilot only (6 of 316 candidates).
+
+## Revisions after Ben's review (09-24)
+
+- Added a visual quick check in "One family of curves": four static curves A–D (different a, b, c, u); which has u < 1? (C). Quick checks in Core ideas: 3.
+- Cut the "same model in two units" widget and its quiz; the unit is now one paragraph (a convention, matters for reading output and equating, not a finding). The chess check is one sentence (1PL common slope 1.22 = Rasch SD of θ, printed).
+- New H3 "The upper asymptote: ceilings and slips" after "What the lower asymptote needs": meaning of u < 1, weak identification, the RMET 4PL's non-convergence, Barton & Lord (1981), Loken & Rulison (2010), and DINA's slip/guess (Junker & Sijtsma, 2001, doi:10.1177/01466210122032064) with a pointer to `cdm` (not a thread). New chunk `ceiling-rmet`: 4PL u from 0.71 to 1.00 (median 0.96); only 2% of respondents score 34+ of 36.
