@@ -84,9 +84,15 @@ raw_csem <- function(t) {
   })
   sqrt(sum(v))
 }
-at <- sapply(c(1, 3, 5, 10, 15, 20), function(s) uniroot(function(t) tcc(t) - s, c(-6, 6))$root)
-round(rbind(raw = c(1, 3, 5, 10, 15, 20), theta = at,
-            model_sem_raw = sapply(at, raw_csem), ctt_sem_raw = sem), 2)
+at <- sapply(c(1, 3, 5, 10, 15, 20, 25), function(s) uniroot(function(t) tcc(t) - s, c(-6, 6))$root)
+# The two scales are linked by the slope of the test characteristic curve: an error of
+# SE points in the score is an error of about SE / slope on theta. Where the curve is
+# flat (near the floor and the ceiling), a small band in points is a wide band in theta.
+slope <- sapply(at, function(t) (tcc(t + 0.001) - tcc(t - 0.001)) / 0.002)
+round(rbind(raw = c(1, 3, 5, 10, 15, 20, 25), theta = at,
+            model_sem_raw = sapply(at, raw_csem), ctt_sem_raw = sem,
+            tcc_slope = slope, sem_raw_over_slope = sapply(at, raw_csem) / slope,
+            csem_theta = sapply(at, csem)), 2)
 
 ## ---- irt-band
 # Bands on the theta scale: each respondent's estimate (EAP, mirt's default) plus or
