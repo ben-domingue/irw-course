@@ -8,16 +8,21 @@ source("_course.R")
 lesson_header("irw-data")
 ```
 
+```{r}
+#| include: false
+knitr::read_chunk("code/irw-data-irw.R")
+```
+
 ```{ojs}
 //| echo: false
 import {rng, palette} from "./widgets/irt.js"
-import {median, itemRest} from "./widgets/irw-data.js"
+import {itemRest} from "./widgets/irw-data.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
 ## What this is for
 
-Every analysis in this course starts from the same object: a record of which respondent gave which response to which item. Before fitting a model to it, we should know how it is stored, what is missing, what else rides along, and what a few simple numbers say. Item response data have their surprises (an item scored the opposite way from its neighbours, a respondent who appears hundreds of times, a missing response that was never asked for), and they are far cheaper to find now than after a model has been fit. This lesson introduces the data, the Item Response Warehouse (IRW) that supplies them, and a first look at three IRW tables: yes/no answers on verbal aggression, a five-point Big Five inventory, and thousands of timed perceptual judgements.
+Every analysis in this course starts from a record of which respondent gave which response to which item. Before fitting a model, we should know how it is stored, what is missing, what rides along, and what a few simple numbers say. Item response data have their surprises (an item scored the opposite way from its neighbours, a respondent who appears hundreds of times, a missing response that was never asked for), and they are far cheaper to find now than after a model has been fit. This lesson introduces the data, the Item Response Warehouse (IRW) that supplies them, and a first look at three IRW tables: yes/no answers on verbal aggression, a five-point Big Five inventory, and thousands of timed perceptual judgements.
 
 ## Goals
 
@@ -38,9 +43,21 @@ By the end of this lesson you should be able to:
 **If you've done** [What is measurement?](measurement.qmd): psychological measurement works through standardized *probes* (items, stimuli, tasks) that draw out responses. From here on every probe is an **item**, whatever its form, and we take the items as given.
 :::
 
-Respondents (usually people) meet items, and each meeting produces a response: a right or wrong answer, a rating from 1 to 5, a key pressed on seeing a patch of pixels. Analysing responses is a different job from judging whether the items were well written or the construct well defined, but a measure's quality rests on those too; [Constructs and construct maps](constructs.qmd) and the Validity module take them up.
+Respondents (usually people) meet items, and each meeting produces a response: a right or wrong answer, a rating from 1 to 5, a key pressed on seeing a patch of pixels. Judging whether items are well written or constructs well defined is a separate job, but a measure's quality rests on it; [Constructs and construct maps](constructs.qmd) and the Validity module take them up.
 
-The **Item Response Warehouse** ([Domingue et al., 2025](https://doi.org/10.3758/s13428-025-02796-y)) collects such data. (I lead the team that builds it.) The data are open: each table's licence permits reuse, and the code that converted the original files is public ([ben-domingue/irw](https://github.com/ben-domingue/irw)). They are harmonized: every table follows one standard, so code written for one runs on the others. The warehouse holds more than 4,000 tables ([its index](https://itemresponsewarehouse.org/tables/)), from tests, personality and clinical scales, randomized trials and experiments, most with metadata and many with item text; [Nadela et al. (2026)](https://doi.org/10.59863/CIJG4549) describe how to use it. Every table cites the study that produced it, and so does this course, in the text and in the Data sources block that closes each lesson.
+The **Item Response Warehouse** ([Domingue et al., 2025](https://doi.org/10.3758/s13428-025-02796-y)) collects such data. (I lead the team that builds it.) The data are open: each table's licence permits reuse, and the code that converted the original files is public ([ben-domingue/irw](https://github.com/ben-domingue/irw)). They are harmonized: every table follows one standard, so code written for one runs on the others. It holds more than 4,000 tables ([index](https://itemresponsewarehouse.org/tables/)), most with metadata and many with item text; [Nadela et al. (2026)](https://doi.org/10.59863/CIJG4549) describe how to use it. This course cites each table's original study in the text and in each lesson's Data sources block.
+
+What is in it? A tour, with the lesson that uses each table:
+
+- Achievement tests: [`cdm_timss11`](https://itemresponsewarehouse.org/tables/cdm_timss11/), TIMSS mathematics from Austria, 174 items in 14 booklets ([Linking and equating](equating.qmd)).
+- Personality: [`bfi2_zhang_2025`](https://itemresponsewarehouse.org/tables/bfi2_zhang_2025/), the BFI-2 in four response formats ([Factor analysis I](fa-exploratory.qmd)).
+- Clinical screening: [`c19prc_uk_mcbride_2021_phq9`](https://itemresponsewarehouse.org/tables/c19prc_uk_mcbride_2021_phq9/), the PHQ-9 depression screener in six waves of a UK COVID-19 panel ([What does a score mean?](score-meaning.qmd)).
+- Randomized trials: [`gilbert_meta_12`](https://itemresponsewarehouse.org/tables/gilbert_meta_12/), vocabulary after a grade 2 literacy intervention, with treatment status ([What is measurement?](measurement.qmd)).
+- Cognitive experiments: [`enkavi_2019_stroop`](https://itemresponsewarehouse.org/tables/enkavi_2019_stroop/), the Stroop task, trial by trial, with response times ([Trials as items](trials.qmd)).
+- Child development: [`vocab_assessment_3_to_8_year_old_children`](https://itemresponsewarehouse.org/tables/vocab_assessment_3_to_8_year_old_children/), German receptive vocabulary in children aged 3 to 8 ([Validity as causation](validity-causal.qmd)).
+- Games: [`chess_lnirt`](https://itemresponsewarehouse.org/tables/chess_lnirt/), the Amsterdam Chess Test, with each player's Elo rating ([The likelihood](likelihood.qmd), [The Rasch model](rasch.qmd)).
+- Human judges: [`Forthmann-2024-cleverness_ratings`](https://itemresponsewarehouse.org/tables/forthmann-2024-cleverness_ratings/), five raters scoring the cleverness of uses for everyday objects ([Generalizability theory](g-theory.qmd)).
+- Items written by AI: [`gpt4mcq_young_2025`](https://itemresponsewarehouse.org/tables/gpt4mcq_young_2025/), a multiple-choice quiz written by ChatGPT-4 ([AI and psychometrics](ai-psychometrics.qmd)).
 
 ### The data standard
 
@@ -163,9 +180,22 @@ Plot.plot({
 md`Missing: **${(100 * ms_cells.filter(d => !d.seen).length / ms_cells.length).toFixed(0)}%** of cells. The long table would have **${ms_cells.filter(d => d.seen).length}** rows instead of 360. Pairs of items that no respondent answered together: **${ms_neverTogether}** of 66.`
 ```
 
-Random skips scatter the gaps, and every pair of items is still answered together by someone. Two booklets leave a third of the cells empty, and 16 pairs of items are never seen together, so the data say nothing directly about how they relate; linking designs are built this way. Stopping early piles the gaps at the end, for a reason that has to do with the respondent.
+Random skips scatter the gaps, and every pair of items is still answered together by someone. Two booklets leave a third of the cells empty, and 16 pairs of items are never seen together, so the data say nothing directly about how they relate; linking designs are built this way. Stopping early piles the gaps at the end, for a reason that has to do with the respondent. Real tables show these patterns (checked below). In [`cdm_timss11`](https://itemresponsewarehouse.org/tables/cdm_timss11/), each student took one of 14 booklets and each item sits in two, so 11,886 of the 15,051 pairs of items are never answered by the same student. In [`pirlsmissing_sirt`](https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/), one PIRLS booklet, skips are far from random: items are left blank by anywhere from 1% to 25% of students. And for 134 of its students the blanks in the second passage run to its last item, which looks like stopping early. I found no IRW table I could verify as an adaptive test.
 
-**How lessons read data.** Each IRW table's landing page ([`verbagg`'s](https://itemresponsewarehouse.org/tables/verbagg/), for example) has a *Download CSV* link that needs no account; the lessons read it with `read.csv()`. The link names the data version (`v59_0`), so an analysis can be pinned to a release. The helper `irw_csv()`, defined in the real-data code below, finds the link. The [irw R package](https://itemresponsewarehouse.github.io/Rpkg/) does more but needs a free Redivis account (see *Going further*).
+::: {.callout-note collapse="true"}
+## Check these patterns
+
+```{r}
+#| include: false
+#| ref.label: "helpers"
+```
+
+```{r missing-real}
+#| echo: true
+```
+:::
+
+**How lessons read data.** Each IRW table's landing page ([`verbagg`'s](https://itemresponsewarehouse.org/tables/verbagg/), for example) has a *Download CSV* link that needs no account; the lessons read it with `read.csv()`. The link names the data version (`v59_0`), so an analysis can be pinned to a release. The real-data code's `irw_csv()` finds the link. The [irw R package](https://itemresponsewarehouse.github.io/Rpkg/) does more but needs a free Redivis account (see *Going further*).
 
 ```{ojs}
 //| echo: false
@@ -192,43 +222,31 @@ All four assume the items run the same way. Each lesson states its keying once: 
 
 #### Try it: keying
 
-Six simulated 1–5 items, 300 respondents. Items 2 and 5 are worded in reverse and stored as answered. Choose which items to reverse-key.
+Six invented respondents rate four Mini-IPIP Extraversion items from 1 (strongly disagree) to 5 (strongly agree): "Am the life of the party", "Don't talk a lot", "Talk to a lot of different people at parties" and "Keep in the background" ([Donnellan et al., 2006](https://doi.org/10.1037/1040-3590.18.2.192); wording from the public-domain [IPIP key](https://ipip.ori.org/MiniIPIPKey.htm)). The second and fourth are worded in reverse.
 
 ```{ojs}
 //| echo: false
-viewof ky_flip = Inputs.checkbox(["1", "2", "3", "4", "5", "6"], {label: "Reverse-key items", value: []})
+viewof ky_key = Inputs.toggle({label: "Key the reversed items (6 − x)", value: false})
 ```
 
 ```{ojs}
 //| echo: false
-ky_raw = {
-  const r = rng(6), sign = [1, -1, 1, 1, -1, 1], shift = [0.3, -0.2, 0, -0.4, 0.2, 0.1];
-  const cut = y => (y < -1.4 ? 1 : y < -0.5 ? 2 : y < 0.4 ? 3 : y < 1.3 ? 4 : 5);
-  return Array.from({length: 300}, () => {
-    const t = r.norm();
-    return sign.map((s, i) => cut(s * 0.8 * t + 0.6 * r.norm() + shift[i]));
-  });
+{
+  const items = ["Life of the party", "Don't talk a lot (R)", "Talk to many at parties", "Keep in the background (R)"];
+  const raw = [[5, 1, 4, 2], [4, 2, 5, 3], [4, 3, 3, 2], [3, 2, 3, 4], [2, 4, 3, 4], [2, 5, 1, 4]];
+  const X = raw.map(r => r.map((x, j) => (ky_key && j % 2 ? 6 - x : x)));
+  const ir = itemRest(X);
+  const cell = (x, on, bold) => `<td style="padding:3px 12px;text-align:center;${on ? `background:${palette.light};` : ""}${bold ? "font-weight:600;" : ""}">${x}</td>`;
+  const head = `<tr><th style="padding:3px 12px">Respondent</th>${items.map(t => `<th style="padding:3px 12px;text-align:center">${t}</th>`).join("")}<th style="padding:3px 12px">Sum</th></tr>`;
+  const rows = X.map((r, i) => `<tr>${cell(i + 1)}${r.map((x, j) => cell(x, ky_key && j % 2)).join("")}${cell(r.reduce((a, b) => a + b, 0), false, true)}</tr>`).join("");
+  const irRow = `<tr><td style="padding:3px 12px"><em>Item-rest r</em></td>${ir.map(v => `<td style="padding:3px 12px;text-align:center;font-weight:600;color:${v < 0 ? palette.contrast : palette.main}">${v.toFixed(2)}</td>`).join("")}<td></td></tr>`;
+  const div = document.createElement("div");
+  div.innerHTML = `<table>${head}${rows}${irRow}</table>`;
+  return div;
 }
-ky_X = ky_raw.map(row => row.map((x, i) => (ky_flip.includes(String(i + 1)) ? 6 - x : x)))
-ky_ir = itemRest(ky_X).map((v, i) => ({item: `Item ${i + 1}`, r: v}))
-ky_sum = ky_X.map(row => row.reduce((u, v) => u + v, 0))
-ky_sd = {
-  const m = ky_sum.reduce((u, v) => u + v, 0) / ky_sum.length;
-  return Math.sqrt(ky_sum.reduce((u, v) => u + (v - m) ** 2, 0) / (ky_sum.length - 1));
-}
-Plot.plot({
-  width: 700, height: 220, x: {label: null}, y: {label: "Item-rest correlation", domain: [-0.8, 0.8]},
-  marks: [Plot.ruleY([0], {stroke: palette.rule}),
-          Plot.barY(ky_ir, {x: "item", y: "r", fill: d => (d.r < 0 ? palette.contrast : palette.main)})]
-})
 ```
 
-```{ojs}
-//| echo: false
-md`Sum-score SD: **${ky_sd.toFixed(2)}**. Negative item-rest correlations: **${ky_ir.filter(d => d.r < 0).length}** of 6.`
-```
-
-Unkeyed, items 2 and 5 correlate negatively with the rest, and the other four are pulled down, because the total mixes directions. Reverse items 2 and 5 and every bar is positive and about twice as tall, and the sum-score SD more than doubles: the items now add up instead of cancelling. Reverse item 3 by mistake and its bar turns negative.
+Unkeyed, the sums barely differ (12 to 14), because agreeing with one kind of item cancels disagreeing with the other, and every item-rest correlation is negative. Keyed, the sums spread from 6 to 18, ordering respondents from most to least extraverted, and every item-rest correlation is positive.
 
 ```{ojs}
 //| echo: false
@@ -246,65 +264,13 @@ quiz({
 
 Many tables record more than `resp`. **Response time** is one: how long someone took is data too ([Response times](response-time.qmd)). Design columns (`treat`, `wave`, sometimes `cluster_id` for a school) say how data were collected ([Invariance and experience](invariance-experience.qmd)). Covariates (`cov_`) let us compare groups item by item ([Differential item functioning](dif.qmd)) or explain responses ([Explanatory item response models](explanatory-irt.qmd)). And many tables have [item text](https://itemresponsewarehouse.org/itemtext.html).
 
-Nor are items always questions. In a perception experiment the item is a condition, a stimulus of a given strength, met many times as trials ([Ratcliff & Rouder, 1998](https://doi.org/10.1111/1467-9280.00067)). Trials bring response times, and a question: when we compare the times of errors and correct responses, what are we comparing?
-
-#### Try it: when are errors slow?
-
-Simulated trials, 400 in each of five conditions from easy to hard. Harder conditions produce more errors and, if you choose, slower responses; within a condition, errors can be given extra time.
-
-```{ojs}
-//| echo: false
-predict({
-  q: "Suppose that *within* every condition, errors and correct responses are equally fast, but hard conditions are slower than easy ones. Pool all the trials and compare the median response time of errors with that of correct responses. What do you expect?",
-  choices: ["Errors slower", "About the same", "Errors faster"],
-  answer: "Errors slower",
-  reveal: "Errors are slower in the pooled comparison, although no condition makes them slower. Most errors happen in the hard conditions, and the hard conditions are slow for every response. The widget starts in exactly this setting: check the pooled medians below it."
-})
-```
-
-```{ojs}
-//| echo: false
-viewof rt_hard = Inputs.range([0, 0.6], {value: 0.3, step: 0.05, label: "Extra time in the hardest condition (s)"})
-viewof rt_err = Inputs.range([0, 0.2], {value: 0, step: 0.01, label: "Extra time for errors within a condition (s)"})
-```
-
-```{ojs}
-//| echo: false
-rt_trials = {
-  const r = rng(98), acc = [0.95, 0.88, 0.75, 0.62, 0.52], out = [];
-  acc.forEach((p, k) => {
-    for (let t = 0; t < 400; t++) {
-      const correct = r.unif() < p;
-      const rt = (0.5 + rt_hard * k / 4) * Math.exp(0.35 * r.norm()) + (correct ? 0 : rt_err);
-      out.push({condition: k + 1, correct, rt});
-    }
-  });
-  return out;
-}
-rt_med = [1, 2, 3, 4, 5].flatMap(k => ["Correct", "Error"].map(o => ({
-  condition: k, outcome: o,
-  rt: median(rt_trials.filter(d => d.condition === k && d.correct === (o === "Correct")).map(d => d.rt))
-})))
-Plot.plot({
-  width: 700, height: 250, x: {label: "Condition (1 = easiest)", ticks: [1, 2, 3, 4, 5]}, y: {label: "Median response time (s)"},
-  color: {legend: true, domain: ["Correct", "Error"], range: [palette.main, palette.contrast]},
-  marks: [Plot.line(rt_med, {x: "condition", y: "rt", stroke: "outcome", strokeWidth: 2}),
-          Plot.dot(rt_med, {x: "condition", y: "rt", fill: "outcome", r: 4})]
-})
-```
-
-```{ojs}
-//| echo: false
-md`Pooled over all conditions, the median response time is **${median(rt_trials.filter(d => !d.correct).map(d => d.rt)).toFixed(2)} s** for errors and **${median(rt_trials.filter(d => d.correct).map(d => d.rt)).toFixed(2)} s** for correct responses. Errors: ${rt_trials.filter(d => !d.correct && d.condition === 5).length} in the hardest condition, ${rt_trials.filter(d => !d.correct && d.condition === 1).length} in the easiest.`
-```
-
-With no extra time for errors, the two lines cross back and forth (error medians are noisy where errors are few), yet the pooled error median is clearly higher: errors crowd into the slow, hard conditions. Set the hardest condition's extra time to 0 and the gap disappears. Before comparing responses, ask where they came from.
+Nor are items always questions. In a perception experiment the item is a condition, a stimulus of a given strength, met many times as trials ([Ratcliff & Rouder, 1998](https://doi.org/10.1111/1467-9280.00067)). The brightness experiment below is of that kind.
 
 ## Simulate
 
-The code builds a long table in which each respondent has a propensity to say yes and each item its own popularity, deletes 5% of the rows, reshapes, and takes the first look. It's base R and runs in a second or two.
+The code builds a long table (each respondent with a propensity to say yes, each item with its own popularity), deletes 5% of rows, reshapes, and takes the first look, in base R.
 
-With the seed as written, item means run from 0.23 to 0.80 and the median item-rest correlation is 0.28. Set `spread <- 0`, so every respondent has the same propensity: the means barely move, but the correlations collapse (median 0.03), since nothing about a respondent carries over between items. With `spread <- 2` the median rises to 0.54. Positive item-rest correlations are the first sign that items measure something in common, and that something is what later lessons model.
+With the seed as written, item means run from 0.23 to 0.80 and the median item-rest correlation is 0.28. Set `spread <- 0`, so every respondent has the same propensity: the means barely move, but the correlations collapse (median 0.03), since nothing about a respondent carries over between items. With `spread <- 2` the median rises to 0.54. Positive item-rest correlations are the first sign that items measure something in common.
 
 ```{webr}
 {{< include code/irw-data-sim.R >}}
@@ -313,11 +279,6 @@ With the seed as written, item means run from 0.23 to 0.80 and the median item-r
 [Download this code](code/irw-data-sim.R) to run it in your own R session.
 
 ## With real data
-
-```{r}
-#| include: false
-knitr::read_chunk("code/irw-data-irw.R")
-```
 
 [verbagg](https://itemresponsewarehouse.org/tables/verbagg/) is the main example, with 0/1 responses; [manolika_2021_mini_ipip](https://itemresponsewarehouse.org/tables/manolika_2021_mini_ipip/) is the contrast for Likert responses and keying; [rr98_accuracy](https://itemresponsewarehouse.org/tables/rr98_accuracy/) is the contrast for response times and trials. The code is base R ([download it](code/irw-data-irw.R)).
 
@@ -349,7 +310,7 @@ One row per response: 316 × 24 = 7,584. Two gentle notes. Respondents answered 
 #| fig-height: 3
 ```
 
-No cell is empty; every item has both categories; item means run from 0.09 to 0.79. Sum scores span 0 to 24 (mean 11.4), with only 4 respondents at the floor and 5 at the ceiling. Every item-rest correlation is positive (0.28 to 0.58, median 0.46). Against the simulation's medians of 0.28 and 0.54 (propensity SDs of 1 and 2), these items hang together fairly well.
+No cell is empty; every item has both categories; item means run from 0.09 to 0.79. Sum scores span 0 to 24 (mean 11.4), with only 4 respondents at the floor and 5 at the ceiling. Every item-rest correlation is positive (0.28 to 0.58, median 0.46). Against the simulation's 0.28 and 0.54, these items hang together fairly well.
 
 Which items are reported most? The design lets us ask.
 
@@ -408,7 +369,7 @@ In [Ratcliff and Rouder's (1998)](https://doi.org/10.1111/1467-9280.00067) first
 #| code-fold: show
 ```
 
-Here `id` is not a person but one of three observers' sessions ("jf 2" is jf's second), 30 in all. The 33 items are brightness levels, and the conditions are repeated as trials: a median of 12 rows per respondent–item pair, told apart by `block` and `trialnum`. This is the quick check's table; going wide needs a rule.
+Here `id` is not a person but one of three observers' sessions ("jf 2" is jf's second), 30 in all. The 33 items are brightness levels, repeated as trials: a median of 12 rows per respondent–item pair, told apart by `block` and `trialnum`.
 
 ```{r rr98-accuracy}
 #| echo: true
@@ -426,8 +387,6 @@ Accuracy is about 0.95 at the extremes and 0.50 in the middle, where either dist
 
 Response times have a long right tail (median 0.58 s, maximum 14 s). Ratcliff and Rouder set aside responses outside 0.2–2.5 s ([rtdists documentation](https://search.r-project.org/CRAN/refmans/rtdists/html/rr98.html)); the IRW keeps them (3.3% of rows), so we compare medians. **Errors are slower than correct responses**: 0.65 s against 0.56 s.
 
-But a pooled comparison mixes two things. Does it here?
-
 ```{r rr98-bylevel}
 #| echo: true
 #| code-fold: show
@@ -435,7 +394,7 @@ But a pooled comparison mixes two things. Does it here?
 #| fig-height: 3.5
 ```
 
-Partly. Errors are slower within 22 of the 33 levels, so they are slower in their own right, but by only about 0.02 s on average (weighting levels by their errors), against a pooled gap of 0.09 s. The rest is where errors happen: the hard middle levels are slow for every response (across levels, error rate and median time correlate at 0.95), and most errors are there. [Trials as items](trials.qmd) and [Response-time process models](rt-process-models.qmd) return to this table.
+Within a brightness level, though, errors are slower by only about 0.02 s (at 22 of the 33 levels), so most of the pooled gap comes from errors crowding into the hard levels, which are slow for every response (across levels, error rate and median time correlate at 0.95). [Response time and the speed-accuracy tradeoff](response-time.qmd) takes up that aggregation, and [Trials as items](trials.qmd) and [Response-time process models](rt-process-models.qmd) return to this table.
 
 ## Problems
 

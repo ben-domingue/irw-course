@@ -80,3 +80,10 @@ Design columns (`treat`, `wave`, `cluster_id`) get a paragraph and a pointer for
 - **Data reading.** The real-data code defines `irw_csv_url()`/`irw_csv()` (as in `_course.R`) so the downloaded file runs standalone and reads the current version-pinned link.
 - **Length.** Optional columns moved to a collapsible; the draft is at the top of the word range.
 
+
+## Revisions from Ben's review of PR #125 (09-24)
+
+- **Scope tour** added before *The data standard*: nine bullets, each linking a real IRW landing page (checked with check_links.R), described from its landing page, naming the lesson that uses it.
+- **Missingness linked to real data**, verified in the CSVs (collapsible `missing-real` chunk): `cdm_timss11` (14 booklets, each item in two; 11,886 of 15,051 item pairs never answered together); `pirlsmissing_sirt` (blank rates 1% to 25% by item; 134 students whose second-passage blanks run to its end). `rapm_poulton_2022_timed` was checked and not used: time-limit hits are scored, not missing, and its missing rows are respondents not retested at wave 2. No adaptive-test table was verified.
+- **Keying widget replaced**: six invented respondents on four public-domain Mini-IPIP Extraversion items (two reversed), one toggle; raw sums 12–14 and all item-rest r negative, keyed sums 6–18 and all positive.
+- **"When are errors slow?" widget and its predict cut.** The aggregation point is two sentences in the `rr98_accuracy` section and is handed to `response-time` (Picks up updated there and in `rt-process-models`).

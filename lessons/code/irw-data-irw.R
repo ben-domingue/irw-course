@@ -146,3 +146,20 @@ plot(as.numeric(colnames(med)), med["correct", ], type = "b", pch = 19, col = "#
      ylim = range(med[1:2, ]), xlab = "Brightness level", ylab = "Median response time (s)")
 lines(as.numeric(colnames(med)), med["error", ], type = "b", pch = 17, col = "#c2410c")
 legend("topright", c("Correct", "Error"), col = c("#2780e3", "#c2410c"), pch = c(19, 17), lty = 1, bty = "n")
+
+## ---- missing-real
+# Missingness patterns in two more tables (helpers from the top of this file).
+# cdm_timss11: each student took one of 14 booklets; each item is in two booklets.
+tm <- irw_csv("cdm_timss11")
+ib <- table(tm$item, tm$booklet) > 0           # item x booklet: does the booklet carry it?
+c(booklets = ncol(ib), items = nrow(ib), booklets_per_item = unique(rowSums(ib)))
+together <- ib %*% t(ib)                        # booklets shared by each pair of items
+c(item_pairs = sum(upper.tri(together)), never_together = sum(together[upper.tri(together)] == 0))
+# pirlsmissing_sirt: one PIRLS booklet; missing responses are rows with an empty resp.
+pr <- irw_csv("pirlsmissing_sirt")
+pr_w <- long2wide(pr)
+round(range(colMeans(is.na(pr_w))), 2)          # share left blank, least and most skipped items
+# Respondents whose blanks in the second passage (the last 16 items) run to its end
+p2 <- is.na(pr_w[, grep("^R31P", names(pr_w))])
+trailing <- apply(p2, 1, function(r) any(r) && all(r[which(r)[1]:length(r)]))
+sum(trailing)
