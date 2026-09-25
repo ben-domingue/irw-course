@@ -20,7 +20,7 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 
 - Items as fixed or random effects in long data; log RT as a second outcome with the same machinery (from `explanatory-irt`).
 - The Rasch item response function (from `rasch`); the 2PL's $a$ appears only in passing.
-- Response times beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`).
+- Response times beside `resp`; errors slower than correct in `rr98_accuracy` (from `irw-data`). Most of that gap is aggregation: within brightness levels errors are slower by about 0.02 s, against 0.09 s pooled (0.65 vs. 0.56 s), because errors crowd into the hard, slow levels. `irw-data` states this in two sentences; this lesson owns the aggregation point.
 - Brief Recalls (E2; restated, not threads; digest E1): in `roar_lexical`, 3.1% of responses come in under 0.3 s at accuracy 0.51 (`guessing-priors`); the IMV (`fit-prediction`), for the deep dive.
 
 ## Promises / leaves open

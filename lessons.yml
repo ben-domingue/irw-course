@@ -70,7 +70,7 @@ lessons:
     prereqs: []
     origin: {slides: [c1], ps: ["PS1#3"], code: [c1/irw_data_exploration.R]}
     tables: [verbagg, manolika_2021_mini_ipip, rr98_accuracy]
-    status: stub
+    status: draft
     tranche: preliminary
 
   - id: likelihood

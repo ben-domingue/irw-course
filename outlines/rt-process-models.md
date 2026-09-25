@@ -20,7 +20,7 @@ Articles checked on Crossref (09-24). Software: `rtdists` (Singmann et al., CRAN
 
 - Log RT, person speed and item time intensity; within- vs. between-person SAT; the conditional accuracy function (from `response-time`).
 - The 2PL and discrimination as a slope (from `1pl-to-4pl`).
-- Errors slower than correct responses in `rr98_accuracy` (from `irw-data`).
+- Errors slower than correct responses in `rr98_accuracy` (from `irw-data`): within levels the gap is about 0.02 s against 0.09 s pooled, so compare error and correct RTs within a condition before reading slow errors as drift variability.
 
 ## Promises / leaves open
 
