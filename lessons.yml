@@ -161,7 +161,7 @@ lessons:
     prereqs: [ability-estimation]
     origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
     tables: [enders_2022_science_literacy]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: 1pl-to-4pl
