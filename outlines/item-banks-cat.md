@@ -10,6 +10,7 @@
 - Go deeper: two callouts, maximum information vs. expected posterior variance (as planned) and the SPRT (moved out of the main line for length; problem 5 uses it).
 - The IACAT walk-through link (http://iacat.org/irt-based-cat) now returns 404; not linked.
 - Sympson & Hetter (1985) is cited through Hetter & Sympson (1997), doi:10.1037/10244-014, and van der Linden (2003); Reckase (1983) through Spray & Reckase (1996), doi:10.3102/10769986021004405. Both verified on Crossref.
+- Ben's review (09-25, PR #167): the step-by-step widget now says what its dots are (each bank item at its difficulty, at its information at the current EAP; legend: available, already given, given at this step), and every panel has fixed axes (information 0 to the bank's largest $a^2/4$; posterior density 0 to 1.6; RMSE 0 to 1.5 in the stopping-rule widget).
 - PROMIS item text: not shown (HealthMeasures terms of use bar redistribution; A5).
 
 Module: uses · Prereqs: information, ability-estimation, polytomous · Extension · Status: draft

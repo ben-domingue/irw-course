@@ -73,7 +73,7 @@ After one item every pattern is all-right or all-wrong, so there is no MLE until
 
 #### Try it: one CAT, step by step
 
-A 100-item 2PL bank and one simulated respondent. Choose their true $\theta$ and step through the test.
+A 100-item 2PL bank and one simulated respondent. Choose their true $\theta$ and step through the test. In the top panel each dot is one bank item, placed at its difficulty $b$, at a height equal to its information at the EAP before this step; the orange dot is the item the CAT gives at this step (the most informative one still available). The bottom panel is the posterior after the response.
 
 ```{ojs}
 //| echo: false
@@ -84,17 +84,19 @@ viewof c1_step = Inputs.range([1, 15], {value: 1, step: 1, label: "Step"})
 ```{ojs}
 //| echo: false
 c1_bank = makeBank(100, 0, 1.2, 11)
+c1_imax = Math.max(...c1_bank.map(it => it.a * it.a / 4))  // largest item information anywhere: fixed y axis
 c1_u = { const r = rng(21); return c1_bank.map(() => r.unif()); }
 c1_steps = runCat(c1_theta, c1_bank, c1_u, {maxItems: 15, pick: () => 0})
 c1_s = c1_steps[c1_step - 1]
 c1_prev = c1_steps.slice(0, c1_step - 1).map(s => s.item.id)
 c1_mle = mle2pl(c1_steps.slice(0, c1_step).map(s => s.item), c1_steps.slice(0, c1_step).map(s => s.x))
 Plot.plot({
-  width: 700, height: 220, x: {label: "Item difficulty b", domain: [-4, 4]}, y: {label: "Information at the EAP before this step"},
+  width: 700, height: 240, x: {label: "Item difficulty b", domain: [-4, 4]}, y: {label: "Item information at the current EAP", domain: [0, c1_imax * 1.05]},
+  color: {legend: true, domain: ["Available item", "Already given", "Given at this step"], range: [palette.light, palette.rule, palette.contrast]},
   marks: [
-    Plot.dot(c1_bank.filter(it => !c1_prev.includes(it.id)), {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 3, fill: palette.light}),
-    Plot.dot(c1_bank.filter(it => c1_prev.includes(it.id)), {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 3, fill: palette.rule}),
-    Plot.dot([c1_s.item], {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 7, fill: palette.contrast}),
+    Plot.dot(c1_bank.filter(it => !c1_prev.includes(it.id)), {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 3, fill: () => "Available item"}),
+    Plot.dot(c1_bank.filter(it => c1_prev.includes(it.id)), {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 3, fill: () => "Already given"}),
+    Plot.dot([c1_s.item], {x: "b", y: it => info2pl(c1_s.thetaBefore, it), r: 7, fill: () => "Given at this step"}),
     Plot.ruleX([c1_s.thetaBefore], {stroke: palette.guide, strokeDasharray: "4,3"})
   ]
 })
@@ -102,12 +104,12 @@ Plot.plot({
 
 ```{ojs}
 //| echo: false
-c1_top = Math.max(...c1_s.post)
+c1_dx = catNodes[1] - catNodes[0]
 Plot.plot({
-  width: 700, height: 220, x: {label: "θ", domain: [-4, 4]}, y: {label: "Posterior after this step", axis: null},
+  width: 700, height: 240, x: {label: "θ", domain: [-4, 4]}, y: {label: "Posterior density after this step", domain: [0, 1.6]}, clip: true,
   marks: [
-    Plot.line(catNodes.map(t => ({t, p: dnorm(t) / dnorm(0) * c1_top})), {x: "t", y: "p", stroke: palette.guide, strokeDasharray: "4,3"}),
-    Plot.line(catNodes.map((t, k) => ({t, p: c1_s.post[k]})), {x: "t", y: "p", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.line(catNodes.map(t => ({t, p: dnorm(t)})), {x: "t", y: "p", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(catNodes.map((t, k) => ({t, p: c1_s.post[k] / c1_dx})), {x: "t", y: "p", stroke: palette.main, strokeWidth: 2.5}),
     Plot.ruleX([c1_s.eap], {stroke: palette.contrast, strokeWidth: 2}),
     Plot.ruleX([c1_theta], {stroke: palette.ink})
   ]
@@ -116,7 +118,7 @@ Plot.plot({
 
 ```{ojs}
 //| echo: false
-md`**Step ${c1_step}.** The EAP before this item was ${c1_s.thetaBefore.toFixed(2)} (dashed line, top). The most informative unused item there (large dot; used items are grey) has b = ${c1_s.item.b.toFixed(2)} and a = ${c1_s.item.a.toFixed(2)}, information ${c1_s.infoAtStart.toFixed(2)}. The respondent got it ${c1_s.x ? "right" : "wrong"}. Now: EAP **${c1_s.eap.toFixed(2)}** (orange line, bottom), posterior SD **${c1_s.sd.toFixed(2)}**, MLE ${c1_mle === null ? "**none** (every answer so far is " + (c1_s.x ? "right" : "wrong") + ")" : "**" + c1_mle.toFixed(2) + "**"}. Responses so far: ${c1_steps.slice(0, c1_step).map(s => s.x).join(" ")}. The black line is the true θ; the dashed curve is the prior.`
+md`**Step ${c1_step}.** The EAP before this item was ${c1_s.thetaBefore.toFixed(2)} (dashed line, top). The item given at this step (orange dot, top), the most informative unused item there, has b = ${c1_s.item.b.toFixed(2)} and a = ${c1_s.item.a.toFixed(2)}, information ${c1_s.infoAtStart.toFixed(2)}. The respondent got it ${c1_s.x ? "right" : "wrong"}. Now: EAP **${c1_s.eap.toFixed(2)}** (orange line, bottom), posterior SD **${c1_s.sd.toFixed(2)}**, MLE ${c1_mle === null ? "**none** (every answer so far is " + (c1_s.x ? "right" : "wrong") + ")" : "**" + c1_mle.toFixed(2) + "**"}. Responses so far: ${c1_steps.slice(0, c1_step).map(s => s.x).join(" ")}. The black line is the true θ; the dashed curve is the prior.`
 ```
 
 At the defaults the first four answers are right, and there is no MLE until the fifth, a wrong answer; the EAP climbs meanwhile (0.56, 1.06, 1.41, 1.74) and ends at 1.59, posterior SD 0.34. The first four items have slopes from 2.2 to 2.4, and from step 10 on the slopes are 1.2 to 1.6: maximum information spends the steepest items first, because $a^2$ multiplies everything else.
@@ -203,7 +205,7 @@ c2_items = Plot.plot({
           Plot.line(c2_by, {x: "theta", y: "items", stroke: palette.main, strokeWidth: 2.5}), Plot.dot(c2_by, {x: "theta", y: "items", fill: palette.main})]
 })
 c2_err = Plot.plot({
-  width: 340, height: 240, x: {label: "True θ", domain: [-3.2, 3.2]}, y: {label: "RMSE of the EAP", domain: [0, 1.2]},
+  width: 340, height: 240, x: {label: "True θ", domain: [-3.2, 3.2]}, y: {label: "RMSE of the EAP", domain: [0, 1.5]}, clip: true,
   marks: [Plot.ruleY([0.3], {stroke: palette.guide, strokeDasharray: "4,3"}),
           Plot.line(c2_by, {x: "theta", y: "rmse", stroke: palette.main, strokeWidth: 2.5}), Plot.dot(c2_by, {x: "theta", y: "rmse", fill: palette.main})]
 })
