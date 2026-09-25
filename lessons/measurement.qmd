@@ -52,7 +52,7 @@ The two part company on one question: is a number a measurement because the attr
 
 #### Try it: two thermometers
 
-Two tubes hold different liquids. Both are marked at melting ice (0) and boiling water (100), and the space between is divided evenly. Liquid A expands evenly with temperature: every degree of warming adds the same volume, so the column climbs the same distance per degree anywhere in the tube. Liquid B expands unevenly: a degree of warming adds more volume at one end of the range than at the other, so its column climbs faster per degree near one mark and slower near the other. The first slider sets how uneven that is (0 is even; the sign says which end expands faster). The picture is stylized, not data on real liquids.
+Two tubes hold different liquids. Both are marked at melting ice (0) and boiling water (100), and the space between is divided evenly. Liquid A expands evenly with temperature: every degree of warming adds the same volume, so the column climbs the same distance per degree anywhere in the tube. Liquid B expands unevenly: a degree of warming adds more volume at one end of the range than at the other, so its column climbs faster per degree near one mark and slower near the other. The first slider sets how uneven that is (0 is even; the sign says which end expands faster). On the left, the disagreement is drawn on the tubes: the liquid stands at the same height in both, and only the graduations differ. Tube A's marks are evenly spaced. Tube B's marks sit where tube B would read 0, 10, 20 and so on, so they crowd together where liquid B runs ahead of liquid A and spread out where it falls behind. On the right, the two readings are plotted against each other. The picture is stylized, not data on real liquids.
 
 ```{ojs}
 //| echo: false
@@ -63,36 +63,15 @@ viewof th_a = Inputs.range([0, 100], {value: 50, step: 1, label: "Tube A reads"}
 ```{ojs}
 //| echo: false
 th_b = a => { const s = a / 100; return 100 * (s + th_c * s * (1 - s)); }
-th_line = grid(0, 100, 101).map(a => ({a, b: th_b(a)}))
-Plot.plot({
-  width: 520, height: 360,
-  x: {label: "Reading on tube A", domain: [0, 100]}, y: {label: "Reading on tube B", domain: [0, 100]},
-  marks: [
-    Plot.line([{a: 0, b: 0}, {a: 100, b: 100}], {x: "a", y: "b", stroke: palette.guide, strokeDasharray: "4,3"}),
-    Plot.line(th_line, {x: "a", y: "b", stroke: palette.main, strokeWidth: 2.5}),
-    Plot.dot([{a: th_a, b: th_b(th_a)}], {x: "a", y: "b", r: 6, fill: palette.contrast})
-  ]
-})
-```
-
-```{ojs}
-//| echo: false
-md`Where tube A reads ${th_a}, tube B reads ${th_b(th_a).toFixed(1)}. They differ by ${Math.abs(th_b(th_a) - th_a).toFixed(1)} degrees here, and by nothing at 0 and 100.`
-```
-
-The same disagreement can be drawn on the tubes themselves. Keep the column and move the marks: below, the liquid stands at the same height in both tubes, and only the graduations differ. Tube A's marks are evenly spaced. Tube B's marks sit where tube B would read 0, 10, 20 and so on, so they crowd together where liquid B runs ahead of liquid A and spread out where it falls behind. The sliders above drive this picture too.
-
-```{ojs}
-//| echo: false
 th_binv = r => { let lo = 0, hi = 100; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (th_b(m) < r) lo = m; else hi = m; } return (lo + hi) / 2; }
-th_marks = d3.range(0, 101, 10)
+th_line = grid(0, 100, 101).map(a => ({a, b: th_b(a)}))
 th_tubes = [{x1: 0.6, x2: 1.4, name: "Tube A"}, {x1: 2.6, x2: 3.4, name: "Tube B"}]
-th_ticks = th_marks.flatMap(r => [
+th_ticks = d3.range(0, 101, 10).flatMap(r => [
   {x1: 1.4, x2: 1.65, y: r, label: r},
   {x1: 3.4, x2: 3.65, y: th_binv(r), label: r}
 ])
-Plot.plot({
-  width: 520, height: 380, marginLeft: 20,
+th_tubeplot = Plot.plot({
+  width: 330, height: 360, marginLeft: 10,
   x: {domain: [0, 4.4], axis: null}, y: {domain: [-8, 108], axis: null},
   marks: [
     Plot.rect(th_tubes, {x1: "x1", x2: "x2", y1: 0, y2: th_a, fill: palette.light}),
@@ -104,6 +83,21 @@ Plot.plot({
     Plot.text([{x: 1, y: 104, s: `reads ${th_a.toFixed(0)}`}, {x: 3, y: 104, s: `reads ${th_b(th_a).toFixed(1)}`}], {x: "x", y: "y", text: "s", fill: palette.contrast})
   ]
 })
+th_curveplot = Plot.plot({
+  width: 360, height: 360,
+  x: {label: "Reading on tube A", domain: [0, 100]}, y: {label: "Reading on tube B", domain: [0, 100]},
+  marks: [
+    Plot.line([{a: 0, b: 0}, {a: 100, b: 100}], {x: "a", y: "b", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(th_line, {x: "a", y: "b", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.dot([{a: th_a, b: th_b(th_a)}], {x: "a", y: "b", r: 6, fill: palette.contrast})
+  ]
+})
+htl.html`<div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">${th_tubeplot}${th_curveplot}</div>`
+```
+
+```{ojs}
+//| echo: false
+md`Where tube A reads ${th_a}, tube B reads ${th_b(th_a).toFixed(1)}. They differ by ${Math.abs(th_b(th_a) - th_a).toFixed(1)} degrees here, and by nothing at 0 and 100.`
 ```
 
 Same column, same bath, two readings. Nothing in the glass says which set of marks is right; that is a question about the liquids.
