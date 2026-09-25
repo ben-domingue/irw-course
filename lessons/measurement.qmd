@@ -52,7 +52,7 @@ The two part company on one question: is a number a measurement because the attr
 
 #### Try it: two thermometers
 
-Two tubes hold different liquids. Both are marked at melting ice (0) and boiling water (100), and the space between is divided evenly. Liquid A expands evenly with temperature; liquid B expands unevenly, by an amount the first slider sets. The picture is stylized, not data on real liquids.
+Two tubes hold different liquids. Both are marked at melting ice (0) and boiling water (100), and the space between is divided evenly. Liquid A expands evenly with temperature: every degree of warming adds the same volume, so the column climbs the same distance per degree anywhere in the tube. Liquid B expands unevenly: a degree of warming adds more volume at one end of the range than at the other, so its column climbs faster per degree near one mark and slower near the other. The first slider sets how uneven that is (0 is even; the sign says which end expands faster). The picture is stylized, not data on real liquids.
 
 ```{ojs}
 //| echo: false
@@ -102,7 +102,7 @@ Stevens paired his definition with a classification that is still in use: scales
 
 - **Nominal.** Igneous, sedimentary, metamorphic. The labels sort rocks into kinds; any relabelling that keeps the kinds apart will do. We can count rocks of each kind.
 - **Ordinal.** Mohs hardness orders minerals by which scratches which: talc is 1, gypsum 2, calcite 3, and so on up to diamond at 10. Any relabelling that keeps the order (any increasing function) will do. We can say quartz (7) is harder than apatite (5), but not that the step from calcite to fluorite equals the step from fluorite to apatite: an order-preserving relabelling can make those steps anything we like. Indentation hardness, measured on the Mohs minerals themselves, doesn't rise evenly with the Mohs number ([Broz, Cook & Whitney, 2006](https://doi.org/10.2138/am.2006.1844)).
-- **Interval.** A unit means the same thing anywhere on the scale. Only linear relabellings, $\beta_0 + \beta_1 x$ with $\beta_1 > 0$, are allowed, and differences can be compared. A ratio scale adds a true zero, so ratios ("twice as long") mean something too.
+- **Interval.** A unit means the same thing anywhere on the scale. Only linear relabellings, $\beta_0 + \beta_1 x$ with $\beta_1 > 0$, are allowed, and differences can be compared. For minerals this takes a different kind of test: instead of asking which mineral scratches which, press a diamond point into the surface with a known force and measure the dent (indentation hardness; [Smith & Sandland, 1922](https://doi.org/10.1243/pime_proc_1922_102_033_02)), or drop a small body onto it and measure how fast it bounces back (rebound hardness; [Leeb, 1979](<https://doi.org/10.1016/0308-9126(79)90087-7>)). Each gives a number in physical units, so a difference of ten units means the same thing at the soft end as at the hard end. The two tests measure different physical properties, though, and needn't agree about spacing, much as the two thermometers above disagree between their marks. A ratio scale adds a true zero, so ratios ("twice as long") mean something too.
 
 Each level licenses more claims than the one before, because it allows fewer relabellings. A statement is safe at a level if it stays true under every relabelling that level allows. Test one. Suppose I haphazardly assemble a box of minerals from the geology department's collection and announce that their hardness is uniformly distributed. Would the geologists accept that?
 
