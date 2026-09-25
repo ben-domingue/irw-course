@@ -406,7 +406,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [florida_twins_grit, florida_twins_panas]
     reuses: [florida_twins_grit]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: rt-process-models

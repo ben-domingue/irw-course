@@ -2,7 +2,7 @@
 
 # Structural equation modeling with lavaan (`sem`)
 
-Module: fa · Prereqs: fa-confirmatory · Extension · Status: outline
+Module: fa · Prereqs: fa-confirmatory · Extension · Status: draft (09-25, #64)
 
 ## Core ideas
 
@@ -31,8 +31,8 @@ Crossref-checked 09-24 unless marked.
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `florida_twins_grit` | main example (measurement: grit) | Grit-O items with item text; first wave; joined to PANAS by `id`. | `dimensionality` (deliberate reuse: same grit items, keyed the same way; `sem` records `reuses:`) |
-| `florida_twins_panas` | main example (outcome: affect) | PANAS positive and negative affect (Watson, Clark & Tellegen, 1988, doi:10.1037/0022-3514.54.6.1063). 618 children and adolescents (ages 9–18) have both. | — |
+| `florida_twins_grit` | main example (measurement: grit) | Grit-O items with item text; **wave 2** (grit was asked in wave 2 only; corrected at drafting); joined to wave-2 PANAS by `id`. | `dimensionality` (deliberate reuse: same grit items, keyed the same way; `sem` records `reuses:`) |
+| `florida_twins_panas` | main example (outcome: affect) | PANAS positive and negative affect (Watson, Clark & Tellegen, 1988, doi:10.1037/0022-3514.54.6.1063). 778 respondents are in both tables at wave 2; 618 (ages 9–18) answered every item. | — |
 
 **Finding:** with MLR, fit is modest (CFI 0.84, RMSEA 0.06, SRMR 0.07). Perseverance of effort predicts positive affect strongly (standardized 0.66); consistency of interest predicts lower negative affect (−0.27). Keying (confirmed 09-24 from the IRW option text): the grit scale runs 1 = "Very much like me" to 5 = "Not like me at all", so the six perseverance items are reversed to make higher = more grit; the consistency-of-interest items already run that way. Same direction as `dimensionality`.
 
@@ -69,3 +69,13 @@ Clustering: twins are nested in families. IRW ids come in pairs ending 00/01 (e.
 - **Notes for drafting (Ben, 09-25).** (1) Prediction as a complement to fit: Zhang, Rahal, Kanopka, Ulitzsch, Zhang & Domingue (2026), *Multivariate Behavioral Research*, doi:10.1080/00273171.2026.2645212 (IMV for CFA with binary outcomes; verified on Crossref); `fa-confirmatory` cites it and has a problem on it, so recall rather than re-teach. (2) Composites vs. factors: composite-based SEM (PLS, PLSc, GSCA) models a construct as a weighted sum of its items rather than a common factor; a paragraph at most, with the `cSEM` package or the Composite-SEM jamovi module (github.com/AbdullahAlarfaj101/Composite-SEM; small, no licence file as of 09-25) as a pointer, flagged as a different model. Point-and-click users: jamovi's SEM tools (verify which module before naming one).
 
 - **First-person verdict.** The outline has none yet. *Default:* "I fit and inspect the measurement model before I read a single structural path; a path between badly measured factors is not worth interpreting" (idea 4, Anderson & Gerbing's two-step). For Ben to confirm or reword.
+
+## Drafting record (09-25)
+
+- **Recomputed** (lavaan 0.7-2, IRW v60.0, 618 complete, MLR, `cluster = family`). Measurement model: CFI 0.842, RMSEA 0.059, SRMR 0.064; the SEM with four paths and correlated outcome residuals has a saturated structural part, so its fit is identical (a teaching point, not a problem). Standardized paths: per → PA 0.66, con → PA −0.01, per → NA −0.16, con → NA −0.27. Sum-score regressions: 0.51, 0.03, −0.18, −0.24 (attenuation plus leakage). The finding line above (0.84/0.06/0.07; 0.66; −0.27) was close; the outline's "first wave" was not.
+- **Keying** checked against IRW option text and the data: `florida_twins_grit` arrives unreversed, so only the six perseverance items are reversed (unlike the `grit` table in `fa-confirmatory`, where all twelve are). Items 3 and 11 load 0.35 and 0.16; item 11 correlates negatively with every perseverance item.
+- **Misfit** is in the measurement model: PANAS near-synonym pairs (7/20 scared/afraid, 8/11, 5/10) and item 11 cross-loading.
+- **Multigroup** (ages 9–13 vs 14–18): metric Δχ² 62.9 on 28 df (p < .001), ΔCFI −0.008; equal paths given equal loadings Δχ² 1.1 on 4 df (p = 0.90). Pays the `measurement-invariance` thread.
+- **Widgets:** attenuation with two correlated predictors (idea 2), structural-model builder with df count (idea 3), equivalent models (idea 5). No separate "fit of which part" widget: the builder's saturated case and the real data make the point.
+- **Verdict** used as the default above (idea 4), for Ben to confirm.
+- **Not done:** `validity-causal` is not on main yet, so no pointer to it; the cross-check can add one. Longitudinal SEM stays unpaid (problem 6 points at the waves).
