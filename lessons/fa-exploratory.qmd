@@ -26,7 +26,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 How many things does a set of items measure? Classical test theory mostly assumes the answer is one, and a high alpha doesn't check that assumption. Many instruments are built to measure several things at once: a personality inventory with five domains, a quality-of-life scale with physical and emotional subscales. And an instrument meant to measure one thing may not, as the reverse-worded items in [the instrument-building lesson](instrument-building.qmd) showed. **Factor analysis** is the family of tools for asking what, and how many, underlying dimensions account for the correlations among a set of items. It is one of the oldest ideas in psychometrics. [Spearman (1904)](https://doi.org/10.2307/1412107) proposed it to explain why children who did well in one school subject tended to do well in others, and it remains the workhorse for studying the internal structure of a scale.
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [From construct map to items](instrument-building.qmd): reverse-worded items guard against acquiescence, but they can cluster together by the direction they're worded in, so a scale written for one construct can show two dimensions.
+**Recall** from [From construct map to items](instrument-building.qmd): reverse-worded items guard against acquiescence, but respondents don't always read them as plain opposites of the forward items. In the Rosenberg Self-Esteem Scale the items fell, with one exception, into two blocks by the direction they were worded in (average correlations of 0.71 and 0.61 within the blocks, 0.23 across), with a second eigenvalue of 2.32. Wording direction acted as a second dimension, and alpha didn't reveal it.
 :::
 
 This lesson is about the *exploratory* version: we let the data suggest a structure. [Factor analysis II](fa-confirmatory.qmd) takes up the *confirmatory* version, where we state a structure in advance and test it; it also asks whether a structure holds across groups, and shows that factor analysis and item response theory are closer relatives than they first appear.
@@ -289,6 +289,15 @@ Before fitting anything, look at the correlations with the items sorted by the d
 ```
 
 Five blocks along the diagonal, and pale regions between them: the median correlation is 0.35 between two items of the same domain and 0.04 between items of different domains. The one band of blue belongs to Negative Emotionality (the fourth block, since the domains are sorted alphabetically), whose items correlate weakly and negatively with many of the others.
+
+Do the BFI-2's items also split by wording, as the Rosenberg items did? Half of each domain's items are worded in reverse (the [scoring key](https://www.colby.edu/wp-content/uploads/2013/08/bfi2-form.pdf) of Soto & John, 2017), so we can compare pairs of items worded in the same direction with pairs worded in opposite directions.
+
+```{r wording}
+#| echo: true
+#| code-fold: show
+```
+
+Within a domain the two kinds of pair correlate equally, with a median of 0.35 each. Between domains, pairs worded the same way correlate 0.05 and pairs worded oppositely 0.02. By this measure wording direction leaves at most a trace in the BFI-2, far from the Rosenberg scale's blocks.
 
 ### How many factors?
 
