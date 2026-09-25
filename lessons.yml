@@ -180,7 +180,7 @@ lessons:
     prereqs: [1pl-to-4pl]
     origin: {slides: [c4], ps: [], code: []}
     tables: [wilmer-mrmet-normative-data-set-2022]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: fit-prediction
