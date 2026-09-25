@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -73,9 +108,11 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<script type="module" src="site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+<script type="ojs-define">
+{"contents":[{"name":"cb_course","value":"{\"modules\":[{\"id\":\"foundations\",\"title\":\"Foundations\"},{\"id\":\"ctt\",\"title\":\"Classical test theory\"},{\"id\":\"fa\",\"title\":\"Factor analysis\"},{\"id\":\"validity\",\"title\":\"Validity\"},{\"id\":\"irt\",\"title\":\"Item response theory\"},{\"id\":\"fairness\",\"title\":\"Fairness and invariance\"},{\"id\":\"uses\",\"title\":\"Using calibrated items\"},{\"id\":\"beyond\",\"title\":\"Beyond the standard models\"}],\"lessons\":[{\"id\":\"measurement\",\"title\":\"What is measurement?\",\"module\":\"foundations\",\"tranche\":\"preliminary\",\"status\":\"draft\",\"prereqs\":[]},{\"id\":\"irw-data\",\"title\":\"Item response data and the IRW\",\"module\":\"foundations\",\"tranche\":\"preliminary\",\"status\":\"draft\",\"prereqs\":[]},{\"id\":\"likelihood\",\"title\":\"The likelihood and logistic regression\",\"module\":\"foundations\",\"tranche\":\"preliminary\",\"status\":\"draft\",\"prereqs\":[\"irw-data\"]},{\"id\":\"constructs\",\"title\":\"Constructs and construct maps\",\"module\":\"ctt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"measurement\"]},{\"id\":\"ctt-reliability\",\"title\":\"Classical test theory and reliability\",\"module\":\"ctt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"constructs\",\"irw-data\"]},{\"id\":\"ctt-limits\",\"title\":\"Where CTT breaks: toward item response models\",\"module\":\"ctt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"ctt-reliability\",\"likelihood\"]},{\"id\":\"validity-argument\",\"title\":\"Validity as an argument\",\"module\":\"validity\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"constructs\",\"ctt-reliability\"]},{\"id\":\"validity-causal\",\"title\":\"Validity as causation: Borsboom's view\",\"module\":\"validity\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"validity-argument\"]},{\"id\":\"rasch\",\"title\":\"The Rasch model\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"ctt-limits\"]},{\"id\":\"information\",\"title\":\"Information, precision, and short forms\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"1pl-to-4pl\"]},{\"id\":\"ability-estimation\",\"title\":\"Estimating abilities: MLE and EAP\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"information\"]},{\"id\":\"item-estimation\",\"title\":\"Estimating item parameters: JML and EM\",\"module\":\"irt\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"ability-estimation\"]},{\"id\":\"1pl-to-4pl\",\"title\":\"From the 1PL to the 4PL\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"rasch\"]},{\"id\":\"parameter-invariance\",\"title\":\"Parameter invariance\",\"module\":\"irt\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"1pl-to-4pl\"]},{\"id\":\"fit-prediction\",\"title\":\"Model fit and out-of-sample prediction\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"1pl-to-4pl\"]},{\"id\":\"guessing-priors\",\"title\":\"Guessing and priors\",\"module\":\"irt\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"ability-estimation\",\"fit-prediction\"]},{\"id\":\"dimensionality\",\"title\":\"Dimensionality and multidimensional IRT\",\"module\":\"irt\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"fa-confirmatory\"]},{\"id\":\"dif\",\"title\":\"Differential item functioning\",\"module\":\"fairness\",\"tranche\":\"core\",\"status\":\"stub\",\"prereqs\":[\"1pl-to-4pl\",\"validity-argument\"]},{\"id\":\"invariance-experience\",\"title\":\"Measurement invariance under treatment and life events\",\"module\":\"fairness\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"dif\"]},{\"id\":\"item-banks-cat\",\"title\":\"Item banks and adaptive testing\",\"module\":\"uses\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"information\",\"ability-estimation\",\"polytomous\"]},{\"id\":\"equating\",\"title\":\"Linking and equating\",\"module\":\"uses\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"1pl-to-4pl\"]},{\"id\":\"explanatory-irt\",\"title\":\"What is an item? Explanatory item response models\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"rasch\"]},{\"id\":\"cdm\",\"title\":\"Latent classes and cognitive diagnosis\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"explanatory-irt\"]},{\"id\":\"polytomous\",\"title\":\"Models for polytomous responses\",\"module\":\"irt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"information\"]},{\"id\":\"irtrees\",\"title\":\"IRTree models\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"polytomous\",\"explanatory-irt\"]},{\"id\":\"unfolding\",\"title\":\"Unfolding models\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"polytomous\"]},{\"id\":\"nominal\",\"title\":\"Nominal response and multiple-choice models\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"polytomous\",\"guessing-priors\"]},{\"id\":\"response-time\",\"title\":\"Response time and the speed-accuracy tradeoff\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"explanatory-irt\"]},{\"id\":\"trials\",\"title\":\"Trials as items: tasks, shots, and rotations\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"explanatory-irt\"]},{\"id\":\"ai-psychometrics\",\"title\":\"AI and psychometrics\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"1pl-to-4pl\",\"explanatory-irt\"]},{\"id\":\"instrument-building\",\"title\":\"From construct map to items: building an instrument\",\"module\":\"ctt\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"constructs\",\"ctt-reliability\"]},{\"id\":\"g-theory\",\"title\":\"Many sources of error: generalizability theory\",\"module\":\"ctt\",\"tranche\":\"core\",\"status\":\"stub\",\"prereqs\":[\"instrument-building\"]},{\"id\":\"fa-exploratory\",\"title\":\"Factor analysis I: exploring dimensionality\",\"module\":\"fa\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"instrument-building\"]},{\"id\":\"fa-confirmatory\",\"title\":\"Factor analysis II: confirmatory models, omega, and IRT as factor analysis\",\"module\":\"fa\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"fa-exploratory\",\"1pl-to-4pl\"]},{\"id\":\"validity-evidence\",\"title\":\"Gathering validity evidence\",\"module\":\"validity\",\"tranche\":\"core\",\"status\":\"stub\",\"prereqs\":[\"validity-argument\",\"ctt-reliability\",\"instrument-building\"]},{\"id\":\"score-meaning\",\"title\":\"What does a score mean? Norms, error bands, and cut scores\",\"module\":\"uses\",\"tranche\":\"core\",\"status\":\"draft\",\"prereqs\":[\"ctt-reliability\",\"information\"]},{\"id\":\"sem\",\"title\":\"Structural equation modeling with lavaan\",\"module\":\"fa\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"fa-confirmatory\"]},{\"id\":\"rt-process-models\",\"title\":\"Process models for response time: drift diffusion and race models\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"response-time\",\"1pl-to-4pl\"]},{\"id\":\"scale-properties\",\"title\":\"Scale properties: is the scale equal-interval?\",\"module\":\"uses\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"measurement\",\"rasch\"]},{\"id\":\"competitions\",\"title\":\"Competitions and paired comparisons: Bradley-Terry and Elo\",\"module\":\"beyond\",\"tranche\":\"extension\",\"status\":\"stub\",\"prereqs\":[\"rasch\"]}],\"paths\":[{\"id\":\"first-course\",\"title\":\"A first course (preliminary and core lessons)\",\"lessons\":[\"measurement\",\"irw-data\",\"likelihood\",\"constructs\",\"ctt-reliability\",\"instrument-building\",\"g-theory\",\"ctt-limits\",\"validity-argument\",\"validity-evidence\",\"fa-exploratory\",\"rasch\",\"1pl-to-4pl\",\"information\",\"ability-estimation\",\"fa-confirmatory\",\"fit-prediction\",\"polytomous\",\"dif\",\"score-meaning\",\"equating\"]},{\"id\":\"educ252\",\"title\":\"EDUC 252 (Stanford), a 10-week course\",\"lessons\":[\"measurement\",\"irw-data\",\"likelihood\",\"constructs\",\"ctt-reliability\",\"ctt-limits\",\"validity-argument\",\"rasch\",\"1pl-to-4pl\",\"information\",\"ability-estimation\",\"validity-causal\",\"parameter-invariance\",\"dimensionality\",\"dif\",\"item-estimation\",\"fit-prediction\",\"guessing-priors\",\"equating\",\"invariance-experience\",\"explanatory-irt\",\"cdm\",\"polytomous\",\"item-banks-cat\",\"irtrees\",\"unfolding\",\"nominal\",\"response-time\",\"trials\",\"ai-psychometrics\"]}],\"threads\":[{\"id\":\"alpha-lower-bound\",\"idea\":\"Alpha is a lower bound on reliability\",\"introduced\":\"ctt-reliability\",\"returns\":[{\"lesson\":\"ctt-limits\",\"how\":\"shows how loose the bound can be (ctt_failures)\"},{\"lesson\":\"fa-exploratory\",\"how\":\"reads tau-equivalence as equal loadings\"},{\"lesson\":\"fa-confirmatory\",\"how\":\"replaces alpha with omega\"},{\"lesson\":\"dimensionality\",\"how\":\"shows correlated errors and testlets breaking the bound\"}]},{\"id\":\"one-sem\",\"idea\":\"One standard error of measurement for everyone\",\"introduced\":\"ctt-reliability\",\"returns\":[{\"lesson\":\"information\",\"how\":\"replaces it with a conditional SEM that varies with θ\"},{\"lesson\":\"score-meaning\",\"how\":\"turns it into error bands around reported scores\"}]},{\"id\":\"reverse-keying\",\"idea\":\"Keying has to be checked; the data can't always tell\",\"introduced\":\"ctt-reliability\",\"returns\":[{\"lesson\":\"instrument-building\",\"how\":\"writes reversed items on purpose\"},{\"lesson\":\"fa-exploratory\",\"how\":\"checks the BFI-2's keying rather than assuming it\"},{\"lesson\":\"polytomous\",\"how\":\"reverses rating-scale categories before fitting\"},{\"lesson\":\"irtrees\",\"how\":\"keys the data before the tree is built\"},{\"lesson\":\"unfolding\",\"how\":\"shows items that are neither forward nor reversed\"}]},{\"id\":\"attenuation\",\"idea\":\"Unreliability attenuates correlations\",\"introduced\":\"ctt-reliability\",\"returns\":[{\"lesson\":\"validity-evidence\",\"how\":\"corrects validity coefficients for it\"},{\"lesson\":\"sem\",\"how\":\"removes it by modelling the latent variables\"}]},{\"id\":\"unidimensionality\",\"idea\":\"One factor accounts for the item correlations\",\"introduced\":\"fa-exploratory\",\"returns\":[{\"lesson\":\"fa-confirmatory\",\"how\":\"tests one factor against the designed facets\"},{\"lesson\":\"dimensionality\",\"how\":\"fits multidimensional IRT and asks how often one dimension holds\"}]},{\"id\":\"rotation-indeterminacy\",\"idea\":\"The data fix the correlations, not the frame of the factors\",\"introduced\":\"fa-exploratory\",\"returns\":[{\"lesson\":\"fa-confirmatory\",\"how\":\"identifies the model by fixing loadings\"},{\"lesson\":\"dimensionality\",\"how\":\"rotates the axes of a multidimensional IRT model\"}]},{\"id\":\"chess-y15\",\"idea\":\"Chess item Y15: Elo barely predicts it\",\"introduced\":\"likelihood\",\"returns\":[{\"lesson\":\"rasch\",\"how\":\"finds it the worst-fitting item (largest outfit)\"},{\"lesson\":\"1pl-to-4pl\",\"how\":\"gives it a slope near zero in the 2PL\"}]},{\"id\":\"sum-score-sufficiency\",\"idea\":\"The sum score is sufficient under the Rasch model\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"1pl-to-4pl\",\"how\":\"shows the 2PL weighting items by slope instead\"},{\"lesson\":\"ability-estimation\",\"how\":\"shows θ̂ depends on the responses only through r\"},{\"lesson\":\"polytomous\",\"how\":\"keeps it in the partial credit model\"},{\"lesson\":\"dif\",\"how\":\"makes the Mantel-Haenszel null exact when matching on the total\"},{\"lesson\":\"cdm\",\"how\":\"contrasts attribute counts with sum scores\"},{\"lesson\":\"scale-properties\",\"how\":\"asks what it licenses about the scale\"}]},{\"id\":\"specific-objectivity\",\"idea\":\"Item comparisons don't depend on who took the items\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"1pl-to-4pl\",\"how\":\"shows it failing when ICCs cross (Y15)\"},{\"lesson\":\"parameter-invariance\",\"how\":\"tests it across samples\"},{\"lesson\":\"scale-properties\",\"how\":\"asks what it buys for an equal-interval scale\"}]},{\"id\":\"no-origin\",\"idea\":\"Only θ − b is identified; the scale has no origin\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"equating\",\"how\":\"links scales that differ by a shift (and a stretch)\"},{\"lesson\":\"scale-properties\",\"how\":\"separates convention from measurement\"}]},{\"id\":\"conditional-ml\",\"idea\":\"Conditioning on the sum score removes θ\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"item-estimation\",\"how\":\"compares conditional\"},{\"lesson\":\"fit-prediction\",\"how\":\"uses Andersen's likelihood-ratio test\"}]},{\"id\":\"overfit-underfit\",\"idea\":\"Misfit as overfit or underfit (outfit and infit)\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"fit-prediction\",\"how\":\"gives outfit its null distribution\"},{\"lesson\":\"item-banks-cat\",\"how\":\"screens bank items with it\"},{\"lesson\":\"scale-properties\",\"how\":\"asks how much misfit a scale can bear\"}]},{\"id\":\"local-independence\",\"idea\":\"Responses are independent given θ\",\"introduced\":\"rasch\",\"returns\":[{\"lesson\":\"dimensionality\",\"how\":\"shows passages and testlets breaking it\"},{\"lesson\":\"explanatory-irt\",\"how\":\"models the dependence with random effects\"},{\"lesson\":\"unfolding\",\"how\":\"keeps it but drops the monotone curve the Rasch model pairs with it\"}]},{\"id\":\"sum-score-part-whole\",\"idea\":\"The sum score contains the item\",\"introduced\":\"ctt-limits\",\"returns\":[{\"lesson\":\"rasch\",\"how\":\"shows r = 0 and r = max agreeing by construction (wirs)\"}]},{\"id\":\"items-rise-with-score\",\"idea\":\"Item curves rise with the sum score (monotonicity)\",\"introduced\":\"ctt-limits\",\"returns\":[{\"lesson\":\"rasch\",\"how\":\"models them as ICCs\"},{\"lesson\":\"unfolding\",\"how\":\"finds single-peaked curves (andrich_mudfold)\"}]},{\"id\":\"sum-score-depends-on-items\",\"idea\":\"The sum score depends on which items were taken\",\"introduced\":\"ctt-limits\",\"returns\":[{\"lesson\":\"rasch\",\"how\":\"puts people and items on one scale instead\"},{\"lesson\":\"equating\",\"how\":\"links scores across forms\"}]},{\"id\":\"equal-unit\",\"idea\":\"Whether a scale has an equal unit changes group comparisons\",\"introduced\":\"measurement\",\"returns\":[{\"lesson\":\"score-meaning\",\"how\":\"percentile ranks need only order\"},{\"lesson\":\"equating\",\"how\":\"links on θ\"},{\"lesson\":\"scale-properties\",\"how\":\"asks what the Rasch model licenses\"}]},{\"id\":\"dominance\",\"idea\":\"A mean difference keeps its sign under every rescaling only under stochastic dominance\",\"introduced\":\"measurement\",\"returns\":[{\"lesson\":\"scale-properties\",\"how\":\"applies it to gains\"},{\"lesson\":\"dif\",\"how\":\"compares groups on θ\"}]},{\"id\":\"desiderata\",\"idea\":\"What we want from a measure: insensitive to nonfocal attributes, calibrated, precise quickly\",\"introduced\":\"measurement\",\"returns\":[{\"lesson\":\"dif\",\"how\":\"tests insensitivity\"},{\"lesson\":\"validity-argument\",\"how\":\"argues for it\"},{\"lesson\":\"information\",\"how\":\"measures precision\"},{\"lesson\":\"item-banks-cat\",\"how\":\"delivers it quickly\"}]},{\"id\":\"probes\",\"idea\":\"Constructs are measured through probes\",\"introduced\":\"measurement\",\"returns\":[{\"lesson\":\"constructs\",\"how\":\"builds a construct map\"},{\"lesson\":\"instrument-building\",\"how\":\"writes the probes\"}]},{\"id\":\"measurement-discovery\",\"idea\":\"Measurement as discovery; is the attribute quantitative?\",\"introduced\":\"measurement\",\"returns\":[{\"lesson\":\"constructs\",\"how\":\"asks what the construct is\"},{\"lesson\":\"validity-causal\",\"how\":\"asks whether the attribute exists\"}]},{\"id\":\"long-format\",\"idea\":\"IRW tables are long: one row per response\",\"introduced\":\"irw-data\",\"returns\":[{\"lesson\":\"likelihood\",\"how\":\"fits a logistic regression to one row per response\"},{\"lesson\":\"ctt-reliability\",\"how\":\"reshapes to wide for item analysis\"}]},{\"id\":\"keying-check\",\"idea\":\"Check keying in the documentation and in the data\",\"introduced\":\"irw-data\",\"returns\":[{\"lesson\":\"ctt-reliability\",\"how\":\"meets the unkeyed Mach IV\"}]},{\"id\":\"slow-errors\",\"idea\":\"Errors are slower than correct responses, partly because of where errors happen\",\"introduced\":\"irw-data\",\"returns\":[{\"lesson\":\"rt-process-models\",\"how\":\"models slow errors\"},{\"lesson\":\"trials\",\"how\":\"treats conditions as items\"}]},{\"id\":\"lower-asymptote-identification\",\"idea\":\"The data say little about c when few respondents sit near chance\",\"introduced\":\"1pl-to-4pl\",\"returns\":[{\"lesson\":\"guessing-priors\",\"how\":\"fixes c or puts a prior on it\"},{\"lesson\":\"nominal\",\"how\":\"looks at the distractors\"},{\"lesson\":\"fit-prediction\",\"how\":\"compares the 2PL and 3PL out of sample\"}]},{\"id\":\"weighted-score\",\"idea\":\"Under the 2PL the weighted score is sufficient\",\"introduced\":\"1pl-to-4pl\",\"returns\":[{\"lesson\":\"ability-estimation\",\"how\":\"estimates θ from it\"},{\"lesson\":\"information\",\"how\":\"weights items by slope\"}]},{\"id\":\"imv\",\"idea\":\"The IMV: predictive gain on a portable scale\",\"introduced\":\"fit-prediction\",\"returns\":[{\"lesson\":\"guessing-priors\",\"how\":\"asks whether c helps out of sample\"}]},{\"id\":\"measurement-invariance\",\"idea\":\"Comparing group means needs scalar invariance\",\"introduced\":\"fa-confirmatory\",\"returns\":[{\"lesson\":\"sem\",\"how\":\"fits it in multigroup SEM\"}]},{\"id\":\"omega\",\"idea\":\"Model-based reliability (omega) in place of alpha\",\"introduced\":\"fa-confirmatory\",\"returns\":[{\"lesson\":\"dimensionality\",\"how\":\"computes it for a bifactor model\"}]},{\"id\":\"ordinal-fa-is-grm\",\"idea\":\"Ordinal factor analysis is the graded response model\",\"introduced\":\"fa-confirmatory\",\"returns\":[{\"lesson\":\"dimensionality\",\"how\":\"fits multidimensional IRT as factor analysis\"}]},{\"id\":\"shrinkage\",\"idea\":\"EAP estimates shrink toward the mean\",\"introduced\":\"ability-estimation\",\"returns\":[{\"lesson\":\"item-banks-cat\",\"how\":\"stops a CAT on the posterior SD\"},{\"lesson\":\"guessing-priors\",\"how\":\"puts priors on items as well\"}]},{\"id\":\"perfect-patterns\",\"idea\":\"No maximum-likelihood estimate for all-right or all-wrong patterns\",\"introduced\":\"ability-estimation\",\"returns\":[{\"lesson\":\"item-banks-cat\",\"how\":\"starts a CAT without an estimate\"}]},{\"id\":\"wording-direction\",\"idea\":\"Wording direction can act as a second dimension\",\"introduced\":\"instrument-building\",\"returns\":[{\"lesson\":\"fa-exploratory\",\"how\":\"finds it in the BFI-2\"},{\"lesson\":\"dimensionality\",\"how\":\"models it as a method factor\"}]},{\"id\":\"contaminated-criterion\",\"idea\":\"A criterion built from the same items inflates validity evidence\",\"introduced\":\"validity-argument\",\"returns\":[{\"lesson\":\"validity-evidence\",\"how\":\"looks for an independent criterion\"}]}]}"}]}
+</script>
 <meta name="robots" content="noindex, nofollow">
 
 
@@ -271,196 +308,45 @@ a.lesson-stub:hover { color: #6c757d; }
 </section>
 </div>
 </section>
-<section id="how-the-lessons-connect" class="level2">
-<h2 class="anchored" data-anchor-id="how-the-lessons-connect">How the lessons connect</h2>
-<p>An arrow from A to B means B assumes A. Extensions (beyond a first course) have a dashed border. Click a lesson to open it.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
+<section id="build-your-own-course" class="level2">
+<h2 class="anchored" data-anchor-id="build-your-own-course">Build your own course</h2>
+<p>Build a course from the lesson bank: drag lessons into your course (or use Add), put them in any order, and group them under unit or week headings. Start from a preset or from nothing. Nothing is blocked. The notes flag a lesson that comes before a lesson it assumes, or that assumes one you left out, and offer a fix you can take or ignore. Open “Dependencies and threads” under a lesson in the bank to see what it needs, what it leads to, and the threads it starts and picks up. The lessons, prerequisites and threads all come from <code>lessons.yml</code>.</p>
+<div class="cell hidden">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="152" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 151;"><span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {courseBuilder} <span class="im">from</span> <span class="st">"./lessons/widgets/course-builder.js"</span></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a>Sortable <span class="op">=</span> <span class="pp">require</span>(<span class="st">"sortablejs@1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display hidden">
 <div>
-<p></p><figure class="figure"><p></p>
+<div id="ojs-cell-1-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display hidden">
 <div>
-<pre class="mermaid mermaid-js">flowchart TB
-  classDef foundations fill:#dbeafe,stroke:#6c757d,color:#212529
-  L01["What is measurement?"]:::foundations
-  L02["Item response data and the IRW"]:::foundations
-  L03["The likelihood and logistic regression"]:::foundations
-  classDef foundations_opt fill:#dbeafe,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef ctt fill:#dcfce7,stroke:#6c757d,color:#212529
-  L04["Constructs and construct maps"]:::ctt
-  L05["Classical test theory and reliability"]:::ctt
-  L06["Where CTT breaks: toward item response models"]:::ctt
-  L31["From construct map to items: building an instrument"]:::ctt
-  L32["Many sources of error: generalizability theory"]:::ctt
-  classDef ctt_opt fill:#dcfce7,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef fa fill:#ccfbf1,stroke:#6c757d,color:#212529
-  L33["Factor analysis I: exploring dimensionality"]:::fa
-  L34["Factor analysis II: confirmatory models, omega, and IRT as factor analysis"]:::fa
-  L37["Structural equation modeling with lavaan"]:::fa
-  classDef fa_opt fill:#ccfbf1,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef validity fill:#fef9c3,stroke:#6c757d,color:#212529
-  L07["Validity as an argument"]:::validity
-  L08["Validity as causation: Borsboom's view"]:::validity
-  L35["Gathering validity evidence"]:::validity
-  classDef validity_opt fill:#fef9c3,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef irt fill:#fce7f3,stroke:#6c757d,color:#212529
-  L09["The Rasch model"]:::irt
-  L10["Information, precision, and short forms"]:::irt
-  L11["Estimating abilities: MLE and EAP"]:::irt
-  L12["Estimating item parameters: JML and EM"]:::irt
-  L13["From the 1PL to the 4PL"]:::irt
-  L14["Parameter invariance"]:::irt
-  L15["Model fit and out-of-sample prediction"]:::irt
-  L16["Guessing and priors"]:::irt
-  L17["Dimensionality and multidimensional IRT"]:::irt
-  L24["Models for polytomous responses"]:::irt
-  classDef irt_opt fill:#fce7f3,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef fairness fill:#ede9fe,stroke:#6c757d,color:#212529
-  L18["Differential item functioning"]:::fairness
-  L19["Measurement invariance under treatment and life events"]:::fairness
-  classDef fairness_opt fill:#ede9fe,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef uses fill:#ffedd5,stroke:#6c757d,color:#212529
-  L20["Item banks and adaptive testing"]:::uses
-  L21["Linking and equating"]:::uses
-  L36["What does a score mean? Norms, error bands, and cut scores"]:::uses
-  L39["Scale properties: is the scale equal-interval?"]:::uses
-  classDef uses_opt fill:#ffedd5,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  classDef beyond fill:#e0f2fe,stroke:#6c757d,color:#212529
-  L22["What is an item? Explanatory item response models"]:::beyond
-  L23["Latent classes and cognitive diagnosis"]:::beyond
-  L25["IRTree models"]:::beyond
-  L26["Unfolding models"]:::beyond
-  L27["Nominal response and multiple-choice models"]:::beyond
-  L28["Response time and the speed-accuracy tradeoff"]:::beyond
-  L29["Trials as items: tasks, shots, and rotations"]:::beyond
-  L30["AI and psychometrics"]:::beyond
-  L38["Process models for response time: drift diffusion and race models"]:::beyond
-  L40["Competitions and paired comparisons: Bradley-Terry and Elo"]:::beyond
-  classDef beyond_opt fill:#e0f2fe,stroke:#6c757d,stroke-dasharray:5 3,color:#495057
-  class L08 validity_opt
-  class L12 irt_opt
-  class L14 irt_opt
-  class L16 irt_opt
-  class L17 irt_opt
-  class L19 fairness_opt
-  class L20 uses_opt
-  class L22 beyond_opt
-  class L23 beyond_opt
-  class L25 beyond_opt
-  class L26 beyond_opt
-  class L27 beyond_opt
-  class L28 beyond_opt
-  class L29 beyond_opt
-  class L30 beyond_opt
-  class L37 fa_opt
-  class L38 beyond_opt
-  class L39 uses_opt
-  class L40 beyond_opt
-  L02 --&gt; L03
-  L01 --&gt; L04
-  L04 --&gt; L05
-  L02 --&gt; L05
-  L05 --&gt; L06
-  L03 --&gt; L06
-  L04 --&gt; L07
-  L05 --&gt; L07
-  L07 --&gt; L08
-  L06 --&gt; L09
-  L13 --&gt; L10
-  L10 --&gt; L11
-  L11 --&gt; L12
-  L09 --&gt; L13
-  L13 --&gt; L14
-  L13 --&gt; L15
-  L11 --&gt; L16
-  L15 --&gt; L16
-  L34 --&gt; L17
-  L13 --&gt; L18
-  L07 --&gt; L18
-  L18 --&gt; L19
-  L10 --&gt; L20
-  L11 --&gt; L20
-  L24 --&gt; L20
-  L13 --&gt; L21
-  L09 --&gt; L22
-  L22 --&gt; L23
-  L10 --&gt; L24
-  L24 --&gt; L25
-  L22 --&gt; L25
-  L24 --&gt; L26
-  L24 --&gt; L27
-  L16 --&gt; L27
-  L22 --&gt; L28
-  L22 --&gt; L29
-  L13 --&gt; L30
-  L22 --&gt; L30
-  L04 --&gt; L31
-  L05 --&gt; L31
-  L31 --&gt; L32
-  L31 --&gt; L33
-  L33 --&gt; L34
-  L13 --&gt; L34
-  L07 --&gt; L35
-  L05 --&gt; L35
-  L31 --&gt; L35
-  L05 --&gt; L36
-  L10 --&gt; L36
-  L34 --&gt; L37
-  L28 --&gt; L38
-  L13 --&gt; L38
-  L01 --&gt; L39
-  L09 --&gt; L39
-  L09 --&gt; L40
-  click L01 href "lessons/measurement.html"
-  click L02 href "lessons/irw-data.html"
-  click L03 href "lessons/likelihood.html"
-  click L04 href "lessons/constructs.html"
-  click L05 href "lessons/ctt-reliability.html"
-  click L06 href "lessons/ctt-limits.html"
-  click L07 href "lessons/validity-argument.html"
-  click L08 href "lessons/validity-causal.html"
-  click L09 href "lessons/rasch.html"
-  click L10 href "lessons/information.html"
-  click L11 href "lessons/ability-estimation.html"
-  click L12 href "lessons/item-estimation.html"
-  click L13 href "lessons/1pl-to-4pl.html"
-  click L14 href "lessons/parameter-invariance.html"
-  click L15 href "lessons/fit-prediction.html"
-  click L16 href "lessons/guessing-priors.html"
-  click L17 href "lessons/dimensionality.html"
-  click L18 href "lessons/dif.html"
-  click L19 href "lessons/invariance-experience.html"
-  click L20 href "lessons/item-banks-cat.html"
-  click L21 href "lessons/equating.html"
-  click L22 href "lessons/explanatory-irt.html"
-  click L23 href "lessons/cdm.html"
-  click L24 href "lessons/polytomous.html"
-  click L25 href "lessons/irtrees.html"
-  click L26 href "lessons/unfolding.html"
-  click L27 href "lessons/nominal.html"
-  click L28 href "lessons/response-time.html"
-  click L29 href "lessons/trials.html"
-  click L30 href "lessons/ai-psychometrics.html"
-  click L31 href "lessons/instrument-building.html"
-  click L32 href "lessons/g-theory.html"
-  click L33 href "lessons/fa-exploratory.html"
-  click L34 href "lessons/fa-confirmatory.html"
-  click L35 href "lessons/validity-evidence.html"
-  click L36 href "lessons/score-meaning.html"
-  click L37 href "lessons/sem.html"
-  click L38 href "lessons/rt-process-models.html"
-  click L39 href "lessons/scale-properties.html"
-  click L40 href "lessons/competitions.html"
-</pre>
-</div>
-<p></p></figure><p></p>
+<div id="ojs-cell-1-2" data-nodetype="declaration">
+
 </div>
 </div>
 </div>
-<p><span style="background:#dbeafe;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Foundations</span> <span style="background:#dcfce7;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Classical test theory</span> <span style="background:#ccfbf1;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Factor analysis</span> <span style="background:#fef9c3;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Validity</span> <span style="background:#fce7f3;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Item response theory</span> <span style="background:#ede9fe;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Fairness and invariance</span> <span style="background:#ffedd5;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Using calibrated items</span> <span style="background:#e0f2fe;border:1px solid #6c757d;border-radius:3px;padding:1px 8px;margin-right:6px;font-size:0.85rem">Beyond the standard models</span></p>
+</div>
+<div class="cell">
+<details class="code-fold hidden">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="157" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 156;"><span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a><span class="fu">courseBuilder</span>(<span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(cb_course)<span class="op">,</span> {Sortable})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
 </section>
 <section id="paths-through-the-course" class="level2">
 <h2 class="anchored" data-anchor-id="paths-through-the-course">Paths through the course</h2>
-<p>A path is one order for teaching the lessons. Add your own to <code>lessons.yml</code>.</p>
+<p>A path is one order for teaching the lessons. The builder’s “A first course” and “EDUC 252” presets start from these lessons. Add your own path to <code>lessons.yml</code>.</p>
 <section id="a-first-course-preliminary-and-core-lessons" class="level3">
 <h3 class="anchored" data-anchor-id="a-first-course-preliminary-and-core-lessons">A first course (preliminary and core lessons)</h3>
 <ol type="1">
@@ -527,6 +413,17 @@ a.lesson-stub:hover { color: #6c757d; }
 </section>
 
 </main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7Y291cnNlQnVpbGRlcn0gZnJvbSBcIi4vbGVzc29ucy93aWRnZXRzL2NvdXJzZS1idWlsZGVyLmpzXCJcblNvcnRhYmxlID0gcmVxdWlyZShcInNvcnRhYmxlanNAMVwiKSAgLy8gZHJhZyBhbmQgZHJvcCwgd2l0aCB0b3VjaFxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC0yIiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiY291cnNlQnVpbGRlcihKU09OLnBhcnNlKGNiX2NvdXJzZSksIHtTb3J0YWJsZX0pXG4ifV19
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../..";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
