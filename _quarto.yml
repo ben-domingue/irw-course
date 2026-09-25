@@ -31,6 +31,10 @@ website:
         text: Course map
       - href: https://itemresponsewarehouse.org
         text: Item Response Warehouse
+    right:
+      - icon: github
+        href: https://github.com/ben-domingue/irw-course
+        aria-label: Course source on GitHub
 
 format:
   html:

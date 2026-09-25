@@ -348,7 +348,7 @@ lessons:
     prereqs: [instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
-    status: stub
+    status: draft
     tranche: core
 
   - id: fa-exploratory
