@@ -2134,7 +2134,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Recall</strong> from <a href="../lessons/instrument-building.html">From construct map to items</a>: reverse-worded items guard against acquiescence, but they can cluster together by the direction they’re worded in, so a scale written for one construct can show two dimensions.</p>
+<p><strong>Recall</strong> from <a href="../lessons/instrument-building.html">From construct map to items</a>: reverse-worded items guard against acquiescence, but respondents don’t always read them as plain opposites of the forward items. In the Rosenberg Self-Esteem Scale the items fell, with one exception, into two blocks by the direction they were worded in (average correlations of 0.71 and 0.61 within the blocks, 0.23 across), with a second eigenvalue of 2.32. Wording direction acted as a second dimension, and alpha didn’t reveal it.</p>
 </div>
 </div>
 </div>
@@ -2565,18 +2565,42 @@ Negative Emotionality       Open-Mindedness
 </div>
 </div>
 <p>Five blocks along the diagonal, and pale regions between them: the median correlation is 0.35 between two items of the same domain and 0.04 between items of different domains. The one band of blue belongs to Negative Emotionality (the fourth block, since the domains are sorted alphabetically), whose items correlate weakly and negatively with many of the others.</p>
+<p>Do the BFI-2’s items also split by wording, as the Rosenberg items did? Half of each domain’s items are worded in reverse (the <a href="https://www.colby.edu/wp-content/uploads/2013/08/bfi2-form.pdf">scoring key</a> of Soto &amp; John, 2017), so we can compare pairs of items worded in the same direction with pairs worded in opposite directions.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reverse-worded items, from the BFI-2 scoring key (Soto &amp; John, 2017). They arrive</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># already reversed; here we only ask whether items worded in the same direction</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># correlate more than items worded in opposite directions.</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>reversed <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="dv">60</span>) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">16</span>, <span class="dv">17</span>, <span class="dv">22</span>, <span class="dv">23</span>, <span class="dv">24</span>, <span class="dv">25</span>, <span class="dv">26</span>, <span class="dv">28</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                               <span class="dv">29</span>, <span class="dv">30</span>, <span class="dv">31</span>, <span class="dv">36</span>, <span class="dv">37</span>, <span class="dv">42</span>, <span class="dv">44</span>, <span class="dv">45</span>, <span class="dv">47</span>, <span class="dv">48</span>, <span class="dv">49</span>, <span class="dv">50</span>, <span class="dv">51</span>, <span class="dv">55</span>, <span class="dv">58</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>same_dom <span class="ot">&lt;-</span> <span class="fu">outer</span>(domain, domain, <span class="st">"=="</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>same_dir <span class="ot">&lt;-</span> <span class="fu">outer</span>(reversed, reversed, <span class="st">"=="</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">same_domain_same_direction =</span> <span class="fu">median</span>(R[off <span class="sc">&amp;</span> same_dom <span class="sc">&amp;</span> same_dir]),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">same_domain_opposite       =</span> <span class="fu">median</span>(R[off <span class="sc">&amp;</span> same_dom <span class="sc">&amp;</span> <span class="sc">!</span>same_dir]),</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">other_domain_same_direction =</span> <span class="fu">median</span>(R[off <span class="sc">&amp;</span> <span class="sc">!</span>same_dom <span class="sc">&amp;</span> same_dir]),</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">other_domain_opposite       =</span> <span class="fu">median</span>(R[off <span class="sc">&amp;</span> <span class="sc">!</span>same_dom <span class="sc">&amp;</span> <span class="sc">!</span>same_dir])), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> same_domain_same_direction        same_domain_opposite 
+                       0.35                        0.35 
+other_domain_same_direction       other_domain_opposite 
+                       0.05                        0.02 </code></pre>
+</div>
+</div>
+<p>Within a domain the two kinds of pair correlate equally, with a median of 0.35 each. Between domains, pairs worded the same way correlate 0.05 and pairs worded oppositely 0.02. By this measure wording direction leaves at most a trace in the BFI-2, far from the Rosenberg scale’s blocks.</p>
 </section>
 <section id="how-many-factors-1" class="level3">
 <h3 class="anchored" data-anchor-id="how-many-factors-1">How many factors?</h3>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb24" data-startfrom="296" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 295;"><span id="cb24-296"><a href="#cb24-296" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
-<span id="cb24-297"><a href="#cb24-297" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"The BFI-2 was designed around five domains, each with three facets. How many factors do you think parallel analysis will suggest for these 60 items?"</span><span class="op">,</span></span>
-<span id="cb24-298"><a href="#cb24-298" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"5"</span><span class="op">,</span> <span class="st">"9"</span><span class="op">,</span> <span class="st">"12"</span><span class="op">,</span> <span class="st">"15"</span>]<span class="op">,</span></span>
-<span id="cb24-299"><a href="#cb24-299" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"9"</span><span class="op">,</span></span>
-<span id="cb24-300"><a href="#cb24-300" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Parallel analysis suggests 9, and the eigenvalue-greater-than-one rule suggests 12. With about 1,200 respondents, the data have enough power to pick up some of the finer facet structure within domains. Neither answer is 'wrong': how many factors depends on the level of detail you care about."</span></span>
-<span id="cb24-301"><a href="#cb24-301" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb26" data-startfrom="305" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 304;"><span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
+<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"The BFI-2 was designed around five domains, each with three facets. How many factors do you think parallel analysis will suggest for these 60 items?"</span><span class="op">,</span></span>
+<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"5"</span><span class="op">,</span> <span class="st">"9"</span><span class="op">,</span> <span class="st">"12"</span><span class="op">,</span> <span class="st">"15"</span>]<span class="op">,</span></span>
+<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"9"</span><span class="op">,</span></span>
+<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Parallel analysis suggests 9, and the eigenvalue-greater-than-one rule suggests 12. With about 1,200 respondents, the data have enough power to pick up some of the finer facet structure within domains. Neither answer is 'wrong': how many factors depends on the level of detail you care about."</span></span>
+<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-13" data-nodetype="expression">
@@ -2587,9 +2611,9 @@ Negative Emotionality       Open-Mindedness
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">252</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>pa <span class="ot">&lt;-</span> <span class="fu">fa.parallel</span>(R, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">fa =</span> <span class="st">"fa"</span>, <span class="at">n.iter =</span> <span class="dv">20</span>, <span class="at">plot =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">main =</span> <span class="st">"Parallel analysis: BFI-2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">252</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>pa <span class="ot">&lt;-</span> <span class="fu">fa.parallel</span>(R, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">fa =</span> <span class="st">"fa"</span>, <span class="at">n.iter =</span> <span class="dv">20</span>, <span class="at">plot =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">main =</span> <span class="st">"Parallel analysis: BFI-2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -2603,9 +2627,9 @@ Negative Emotionality       Open-Mindedness
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>ev <span class="ot">&lt;-</span> <span class="fu">eigen</span>(R)<span class="sc">$</span>values</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">parallel =</span> pa<span class="sc">$</span>nfact,</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">kaiser =</span> <span class="fu">sum</span>(ev <span class="sc">&gt;</span> <span class="dv">1</span>))           <span class="co"># the "eigenvalue greater than one" rule, for comparison</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ev <span class="ot">&lt;-</span> <span class="fu">eigen</span>(R)<span class="sc">$</span>values</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">parallel =</span> pa<span class="sc">$</span>nfact,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">kaiser =</span> <span class="fu">sum</span>(ev <span class="sc">&gt;</span> <span class="dv">1</span>))           <span class="co"># the "eigenvalue greater than one" rule, for comparison</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>parallel   kaiser 
@@ -2613,16 +2637,16 @@ Negative Emotionality       Open-Mindedness
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(ev[<span class="dv">1</span>] <span class="sc">/</span> ev[<span class="dv">2</span>], <span class="dv">2</span>)           <span class="co"># ratio of the first to the second eigenvalue</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(ev[<span class="dv">1</span>] <span class="sc">/</span> ev[<span class="dv">2</span>], <span class="dv">2</span>)           <span class="co"># ratio of the first to the second eigenvalue</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.67</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The same parallel analysis on Pearson correlations, for comparison:</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">252</span>)</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fa.parallel</span>(r, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">fa =</span> <span class="st">"fa"</span>, <span class="at">n.iter =</span> <span class="dv">20</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>nfact</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The same parallel analysis on Pearson correlations, for comparison:</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">252</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fa.parallel</span>(r, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">fa =</span> <span class="st">"fa"</span>, <span class="at">n.iter =</span> <span class="dv">20</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>nfact</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Parallel analysis suggests that the number of factors =  9  and the number of components =  NA </code></pre>
@@ -2640,16 +2664,16 @@ Negative Emotionality       Open-Mindedness
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Five factors, minimum-residual estimation, oblique (oblimin) rotation.</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>f5 <span class="ot">&lt;-</span> <span class="fu">fa</span>(R, <span class="at">nfactors =</span> <span class="dv">5</span>, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">rotate =</span> <span class="st">"oblimin"</span>, <span class="at">fm =</span> <span class="st">"minres"</span>)</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">unclass</span>(f5<span class="sc">$</span>loadings)</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, which.max)</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Name each factor after the domain whose items load on it most often.</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>names_f <span class="ot">&lt;-</span> <span class="fu">tapply</span>(domain, <span class="fu">factor</span>(top, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>), <span class="cf">function</span>(d) <span class="fu">names</span>(<span class="fu">which.max</span>(<span class="fu">table</span>(d))))</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>short <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">Extraversion =</span> <span class="st">"E"</span>, <span class="at">Agreeableness =</span> <span class="st">"A"</span>, <span class="at">Conscientiousness =</span> <span class="st">"C"</span>,</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>           <span class="st">"Negative Emotionality"</span> <span class="ot">=</span> <span class="st">"N"</span>, <span class="st">"Open-Mindedness"</span> <span class="ot">=</span> <span class="st">"O"</span>)[names_f]</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(L) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(f5<span class="sc">$</span>Phi)[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(f5<span class="sc">$</span>Phi)[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> short</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(domain, <span class="at">factor =</span> short[top])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Five factors, minimum-residual estimation, oblique (oblimin) rotation.</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>f5 <span class="ot">&lt;-</span> <span class="fu">fa</span>(R, <span class="at">nfactors =</span> <span class="dv">5</span>, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">rotate =</span> <span class="st">"oblimin"</span>, <span class="at">fm =</span> <span class="st">"minres"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">unclass</span>(f5<span class="sc">$</span>loadings)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>top <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, which.max)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Name each factor after the domain whose items load on it most often.</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>names_f <span class="ot">&lt;-</span> <span class="fu">tapply</span>(domain, <span class="fu">factor</span>(top, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>), <span class="cf">function</span>(d) <span class="fu">names</span>(<span class="fu">which.max</span>(<span class="fu">table</span>(d))))</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>short <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">Extraversion =</span> <span class="st">"E"</span>, <span class="at">Agreeableness =</span> <span class="st">"A"</span>, <span class="at">Conscientiousness =</span> <span class="st">"C"</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>           <span class="st">"Negative Emotionality"</span> <span class="ot">=</span> <span class="st">"N"</span>, <span class="st">"Open-Mindedness"</span> <span class="ot">=</span> <span class="st">"O"</span>)[names_f]</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(L) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(f5<span class="sc">$</span>Phi)[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(f5<span class="sc">$</span>Phi)[[<span class="dv">2</span>]] <span class="ot">&lt;-</span> short</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(domain, <span class="at">factor =</span> short[top])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                       factor
@@ -2662,8 +2686,8 @@ domain                   A  C  E  N  O
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">median_main_loading =</span> <span class="fu">median</span>(<span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, max)),</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">median_largest_other =</span> <span class="fu">median</span>(<span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">sort</span>(x, <span class="cn">TRUE</span>)[<span class="dv">2</span>]))), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">median_main_loading =</span> <span class="fu">median</span>(<span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, max)),</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">median_largest_other =</span> <span class="fu">median</span>(<span class="fu">apply</span>(<span class="fu">abs</span>(L), <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">sort</span>(x, <span class="cn">TRUE</span>)[<span class="dv">2</span>]))), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> median_main_loading median_largest_other 
@@ -2671,7 +2695,7 @@ domain                   A  C  E  N  O
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(f5<span class="sc">$</span>Phi, <span class="dv">2</span>)   <span class="co"># correlations among the rotated factors</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(f5<span class="sc">$</span>Phi, <span class="dv">2</span>)   <span class="co"># correlations among the rotated factors</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>      N     E     C    O     A
@@ -2686,8 +2710,8 @@ A -0.05  0.09  0.15 0.20  1.00</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loadings for the Extraversion items on the five factors.</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(L[domain <span class="sc">==</span> <span class="st">"Extraversion"</span>, ], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Loadings for the Extraversion items on the five factors.</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(L[domain <span class="sc">==</span> <span class="st">"Extraversion"</span>, ], <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                N    E     C     O     A
@@ -2710,9 +2734,9 @@ self_BFI_56 -0.08 0.57  0.01  0.09  0.30</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The same five factors with an orthogonal rotation: identical fit, different loadings.</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>f5v <span class="ot">&lt;-</span> <span class="fu">fa</span>(R, <span class="at">nfactors =</span> <span class="dv">5</span>, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">rotate =</span> <span class="st">"varimax"</span>, <span class="at">fm =</span> <span class="st">"minres"</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">oblimin_rmsr =</span> f5<span class="sc">$</span>rms, <span class="at">varimax_rmsr =</span> f5v<span class="sc">$</span>rms), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The same five factors with an orthogonal rotation: identical fit, different loadings.</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>f5v <span class="ot">&lt;-</span> <span class="fu">fa</span>(R, <span class="at">nfactors =</span> <span class="dv">5</span>, <span class="at">n.obs =</span> <span class="fu">nrow</span>(resp), <span class="at">rotate =</span> <span class="st">"varimax"</span>, <span class="at">fm =</span> <span class="st">"minres"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">oblimin_rmsr =</span> f5<span class="sc">$</span>rms, <span class="at">varimax_rmsr =</span> f5v<span class="sc">$</span>rms), <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>oblimin_rmsr varimax_rmsr 

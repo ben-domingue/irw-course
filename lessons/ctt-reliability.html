@@ -2440,11 +2440,11 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Recall</strong> from <a href="../lessons/irw-data.html">Item response data and the IRW</a>: IRW tables are <em>long</em>, one row per respondent–item response, so an item analysis starts by reshaping to one row per respondent; item means and sum scores are then column and row sums.</p>
+<p><strong>Recall</strong> from <a href="../lessons/irw-data.html">Item response data and the IRW</a>: IRW tables are <em>long</em>, one row per respondent–item response, so an item analysis starts by reshaping to one row per respondent; item means and sum scores are then column and row sums. Item means and item-rest correlations were two of that lesson’s four first descriptives.</p>
 </div>
 </div>
 </div>
-<p>CTT also offers the simplest tools for looking at individual items. For each item we compute:</p>
+<p>CTT gives those two first-look numbers their classical roles. For each item we compute:</p>
 <ul>
 <li>its <strong>mean</strong> (for 0/1 items, the proportion correct, often called the item’s <em>p</em>-value), a first indication of difficulty, where larger values mean easier items;</li>
 <li>its <strong>item-rest correlation</strong>: the correlation between the item and the sum of the <em>other</em> items. This tells us whether the item is hanging together with the rest. An item with a correlation near zero, or negative, is either measuring something else or is keyed backwards.</li>
@@ -2648,15 +2648,25 @@ share_below_alpha
 <section id="reverse-keying-the-mach-iv" class="level3">
 <h3 class="anchored" data-anchor-id="reverse-keying-the-mach-iv">Reverse keying: the Mach IV</h3>
 <p>The Mach IV is answered on a six-point scale, from 0 (strongly disagree) to 5 (strongly agree). Half its items are worded so that agreeing is the Machiavellian answer; for the other half, agreeing is the <em>less</em> Machiavellian answer. The IRW table stores the responses as given, unkeyed.</p>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Recall</strong> from <a href="../lessons/irw-data.html">Item response data and the IRW</a>: the Mini-IPIP’s ten reverse-worded items arrived already reverse-scored, although the deposit’s codebook suggested otherwise; every within-trait correlation came out positive, and that settled it. The rule there: learn from the documentation which way each item should run, then check it in the data, because neither is enough alone.</p>
+</div>
+</div>
+</div>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb30" data-startfrom="292" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 291;"><span id="cb30-292"><a href="#cb30-292" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
-<span id="cb30-293"><a href="#cb30-293" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"Half the Mach IV's items are worded so that agreeing is the *less* Machiavellian answer. If we compute alpha *without* reverse-keying them, roughly what do we get? (Keyed by the published key, alpha is 0.70.)"</span><span class="op">,</span></span>
-<span id="cb30-294"><a href="#cb30-294" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"About 0.70"</span><span class="op">,</span> <span class="st">"About 0.55"</span><span class="op">,</span> <span class="st">"About 0.35"</span><span class="op">,</span> <span class="st">"Below 0"</span>]<span class="op">,</span></span>
-<span id="cb30-295"><a href="#cb30-295" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"About 0.35"</span><span class="op">,</span></span>
-<span id="cb30-296"><a href="#cb30-296" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Alpha is 0.37 unkeyed. Items pulling in opposite directions partly cancel in the total, so the covariances that alpha relies on shrink. It doesn't go all the way to zero or below: most item-rest correlations stay slightly positive, as the output shows."</span></span>
-<span id="cb30-297"><a href="#cb30-297" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb30" data-startfrom="296" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 295;"><span id="cb30-296"><a href="#cb30-296" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
+<span id="cb30-297"><a href="#cb30-297" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"Half the Mach IV's items are worded so that agreeing is the *less* Machiavellian answer. If we compute alpha *without* reverse-keying them, roughly what do we get? (Keyed by the published key, alpha is 0.70.)"</span><span class="op">,</span></span>
+<span id="cb30-298"><a href="#cb30-298" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"About 0.70"</span><span class="op">,</span> <span class="st">"About 0.55"</span><span class="op">,</span> <span class="st">"About 0.35"</span><span class="op">,</span> <span class="st">"Below 0"</span>]<span class="op">,</span></span>
+<span id="cb30-299"><a href="#cb30-299" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"About 0.35"</span><span class="op">,</span></span>
+<span id="cb30-300"><a href="#cb30-300" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Alpha is 0.37 unkeyed. Items pulling in opposite directions partly cancel in the total, so the covariances that alpha relies on shrink. It doesn't go all the way to zero or below: most item-rest correlations stay slightly positive, as the output shows."</span></span>
+<span id="cb30-301"><a href="#cb30-301" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-14" data-nodetype="expression">
