@@ -207,7 +207,7 @@ lessons:
     prereqs: [fa-confirmatory]
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
     tables: [florida_twins_dweck, florida_twins_grit]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-25: added at Ben's request while reviewing dif (#150): fairness, impact vs.
