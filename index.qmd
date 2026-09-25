@@ -122,12 +122,13 @@ cat(':::\n')
 
 ## Build your own course
 
-Pick a starting point, then add or remove lessons. Adding a lesson brings in the
-lessons it assumes; a lesson can't be removed while a chosen lesson still needs it.
-Your course is listed in teaching order, with each lesson after the ones it assumes.
-Open "Dependencies and threads" under a lesson to see what it needs, what it leads
-to, and the threads it starts and picks up. The lessons, prerequisites and threads
-all come from `lessons.yml`.
+Build a course from the lesson bank: drag lessons into your course (or use Add),
+put them in any order, and group them under unit or week headings. Start from a
+preset or from nothing. Nothing is blocked. The notes flag a lesson that comes
+before a lesson it assumes, or that assumes one you left out, and offer a fix you can
+take or ignore. Open "Dependencies and threads" under a lesson in the bank to see
+what it needs, what it leads to, and the threads it starts and picks up. The
+lessons, prerequisites and threads all come from `lessons.yml`.
 
 ```{r}
 # The builder reads lessons.yml through `course`; nothing in it is hand-maintained.
@@ -147,8 +148,14 @@ ojs_define(cb_course = as.character(jsonlite::toJSON(list(
 
 ```{ojs}
 //| echo: false
+//| output: false
 import {courseBuilder} from "./lessons/widgets/course-builder.js"
-courseBuilder(JSON.parse(cb_course))
+Sortable = require("sortablejs@1")  // drag and drop, with touch
+```
+
+```{ojs}
+//| echo: false
+courseBuilder(JSON.parse(cb_course), {Sortable})
 ```
 
 ## Paths through the course

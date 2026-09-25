@@ -1,16 +1,21 @@
-// "Build your own course" on the course map (index.qmd, #14). Everything comes
-// from lessons.yml, passed in by index.qmd with ojs_define():
+// "Build your own course" on the course map (index.qmd, #14). A bank of every
+// lesson (from lessons.yml, passed in by index.qmd with ojs_define) and a canvas
+// holding the teacher's course: lessons and unit headings, in any order. Nothing
+// is blocked or added automatically; a notes panel points out lessons that come
+// before a prerequisite, and prerequisites missing from the course, each with a
+// one-click fix the teacher can ignore.
 //   import {courseBuilder} from "./lessons/widgets/course-builder.js"
-//   courseBuilder(JSON.parse(cb_course))
-// The dependency logic (closure, add, remove, order, presets, URL hash) is plain
-// functions of a course object, so it can be tested in node without a page
-// (see the PR for #14); only courseBuilder() touches the DOM.
+//   Sortable = require("sortablejs@1")
+//   courseBuilder(JSON.parse(cb_course), {Sortable})
+// The logic (notes, fixes, presets, URL hash, text export) is plain functions of
+// a course object and a list of items, so it can be tested in node; only
+// courseBuilder() touches the DOM.
 import { palette } from "./irt.js";
 
 const arr = (x) => (x == null ? [] : [].concat(x));
 
-// Index the course: lessons by id, prerequisites, dependants, threads, and a
-// rank for breaking ties in the order (first-course path, then lessons.yml).
+// Index the course: lessons by id, dependants, threads, and a rank for ordering
+// "Everything" (first-course path, then lessons.yml).
 export function makeCourse(data) {
   const lessons = arr(data.lessons).map((l) => ({ ...l, prereqs: arr(l.prereqs) }));
   const byId = new Map(lessons.map((l) => [l.id, l]));
@@ -23,49 +28,37 @@ export function makeCourse(data) {
   return { lessons, byId, paths, threads, modules: arr(data.modules), dependants, rank };
 }
 
-// Missing prerequisites of `ids` (transitively), each with the lesson that
-// first needed it: [{id, neededBy}], in the order they were found.
-export function missingPrereqs(ids, course) {
-  const have = new Set(ids), added = [];
-  const visit = (id) => {
-    for (const p of course.byId.get(id).prereqs) {
-      if (have.has(p)) continue;
-      have.add(p); added.push({ id: p, neededBy: id });
-      visit(p);
-    }
-  };
-  for (const id of ids) visit(id);
-  return added;
+// ---- Items ------------------------------------------------------------------
+// The canvas is a list of items: {type: "lesson", id} or {type: "heading", title}.
+
+export const lesson = (id) => ({ type: "lesson", id });
+export const heading = (title) => ({ type: "heading", title });
+export const lessonIds = (items) => items.filter((it) => it.type === "lesson").map((it) => it.id);
+const indexOfLesson = (items, id) => items.findIndex((it) => it.type === "lesson" && it.id === id);
+
+// Move the item at `from` so it ends up at index `to`.
+export function moveItem(items, from, to) {
+  const out = items.slice();
+  const [it] = out.splice(from, 1);
+  out.splice(Math.max(0, Math.min(to, out.length)), 0, it);
+  return out;
 }
 
-// A selection closed under prerequisites, plus what had to be added. Unknown
-// ids are dropped and reported.
-export function closeSelection(ids, course) {
-  const known = [...new Set(ids)].filter((id) => course.byId.has(id));
-  const unknown = ids.filter((id) => !course.byId.has(id));
-  const added = missingPrereqs(known, course);
-  return { selection: new Set([...known, ...added.map((a) => a.id)]), added, unknown };
+// Put lesson `id` at index `at`. A lesson appears once: if it is already on the
+// canvas, it moves (the index is where it lands in the final list).
+export function placeLesson(items, id, at) {
+  const out = items.filter((it) => !(it.type === "lesson" && it.id === id));
+  out.splice(Math.max(0, Math.min(at, out.length)), 0, lesson(id));
+  return out;
 }
 
-// Add a lesson and any prerequisites it is missing.
-export function addLesson(selection, id, course) {
-  const added = missingPrereqs([id], course).filter((a) => !selection.has(a.id));
-  return { selection: new Set([...selection, id, ...added.map((a) => a.id)]), added };
-}
+export const removeItem = (items, i) => items.filter((_, j) => j !== i);
 
-// Remove a lesson, unless a selected lesson lists it as a prerequisite: then
-// the selection is unchanged and `blockedBy` names those lessons.
-export function removeLesson(selection, id, course) {
-  const blockedBy = course.dependants.get(id).filter((d) => selection.has(d));
-  if (blockedBy.length) return { selection, blockedBy };
-  const s = new Set(selection); s.delete(id);
-  return { selection: s, blockedBy: [] };
-}
-
-// Teaching order: every lesson after its prerequisites; among lessons that are
-// ready, the one earliest in the first-course path, then in lessons.yml.
-export function orderSelection(selection, course) {
-  const left = new Set(selection), out = [];
+// Teaching order for a set of lessons: every lesson after its prerequisites (in
+// the set); among lessons that are ready, the one earliest in the first-course
+// path, then in lessons.yml. Used to lay out "Everything".
+export function orderSelection(ids, course) {
+  const left = new Set(ids), out = [];
   while (left.size) {
     const ready = [...left].filter((id) => course.byId.get(id).prereqs.every((p) => !left.has(p)));
     if (!ready.length) throw new Error("prerequisite cycle among " + [...left].join(", "));
@@ -75,28 +68,90 @@ export function orderSelection(selection, course) {
   return out;
 }
 
-// The presets: the first-course path (the default), EDUC 252, and everything.
+// ---- Notes and fixes --------------------------------------------------------
+
+// Advisory notes, in canvas order: {kind: "order", id, prereq} when lesson `id`
+// comes before its prerequisite `prereq`; {kind: "missing", id, prereq} when the
+// prerequisite isn't on the canvas at all.
+export function courseNotes(items, course) {
+  const ids = lessonIds(items), notes = [];
+  ids.forEach((id, i) => {
+    for (const p of course.byId.get(id).prereqs) {
+      const j = ids.indexOf(p);
+      if (j < 0) notes.push({ kind: "missing", id, prereq: p });
+      else if (j > i) notes.push({ kind: "order", id, prereq: p });
+    }
+  });
+  return notes;
+}
+
+// The fix a note offers: move the prerequisite (or add it) just before the lesson.
+export function applyFix(items, note) {
+  const at = indexOfLesson(items, note.id);
+  if (at < 0) return items;
+  if (note.kind === "order") {
+    const from = indexOfLesson(items, note.prereq);
+    return from > at ? moveItem(items, from, at) : items;
+  }
+  return placeLesson(items, note.prereq, at);
+}
+
+// ---- Presets, sharing and export --------------------------------------------
+
 export function presets(course) {
   const path = (id) => (course.paths.find((p) => p.id === id) || { lessons: [] }).lessons;
   return [
     { id: "first-course", label: "A first course", ids: path("first-course") },
     { id: "educ252", label: "EDUC 252", ids: path("educ252") },
-    { id: "everything", label: "Everything", ids: course.lessons.map((l) => l.id) }
+    { id: "everything", label: "Everything", ids: orderSelection(course.lessons.map((l) => l.id), course) },
+    { id: "empty", label: "Empty", ids: [] }
   ];
 }
+export const presetItems = (p) => p.ids.map(lesson);
 
-export const encodeHash = (order) => "#course=" + order.join(",");
+// The hash: "#c=" then comma-separated entries, each a lesson id or "~" and a
+// URI-encoded heading. Lesson ids are readable and survive reordering lessons.yml.
+export const encodeHash = (items) =>
+  "#c=" + items.map((it) => (it.type === "lesson" ? it.id : "~" + encodeURIComponent(it.title))).join(",");
 
-// The lesson ids in a hash like "#course=measurement,irw-data", or null if the
-// hash carries no course.
-export function decodeHash(hash) {
-  const m = /^#?course=(.*)$/.exec(hash || "");
+// Items from a hash, or null if the hash carries no course. Unknown lesson ids
+// and repeats are dropped and listed in `unknown`. Also reads the first
+// version's "#course=id,id,...".
+export function decodeHash(hash, course) {
+  const m = /^#?(?:c|course)=(.*)$/.exec(hash || "");
   if (!m) return null;
-  return decodeURIComponent(m[1]).split(",").map((s) => s.trim()).filter(Boolean);
+  const items = [], unknown = [], seen = new Set();
+  for (const raw of m[1].split(",")) {
+    if (!raw) continue;
+    if (raw[0] === "~") {
+      let t; try { t = decodeURIComponent(raw.slice(1)); } catch (e) { t = raw.slice(1); }
+      items.push(heading(t));
+    } else {
+      let id; try { id = decodeURIComponent(raw).trim(); } catch (e) { id = raw; }
+      if (course.byId.has(id) && !seen.has(id)) { items.push(lesson(id)); seen.add(id); } else unknown.push(id);
+    }
+  }
+  return { items, unknown };
 }
 
-export const asText = (order, course) =>
-  order.map((id, i) => `${i + 1}. ${course.byId.get(id).title}`).join("\n");
+// Plain text: headings on their own line, lessons numbered as sessions.
+export function asText(items, course) {
+  let n = 0;
+  return items.map((it) => (it.type === "heading" ? it.title : `${++n}. ${course.byId.get(it.id).title}`)).join("\n");
+}
+
+// Markdown: headings as ##, lessons as numbered links (numbering runs across units).
+export function asMarkdown(items, course, url = (id) => `lessons/${id}.html`) {
+  let n = 0;
+  const out = [];
+  for (const it of items) {
+    if (it.type === "heading") {
+      if (out.length) out.push("");
+      out.push(`## ${it.title}`, "");
+    } else out.push(`${++n}. [${course.byId.get(it.id).title}](${url(it.id)})`);
+  }
+  return out.join("\n");
+}
 
 // What a lesson needs, what it unlocks, and the threads it starts and picks up.
 export function neighbourhood(id, course) {
@@ -108,194 +163,260 @@ export function neighbourhood(id, course) {
   };
 }
 
-// ---- The widget ------------------------------------------------------------
+// ---- The widget ---------------------------------------------------------------
 
 function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === "style") e.style.cssText = v;
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
-    else e.setAttribute(k, v);
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
   }
-  for (const k of kids) if (k != null) e.append(k);
+  for (const k of kids) if (k != null && k !== false) e.append(k);
   return e;
 }
 
-const TAG = "font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-left:0.4rem;white-space:nowrap";
-const BUTTON = `border:1px solid ${palette.main};border-radius:4px;background:${palette.white};color:${palette.main};` +
-  "padding:0.25rem 0.75rem;cursor:pointer;font-size:0.9rem";
-const BUTTON_ON = `border:1px solid ${palette.main};border-radius:4px;background:${palette.main};color:${palette.white};` +
-  "padding:0.25rem 0.75rem;cursor:pointer;font-size:0.9rem";
+const TAG = "font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-left:0.4rem;white-space:nowrap";
+const BTN = `border:1px solid ${palette.main};border-radius:4px;background:${palette.white};color:${palette.main};` +
+  "padding:0.2rem 0.65rem;cursor:pointer;font-size:0.88rem";
+const BTN_ON = `border:1px solid ${palette.main};border-radius:4px;background:${palette.main};color:${palette.white};` +
+  "padding:0.2rem 0.65rem;cursor:pointer;font-size:0.88rem";
+const ICON = `border:1px solid ${palette.rule};border-radius:4px;background:${palette.white};color:${palette.ink};` +
+  "padding:0 0.45rem;cursor:pointer;font-size:0.85rem;line-height:1.6;min-width:1.9rem";
+const GRIP = `cursor:grab;color:${palette.guide};padding:0 0.35rem;user-select:none;touch-action:none;font-size:1.1rem;line-height:1.4`;
+const CSS = `
+.course-builder .cb-ghost { opacity: 0.45; outline: 2px dashed ${palette.main}; }
+.course-builder .cb-drag { background: ${palette.white}; }
+.course-builder button:disabled { opacity: 0.45; cursor: default; }
+.course-builder .cb-bank { max-height: 75vh; overflow-y: auto; }
+.course-builder button:focus-visible, .course-builder input:focus-visible, .course-builder summary:focus-visible { outline: 2px solid ${palette.contrast}; outline-offset: 1px; }
+`;
 
-export function courseBuilder(data, { base = "lessons/" } = {}) {
+let uid = 0;
+const keyed = (it) => ({ ...it, key: ++uid });
+
+export function courseBuilder(data, { Sortable = null, base = "lessons/" } = {}) {
   const course = makeCourse(data);
-  const title = (id) => course.byId.get(id).title;
   const href = (id) => `${base}${id}.html`;
-  const link = (id) => {
-    const l = course.byId.get(id);
-    return el("a", { href: href(id), style: l.status === "stub" ? `color:${palette.guide}` : "" }, l.title);
-  };
+  const absolute = (id) => new URL(href(id), location.href).href;
+  const title = (id) => course.byId.get(id).title;
+  const code = (id) => el("code", {}, id);
+  const link = (id) => el("a", { href: href(id), style: course.byId.get(id).status === "stub" ? `color:${palette.guide}` : "" }, title(id));
   const links = (ids) => {
     if (!ids.length) return document.createTextNode("none");
     const span = el("span");
     ids.forEach((id, i) => { if (i) span.append(" · "); span.append(link(id)); });
     return span;
   };
-  const code = (id) => el("code", {}, id);
-  const listOf = (ids) => {
-    const span = el("span");
-    ids.forEach((id, i) => { if (i) span.append(i === ids.length - 1 ? " and " : ", "); span.append(code(id)); });
-    return span;
-  };
+  const tags = (l) => [
+    l.tranche !== "core" ? el("span", { style: `${TAG};color:${palette.contrast}` }, l.tranche) : null,
+    l.status === "stub" ? el("span", { style: `${TAG};color:${palette.guide}` }, "not yet written") : null
+  ];
 
-  let selection = new Set();
-  let current = null; // the preset the selection still matches, if any
+  let items = [];       // the canvas; each item has a `key` for focus after a redraw
+  let current = null;   // the preset the canvas still matches, if any
+  let unitCount = 0;
 
-  // Messages (what was added and why; why a removal was blocked). Read out by
-  // screen readers as they change.
-  const note = el("div", { role: "status", "aria-live": "polite", style: "min-height:1.4em;margin:0.6rem 0;font-size:0.92rem" });
-  const say = (kind, ...kids) => {
-    note.replaceChildren();
-    if (!kids.length) return;
-    const colour = kind === "blocked" ? palette.contrast : palette.main;
-    note.append(el("div", { style: `border-left:4px solid ${colour};padding:0.35rem 0.8rem` }, ...kids));
-  };
-  const addedNote = (added) => {
-    const span = el("span", {}, el("strong", {}, "Added "));
-    added.forEach((a, i) => {
-      if (i) span.append("; ");
-      span.append(code(a.id), ", needed by ", code(a.neededBy));
-    });
-    span.append(".");
-    return span;
-  };
-
-  // Presets.
-  const presetButtons = new Map();
-  const presetRow = el("div", { role: "group", "aria-label": "Start from a preset", style: "display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center" },
-    el("span", { style: "font-weight:600;margin-right:0.2rem" }, "Start from:"));
-  for (const p of presets(course)) {
-    const b = el("button", { type: "button", style: BUTTON, "aria-pressed": "false", onclick: () => loadPreset(p) }, p.label);
-    presetButtons.set(p.id, b); presetRow.append(b);
-  }
-  const clear = el("button", { type: "button", style: BUTTON, onclick: () => { selection = new Set(); current = null; say(); update(); } }, "Clear");
-  presetRow.append(clear);
-
-  // The chooser: one fieldset per module, a checkbox per lesson, and a details
-  // element with its neighbourhood.
-  const boxes = new Map();
-  const chooser = el("div", { style: "flex:1 1 22rem;min-width:0" }, el("h3", { style: "font-size:1.05rem" }, "Choose lessons"));
+  // ---- Bank ----
+  const filter = el("input", { type: "search", placeholder: "Filter lessons", "aria-label": "Filter lessons by title",
+    style: `width:100%;padding:0.3rem 0.5rem;border:1px solid ${palette.rule};border-radius:4px;margin-bottom:0.6rem` });
+  const bankRows = new Map(); // id -> {row, add, inCourse, text}
+  const bankLists = [];
+  const bankBody = el("div", { class: "cb-bank" });
   for (const m of course.modules) {
-    const fs = el("fieldset", { style: `border:1px solid ${palette.rule};border-radius:6px;padding:0.4rem 0.9rem 0.6rem;margin:0 0 0.8rem` },
-      el("legend", { style: "font-size:0.95rem;font-weight:600;float:none;width:auto;padding:0 0.3rem;margin:0" }, m.title));
+    const ul = el("ul", { style: "list-style:none;margin:0;padding:0" });
     for (const l of course.lessons.filter((x) => x.module === m.id)) {
-      const cb = el("input", { type: "checkbox", id: `cb-${l.id}`, style: "margin-right:0.45rem;flex:none;margin-top:0.3rem" });
-      cb.addEventListener("change", () => toggle(l.id, cb.checked));
-      boxes.set(l.id, cb);
-      const tags = [];
-      if (l.tranche !== "core") tags.push(el("span", { style: `${TAG};color:${palette.contrast}` }, l.tranche));
-      if (l.status === "stub") tags.push(el("span", { style: `${TAG};color:${palette.guide}` }, "not yet written"));
       const nb = neighbourhood(l.id, course);
       const thread = (t, from) => el("li", {}, t.idea, " (", from ? "from " : "→ ",
         from ? link(t.introduced) : links(t.returns.map((r) => r.lesson)), ")");
-      const details = el("details", { style: "margin:0.1rem 0 0.2rem 1.6rem;font-size:0.85rem" },
-        el("summary", { style: `color:${palette.guide};cursor:pointer` }, "Dependencies and threads",
-          el("span", { class: "visually-hidden" }, ` for ${l.title}`)),
-        el("div", { style: `border-left:2px solid ${palette.rule};padding:0.2rem 0 0.2rem 0.7rem;margin:0.2rem 0` },
-          el("div", {}, el("strong", {}, "Needs: "), links(nb.needs)),
-          el("div", {}, el("strong", {}, "Unlocks: "), links(nb.unlocks)),
-          nb.starts.length ? el("div", {}, el("strong", {}, "Starts threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.starts.map((t) => thread(t, false)))) : null,
-          nb.picks.length ? el("div", {}, el("strong", {}, "Picks up threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.picks.map((t) => thread(t, true)))) : null,
-          el("div", {}, el("a", { href: href(l.id) }, "Open the lesson"))));
-      fs.append(el("div", { style: "margin:0.15rem 0" },
-        el("div", { style: "display:flex;align-items:flex-start" }, cb,
-          el("label", { for: `cb-${l.id}`, style: `cursor:pointer;${l.status === "stub" ? `color:${palette.guide}` : ""}` }, l.title, ...tags)),
-        details));
+      const add = el("button", { type: "button", style: ICON, "aria-label": `Add ${l.title} to the end of your course`,
+        onclick: () => setItems(placeLesson(items, l.id, items.length)) }, "Add");
+      const inCourse = el("span", { style: `${TAG};color:${palette.main}`, hidden: true }, "in course");
+      const row = el("li", { "data-id": l.id, style: "margin:0.1rem 0" },
+        el("div", { style: "display:flex;align-items:flex-start;gap:0.2rem" },
+          el("span", { class: "cb-grip", "aria-hidden": "true", title: "Drag to your course", style: GRIP }, "⠿"),
+          el("span", { style: `flex:1;${l.status === "stub" ? `color:${palette.guide}` : ""}` }, l.title, ...tags(l), inCourse),
+          add),
+        el("details", { style: "margin:0 0 0.2rem 1.6rem;font-size:0.84rem" },
+          el("summary", { style: `color:${palette.guide};cursor:pointer` }, "Dependencies and threads",
+            el("span", { class: "visually-hidden" }, ` for ${l.title}`)),
+          el("div", { style: `border-left:2px solid ${palette.rule};padding:0.2rem 0 0.2rem 0.7rem;margin:0.2rem 0` },
+            el("div", {}, el("strong", {}, "Needs: "), links(nb.needs)),
+            el("div", {}, el("strong", {}, "Unlocks: "), links(nb.unlocks)),
+            nb.starts.length ? el("div", {}, el("strong", {}, "Starts threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.starts.map((t) => thread(t, false)))) : null,
+            nb.picks.length ? el("div", {}, el("strong", {}, "Picks up threads:"), el("ul", { style: "margin:0;padding-left:1.2rem" }, ...nb.picks.map((t) => thread(t, true)))) : null,
+            el("div", {}, el("a", { href: href(l.id) }, "Open the lesson")))));
+      bankRows.set(l.id, { row, add, inCourse, text: (l.title + " " + l.id).toLowerCase() });
+      ul.append(row);
     }
-    chooser.append(fs);
+    const fs = el("fieldset", { style: `border:1px solid ${palette.rule};border-radius:6px;padding:0.3rem 0.7rem 0.5rem;margin:0 0 0.7rem` },
+      el("legend", { style: "font-size:0.92rem;font-weight:600;float:none;width:auto;padding:0 0.3rem;margin:0" }, m.title), ul);
+    bankLists.push({ fs, ul });
+    bankBody.append(fs);
   }
+  filter.addEventListener("input", () => {
+    const q = filter.value.trim().toLowerCase();
+    for (const { row, text } of bankRows.values()) row.hidden = !!q && !text.includes(q);
+    for (const { fs, ul } of bankLists) fs.hidden = ![...ul.children].some((r) => !r.hidden);
+  });
+  const bank = el("section", { "aria-label": "Lesson bank", style: "flex:1 1 20rem;min-width:0" },
+    el("h3", { style: "font-size:1.05rem" }, "Lesson bank"),
+    el("p", { style: `font-size:0.85rem;color:${palette.guide};margin:0 0 0.4rem` },
+      "Drag a lesson by its handle (⠿) into your course, or use Add."),
+    filter, bankBody);
 
-  // The course itself.
-  const heading = el("h3", { style: "font-size:1.05rem" });
-  const list = el("ol", { style: "padding-left:1.6rem;margin-bottom:0.6rem" });
-  const copied = el("span", { role: "status", "aria-live": "polite", style: `margin-left:0.6rem;font-size:0.85rem;color:${palette.guide}` });
-  const copy = el("button", { type: "button", style: BUTTON, onclick: copyList }, "Copy as list");
-  const share = el("p", { style: `font-size:0.85rem;color:${palette.guide};margin:0.4rem 0 0` },
-    "The page address keeps your choice: bookmark it or send it to share this course.");
-  const output = el("div", { style: `flex:1 1 20rem;min-width:0;border:1px solid ${palette.rule};border-top:4px solid ${palette.main};border-radius:6px;padding:0 1rem 1rem;align-self:flex-start` },
-    heading, list, el("div", {}, copy, copied), share);
-
-  function toggle(id, on) {
-    if (on) {
-      const r = addLesson(selection, id, course);
-      selection = r.selection;
-      say("added", ...(r.added.length ? [addedNote(r.added)] : []));
-    } else {
-      const r = removeLesson(selection, id, course);
-      if (r.blockedBy.length) {
-        say("blocked", el("strong", {}, "Can't remove "), code(id), el("strong", {}, ": "),
-          listOf(r.blockedBy), r.blockedBy.length > 1 ? " need it. Remove them first." : " needs it. Remove that first.");
-        update(); // puts the box back; the selection (and its preset) is unchanged
-        return;
-      }
-      selection = r.selection; say();
-    }
-    current = null;
-    update();
+  // ---- Canvas ----
+  const presetButtons = new Map();
+  const presetRow = el("div", { role: "group", "aria-label": "Fill the course from a preset", style: "display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;margin-bottom:0.5rem" },
+    el("span", { style: "font-weight:600;font-size:0.9rem;margin-right:0.2rem" }, "Start from:"));
+  for (const p of presets(course)) {
+    const b = el("button", { type: "button", style: BTN, "aria-pressed": "false", onclick: () => setItems(presetItems(p), p.id) }, p.label);
+    presetButtons.set(p.id, b); presetRow.append(b);
   }
+  const count = el("h3", { style: "font-size:1.05rem;margin-bottom:0.3rem" });
+  const status = el("div", { role: "status", "aria-live": "polite", class: "visually-hidden" });
+  const skipped = el("p", { hidden: true, style: `font-size:0.85rem;border-left:4px solid ${palette.contrast};padding:0.2rem 0.6rem` });
+  const notesBox = el("div", { style: "margin:0.4rem 0 0.6rem" });
+  const list = el("ol", { "aria-label": "Your course", style: `list-style:none;margin:0;padding:0.3rem;min-height:3.2rem;border:1px dashed ${palette.rule};border-radius:6px` });
+  const empty = el("p", { style: `color:${palette.guide};font-size:0.88rem;margin:0.3rem 0 0` }, "Your course is empty. Drag lessons here, use Add, or start from a preset.");
+  const addHeading = el("button", { type: "button", style: BTN, onclick: () => {
+    const it = keyed(heading(`Unit ${++unitCount}`));
+    setItems([...items, it], null, () => list.querySelector(`[data-key="${it.key}"] input`)?.select());
+  } }, "Add heading");
+  const copied = el("span", { role: "status", "aria-live": "polite", style: `font-size:0.85rem;color:${palette.guide}` });
+  const copyText = el("button", { type: "button", style: BTN, onclick: () => copy(asText(items, course)) }, "Copy as list");
+  const copyMd = el("button", { type: "button", style: BTN, onclick: () => copy(asMarkdown(items, course, absolute)) }, "Copy as Markdown");
+  const tools = el("div", { style: "display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;margin-top:0.6rem" }, addHeading, copyText, copyMd, copied);
+  const canvas = el("section", { "aria-label": "Your course", style: `flex:1.3 1 22rem;min-width:0;border:1px solid ${palette.rule};border-top:4px solid ${palette.main};border-radius:6px;padding:0 0.9rem 0.9rem` },
+    count, presetRow, skipped, notesBox, list, empty, tools,
+    el("p", { style: `font-size:0.82rem;color:${palette.guide};margin:0.5rem 0 0` },
+      "The page address keeps your course, headings included: bookmark it or send it to share."), status);
 
-  function loadPreset(p) {
-    const r = closeSelection(p.ids, course);
-    selection = r.selection; current = p.id;
-    say("added", ...(r.added.length ? [el("strong", {}, p.label), " lists a lesson without its prerequisite. ", addedNote(r.added)] : []));
-    update();
-  }
-
-  function copyList() {
-    const text = asText(orderSelection(selection, course), course);
+  function copy(text) {
     const done = (msg) => { copied.textContent = msg; setTimeout(() => { copied.textContent = ""; }, 2500); };
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => done("Copied."), () => fallback(text));
-    } else fallback(text);
-    function fallback(t) {
-      const ta = el("textarea", { rows: "6", style: "width:100%;margin-top:0.5rem;font-size:0.85rem", "aria-label": "Your course as a list" });
-      ta.value = t; copied.replaceChildren(); output.querySelector("textarea")?.remove();
-      copy.after(ta); ta.select(); done("Select all and copy.");
-    }
+    const fallback = () => {
+      canvas.querySelector("textarea")?.remove();
+      const ta = el("textarea", { rows: "6", style: "width:100%;margin-top:0.5rem;font-size:0.82rem", "aria-label": "Your course, to copy" });
+      ta.value = text; tools.after(ta); ta.select(); done("Select all and copy.");
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => done("Copied."), fallback);
+    else fallback();
   }
 
-  function update() {
-    for (const [id, cb] of boxes) cb.checked = selection.has(id);
-    for (const [id, b] of presetButtons) {
-      b.style.cssText = id === current ? BUTTON_ON : BUTTON;
-      b.setAttribute("aria-pressed", String(id === current));
-    }
-    const order = orderSelection(selection, course);
-    const stubs = order.filter((id) => course.byId.get(id).status === "stub").length;
-    heading.replaceChildren(`Your course: ${order.length} session${order.length === 1 ? "" : "s"}`,
-      el("span", { style: `font-weight:normal;font-size:0.85rem;color:${palette.guide}` },
-        stubs ? ` (${stubs} not yet written)` : ""));
-    list.replaceChildren(...order.map((id) => {
-      const l = course.byId.get(id);
-      return el("li", {}, link(id), l.status === "stub" ? el("span", { style: `${TAG};color:${palette.guide}` }, "not yet written") : null);
+  // Replace the canvas and redraw. `preset` names the preset it now matches.
+  function setItems(next, preset = null, after = null) {
+    items = next.map((it) => (it.key ? it : keyed(it)));
+    current = preset;
+    render();
+    if (after) after();
+  }
+  const focusIn = (key, sel) => list.querySelector(`[data-key="${key}"] ${sel}`);
+
+  const moveBtn = (i, dir, what) => el("button", {
+    type: "button", class: dir < 0 ? "cb-up" : "cb-down", style: ICON, disabled: dir < 0 ? i === 0 : i === items.length - 1,
+    "aria-label": `Move ${what} ${dir < 0 ? "up" : "down"}`,
+    onclick: () => {
+      const key = items[i].key, cls = dir < 0 ? ".cb-up" : ".cb-down", other = dir < 0 ? ".cb-down" : ".cb-up";
+      setItems(moveItem(items, i, i + dir), null, () => {
+        const b = focusIn(key, cls);
+        (b && !b.disabled ? b : focusIn(key, other))?.focus();
+      });
+    } }, dir < 0 ? "↑" : "↓");
+  const removeBtn = (i, what) => el("button", { type: "button", class: "cb-remove", style: ICON, "aria-label": `Remove ${what}`,
+    onclick: () => setItems(removeItem(items, i), null,
+      () => list.children[Math.min(i, items.length - 1)]?.querySelector(".cb-remove")?.focus()) }, "✕");
+
+  function renderNotes(notes) {
+    const order = notes.filter((n) => n.kind === "order"), missing = notes.filter((n) => n.kind === "missing");
+    const fix = (n, label) => el("button", { type: "button", style: `${BTN};font-size:0.8rem;padding:0.05rem 0.5rem;margin-left:0.4rem`,
+      onclick: () => setItems(applyFix(items, n)) }, label);
+    const group = (head, rows) => rows.length ? el("div", {},
+      el("div", { style: "font-weight:600;font-size:0.88rem;margin-top:0.2rem" }, head),
+      el("ul", { style: "margin:0.1rem 0 0.2rem;padding-left:1.1rem;font-size:0.87rem" }, ...rows)) : null;
+    const box = el("div", { style: `border-left:4px solid ${notes.length ? palette.contrast : palette.main};padding:0.3rem 0.8rem` },
+      notes.length ? null : el("span", { style: "font-size:0.88rem" }, items.some((it) => it.type === "lesson")
+        ? "No notes: every lesson comes after the lessons it assumes." : "Notes on the order will appear here."),
+      group(`Out of order (${order.length})`, order.map((n) => el("li", { style: "margin:0.15rem 0" },
+        code(n.id), " comes before its prerequisite ", code(n.prereq), ".",
+        fix(n, `Move ${n.prereq} before ${n.id}`)))),
+      group(`Missing prerequisites (${missing.length})`, missing.map((n) => el("li", { style: "margin:0.15rem 0" },
+        code(n.id), " assumes ", code(n.prereq), ", which isn't in your course.",
+        fix(n, `Add ${n.prereq} before ${n.id}`)))),
+      notes.length ? el("div", { style: `font-size:0.8rem;color:${palette.guide};margin-top:0.2rem` },
+        "Notes are advice: the course is yours to order.") : null);
+    notesBox.replaceChildren(el("div", { style: "font-weight:600;font-size:0.95rem;margin-bottom:0.2rem" }, "Notes"), box);
+  }
+
+  function render() {
+    let n = 0;
+    const onCanvas = new Set(lessonIds(items));
+    list.replaceChildren(...items.map((it, i) => {
+      if (it.type === "heading") {
+        const input = el("input", { type: "text", value: it.title, "aria-label": "Heading title",
+          style: `flex:1;min-width:0;font-weight:600;font-size:1rem;border:1px solid transparent;border-bottom:1px solid ${palette.rule};padding:0.1rem 0.3rem;background:transparent;color:inherit` });
+        input.addEventListener("input", () => { it.title = input.value; current = null; saveHash(); });
+        return el("li", { "data-key": it.key, style: "display:flex;align-items:center;gap:0.25rem;margin:0.5rem 0 0.2rem" },
+          el("span", { class: "cb-grip", "aria-hidden": "true", title: "Drag to reorder", style: GRIP }, "⠿"),
+          input, moveBtn(i, -1, `heading ${it.title}`), moveBtn(i, 1, `heading ${it.title}`), removeBtn(i, `heading ${it.title}`));
+      }
+      const l = course.byId.get(it.id);
+      return el("li", { "data-key": it.key, style: `display:flex;align-items:center;gap:0.25rem;padding:0.12rem 0;border-bottom:1px solid ${palette.rule}` },
+        el("span", { class: "cb-grip", "aria-hidden": "true", title: "Drag to reorder", style: GRIP }, "⠿"),
+        el("span", { style: `min-width:1.8rem;text-align:right;color:${palette.guide};font-size:0.85rem` }, `${++n}.`),
+        el("span", { style: "flex:1;min-width:0" }, link(it.id), ...tags(l)),
+        moveBtn(i, -1, l.title), moveBtn(i, 1, l.title), removeBtn(i, l.title));
     }));
-    if (!order.length) list.append(el("li", { style: `list-style:none;color:${palette.guide};margin-left:-1.6rem` }, "No lessons chosen yet."));
-    copy.disabled = !order.length;
-    try { history.replaceState(null, "", location.pathname + location.search + encodeHash(order)); } catch (e) { /* e.g. a sandboxed preview */ }
+    empty.hidden = items.length > 0;
+    const stubs = lessonIds(items).filter((id) => course.byId.get(id).status === "stub").length;
+    count.replaceChildren(`Your course: ${n} session${n === 1 ? "" : "s"}`,
+      el("span", { style: `font-weight:normal;font-size:0.85rem;color:${palette.guide}` }, stubs ? ` (${stubs} not yet written)` : ""));
+    for (const [id, r] of bankRows) {
+      r.inCourse.hidden = !onCanvas.has(id);
+      r.add.disabled = onCanvas.has(id);
+    }
+    for (const [id, b] of presetButtons) { b.style.cssText = id === current ? BTN_ON : BTN; b.setAttribute("aria-pressed", String(id === current)); }
+    const notes = courseNotes(items, course);
+    renderNotes(notes);
+    copyText.disabled = copyMd.disabled = !items.length;
+    status.textContent = `${n} session${n === 1 ? "" : "s"}; ${notes.length} note${notes.length === 1 ? "" : "s"}.`;
+    saveHash();
   }
 
-  // Restore a course from the address, else start from the default preset.
-  const fromHash = decodeHash(location.hash);
-  if (fromHash) {
-    const r = closeSelection(fromHash, course);
-    selection = r.selection;
-    const msgs = [];
-    if (r.unknown.length) msgs.push(el("span", {}, el("strong", {}, "Skipped "), listOf(r.unknown), ": not in the course. "));
-    if (r.added.length) msgs.push(addedNote(r.added));
-    say("added", ...msgs);
-    update();
-  } else loadPreset(presets(course)[0]);
+  function saveHash() {
+    try { history.replaceState(null, "", location.pathname + location.search + encodeHash(items)); } catch (e) { /* sandboxed preview */ }
+  }
 
-  return el("div", { class: "course-builder" }, presetRow, note,
-    el("div", { style: "display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start" }, output, chooser));
+  // Drag and drop with SortableJS (mouse and touch), by the ⠿ handle. The canvas
+  // is redrawn from `items` after every drop, which replaces Sortable's DOM moves.
+  if (Sortable) {
+    // forceFallback: the same pointer-driven dragging for mouse and touch.
+    const common = { handle: ".cb-grip", animation: 120, ghostClass: "cb-ghost", chosenClass: "cb-drag", forceFallback: true, fallbackOnBody: true };
+    for (const { ul } of bankLists) Sortable.create(ul, { ...common, group: { name: "course", pull: "clone", put: false }, sort: false });
+    Sortable.create(list, { ...common, group: { name: "course", pull: false, put: true },
+      onAdd: (e) => {
+        // The dragged bank row goes back to the bank (Sortable left a clone there).
+        const id = e.item.dataset.id;
+        e.clone.replaceWith(e.item);
+        const before = items.slice(0, e.newIndex).some((it) => it.type === "lesson" && it.id === id) ? 1 : 0;
+        setItems(placeLesson(items, id, e.newIndex - before));
+      },
+      onEnd: (e) => {
+        if (e.from !== list || e.to !== list || e.oldIndex === e.newIndex) return;
+        setItems(moveItem(items, e.oldIndex, e.newIndex));
+      } });
+  }
+
+  // Restore from the address, else the default preset.
+  const restored = decodeHash(location.hash, course);
+  if (restored) {
+    unitCount = restored.items.filter((it) => it.type === "heading").length;
+    if (restored.unknown.length) {
+      skipped.textContent = `Skipped from the address (not a lesson, or repeated): ${restored.unknown.join(", ")}.`;
+      skipped.hidden = false;
+    }
+    setItems(restored.items);
+  } else setItems(presetItems(presets(course)[0]), "first-course");
+
+  return el("div", { class: "course-builder" }, el("style", {}, CSS),
+    el("div", { style: "display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start" }, bank, canvas));
 }
