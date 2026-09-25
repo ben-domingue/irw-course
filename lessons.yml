@@ -366,7 +366,7 @@ lessons:
     prereqs: [fa-exploratory, 1pl-to-4pl]
     origin: {slides: [], ps: [], code: []}
     tables: [grit, neurodegenerative_huizinga_2019_dass]
-    status: stub
+    status: draft
     tranche: core
 
   - id: validity-evidence

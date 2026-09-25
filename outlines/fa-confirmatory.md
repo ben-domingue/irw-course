@@ -2,7 +2,7 @@
 
 # Factor analysis II: confirmatory models, omega, and IRT as factor analysis (`fa-confirmatory`)
 
-Module: fa · Prereqs: fa-exploratory, 1pl-to-4pl · Core · Status: outline
+Module: fa · Prereqs: fa-exploratory, 1pl-to-4pl · Core · Status: draft (09-24, #59)
 
 ## Core ideas
 
@@ -73,3 +73,17 @@ Grit sources: Duckworth, Peterson, Matthews & Kelly (2007), doi:10.1037/0022-351
 ## Open questions
 
 - None. Settled 09-24: `lavaan` first appears here (C9); keep the order after `1pl-to-4pl` (C10); multigroup CFA lives here (E1); the bifactor question is answered here (E3); item text per A5.
+
+## Drafting notes (09-24, #59)
+
+What changed from this outline while drafting:
+
+- **Grit keying.** The `grit` table is not the Florida twins table: its source is Open Psychometrics (codebook: 1 = "Very much like me" … 5 = "Not like me at all"), and the IRW processing script already reversed the six consistency items. Every item in the table therefore runs toward less grit; the lesson reverses all twelve (equivalent to reversing the perseverance items in the raw data, as B says).
+- **Grit fit** is shown with ML (items as numbers, five balanced categories) and then with WLSMV: ML one factor CFI 0.758 / RMSEA 0.128; two factors CFI 0.897 / RMSEA 0.084 / SRMR 0.066, facet correlation 0.61. WLSMV two factors CFI 0.906 / RMSEA 0.112 (the outline's 0.91 / 0.11), correlation 0.62; `mirt` 2D graded 0.61. Converted slopes correlate 0.94 with `mirt`'s (largest gap 0.33, item 9), not the single-item 2.1 vs 2.2 of the outline.
+- **DASS omega.** Omega is computed from an MLR bifactor model (items as numbers), since omega is about the observed sum score: omega total 0.944, omega hierarchical 0.879, alpha 0.933; omega-hierarchical-subscale 0.24 (depression), 0.23 (anxiety), 0.002 (stress). The outline's 0.97 / 0.86 were from a different computation. Factor correlations (WLSMV) 0.84–0.87 as planned.
+- **Invariance.** `cov_sex` = 2 is women: the paper's Table 1 reports 785 women of 1,461, and code 2 holds exactly 785 of 1,461 (a count match, no codebook). The main ladder stays MLR (numbers as planned: metric Δχ² 13.5/18, p = 0.76; scalar 24.6/18, p = 0.14; robust CFI 0.931–0.932; item 16's intercept the largest score test, 6.9 on 1 df, among 39; women +0.09 / +0.16 / +0.18 SD on depression / anxiety / stress). The WLSMV ladder is shown as a check (CFI 0.978–0.987) without difference tests: some top categories hold one response per group and the scaled χ² is erratic (lower for metric than configural).
+- **CES-D** is problem 4 (fails at the crying item, `ces_17`: intercept score test 14.2), not a worked example (Ben, 09-24).
+- **Simulate** fits `mirt` one factor at a time: a two-dimensional graded fit is too slow in the browser. The page's webR setup patches `parallel::detectCores()` (NA in webR), without which `lavaan::cfa()` never returns in the browser.
+- **Go deeper:** one (ordinal FA = graded model). The omega/alpha derivation is problem 1 instead of a second callout.
+- **Verdict** (for Ben): DASS-21 in a community sample: report the total, with the depression and anxiety scores only alongside it.
+- The `instrument-building` Recall became a sentence in the keying paragraph and problem 3 (facet and wording direction coincide on the Grit-O), to fit the length.
