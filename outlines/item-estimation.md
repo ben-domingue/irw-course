@@ -2,7 +2,7 @@
 
 # Estimating item parameters: JML and EM (`item-estimation`)
 
-Module: irt · Prereqs: ability-estimation · Extension · Status: outline
+Module: irt · Prereqs: ability-estimation · Extension · Status: drafted (#38)
 
 ## Core ideas
 
@@ -67,6 +67,16 @@ Table citation from IRW biblio.
 ## Go deeper
 
 - **EM for the Rasch model, one cycle by hand.** The E step's $r_{ik}$ and $f_k$ at each node and the M step for one item. Why: `item-banks-cat`, `equating`, `explanatory-irt`. Length: about a page.
+
+## Drafting notes (#38, 09-25)
+
+- **Keying.** The IRW table codes 1 = answered "true", not 1 = correct: statements 2, 5, 7, 8 and 11 are false (Enders et al., 2022, S1 file), and before recoding their correlations with the six true statements are mostly negative (24 of 30). The lesson recodes them. The planned numbers above were computed on the unrecoded data; after recoding nobody scores 0 or 1, 145 score 11, JML keeps 1,895; the JML stretch is still 1.09 against MML and 1.10 against CML ($11/10$); the empirical-histogram check moves no (centred) difficulty by more than 0.008 (≤ 0.02 as planned). A fix to the IRW table is proposed in the PR.
+- **Notation.** Nodes are $t_q$, $q = 1..Q$, with prior weights $w_q$ (as in `ability-estimation`), not node $k$: so $W_{jq}$, $f_q$, $r_{iq}$, and $I/(I-1)$ for the number of items.
+- **CML** gets a paragraph and a hand-written estimator in the real data (the `conditional-ml` thread asks the lesson to compare all three), not just one sentence.
+- **Go deeper:** two callouts, the planned EM-for-Rasch cycle and the two-item JML result (JML exactly doubles the CML difference).
+- **Simulate:** the dramatic prior case is a 2PL (every slope 1.5) with skewed abilities; a Rasch fit barely moves under the same skew, which the real data echo.
+- **Problem 1** uses a joint likelihood with a mistake written for the lesson (the 252 slide's is in an image).
+- Widgets rebuilt from Ben's `em_irt.html`: θ known/hidden; JML stretch; ripple vs. fix; E step; EM step by step (with a weak-items switch). Helpers in `lessons/widgets/item-estimation.js`.
 
 ## Open questions
 

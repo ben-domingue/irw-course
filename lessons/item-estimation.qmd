@@ -8,24 +8,494 @@ source("_course.R")
 lesson_header("item-estimation")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, logistic, logisticFit, palette} from "./widgets/irt.js"
+import {demoA, demoB, quadrature, simulate2pl, tabulate, posterior, eStep, runEM, cyclesToConverge, gradB, simulateRasch, jmlRasch, slopeThroughOrigin} from "./widgets/item-estimation.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Every lesson since [The Rasch model](rasch.qmd) has leaned on a promise: `mirt` estimates the item parameters first, and everything else follows. Where do they come from? To estimate an item we'd like to know the respondents' abilities, and to estimate abilities we need the items. Neither is observed. This lesson takes three ways out: estimate everything at once (joint maximum likelihood), condition the abilities away (conditional maximum likelihood, for the Rasch model), or integrate them out against a distribution (marginal maximum likelihood, fit by the EM algorithm). On a short test they give different answers: on eleven true-or-false science statements, the joint estimates come out stretched by 10%, as theory predicts for eleven items.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- explain why estimating item parameters is a missing-data problem, and what it would be if $\theta$ were known;
+- run joint maximum likelihood, and explain why its difficulties don't settle on the truth when the test is short, however many respondents there are;
+- write the marginal likelihood on a grid of nodes, and say how direct maximization and EM climb it differently;
+- carry out an E step and an M step: posterior weights, expected counts, and a weighted logistic regression for each item;
+- compare joint, conditional and marginal estimates on real data, and check what the marginal model's normal prior does to them.
+
 ## Core ideas
 
-## Worked example
+The widgets in this lesson are rebuilt from an interactive walkthrough of EM for the 2PL that I (Ben Domingue) wrote for teaching, in the course's notation: item $i$, respondent $j$, quadrature node $q$.
+
+### θ is the missing data
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The likelihood and logistic regression](likelihood.qmd): with a predictor we can see, such as Elo, each chess problem was a logistic regression, fit by maximizing $\sum [y \log p + (1 - y)\log(1 - p)]$. `glm()` does it with a version of Newton's method, and this lesson was promised as the place that opens up the machinery.
+:::
+
+Suppose we knew every respondent's $\theta$. Then each item would be exactly that: a logistic regression of the item's responses on $\theta$, with slope $a_i$ and intercept $-a_i b_i$, fit one item at a time ([Baker & Kim, 2004](https://doi.org/10.1201/9781482276725)). What we have instead is a matrix of 0s and 1s with no $\theta$ column. The model is symmetric in people and items, $\theta_j - b_i$, but the data are not: a few items and many respondents.
+
+#### Try it: θ known, then hidden
+
+Four hundred simulated respondents answer five 2PL items. Choose an item; the solid curve is the logistic regression fit to $(\theta, x)$, the dashed curve the truth.
+
+```{ojs}
+//| echo: false
+ie_quad = quadrature()
+ie_sim = simulate2pl(400, demoA, demoB)
+ie_pats = tabulate(ie_sim.X)
+viewof k1_item = Inputs.radio([1, 2, 3, 4, 5], {value: 3, label: "Item", format: i => `Item ${i}`})
+viewof k1_hide = Inputs.toggle({label: "Hide θ (what we actually observe)", value: false})
+```
+
+```{ojs}
+//| echo: false
+k1_i = k1_item - 1
+k1_x = ie_sim.X.map(x => x[k1_i])
+k1_fit = logisticFit(ie_sim.theta, k1_x)
+k1_a = k1_fit.b1
+k1_b = -k1_fit.b0 / k1_fit.b1
+k1_hide ?
+  Inputs.table(ie_sim.X.slice(0, 10).map((x, j) => ({respondent: j + 1, "θ": "?", ...Object.fromEntries(x.map((v, i) => [`item ${i + 1}`, v])), "sum score": x.reduce((u, v) => u + v, 0)})), {layout: "auto"}) :
+  Plot.plot({
+    width: 700, height: 300, x: {label: "Ability θ (known)", domain: [-3.5, 3.5]}, y: {label: "Response, and P(correct)", domain: [-0.1, 1.1]},
+    marks: [
+      Plot.dot(ie_sim.theta.map((t, j) => ({t, y: k1_x[j] + ((j * 37) % 11 - 5) * 0.01})), {x: "t", y: "y", r: 2.5, fill: palette.light}),
+      Plot.line(grid(-3.5, 3.5).map(t => ({t, p: logistic(demoA[k1_i] * (t - demoB[k1_i]))})), {x: "t", y: "p", stroke: palette.guide, strokeDasharray: "5,3", strokeWidth: 2}),
+      Plot.line(grid(-3.5, 3.5).map(t => ({t, p: logistic(k1_a * (t - k1_b))})), {x: "t", y: "p", stroke: palette.main, strokeWidth: 2.5})
+    ]
+  })
+```
+
+```{ojs}
+//| echo: false
+md`${k1_hide ? "This is all the data contain: which items each respondent got right. The θ column is empty, so there is nothing to put on the horizontal axis." : `Item ${k1_item}: fitted a = **${k1_a.toFixed(2)}**, b = **${k1_b.toFixed(2)}**; true a = ${demoA[k1_i]}, b = ${demoB[k1_i]}.`}`
+```
+
+With $\theta$ in hand the fit lands close to the truth (item 3: $a$ = 1.53 against 1.6, $b$ = 0.32 against 0.2), and it's ordinary logistic regression. Hide $\theta$ and the problem is circular: the items need $\theta$, and $\theta$ needs the items. Each method below breaks the circle differently.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "If every respondent's $\\theta$ were known, how would you estimate one item's slope and difficulty under the 2PL?",
+  options: [
+    {text: "A logistic regression of that item's responses on $\\theta$, one item at a time", correct: true, why: "With $\\theta$ observed it is a predictor like Elo: the slope is $a_i$ and the intercept $-a_i b_i$. Items don't interact, so each is its own regression."},
+    {text: "A logistic regression of the sum score on $\\theta$", correct: false, why: "The sum score isn't binary, and it mixes every item together. Each item's own 0/1 responses are the outcome."},
+    {text: "It can't be done without also estimating the other items", correct: false, why: "That is the situation when $\\theta$ is unknown. With $\\theta$ known, the items separate."}
+  ]
+})
+```
+
+### Joint maximum likelihood, and why it stretches
+
+The first idea is to treat every $\theta_j$ as one more parameter and alternate: abilities with the items held fixed, then items with the abilities held fixed, and repeat. That is **joint maximum likelihood** (JML), and each half is a problem we've already solved.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd), its Go deeper callout: a respondent who answers every item correctly (or none) has no finite maximum-likelihood estimate, so joint maximum likelihood has to set such respondents aside before it starts.
+:::
+
+What goes wrong? Each new respondent brings more data about the items, but also a new parameter, estimated from the same handful of items however large the sample. [Neyman and Scott (1948)](https://doi.org/10.2307/1914288) showed that when such *incidental* parameters grow with the sample, maximum likelihood estimates of the *structural* ones (here, the items) need not converge to the truth. For the Rasch model the JML difficulties are spread out by a factor of about $I/(I-1)$, where $I$ is the number of items, and multiplying them by $(I-1)/I$ removes most of it ([Wright & Douglas, 1977](https://doi.org/10.1177/014662167700100216)). Why spread out? Each $\hat\theta_j$ comes from only $I$ responses, so the estimates are more spread out than the abilities (in [Estimating abilities](ability-estimation.qmd), an SD of 1.26 against a true 1), and difficulties fit to them follow.
+
+#### Try it: the JML stretch
+
+Simulated Rasch data with difficulties evenly spaced from −2 to 2. The dots are the JML difficulties; the dashed line is the truth, the solid line $I/(I-1)$ times the truth.
+
+```{ojs}
+//| echo: false
+viewof js_I = Inputs.range([2, 40], {value: 5, step: 1, label: "Items (I)"})
+viewof js_N = Inputs.range([250, 5000], {value: 1000, step: 250, label: "Respondents"})
+```
+
+```{ojs}
+//| echo: false
+js_b = Array.from({length: js_I}, (_, i) => -2 + 4 * i / (js_I - 1))
+js_fit = jmlRasch(simulateRasch(js_N, js_b))
+js_slope = slopeThroughOrigin(js_b, js_fit.b)
+js_top = Math.max(2.6, 1.05 * Math.max(...js_fit.b.map(Math.abs)))
+Plot.plot({
+  width: 700, height: 320, x: {label: "True difficulty", domain: [-2.4, 2.4]}, y: {label: "JML difficulty", domain: [-js_top, js_top]},
+  marks: [
+    Plot.line([[-2.4, -2.4], [2.4, 2.4]], {stroke: palette.guide, strokeDasharray: "5,3"}),
+    Plot.line([[-2.4, -2.4 * js_I / (js_I - 1)], [2.4, 2.4 * js_I / (js_I - 1)]], {stroke: palette.contrast, strokeWidth: 1.5, clip: true}),
+    Plot.dot(js_b.map((b, i) => ({b, est: js_fit.b[i]})), {x: "b", y: "est", r: 5, fill: palette.main})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`${js_I} items, ${js_N} respondents (${js_fit.dropped} set aside with a zero or perfect score). The JML difficulties are **${js_slope.toFixed(2)}** times the truth; I/(I − 1) = ${(js_I / (js_I - 1)).toFixed(2)}.`
+```
+
+With 5 items and 1,000 respondents the JML difficulties are 1.34 times the truth, and with 5,000 respondents still 1.34: more respondents don't cure it. More items do: 1.13 at 10 items (against $I/(I-1)$ = 1.11) and 1.04 at 40. With 3 or 4 widely spread items the stretch exceeds $I/(I-1)$, an approximation; the Go deeper callout below finds the exact factor for two. Joint estimates do settle down when items and respondents grow together ([Haberman, 1977](https://doi.org/10.1214/aos/1176343941)), so JML with its correction is a reasonable choice for long tests.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd), its Go deeper callout: under the Rasch model the sum score is sufficient, and conditioning on it removes $\theta$ from the likelihood. Maximizing what's left is **conditional maximum likelihood** (CML), whose difficulty estimates converge to the truth as respondents are added ([Andersen, 1970](https://doi.org/10.1111/j.2517-6161.1970.tb00842.x)).
+:::
+
+So CML never estimates a $\theta$ at all, and it assumes nothing about how abilities are distributed. It is a reasonable choice whenever the Rasch model is the model; it doesn't extend to the 2PL, whose sufficient statistic, the weighted score, depends on the slopes being estimated ([From the 1PL to the 4PL](1pl-to-4pl.qmd)).
+
+::: {.callout-note collapse="true"}
+## Go deeper: with two items, JML exactly doubles the difference
+
+**Assumptions:** the Rasch model; two items with difficulties $b_1 < b_2$; responses from many respondents. Write $\delta = b_2 - b_1$.
+
+Respondents who got both items or neither right have no finite $\hat\theta$ and are set aside. Each of the $n$ who remain got exactly one right, so their score equation is $P_1(\hat\theta_j) + P_2(\hat\theta_j) = 1$. By the symmetry of the logistic curve the solution is the midpoint, $\hat\theta_j = (b_1 + b_2)/2$, the same for everyone. Let $n_1$ of them get item 1 right. Item 1's score equation says its expected number correct equals $n_1$:
+$$n \cdot \text{logit}^{-1}\Big(\tfrac{b_1 + b_2}{2} - b_1\Big) = n_1 \quad\Longrightarrow\quad \hat\delta_{\text{JML}} = 2\,\text{logit}\Big(\frac{n_1}{n}\Big).$$
+CML uses the same respondents (the others carry no information about $\delta$ once we condition on the score). By the Rasch lesson's two-item result, $\Pr(x_1 = 1 \mid x_1 + x_2 = 1) = 1/(1 + e^{b_1 - b_2}) = \text{logit}^{-1}(\delta)$, which does not involve $\theta$, so
+$$\hat\delta_{\text{CML}} = \text{logit}\Big(\frac{n_1}{n}\Big).$$
+CML is consistent, so $\hat\delta_{\text{CML}} \to \delta$ as $n$ grows, and $\hat\delta_{\text{JML}} = 2\hat\delta_{\text{CML}} \to 2\delta$: a stretch of exactly $2 = I/(I-1)$. More respondents make the JML estimate more precise, around the wrong value. Set the widget to two items to see it.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A 6-item Rasch test is calibrated by JML on 500 respondents, and the difficulties look stretched. A colleague proposes collecting 5,000 more respondents. What happens to the stretch?",
+  options: [
+    {text: "It stays at about $6/5 = 1.2$", correct: true, why: "Each new respondent brings a new $\\theta$ estimated from the same six items, so the stretch doesn't shrink with the sample. More respondents make the estimates more precise around the stretched values."},
+    {text: "It shrinks toward 1, as maximum likelihood estimates do with more data", correct: false, why: "That holds when the number of parameters stays fixed. Here every respondent adds one (the incidental-parameter problem), so the usual large-sample argument doesn't apply."},
+    {text: "It gets worse, because more respondents are set aside with perfect scores", correct: false, why: "The share set aside stays about the same. The stretch comes from estimating each $\\theta$ from six responses, not from who is dropped."}
+  ]
+})
+```
+
+### Marginal maximum likelihood: integrate θ out
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd): the EAP estimate evaluates likelihood × prior at a grid of nodes $t_1, \dots, t_Q$ and averages, with no closed-form integral needed. That lesson left the nodes and weights for this one.
+:::
+
+The third idea treats abilities as draws from a distribution $g(\theta)$, normal with mean 0 by default in `mirt`. A respondent's pattern then has a probability that involves only the items: average its likelihood over $g$. On the grid of nodes, with prior weights $w_q$ that sum to 1, the **marginal log likelihood** is
+$$\ell(\text{items}) = \sum_j \log \sum_{q=1}^{Q} L(\mathbf{x}_j \mid t_q)\, w_q .$$
+Maximizing it is **marginal maximum likelihood** (MML; [Bock & Aitkin, 1981](https://doi.org/10.1007/bf02293801)). The number of parameters no longer grows with the sample, so the incidental-parameter problem is gone. The price is $g$, taken up at the end of this section.
+
+How do we climb this surface? Directly, by Newton–Raphson over all the item parameters at once ([Bock & Lieberman, 1970](https://doi.org/10.1007/BF02291262)), or by the EM algorithm ([Dempster, Laird & Rubin, 1977](https://doi.org/10.1111/j.2517-6161.1977.tb01600.x)), `mirt`'s default. Both reach the same top.
+
+EM's idea is easiest to see with two coins ([Do & Batzoglou, 2008](https://doi.org/10.1038/nbt1406)). Sets of ten tosses come from one of two biased coins, but we aren't told which. If we knew, each bias would be a proportion of heads. So guess the biases; for each set, work out how probable each coin is; split the set's heads and tails between the coins in those proportions; re-estimate each bias from its expected heads and tosses; repeat. Item estimation is the same problem with $Q$ "coins", the nodes, and one set of tosses per respondent.
+
+The two ways of climbing differ in how they treat each respondent's **posterior weights**,
+$$W_{jq} = \frac{L(\mathbf{x}_j \mid t_q)\, w_q}{\sum_{q'} L(\mathbf{x}_j \mid t_{q'})\, w_{q'}},$$
+the probability that respondent $j$ sits at node $q$, given their responses and the current items. Every $W_{jq}$ depends on every item. In direct MML the weights move whenever any item parameter moves, tying the items together. EM computes the weights once per cycle and holds them fixed while it updates the items.
+
+#### Try it: the ripple and the fix
+
+The five items from the first widget, at their MML estimates, where every gradient is zero. Move item 1's difficulty. The heat map shows posterior weights for six patterns; the table gives each item's gradient with respect to $b_i$ with the weights recomputed (direct MML) and held from the start of the cycle (EM).
+
+```{ojs}
+//| echo: false
+ie_mle = cyclesToConverge(ie_pats, ie_quad, 1e-9)
+viewof rf_shift = Inputs.range([-1, 1], {value: 0.5, step: 0.05, label: "Move item 1's b by"})
+```
+
+```{ojs}
+//| echo: false
+rf_b = ie_mle.b.map((v, i) => (i === 0 ? v + rf_shift : v))
+rf_e0 = eStep(ie_pats, ie_mle.a, ie_mle.b, ie_quad)
+rf_e1 = eStep(ie_pats, ie_mle.a, rf_b, ie_quad)
+rf_show = ["00000", "10000", "11000", "11100", "11110", "11111"]
+rf_cells = rf_show.flatMap(k => {
+  const W = posterior(k.split("").map(Number), ie_mle.a, rf_b, ie_quad).W;
+  return ie_quad.nodes.map((t, q) => ({pattern: k, t: t.toFixed(1), W: W[q]}));
+})
+Plot.plot({
+  width: 700, height: 230, marginLeft: 60, x: {label: "Node t_q", domain: ie_quad.nodes.map(t => t.toFixed(1))}, y: {label: null, domain: rf_show},
+  color: {type: "linear", range: [palette.white, palette.main], label: "W", legend: true},
+  marks: [Plot.cell(rf_cells, {x: "t", y: "pattern", fill: "W", inset: 0.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+rf_g1 = gradB(rf_e1.r, rf_e1.f, ie_mle.a, rf_b, ie_quad)
+rf_g0 = gradB(rf_e0.r, rf_e0.f, ie_mle.a, rf_b, ie_quad)
+Inputs.table(rf_g1.map((g, i) => ({item: `Item ${i + 1}${i === 0 ? " (moved)" : ""}`, "b": rf_b[i].toFixed(2),
+  "gradient, weights recomputed (MML)": g.toFixed(2), "gradient, weights held (EM)": rf_g0[i].toFixed(2)})), {layout: "auto"})
+```
+
+With item 1 moved by 0.5, items 2 to 5, which haven't moved, now have gradients from 3.1 to 8.0 under direct MML: their best values depend on item 1's. Under EM their gradients stay at zero. Neither is a mistake. Direct MML sees the true slope of the surface and must move all the items together; EM climbs a simpler surface on which the items are separate, and pays with more cycles.
+
+### The E step and the M step
+
+**E step.** With the current item parameters, compute every respondent's posterior weights $W_{jq}$, then add them up two ways:
+$$f_q = \sum_j W_{jq}, \qquad r_{iq} = \sum_j W_{jq}\, x_{ij}.$$
+$f_q$ is the expected number of respondents at node $q$; $r_{iq}$ is the expected number of them who got item $i$ right. No respondent is assigned to one node: each is spread across all of them, in proportion to how well each node explains their responses.
+
+#### Try it: from one pattern to the expected counts
+
+Choose a response pattern (with its count among the 400) and an item. The bars are the pattern's posterior weights, the dashed line the prior. Below, the proportion $r_{iq}/f_q$ at each node (dot size is $f_q$), with the item's current curve.
+
+```{ojs}
+//| echo: false
+viewof es_key = Inputs.select(ie_pats.map(p => p.key), {value: "11000", label: "Pattern", format: k => `${k} (${ie_pats.find(p => p.key === k).n})`})
+viewof es_item = Inputs.radio([1, 2, 3, 4, 5], {value: 4, label: "Item", format: i => `Item ${i}`})
+```
+
+```{ojs}
+//| echo: false
+es_W = posterior(es_key.split("").map(Number), ie_mle.a, ie_mle.b, ie_quad).W
+Plot.plot({
+  width: 700, height: 200, x: {label: "Node t_q", domain: [-3.8, 3.8]}, y: {label: "Posterior weight W", domain: [0, Math.max(0.3, ...es_W) * 1.05]},
+  marks: [
+    Plot.rectY(ie_quad.nodes.map((t, q) => ({t, W: es_W[q]})), {x1: d => d.t - 0.2, x2: d => d.t + 0.2, y: "W", fill: palette.main}),
+    Plot.line(ie_quad.nodes.map((t, q) => ({t, w: ie_quad.w[q]})), {x: "t", y: "w", stroke: palette.guide, strokeDasharray: "4,3"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+es_i = es_item - 1
+es_pts = ie_quad.nodes.map((t, q) => ({t, f: rf_e0.f[q], p: rf_e0.r[es_i][q] / rf_e0.f[q]}))
+Plot.plot({
+  width: 700, height: 250, x: {label: "Node t_q", domain: [-3.8, 3.8]}, y: {label: "r / f at each node", domain: [0, 1]},
+  r: {range: [1, 14]},
+  marks: [
+    Plot.line(grid(-3.8, 3.8).map(t => ({t, p: logistic(ie_mle.a[es_i] * (t - ie_mle.b[es_i]))})), {x: "t", y: "p", stroke: palette.contrast, strokeWidth: 2}),
+    Plot.dot(es_pts.filter(d => d.f > 0.05), {x: "t", y: "p", r: "f", fill: palette.main, fillOpacity: 0.8})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+es_n = ie_pats.find(p => p.key === es_key).n
+es_top = es_W.indexOf(Math.max(...es_W))
+md`Pattern ${es_key} puts its largest weight, ${es_W[es_top].toFixed(2)}, on the node at θ = ${ie_quad.nodes[es_top].toFixed(1)}, so its ${es_n} respondents add ${(es_n * es_W[es_top]).toFixed(1)} to f there${es_key[es_i] === "1" ? ` and the same to r for item ${es_item}, which they got right` : `, and nothing to r for item ${es_item}, which they got wrong`}. Summed over nodes, f comes to **${rf_e0.f.reduce((u, v) => u + v, 0).toFixed(1)}** (every respondent, counted once) and r for item ${es_item} to **${rf_e0.r[es_i].reduce((u, v) => u + v, 0).toFixed(1)}**, the number who got it right.`
+```
+
+The pattern 11000 (right on the two easiest items) spreads from about −1.5 to 1, peaking at 0. However the weights are spread, each respondent adds exactly 1 to the total of $f$, and $r_{iq}$ adds up to the number who got item $i$ right.
+
+**M step.** Now hold $r_{iq}$ and $f_q$ fixed and maximize, for each item separately,
+$$\ell_i = \sum_{q=1}^{Q}\Big[\, r_{iq} \log P_i(t_q) + (f_q - r_{iq}) \log\big(1 - P_i(t_q)\big) \Big].$$
+This is the logistic regression from the first widget, with $Q$ nodes carrying fractional counts in place of respondents: $f_q$ trials and $r_{iq}$ successes at $\theta = t_q$ ([Harwell, Baker & Zwarts, 1988](https://doi.org/10.3102/10769986013003243)). In the plot above, it fits the curve to the dots, weighted by their size. No item's $\ell_i$ involves another item's parameters, so the M step is $I$ small, separate regressions. The next E step recomputes the weights, and the cycle repeats; no cycle lowers the marginal log likelihood ([Dempster, Laird & Rubin, 1977](https://doi.org/10.1111/j.2517-6161.1977.tb01600.x)).
+
+#### Try it: EM, one cycle at a time
+
+EM starts every item at $a = 1$, $b = 0$. Each panel shows one item's true curve (dashed) and its current estimate (solid).
+
+```{ojs}
+//| echo: false
+viewof em_set = Inputs.radio(["As simulated", "Weaker items (slopes × 0.4)"], {value: "As simulated", label: "Items"})
+viewof em_n = Inputs.button([["Step once", n => n + 1], ["Ten cycles", n => n + 10], ["Reset", () => 0]], {value: 0, label: "EM"})
+```
+
+```{ojs}
+//| echo: false
+em_A = em_set === "As simulated" ? demoA : demoA.map(v => v * 0.4)
+em_pats = em_set === "As simulated" ? ie_pats : tabulate(simulate2pl(400, em_A, demoB).X)
+em_hist = runEM(em_pats, ie_quad, Math.min(em_n, 300))
+em_now = em_hist[em_hist.length - 1]
+em_conv = cyclesToConverge(em_pats, ie_quad, 1e-3)
+Plot.plot({
+  width: 700, height: 190, x: {label: "θ", domain: [-3, 3], ticks: [-2, 0, 2]}, y: {label: "P(correct)", domain: [0, 1]},
+  fx: {label: null, tickFormat: i => `Item ${i}`},
+  marks: [
+    Plot.line([1, 2, 3, 4, 5].flatMap(i => grid(-3, 3, 61).map(t => ({i, t, p: logistic(em_A[i - 1] * (t - demoB[i - 1]))}))), {fx: "i", x: "t", y: "p", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line([1, 2, 3, 4, 5].flatMap(i => grid(-3, 3, 61).map(t => ({i, t, p: logistic(em_now.a[i - 1] * (t - em_now.b[i - 1]))}))), {fx: "i", x: "t", y: "p", stroke: palette.main, strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 700, height: 200, x: {label: "EM cycle"}, y: {label: "Marginal log likelihood"},
+  marks: [
+    Plot.line(em_hist, {x: "cycle", y: "ll", stroke: palette.main, strokeWidth: 2}),
+    Plot.dot(em_hist, {x: "cycle", y: "ll", fill: palette.main, r: 3})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+em_rec = [...em_A.map((v, i) => ({which: "slope a", tru: v, est: em_now.a[i]})), ...demoB.map((v, i) => ({which: "difficulty b", tru: v, est: em_now.b[i]}))]
+Plot.plot({
+  width: 700, height: 260, x: {label: "True value"}, y: {label: "Current estimate"},
+  fx: {label: null, domain: ["slope a", "difficulty b"]},
+  marks: [
+    Plot.line([{which: "slope a", v: 0}, {which: "slope a", v: 2}], {fx: "which", x: "v", y: "v", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line([{which: "difficulty b", v: -2}, {which: "difficulty b", v: 2}], {fx: "which", x: "v", y: "v", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.dot(em_rec, {fx: "which", x: "tru", y: "est", r: 5, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`After **${em_now.cycle}** cycle${em_now.cycle === 1 ? "" : "s"}${em_n > 300 ? " (the widget stops at 300)" : ""}: marginal log likelihood ${em_now.ll.toFixed(2)}${em_now.cycle > 0 ? `, a gain of ${(em_now.ll - em_hist[em_hist.length - 2].ll).toFixed(4)} on the last cycle` : ""}. With these items EM needs **${em_conv.cycles}** cycles before a cycle gains less than 0.001.`
+```
+
+The first cycle does most of the work: from the flat start, one E step and one M step put every difficulty within about 0.2 of where it ends up, and the log likelihood jumps from −1,357 to −1,124. After that each cycle gains less than the one before, and at 11 cycles the gain drops below 0.001. The slopes move last. Switch to the weaker items. Their posteriors are flatter, since five weak items say little about where a respondent sits, and each cycle moves the parameters less: EM now needs 22 cycles. Every cycle goes up, but EM is not fast when the items carry little information ([Dempster, Laird & Rubin, 1977](https://doi.org/10.1111/j.2517-6161.1977.tb01600.x)). The recovery plot shows the other half of the story: five items and 400 respondents recover difficulties better than slopes.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In the M step, why can each item be estimated on its own?",
+  options: [
+    {text: "Because $r_{iq}$ and $f_q$ are held fixed, and item $i$'s objective involves only its own parameters", correct: true, why: "Once the posterior weights are frozen, $\\ell_i = \\sum_q [r_{iq}\\log P_i + (f_q - r_{iq})\\log(1 - P_i)]$ contains no other item's $a$ or $b$."},
+    {text: "Because the items are locally independent, so their parameters never depend on each other", correct: false, why: "Local independence holds given $\\theta$, but with $\\theta$ unknown the items are tied together through the posterior weights, as the ripple widget showed. EM separates them by freezing the weights for one cycle."},
+    {text: "Because each respondent is assigned to the node where their posterior is highest", correct: false, why: "No respondent is assigned to one node: each is spread over every node by their weights $W_{jq}$."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: one EM cycle for the Rasch model, by hand
+
+**Assumptions:** the Rasch model, $P_i(t) = \text{logit}^{-1}(t - b_i)$; abilities drawn from a known distribution with weights $w_q$ at nodes $t_q$; every respondent answers all $I$ items. Write $\varepsilon_i = e^{-b_i}$.
+
+**E step.** For respondent $j$ with sum score $r_j$, the likelihood at node $q$ factorizes as in the Rasch lesson's Go deeper callout: $L(\mathbf{x}_j \mid t_q) = e^{r_j t_q}\prod_i \varepsilon_i^{x_{ij}} / \prod_i (1 + e^{t_q - b_i})$. The factor $\prod_i \varepsilon_i^{x_{ij}}$ doesn't depend on $q$, so it cancels from $W_{jq}$:
+$$W_{jq} = \frac{e^{r_j t_q}\, w_q \big/ \prod_i (1 + e^{t_q - b_i})}{\sum_{q'} e^{r_j t_{q'}}\, w_{q'} \big/ \prod_i (1 + e^{t_{q'} - b_i})}.$$
+Under the Rasch model the posterior weights depend on the pattern only through the sum score, so the E step needs $I + 1$ rows of weights, one per score, not one per pattern. With $N_s$ respondents at score $s$, $n_{is}$ of them right on item $i$, and $W_{sq}$ the weights for score $s$,
+$$f_q = \sum_{s} N_s W_{sq}, \qquad r_{iq} = \sum_s n_{is} W_{sq}.$$
+
+**M step.** For item $i$, the derivative of $\ell_i$ with respect to $b_i$ is $-\sum_q (r_{iq} - f_q P_{iq})$, and the second derivative is $-\sum_q f_q P_{iq}(1 - P_{iq})$. One Newton step is
+$$b_i \leftarrow b_i - \frac{\sum_q \big(r_{iq} - f_q P_{iq}\big)}{\sum_q f_q P_{iq}\big(1 - P_{iq}\big)}.$$
+At the solution $\sum_q f_q P_{iq} = \sum_q r_{iq}$, the number of respondents who got item $i$ right: the expected number correct matches the observed, the score equation of [The likelihood and logistic regression](likelihood.qmd), with the expectation now taken over the posterior. If the SD of $\theta$ is estimated too (as `mirt` does for the Rasch model), it gets an M step of its own, from the spread of the nodes weighted by $f_q$.
+
+**Why it climbs.** The marginal log likelihood equals the expected complete-data log likelihood under the weights, minus a term that the current weights themselves maximize. Raising the first term with the weights held fixed can't lower the total ([Dempster, Laird & Rubin, 1977](https://doi.org/10.1111/j.2517-6161.1977.tb01600.x)).
+:::
+
+### The price: a distribution for θ
+
+Marginal ML gets rid of the incidental parameters by assuming a distribution for $\theta$. What if it's wrong? The posterior weights depend on the prior weights $w_q$, so a wrong prior can bend the item estimates; [Seong (1990)](https://doi.org/10.1177/014662169001400307) found that a prior matched to the true distribution improved item estimates in large samples. One check needs no outside information: estimate the weights $w_q$ along with the items, as an **empirical histogram** updated from the $f_q$ ([Bock & Aitkin, 1981](https://doi.org/10.1007/bf02293801); [Mislevy, 1984](https://doi.org/10.1007/bf02306026)), or a spline-smoothed version ([Woods & Thissen, 2006](https://doi.org/10.1007/s11336-004-1175-8)). If the items barely move, the prior wasn't doing much harm.
+
+## Simulate
+
+The code below simulates Rasch responses for 5, 10 and 40 items (1,000 respondents, difficulties from −2 to 2) and estimates the difficulties by JML (written out in the code) and by `mirt`'s MML. Then it draws abilities from a skewed distribution (a standardized chi-square with 2 degrees of freedom: nobody below −1, a long tail above) and fits a 2PL with every true slope 1.5, with the normal prior and with an empirical histogram. The first run takes 20–30 seconds while R and `mirt` load, and the fits about another minute.
+
+With the seed as written, JML stretches the difficulties by 1.39 with 5 items (against $I/(I-1)$ = 1.25), 1.13 with 10 (1.11) and 1.03 with 40 (1.03), while MML stays within 0.04 of 1. In the second part the normal prior bends the 2PL: the slopes, all 1.5 in truth, run from 0.76 for the easiest item to 2.56 for the hardest, and the easiest item's difficulty is off by 1.57. The histogram brings the slopes back to between 1.33 and 2.04 and the largest difficulty error to 0.36. Set `np` to 5000 in your own R session: the JML stretch doesn't budge.
+
+```{webr}
+{{< include code/item-estimation-sim.R >}}
+```
+
+[Download this code](code/item-estimation-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/item-estimation-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Our example is [enders_2022_science_literacy](https://itemresponsewarehouse.org/tables/enders_2022_science_literacy/): eleven statements about science that 2,054 US adults marked true or false, in a national survey on conspiracy beliefs and vaccine hesitancy ([Enders, Uscinski, Klofstad & Stoler, 2022](https://doi.org/10.1371/journal.pone.0276082)). The statements (that the center of the Earth is very hot, for instance, or that lasers work by focusing sound waves) are listed with their answers in the article's [S1 file](https://doi.org/10.1371/journal.pone.0276082.s001). Its job here is to be a short test, where JML and the marginal method part company. [Download the code](code/item-estimation-irw.R); it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
+
+```{r fetch-sl}
+#| echo: true
+#| code-fold: show
+```
+
+There is one administration, and 2,040 of the 2,054 respondents answered all eleven statements; we use them.
+
+```{r keying-sl}
+#| echo: true
+#| code-fold: show
+```
+
+The correlations turn up something about the coding. Within the six true statements and within the five false ones (S1 file), correlations average 0.08 and 0.14, and 1 of 25 is negative; between the groups, 24 of 30 are negative. A respondent who knows more science should get both kinds right, so in the table a 1 must record a "true" answer, not a correct one (the table is built from the survey's raw export). Recoding the five false statements makes 1 a correct answer (higher = more knowledge), and every item-rest correlation turns positive, from 0.05 to 0.24: low, against a median of 0.49 for the reading test in [Classical test theory and reliability](ctt-reliability.qmd). Nobody scores 0 or 1, and 145 respondents get all eleven right.
+
+```{r mml-sl}
+#| echo: true
+#| code-fold: show
+```
+
+`mirt` needed 37 EM cycles, and the SD of ability is 0.64, small next to the 1.22 of the chess problems in [The Rasch model](rasch.qmd): the statements don't spread these respondents far apart.
+
+```{r jml-sl}
+#| echo: true
+#| code-fold: show
+```
+
+JML sets the 145 perfect scorers aside and converges in 7 rounds on the other 1,895.
+
+```{r cml-sl}
+#| echo: true
+#| code-fold: show
+```
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Put the three sets of difficulties on the same origin (summing to 0). Compared with the marginal (MML) difficulties, will the JML difficulties be more spread out, less spread out, or about the same? By how much?",
+  choices: ["Less spread out, by about 10%", "About the same", "More spread out, by about 10%", "More spread out, by about 50%"],
+  answer: "More spread out, by about 10%",
+  reveal: "More spread out, by about 10%: the JML difficulties are 1.09 times the MML ones and 1.10 times the CML ones. With eleven items, $I/(I-1) = 11/10 = 1.1$. Check the output below."
+})
+```
+
+```{r compare-sl}
+#| echo: true
+#| code-fold: show
+```
+
+The JML difficulties are 1.09 times the MML ones and 1.10 times the CML ones: $11/10$. The largest gap is 0.14, for statement 7, the hardest (lasers). Multiplied by $10/11$, the JML difficulties come within 0.02 of MML everywhere. CML and MML, which condition $\theta$ away and integrate it out, agree to within 0.01 (a slope of 1.005).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): only $\theta - b$ is identified, so software fixes an origin. `mirt` sets the mean ability to 0, while our JML and CML make the difficulties sum to 0; the comparisons above put all three on that second origin.
+:::
+
+Last, the marginal model's prior. Is the normal distribution doing any harm here?
+
+```{r eh-sl}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 3.5
+```
+
+The estimated histogram (bars) is not normal: its skewness is 1.56, with a long right tail where the perfect scorers sit, and its SD is 0.78 against the normal fit's 0.64 (dashed). Yet the difficulties move by at most 0.008. That is a reassuring null: with one common slope, the Rasch difficulties are set largely by each statement's proportion correct, and the prior has little room to bend them. The Simulate section showed a case where it does, a 2PL with skewed abilities; problem 3 tries the 2PL here.
+
+So which estimate would I trust for item parameters? First the assumptions. JML assumes nothing about the distribution of $\theta$ but estimates one $\theta$ per respondent, and pays with a stretch that more respondents don't fix. CML assumes nothing about the distribution either, but needs the sum score to be sufficient, which means the Rasch model. MML works for any model and has no incidental parameters, but assumes a distribution for $\theta$, which can be checked. For a short test, and for any model beyond the Rasch model, I use marginal ML by EM and check the prior by refitting with an empirical histogram. I'd use JML only with its $(I-1)/I$ correction, and only when the items number in the dozens, where the stretch is a few percent before the correction. When the Rasch model is the model, CML is the check I'd add; here it agrees with MML to 0.01.
 
 ## Problems
 
+1. **The joint likelihood.** Here is a Rasch joint log likelihood with a deliberate mistake: $\ell = \sum_j \sum_i \big[x_{ij}(\theta_j - b_i) - \log\big(1 + e^{\theta_j + b_i}\big)\big]$. Find it, correct it, and derive $\partial \ell/\partial \theta_j$ and $\partial \ell/\partial b_i$. Show that setting them to zero gives "expected equals observed" for each respondent's score and each item's total, and explain why the equation for a respondent with a perfect score has no solution. (252, slides c5)
+2. **Two coins.** Write the two-coin EM in R: five sets of ten tosses with 5, 9, 8, 4 and 7 heads, starting from biases 0.6 and 0.5 ([Do & Batzoglou, 2008](https://doi.org/10.1038/nbt1406)). Then simulate data of your own. How sensitive are the estimates to the starting values, to how far apart the true biases are, and to the number of sets and of tosses per set? What happens if you start both coins at the same bias? (c5/EM-coins.R, c5/EM-example.R)
+3. **The 2PL, twice.** Fit a 2PL to the recoded science-literacy data with the default normal prior and with `dentype = "EH"`, and put the two on the same scale (the Simulate code shows how). Do the slopes move more than the Rasch difficulties did? Which statements move most, and does that match the pattern in the simulation?
+4. **The M step is a regression.** Show that the expected complete-data log likelihood, $\sum_j \sum_q W_{jq} \log\big[L(\mathbf{x}_j \mid t_q)\,w_q\big]$, equals $\sum_i \sum_q \big[r_{iq} \log P_i(t_q) + (f_q - r_{iq})\log(1 - P_i(t_q))\big]$ plus terms that don't involve the item parameters. Which of those other terms would you maximize to estimate the prior weights $w_q$ as well, and what is the answer?
+5. **When is JML enough?** Rasch analyses of long tests are sometimes run by JML with the $(I-1)/I$ correction. Using the stretch widget and the simulation, decide how many items you'd want before you'd accept corrected JML difficulties without comparing them with CML or MML. What else would make you more or less comfortable: the spread of the difficulties, missing responses, the number of perfect scores?
+6. **Challenge (open): how wrong can the prior be?** The 252 slides ask how sensitive marginal ML is to the assumed distribution of $\theta$, and answer that they don't know. Start from [Seong (1990)](https://doi.org/10.1177/014662169001400307) and [Woods & Thissen (2006)](https://doi.org/10.1007/s11336-004-1175-8), and find what has been learned since. Then design a study across the IRW: which tables would you refit with an empirical histogram, and what would count as the prior "mattering"? I don't know the answer. (PS5#1)
+
+```{r}
+#| output: asis
+ask_claude("item-estimation", "It covers estimating item parameters when abilities are unknown: joint maximum likelihood and the incidental-parameter problem (the I/(I-1) stretch of Rasch difficulties), conditional maximum likelihood, marginal maximum likelihood on a quadrature grid, the EM algorithm (posterior weights, expected counts f and r in the E step, item-by-item weighted logistic regressions in the M step, convergence), and the role of the normal prior for theta, checked with an empirical histogram, with R analyses of an eleven-item science-literacy test.")
+```
+
 ## Going further
 
+- Baker, F. B., & Kim, S.-H. (2004). *Item response theory: Parameter estimation techniques* (2nd ed.). Marcel Dekker. <https://doi.org/10.1201/9781482276725>. JML, CML and MML by EM, worked through step by step.
+- Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443–459. <https://doi.org/10.1007/bf02293801>. The E step and M step this lesson follows, and the empirical histogram.
+- Harwell, M. R., Baker, F. B., & Zwarts, M. (1988). Item parameter estimation via marginal maximum likelihood and an EM algorithm: A didactic. *Journal of Educational Statistics*, 13(3), 243–271. <https://doi.org/10.3102/10769986013003243>. Bock and Aitkin's algorithm written out in full.
+- Bock, R. D., & Lieberman, M. (1970). Fitting a response model for *n* dichotomously scored items. *Psychometrika*, 35(2), 179–197. <https://doi.org/10.1007/BF02291262>. Marginal ML maximized directly, by Newton–Raphson.
+- Dempster, A. P., Laird, N. M., & Rubin, D. B. (1977). Maximum likelihood from incomplete data via the EM algorithm. *Journal of the Royal Statistical Society, Series B*, 39(1), 1–22. <https://doi.org/10.1111/j.2517-6161.1977.tb01600.x>. EM in general, and why each cycle climbs.
+- Do, C. B., & Batzoglou, S. (2008). What is the expectation maximization algorithm? *Nature Biotechnology*, 26(8), 897–899. <https://doi.org/10.1038/nbt1406>. The two coins.
+- Neyman, J., & Scott, E. L. (1948). Consistent estimates based on partially consistent observations. *Econometrica*, 16(1), 1–32. <https://doi.org/10.2307/1914288>. The incidental-parameter problem.
+- Wright, B. D., & Douglas, G. A. (1977). Best procedures for sample-free item analysis. *Applied Psychological Measurement*, 1(2), 281–295. <https://doi.org/10.1177/014662167700100216>. The bias of JML for the Rasch model, and a correction.
+- Andersen, E. B. (1970). Asymptotic properties of conditional maximum-likelihood estimators. *Journal of the Royal Statistical Society, Series B*, 32(2), 283–301. <https://doi.org/10.1111/j.2517-6161.1970.tb00842.x>. Why CML is consistent.
+- Haberman, S. J. (1977). Maximum likelihood estimates in exponential response models. *The Annals of Statistics*, 5(5). <https://doi.org/10.1214/aos/1176343941>. Joint estimates as both items and respondents grow, with the Rasch model as the example.
+- Mislevy, R. J. (1984). Estimating latent distributions. *Psychometrika*, 49(3), 359–381. <https://doi.org/10.1007/bf02306026>. The ability distribution estimated from the responses, including a non-parametric version.
+- Seong, T.-J. (1990). Sensitivity of marginal maximum likelihood estimation of item and ability parameters to the characteristics of the prior ability distributions. *Applied Psychological Measurement*, 14(3), 299–311. <https://doi.org/10.1177/014662169001400307>. What a mismatched prior does, by simulation.
+- Woods, C. M., & Thissen, D. (2006). Item response theory with estimation of the latent population distribution using spline-based densities. *Psychometrika*, 71(2), 281–301. <https://doi.org/10.1007/s11336-004-1175-8>. A smooth alternative to the empirical histogram.
+- Enders, A. M., Uscinski, J., Klofstad, C., & Stoler, J. (2022). On the relationship between conspiracy theory beliefs, misinformation, and vaccine hesitancy. *PLOS ONE*, 17(10), e0276082. <https://doi.org/10.1371/journal.pone.0276082>. The source of the science-literacy data; the S1 file lists the statements and their answers.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. EM, and the empirical histogram (`dentype = "EH"`).
 - Glas, C. A. W. (2017). Maximum-likelihood estimation. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 197–217). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-11>. A handbook chapter on maximum-likelihood estimation for item response models.
 - Aitkin, M. (2017). Expectation maximization algorithm and extensions. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 217–236). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-12>. A handbook chapter on the EM algorithm and its extensions.
 - Haberman, S. J. (2017). Models with nuisance and incidental parameters. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 151–170). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-9>. A handbook chapter on estimation when a model has nuisance or incidental parameters, such as person parameters.
-- Junker, B. W., Patz, R. J., & VanHoudnos, N. M. (2017). Markov chain Monte Carlo for item response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 271–312). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-15>. A handbook chapter on Markov chain Monte Carlo estimation for item response models.
+- Junker, B. W., Patz, R. J., & VanHoudnos, N. M. (2017). Markov chain Monte Carlo for item response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 271–312). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-15>. A handbook chapter on Markov chain Monte Carlo for item response models.
 
 ```{r}
 #| output: asis
@@ -34,3 +504,8 @@ data_sources("item-estimation")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 5 (slides c5, 33–63), problem set 5 (#1), and the code in `ben-domingue/252`: `c5/EM-coins.R`, `c5/EM-example.R`. The widgets are rebuilt from Ben Domingue's interactive EM walkthrough (`em_irt.html`, not published), in the course's notation and colours.
+- **Timing:** the core ideas and widgets take about 60 minutes; the science-literacy analysis works as a 25-minute lab. Every fit takes a few seconds in local R.
+- **Changed from 252:** the slides make JML's inconsistency a quotation from Baker and Kim; here the stretch widget, the two-item Go deeper and the real data show it, and CML is added as a third estimator. The coins are a paragraph and a problem. The real data are new, and their keying had to be fixed first (five false statements recoded).
+- **Held back:** priors on item parameters ([Guessing and priors](guessing-priors.qmd)); many-item, sparse designs in which each respondent sees some items ([Linking and equating](equating.qmd), [Item banks and adaptive testing](item-banks-cat.qmd)); a prior that depends on covariates, and crossed random effects as another estimator ([Explanatory item response models](explanatory-irt.qmd)); standard errors for item parameters.
+- **Solutions:** held back in `solutions/item-estimation.qmd` (not published).
