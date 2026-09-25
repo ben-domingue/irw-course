@@ -161,7 +161,7 @@ lessons:
     prereqs: [ability-estimation]
     origin: {slides: [c5], ps: ["PS5#1"], code: [c5/EM-coins.R, c5/EM-example.R]}
     tables: [enders_2022_science_literacy]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: 1pl-to-4pl
@@ -198,7 +198,7 @@ lessons:
     prereqs: [ability-estimation, fit-prediction]
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical, vocabulary_iq]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: dimensionality
@@ -302,7 +302,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#3"], code: [ps9/unfold.R]}
     tables: [andrich_mudfold, eurpar2_mudfold]
     reuses: [andrich_mudfold]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: nominal

@@ -2,7 +2,16 @@
 
 # Guessing and priors (`guessing-priors`)
 
-Module: irt · Prereqs: ability-estimation, fit-prediction · Extension · Status: outline
+Module: irt · Prereqs: ability-estimation, fit-prediction · Extension · Status: drafted (#42, 09-25)
+
+
+**Drafting notes (#42, 09-25).** What the draft changed from this outline:
+- Idea 2: San Martín et al. (2006) call the Rasch model with *estimated* item guessing the 1PL-G; the fixed-floor model is the first of the three options they list. The lesson says "the Rasch model with a fixed floor" and doesn't use the 1PL-G name. Han (2012) now has a DOI, 10.7275/f0gz-kc87 (DataCite).
+- Idea 1: the RMET median $c$ is 0.01 as drafted in `1pl-to-4pl` (not 0.05). C15 is described from §3 of the paper (checked against the PsyArXiv preprint, 10.31234/osf.io/q3djt): lower asymptotes drawn from Unif(0, 0.3); average IMV(2PL, 3PL) never above 0.001.
+- `roar_lexical`, new findings: 17 strings (11 real words, 6 made-up) are answered correctly by fewer than half the respondents (below chance), and the fixed floor pushes their difficulties to 5–14; out of sample the fixed floor's IMV over Rasch is 0.0023, all of it from the lowest-accuracy quarter of respondents (0.057 there, −0.0017 elsewhere). Log likelihoods on the v60 pin are −25,579 and −25,380.
+- `vocabulary_iq`: "don't know" is missing in the IRW table (13% of cells); the 2,802 complete respondents are those who never chose it. Priors are lognormal(0, 1) and beta(2, 18) (chance 1/10). Full-sample $c$ 0–0.09 (with priors 0.045–0.066). At n = 300 the priors cut the slope SD from 2.07 to 0.79 and the slope error from 1.75 to 0.94, but raise the difficulty error (0.37 to 0.69) against the no-prior full-sample reference.
+- Simulate fits the 2PL, 3PL and 3PL + priors (not the Rasch model) at n = 300, with n = 3,000 as the suggested change.
+- Deep dive #22 is not built (outline lists it as "Across the IRW"; the lesson isn't marked as a deep-dive lesson in PROTOCOL terms). Left for Ben.
 
 ## Core ideas
 
@@ -20,7 +29,7 @@ DOIs Crossref-checked 09-24.
 
 ## Picks up
 
-- The 3PL, its lower asymptote, `mirt`'s parameterization; the RMET's median $c$ of 0.05 (from `1pl-to-4pl`).
+- The 3PL, its lower asymptote, `mirt`'s parameterization; the RMET's median $c$ of 0.01 (from `1pl-to-4pl`).
 - Out-of-sample prediction and the IMV (from `fit-prediction`).
 - The Bayesian reading of the likelihood (from `likelihood`).
 - Response times as data beside responses (from `irw-data`).

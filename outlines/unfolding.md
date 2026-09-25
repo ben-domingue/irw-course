@@ -2,7 +2,7 @@
 
 # Unfolding models (`unfolding`)
 
-Module: beyond · Prereqs: polytomous · Extension · Status: outline
+Module: beyond · Prereqs: polytomous · Extension · Status: draft (#52)
 
 ## Core ideas
 
@@ -63,3 +63,17 @@ References checked on Crossref (09-24) unless marked. Claude's checks before dra
 ## Open questions
 
 - **Verdict (F32, on hold with Ben).** Candidate: "if the statements weren't written to span the middle, the dominance model is enough" (Claude's reading of PS9#3 and the AIC result). *Default while on hold:* the draft carries the candidate in a hidden TODO, not on the page, and the lesson's first-person verdict waits for Ben.
+
+## Drafting notes (09-25, #52)
+
+What the draft changed or dropped, against the plan above:
+
+- **Runs.** The GGUM places the three "against" statements within 0.02 of each other, so "GGUM order" isn't one order. The lesson counts runs in Andrich's order (39 of 54) and over all 40,320 orders (mean 5.4, best 40, which is Andrich's order with neighbours swapped).
+- **AIC.** Recomputed: Rasch 594.6, ideal 436.5, 2PL 422.0 (EM stops at its limit: CRIMDESERV's slope grows without bound), GGUM (GGUM package) 422.1 with 24 parameters. BIC prefers the 2PL. One ideal-point item at a time: none below 422.0 (closest DETERRENT 422.5, WISHNOTNEC 422.6).
+- **GGUM in webR.** The `GGUM` package isn't on the webR repo (it imports `xlsx`), and `mirt`'s `ggum` itemtype fails on these dichotomous data (NaN gradient). So the GGUM is fitted only in the real-data section at render time (about 30 s); Simulate uses `mirt`'s `ideal` item. The ideal-point fit in Simulate needs data-based starting values (default starts land on a poor local maximum; recorded in the code). `mirt`'s `hcm` works but took about 50 s and didn't converge on the simulated data, so it isn't used.
+- **Simulate result.** With a correct start, the ideal-point model still edges the 2PL on end statements only in large samples; with 500 respondents the two tie (AIC 2,296 vs 2,297), and the ideal model wins by about 1,400 points with all 20 statements.
+- **Notation.** Statement location is $b$ (notation.md) and the HCM's unit parameter is written $\tau$, to keep $\lambda$ for loadings. Proposed for notation.md in the PR.
+- **Negative slopes pick-up.** `1pl-to-4pl` as drafted doesn't discuss negative slopes, so there is no Recall for it; the lesson states the point directly.
+- **Andrich's (1988) scale values.** Not checked (article paywalled); the lesson compares the data's order with the order the statements come in.
+- **Item text (F31).** All eight statements quoted in one table, from the `mudfold` help page, cited to Andrich (1988); within SAGE's pre-approved reuse (≤ 200 words from one article). Not checked against the printed article.
+- **Verdict (F32).** Hidden TODO in the page at the end of the capital-punishment analysis.
