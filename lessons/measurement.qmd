@@ -80,6 +80,34 @@ Plot.plot({
 md`Where tube A reads ${th_a}, tube B reads ${th_b(th_a).toFixed(1)}. They differ by ${Math.abs(th_b(th_a) - th_a).toFixed(1)} degrees here, and by nothing at 0 and 100.`
 ```
 
+The same disagreement can be drawn on the tubes themselves. Keep the column and move the marks: below, the liquid stands at the same height in both tubes, and only the graduations differ. Tube A's marks are evenly spaced. Tube B's marks sit where tube B would read 0, 10, 20 and so on, so they crowd together where liquid B runs ahead of liquid A and spread out where it falls behind. The sliders above drive this picture too.
+
+```{ojs}
+//| echo: false
+th_binv = r => { let lo = 0, hi = 100; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (th_b(m) < r) lo = m; else hi = m; } return (lo + hi) / 2; }
+th_marks = d3.range(0, 101, 10)
+th_tubes = [{x1: 0.6, x2: 1.4, name: "Tube A"}, {x1: 2.6, x2: 3.4, name: "Tube B"}]
+th_ticks = th_marks.flatMap(r => [
+  {x1: 1.4, x2: 1.65, y: r, label: r},
+  {x1: 3.4, x2: 3.65, y: th_binv(r), label: r}
+])
+Plot.plot({
+  width: 520, height: 380, marginLeft: 20,
+  x: {domain: [0, 4.4], axis: null}, y: {domain: [-8, 108], axis: null},
+  marks: [
+    Plot.rect(th_tubes, {x1: "x1", x2: "x2", y1: 0, y2: th_a, fill: palette.light}),
+    Plot.rect(th_tubes, {x1: "x1", x2: "x2", y1: 0, y2: 100, stroke: palette.guide, fill: "none"}),
+    Plot.link(th_ticks, {x1: "x1", x2: "x2", y1: "y", y2: "y", stroke: palette.ink}),
+    Plot.text(th_ticks, {x: "x2", y: "y", text: "label", dx: 4, textAnchor: "start", fontSize: 10}),
+    Plot.ruleY([th_a], {stroke: palette.contrast, strokeDasharray: "4,3"}),
+    Plot.text(th_tubes, {x: d => (d.x1 + d.x2) / 2, y: -5, text: "name"}),
+    Plot.text([{x: 1, y: 104, s: `reads ${th_a.toFixed(0)}`}, {x: 3, y: 104, s: `reads ${th_b(th_a).toFixed(1)}`}], {x: "x", y: "y", text: "s", fill: palette.contrast})
+  ]
+})
+```
+
+Same column, same bath, two readings. Nothing in the glass says which set of marks is right; that is a question about the liquids.
+
 The thermometers agree at the marks and disagree between them, and nothing in either tube says which is right. Both put every bath in the same order; they differ only in spacing. Early thermometry faced exactly this problem. Making the two marks reliable was hard work in itself ([Chang, 2004, ch. 1](https://doi.org/10.1093/0195171276.003.0001)), and settling on a numerical scale between them, which meant deciding which liquid (if any) expands evenly, took more than a century of argument and experiment ([Chang, 2004, ch. 2](https://doi.org/10.1093/0195171276.003.0002)). Temperature was there all along. What took work was the theory that says what an equal step of temperature is.
 
 That is the sense in which measurement is a discovery: whether an attribute can be measured depends on the attribute and on how well we understand it. This course takes the first definition as the aim, and works, most days, with numbers that meet only the second. Whether a psychological attribute is quantitative at all is a question [Scale properties](scale-properties.qmd) and [Validity as causation](validity-causal.qmd) return to.
