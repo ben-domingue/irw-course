@@ -8,19 +8,466 @@ source("_course.R")
 lesson_header("1pl-to-4pl")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {p2pl, grid, dnorm, patternsWithSum, palette} from "./widgets/irt.js"
+import {p4pl, mle4, closest2pl} from "./widgets/1pl-to-4pl.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+The Rasch model gives every item the same slope, and the chess data have already turned up an item that doesn't go along: problem Y15, about as hard as Y29, whose success barely moves with skill. What happens when each item gets its own slope, and then its own floor and ceiling? This lesson builds that family, from the 1PL to the 4PL, asks what each new parameter costs and what the data can say about it, and fits all four to the Reading the Mind in the Eyes Test. For that test my choice is the 2PL, and most of the lesson is the case for it.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write down the 4PL, say what $a$, $b$, $c$ and $u$ do to a curve, and which constraints give the 3PL, 2PL and Rasch model;
+- explain why the weighted score $\sum_i a_i x_i$ replaces the sum score under the 2PL, and why crossing curves give up specific objectivity;
+- convert `mirt`'s intercept to a difficulty, and say how each model fixes the unit of the scale;
+- explain why a lower asymptote is hard to estimate, and when a 3PL is a reasonable choice;
+- fit all four models with `mirt` and compare them by BIC and by what they say about respondents.
+
 ## Core ideas
 
-## Worked example
+### One family of curves
+
+One formula covers every model here. For person $j$ and item $i$,
+$$\Pr(x_{ij} = 1) = c_i + (u_i - c_i)\,\frac{\exp\big(a_i(\theta_j - b_i)\big)}{1 + \exp\big(a_i(\theta_j - b_i)\big)}.$$
+
+- $b_i$ is the item's **difficulty**, its location on the $\theta$ scale.
+- $a_i$ is its **slope** or **discrimination**: how quickly the probability rises as $\theta$ passes $b_i$.
+- $c_i$ is the **lower asymptote**, the probability of success at very low ability; on multiple-choice items it is called the guessing parameter.
+- $u_i$ is the **upper asymptote**; below 1, even the strongest respondents sometimes miss (a "slip").
+
+"PL" stands for "parameter logistic", and the number counts the free item parameters. The Rasch model, a 1PL, frees only $b$ ($a = 1$, $c = 0$, $u = 1$). The 2PL frees $a$ and the 3PL frees $c$ as well, both from Birnbaum's chapters in [Lord & Novick (1968)](https://openlibrary.org/works/OL6568286W). The 4PL frees $u$ too ([Barton & Lord, 1981](https://doi.org/10.1002/j.2333-8504.1981.tb01255.x); [Loken & Rulison, 2010](https://doi.org/10.1348/000711009x474502)).
+
+#### Try it: four parameters
+
+```{ojs}
+//| echo: false
+viewof f_b = Inputs.range([-3, 3], {value: 0, step: 0.1, label: "Difficulty b"})
+viewof f_a = Inputs.range([0.1, 4], {value: 1, step: 0.05, label: "Slope a"})
+viewof f_c = Inputs.range([0, 0.5], {value: 0, step: 0.01, label: "Lower asymptote c"})
+viewof f_u = Inputs.range([0.5, 1], {value: 1, step: 0.01, label: "Upper asymptote u"})
+```
+
+```{ojs}
+//| echo: false
+f_data = grid(-4, 4).flatMap(t => [
+  {theta: t, p: p2pl(t, f_b, 1), curve: "Rasch (a = 1, c = 0, u = 1)"},
+  {theta: t, p: p4pl(t, f_b, f_a, f_c, f_u), curve: "This item"}])
+f_mid = (f_c + f_u) / 2
+Plot.plot({
+  width: 700, height: 330, x: {label: "Ability θ"}, y: {label: "P(correct)", domain: [0, 1]},
+  color: {legend: true, domain: ["Rasch (a = 1, c = 0, u = 1)", "This item"], range: [palette.light, palette.main]},
+  marks: [
+    Plot.ruleY([f_c, f_u], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.ruleX([f_b], {stroke: palette.rule}),
+    Plot.line(f_data, {x: "theta", y: "p", stroke: "curve", strokeWidth: 2.5}),
+    Plot.dot([{theta: f_b, p: f_mid}], {x: "theta", y: "p", r: 5, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`At θ = b = ${f_b.toFixed(1)} this item's probability is **${f_mid.toFixed(2)}**, halfway between the two asymptotes (dashed). ${f_c === 0 && f_u === 1 ? "With c = 0 and u = 1 that is 0.5, as in the Rasch model." : "It is no longer 0.5."}`
+```
+
+Move $a$ and the curve pivots around $b$; near zero it is almost flat. Raising $c$ lifts the floor, and lowering $u$ (the last slider) drops the ceiling. The point at $\theta = b$ always sits halfway between the asymptotes, so once $c > 0$ or $u < 1$, difficulty no longer means "the ability at which the probability is 0.5".
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A 3PL item has $c = 0.2$ (and $u = 1$). What is the probability of a correct response for a person with $\\theta = b$?",
+  options: [
+    {text: "0.6", correct: true, why: "At $\\theta = b$ the logistic part is 0.5, so the probability is $c + (1 - c)(0.5) = 0.2 + 0.4 = 0.6$, halfway between 0.2 and 1."},
+    {text: "0.5", correct: false, why: "That holds when $c = 0$ and $u = 1$. With a floor at 0.2, the midpoint of the curve moves up to $(0.2 + 1)/2$."},
+    {text: "0.7", correct: false, why: "That would be $c + 0.5$. The logistic part is scaled by $(1 - c)$ before it is added to $c$."}
+  ]
+})
+```
+
+Four items, with different values of all four parameters:
+
+```{ojs}
+//| echo: false
+vq_items = [
+  {item: "A", a: 1.0, b: -1.0, c: 0.00, u: 1.00, lx: -1.0, off: 0.07},
+  {item: "B", a: 2.0, b: 0.5, c: 0.25, u: 1.00, lx: -3.3, off: 0.05},
+  {item: "C", a: 1.5, b: -0.5, c: 0.00, u: 0.75, lx: 2.6, off: -0.07},
+  {item: "D", a: 0.7, b: 0.0, c: 0.00, u: 1.00, lx: 3.6, off: -0.07}]
+Plot.plot({
+  width: 700, height: 300, x: {label: "Ability θ", domain: [-4, 4]}, y: {label: "P(correct)", domain: [0, 1]},
+  color: {legend: true, domain: ["A", "B", "C", "D"], range: [palette.main, palette.contrast, palette.ink, palette.guide]},
+  marks: [
+    Plot.ruleY([0, 1], {stroke: palette.rule}),
+    Plot.line(vq_items.flatMap(d => grid(-4, 4).map(t => ({theta: t, p: p4pl(t, d.b, d.a, d.c, d.u), item: d.item}))),
+      {x: "theta", y: "p", stroke: "item", strokeWidth: 2.5}),
+    Plot.text(vq_items, {x: "lx", y: d => p4pl(d.lx, d.b, d.a, d.c, d.u) + d.off, text: "item", fill: "item", fontWeight: "bold", fontSize: 14})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Which item has an upper asymptote $u$ below 1: one that even the strongest respondents sometimes miss?",
+  options: [
+    {text: "B", correct: false, why: "B's peculiarity is at the other end: its curve never falls below about 0.25 on the left, a lower asymptote $c > 0$. On the right it reaches 1."},
+    {text: "D", correct: false, why: "D rises slowly (a small slope $a$), but it is still climbing at θ = 4 and heads for 1. A slow curve is not a low ceiling."},
+    {text: "C", correct: true, why: "Its curve flattens out near 0.75 at the right of the plot, while the others keep heading for 1: $u \\approx 0.75$."},
+    {text: "A", correct: false, why: "A is an ordinary Rasch-like curve: it runs from 0 to 1, rising at an average rate."}
+  ]
+})
+```
+
+### What slopes cost: sufficiency and crossing curves
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): under the Rasch model the sum score $r$ is sufficient for $\theta$: patterns with the same sum score share an ability estimate. That lesson's widget broke this by switching to a 2PL.
+:::
+
+What takes the sum score's place under the 2PL? Write out one person's likelihood, as the Rasch lesson's Go deeper callout did:
+$$\Pr(\mathbf{x} \mid \theta) = \prod_i \frac{\exp\big(x_i a_i(\theta - b_i)\big)}{1 + \exp\big(a_i(\theta - b_i)\big)} = \frac{\exp\big(\theta \sum_i a_i x_i\big)\,\exp\big(-\sum_i a_i b_i x_i\big)}{\prod_i \big(1 + \exp(a_i(\theta - b_i))\big)}.$$
+The data meet $\theta$ only through the **weighted score** $\sum_i a_i x_i$, so under the 2PL it is sufficient ([Birnbaum, 1968](https://openlibrary.org/works/OL6568286W)). A correct answer counts in proportion to its item's slope. The weights are estimated item parameters, though; [Andersen (1977)](https://doi.org/10.1007/BF02293746) showed that a sufficient statistic free of the item parameters exists only under the Rasch model. Under the 3PL the lower asymptote spoils the factorization, and no simple statistic is sufficient.
+
+#### Try it: which patterns share an estimate?
+
+Five items ($b$ from −1.5 to 1.5; slopes 1, 2, 1, 1, 2). Pick a pattern; the table lists every pattern with the same sum score or weighted score, and each one's maximum-likelihood estimate of $\theta$ under the model you choose (in the 3PL, every $c = 0.2$).
+
+```{ojs}
+//| echo: false
+ws_b = [-1.5, -0.5, 0, 0.5, 1.5]
+ws_a = [1, 2, 1, 1, 2]
+ws_labels = ws_b.map((b, i) => `Item ${i + 1} (b = ${b}, a = ${ws_a[i]})`.replace("-", "−"))
+viewof ws_x = Inputs.checkbox(ws_labels, {label: "Correct on", value: [ws_labels[1]]})
+viewof ws_model = Inputs.radio(["Rasch", "2PL", "3PL (c = 0.2)"], {value: "2PL", label: "Model"})
+```
+
+```{ojs}
+//| echo: false
+ws_pattern = ws_labels.map(l => ws_x.includes(l) ? 1 : 0)
+ws_w = x => x.reduce((s, v, i) => s + v * ws_a[i], 0)
+ws_est = x => ws_model === "Rasch" ? mle4(x, ws_b) :
+  ws_model === "2PL" ? mle4(x, ws_b, ws_a) : mle4(x, ws_b, ws_a, ws_b.map(() => 0.2))
+ws_sum = ws_pattern.reduce((s, v) => s + v, 0)
+ws_rows = [0, 1, 2, 3, 4, 5].flatMap(s => patternsWithSum(5, s))
+  .filter(x => x.reduce((u, v) => u + v, 0) === ws_sum || ws_w(x) === ws_w(ws_pattern))
+  .map(x => ({pattern: x.join(""), "sum score": x.reduce((u, v) => u + v, 0), "weighted score": ws_w(x), mle: ws_est(x)}))
+  .sort((p, q) => p["weighted score"] - q["weighted score"] || q["sum score"] - p["sum score"])
+Inputs.table(ws_rows.map(d => ({...d, "MLE of θ": Number.isFinite(d.mle) ? d.mle.toFixed(2) : (d.mle > 0 ? "+∞" : "−∞"),
+  "": d.pattern === ws_pattern.join("") ? "← yours" : ""})), {columns: ["pattern", "sum score", "weighted score", "MLE of θ", ""], layout: "auto", rows: 14})
+```
+
+With the default pattern (only item 2 right) and the 2PL, five patterns have a weighted score of 2: `01000`, `00001` and the three pairs of slope-1 items, such as `10100`. All five share an estimate, −0.75, whether their sum score is 1 or 2, while `10000`, with the same sum score as yours, sits at −1.55. Switch to Rasch and the grouping goes back to the sum score. Switch to the 3PL and neither score is enough: the five patterns now spread from −1.09 down to −∞, since a lone correct answer is best explained as a lucky guess.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): specific objectivity asks that comparisons between items not depend on who takes them. With equal slopes, curves never cross, so one item is easier than another for everyone.
+:::
+
+Give two items different slopes and their curves cross where $a_1(\theta - b_1) = a_2(\theta - b_2)$: below that point one item is easier, above it the other. The 2PL buys its better description of items by giving up specific objectivity, and the chess data below show a crossing where most players sit.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under a 2PL, respondent A answers only one item correctly, with slope $a = 2$. Respondent B answers two items correctly, each with slope $a = 1$. Both took the same items and answered all of them. How do their ability estimates compare?",
+  options: [
+    {text: "They are equal", correct: true, why: "Both have a weighted score $\\sum_i a_i x_i = 2$, and under the 2PL the weighted score is sufficient. Which items they got right, and how many, doesn't matter beyond that."},
+    {text: "B's is higher: B got more items right", correct: false, why: "That's the Rasch model's answer, where the sum score is sufficient. Under the 2PL each correct answer is weighted by its item's slope."},
+    {text: "It depends on the items' difficulties", correct: false, why: "The difficulties enter the likelihood, but only in a term that doesn't involve $\\theta$. The estimate depends on the pattern only through the weighted score."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: the weighted score under the 2PL, and why the 3PL has none
+
+**Assumptions:** one respondent answers $I$ dichotomous items; responses are locally independent given $\theta$; the item parameters are known. Write $L_i = \text{logit}^{-1}(a_i(\theta - b_i))$.
+
+**2PL.** The factorization in the main text puts $\theta$ and the data together only in $\exp(\theta \sum_i a_i x_i)$, so by the factorization theorem $t = \sum_i a_i x_i$ is sufficient. The score equation says the same thing: differentiating the log likelihood,
+$$\frac{\partial \ell}{\partial \theta} = \sum_i a_i\,(x_i - L_i) = t - \sum_i a_i L_i,$$
+so the MLE solves $\sum_i a_i L_i(\theta) = t$, which involves the data only through $t$. Conditioning on $t$ removes $\theta$, just as conditioning on $r$ did for the Rasch model. It buys little here: with slopes that are real numbers, nearly every pattern has its own weighted score, so the conditional distribution given $t$ usually has one pattern in it and nothing to estimate from.
+
+**3PL.** Now $P_i = c_i + (1 - c_i) L_i$, and $\partial P_i/\partial\theta = a_i (P_i - c_i)(1 - P_i)/(1 - c_i)$. The same calculation gives
+$$\frac{\partial \ell}{\partial \theta} = \sum_i a_i\,(x_i - P_i)\,\frac{P_i - c_i}{P_i\,(1 - c_i)}.$$
+With $c_i = 0$ the last fraction is 1 and we're back to the 2PL. With $c_i > 0$ it is a weight that depends on $\theta$: near 1 for a person well above the item, near 0 for a person well below it, where a correct answer is mostly chance. Each correct answer's weight therefore changes with the ability at which it is evaluated, and no single function of the pattern carries all the information about $\theta$. That is the widget's 3PL result: a lone correct answer can leave the estimate at the bottom of the scale.
+:::
+
+### Reading `mirt`, and what fixes the scale
+
+`mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)) writes these models with an intercept, $\Pr(x = 1) = g + (u - g)\,\text{logit}^{-1}(a\theta + d)$; its `g` is our $c$ and its `u` is our $u$. Matching $a\theta + d$ with $a(\theta - b)$ gives $b = -d/a$, the conversion every chunk below uses. When $a$ is near 0, that ratio can be enormous, as the chess data will show.
+
+What fixes the unit of $\theta$? The model only sees $a(\theta - b)$, so multiplying every $\theta$ and $b$ by $k$ and dividing every $a$ by $k$ changes no probability. The unit is a convention the software sets, as the origin was ([The Rasch model](rasch.qmd)): the Rasch fit fixes the slopes at 1 and estimates the SD of $\theta$; the 2PL fixes that SD at 1. A Rasch fit and a 1PL with one common, estimated slope are then the same model reporting different $a$ and $b$. That matters when reading output or comparing numbers across fits, the problem [Linking and equating](equating.qmd) takes up, but it says nothing about the data.
+
+### What the lower asymptote needs
+
+The lower asymptote describes people far below an item's difficulty. If few respondents are down there, the data say little about it, and a 2PL, with a lower slope and a shifted difficulty, can imitate a 3PL where the respondents are.
+
+#### Try it: can a 2PL stand in for a 3PL?
+
+```{ojs}
+//| echo: false
+viewof la_c = Inputs.range([0, 0.4], {value: 0.25, step: 0.01, label: "The 3PL's lower asymptote c"})
+viewof la_mu = Inputs.range([-2, 2], {value: 1.5, step: 0.1, label: "Mean ability, relative to the item (b = 0)"})
+```
+
+```{ojs}
+//| echo: false
+la_th = grid(la_mu - 3.5, la_mu + 3.5, 141)
+la_w = la_th.map(t => dnorm(t, la_mu, 1))
+la_fit = closest2pl(t => p4pl(t, 0, 1.2, la_c), la_th, la_w)
+la_dens = la_th.map((t, k) => ({theta: t, d: la_w[k] / dnorm(0) * 0.35}))
+Plot.plot({
+  width: 700, height: 320, x: {label: "Ability θ", domain: [-5, 5]}, y: {label: "P(correct)", domain: [0, 1]},
+  color: {legend: true, domain: ["3PL (a = 1.2, b = 0)", "Closest 2PL"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.areaY(la_dens.filter(d => d.theta >= -5 && d.theta <= 5), {x: "theta", y: "d", fill: palette.light, fillOpacity: 0.5}),
+    Plot.line(grid(-5, 5).flatMap(t => [
+      {theta: t, p: p4pl(t, 0, 1.2, la_c), curve: "3PL (a = 1.2, b = 0)"},
+      {theta: t, p: p2pl(t, la_fit.b, la_fit.a), curve: "Closest 2PL"}]), {x: "theta", y: "p", stroke: "curve", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Closest 2PL, weighting by where respondents are (shaded): a = ${la_fit.a.toFixed(2)}, b = ${la_fit.b.toFixed(2)}. Over the middle 95% of respondents the two curves never differ by more than **${la_fit.maxDiff.toFixed(3)}**.`
+```
+
+As the widget loads, mean ability is 1.5, so the item is easy for most respondents. The curves differ by at most about 0.01 where respondents are, parting only to the left, where almost nobody is. Slide the mean ability down to −2 and the largest difference grows eight-fold, to 0.08: now many respondents sit near the floor, and the floor matters.
+
+[Domingue et al. (2024)](https://doi.org/10.1007/s11336-024-09977-2) looked at this through prediction. They simulated data from the 3PL and asked how much better a fitted 3PL predicted new responses than a fitted 2PL, using the IMV, a measure of predictive gain that [Model fit and out-of-sample prediction](fit-prediction.qmd) teaches. The average gain never exceeded 0.001, even with pronounced guessing in the generating model, and across 89 IRW datasets it averaged 0.00016. They connect this to the difficulty of identifying the 3PL's parameters ([Maris & Bechger, 2009](https://doi.org/10.1080/15366360903070385); [Haberman, 2005](https://doi.org/10.1002/j.2333-8504.2005.tb02001.x); [von Davier, 2009](https://doi.org/10.1080/15366360903117079)), noting that 3PL estimates may still flag items with guessing problems. A 3PL is a reasonable choice when the items are multiple choice, when a good share of respondents sits near chance, when the sample is large, or when $c$ is fixed or given a prior, as in [Guessing and priors](guessing-priors.qmd).
+
+### The upper asymptote: ceilings and slips
+
+What does $u < 1$ mean? That respondents far above an item's difficulty still sometimes miss it: through carelessness, a slip, or an item harder than it looks for experts. [Barton and Lord (1981)](https://doi.org/10.1002/j.2333-8504.1981.tb01255.x) added the upper asymptote to the 3PL in an ETS report; [Loken and Rulison (2010)](https://doi.org/10.1348/000711009x474502) estimated the 4PL with Bayesian methods and applied it to a delinquency scale.
+
+The ceiling mirrors the floor: estimating $u$ needs many respondents far above the item, missing it now and then. Most data have few, so $u$ is weakly identified. On the RMET, the 4PL had not converged when EM stopped at its 500-cycle limit (below).
+
+The same two asymptotes return, without a curve between them, in cognitive diagnosis. In the DINA model ([Junker & Sijtsma, 2001](https://doi.org/10.1177/01466210122032064)), a respondent who has every attribute an item requires answers correctly with probability $1 - s$, where $s$ is the item's *slip* parameter, and a respondent who lacks any of them with probability $g$, its *guess*. [Cognitive diagnostic models](cdm.qmd), an extension lesson, takes this up.
+
+### Two philosophies
+
+The choice between these models is also a choice between two traditions, which [Andrich (2004)](https://doi.org/10.1097/01.mlr.0000103528.48582.7c) describes as incompatible paradigms in Kuhn's sense. What does each assume?
+
+- **The model comes first.** The Rasch tradition starts from what measurement should mean: a sufficient sum score, and comparisons that don't depend on which items or people were used ([Rasch, 1960](https://openlibrary.org/works/OL4506215W); [Wright, 1997](https://doi.org/10.1111/j.1745-3992.1997.tb00606.x)). It assumes items can be revised until they fit, and treats misfit as information about the items. It suits building an instrument you can still change.
+- **The data come first.** The tradition that runs from Birnbaum through [Lord (1980)](https://doi.org/10.4324/9780203056615) takes the items as given and adds parameters until the curves describe them, accepting weighted scores and crossing curves. It suits analysing a test you can't change.
+
+Some of the disagreement is about values, which data can't settle; some is empirical, and the RMET tests it below.
+
+### Beyond four: asymmetric curves
+
+All four models give point-symmetric curves. [Samejima (2000)](https://doi.org/10.1007/BF02296149) proposed the logistic positive exponent family, which raises a logistic curve to a positive power so that it can rise slowly and then steeply, or the reverse. [Lee and Bolt (2018)](https://doi.org/10.1007/s11336-017-9586-5) study what asymmetry can say about item complexity, and the IRW's [asymmetric models vignette](https://itemresponsewarehouse.org/vignettes/asymmetric_irt.html) fits such models across its tables.
+
+## Simulate
+
+The code below simulates 1,000 respondents answering 20 items from a 3PL with $c = 0.25$ on every item, then fits the Rasch model, the 2PL and the 3PL. It runs in your browser; the first run takes 20–30 seconds while R and `mirt` load, and the fits a little longer.
+
+With the seed as written, the estimates of $c$ have a median of 0.25, right on the truth, but range from 0 to 0.48. BIC prefers the Rasch model (25,347, against 25,362 for the 2PL and 25,464 for the 3PL), although the 3PL generated the data. The three models' abilities correlate 0.97 to 0.99 with each other.
+
+Now change `np`. At 300, the median estimate of $c$ drops to 0.06. At 10,000 (run that in your own R session), the estimates range from 0.07 to 0.42, BIC finally prefers the 3PL, and the abilities still correlate 0.99 or above. The lower asymptote needs a lot of data to settle; the abilities hardly notice it either way.
+
+```{webr}
+{{< include code/1pl-to-4pl-sim.R >}}
+```
+
+[Download this code](code/1pl-to-4pl-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/1pl-to-4pl-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Our main example is [wilmer-rmet-normative-data-set-2022](https://itemresponsewarehouse.org/tables/wilmer-rmet-normative-data-set-2022/), responses to the Reading the Mind in the Eyes Test (RMET; [Baron-Cohen et al., 2001](https://doi.org/10.1111/1469-7610.00715)), a measure of reading mental states from the eye region of a face. Each of its 36 items offers four words, one of them correct. The data are the normative sample [Kim et al. (2024)](https://doi.org/10.3758/s13428-023-02323-x) released with their Multiracial RMET (the landing page describes the newer test; this table holds the original). Its job is to be a test where the lower asymptote has an obvious prediction: with four options, chance is 0.25. A response is 1 when the respondent chose the correct word. [Download the code](code/1pl-to-4pl-irw.R) to run every chunk yourself.
+
+```{r fetch-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+All 17,680 respondents answered all 36 items. The items are easy for this sample: 56% to 86% chose the correct word.
+
+```{r fit-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+BIC ([Schwarz, 1978](https://doi.org/10.1214/aos/1176344136)) adds a penalty for each parameter to minus twice the log likelihood; smaller is better. It prefers the 2PL (204,337) to the Rasch model (205,192, or 855 higher), the 3PL (204,617) and the 4PL (204,707). The 4PL hadn't converged at EM's 500-cycle limit, itself a sign that the data say little about four parameters per item. BIC says *whether* a model is preferred, not how much it improves predictions of new responses; that is for [Model fit and out-of-sample prediction](fit-prediction.qmd).
+
+```{r ceiling-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The 4PL's ceilings run from 0.71 to 1.00 (median 0.96), yet only 2% of respondents answered 34 or more items correctly: like the floors, they rest on few respondents.
+
+```{r slopes-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The slopes run from 0.19 to 1.13, a ratio of about 6 ($1.13/0.19 \approx 5.9$). Every difficulty is negative (−3.23 to −0.39): each item is easy for an average respondent. On the log scale the slopes have an SD of 0.42, which *Across the IRW* compares with the rest of the warehouse.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Each RMET item offers four words, so a respondent who knows nothing picks the right one a quarter of the time. What lower asymptotes will the 3PL estimate?",
+  choices: ["Near 0.25, as chance predicts", "Above 0.25", "Mostly near 0", "Scattered evenly between 0 and 0.5"],
+  answer: "Mostly near 0",
+  reveal: "Mostly near 0: the median estimate is 0.01, and three quarters of the items are at 0.16 or below. The data have almost nobody near chance, so they can't locate the floor. Check the output below."
+})
+```
+
+```{r guessing-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The median estimate of $c$ is 0.01. Why so far from 0.25? Only 84 of the 17,680 respondents (0.48%) answered 9 or fewer items correctly, the score expected from picking words at random; the median respondent answered 26. The lower asymptote describes people almost absent from these data. This says not that RMET respondents never guess, but that these data can't tell how often. Which wrong words they chose is a question for [Nominal response and multiple-choice models](nominal.qmd), with the same data.
+
+```{r abilities-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The four models' abilities correlate from 0.972 to 0.999, and the three with free slopes at 0.987 or above. The choice matters little for ranking respondents, more for what we say about items.
+
+So which model would I fit to a test like the RMET? The 2PL. The slopes differ six-fold, BIC prefers it to the Rasch model by 855 points, the lower asymptote can't be estimated from a sample with almost no one near chance, and the richer models' abilities correlate with the 2PL's at 0.987 or above. If the RMET were being revised, the Rasch tradition's question (which items to rewrite so that one slope fits them all) would be a fair one; for the test as it stands, the 2PL describes it.
+
+### Chess, again
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The likelihood and logistic regression](likelihood.qmd) and [The Rasch model](rasch.qmd): chess problem Y15 is about as hard as Y29 (8% and 7% of players solve them), but success on Y15 barely moved with Elo, and under the Rasch model it had the largest outfit of all 40 items, 2.2.
+:::
+
+Our contrast table is [chess_lnirt](https://itemresponsewarehouse.org/tables/chess_lnirt/), the Amsterdam Chess Test ([van der Maas & Wagenmakers, 2005](https://doi.org/10.2307/30039042)), used again on purpose to show what the 2PL makes of Y15 (three players with no responses dropped, as before).
+
+```{r fetch-chess}
+#| echo: true
+#| code-fold: show
+```
+
+```{r chess-2pl}
+#| echo: true
+#| code-fold: show
+```
+
+The 2PL slopes run from 0.02 (Y15) to 3.79 (Y29), and BIC prefers the 2PL to the Rasch model (8,906 against 8,960). Y15's curve is nearly flat: a player's ability tells us almost nothing about whether they solve it. Its difficulty of 136.52 comes from dividing by a slope near zero; for an item this flat, $b$ has no useful meaning.
+
+```{r chess-cross}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+The curves cross at $\theta = 0.91$; for the 82% of players below it Y15 is the easier problem, and for the strongest, Y29. The grouped proportions (points) agree without the model: in the bottom third of players (by score on the other 38 problems) 9% solved Y15 and none Y29; in the top third, 10% and 19%. "Y15 is easier than Y29" is true for some players and false for others: specific objectivity given up, in data.
+
+```{r chess-weighted}
+#| echo: true
+#| code-fold: show
+```
+
+Among players with complete responses, the Rasch model gives everyone with the same sum score the same estimate (largest spread 0.00); the 2PL spreads them by up to 0.63. The fifteen players who solved exactly 20 problems share one Rasch estimate, 0.29, but get 2PL estimates from 0.06 to 0.39, in the order of their weighted scores.
+
+```{r chess-identify}
+#| echo: true
+#| code-fold: show
+```
+
+Last, the units point: a 1PL with one common slope reports that slope as 1.22, the Rasch fit's SD of ability.
 
 ## Problems
 
+1. **Weighted scores.** Show that under the 2PL, $\sum_i a_i x_i$ is sufficient for $\theta$. Then, for the 3PL, find two patterns on three items of your choosing with the same $\sum_i a_i x_i$ but different maximum-likelihood estimates.
+2. **What $b$ means now.** For the 3PL, show that at $\theta = b$ the probability is $(1 + c)/2$. At what $\theta$ is the probability 0.5? What does $b$ describe, in words, once $c > 0$? And for the 4PL?
+3. **Where the floor is.** Fit the 2PL and the 3PL to the RMET using only the respondents in the bottom quarter of sum scores. Do the estimated lower asymptotes change? Explain what you see, and why selecting on the same items' sum score might itself cause trouble.
+4. **Reading $c$.** A colleague wants to report the RMET's 3PL lower asymptotes as "the rate at which people guess on each item". What would you tell them, using this lesson's output?
+5. **Crossing curves.** In the chess data, find two problems other than Y15 whose 2PL curves cross where most players sit. For which players is each the easier one? Check against grouped proportions, as the lesson did for Y15 and Y29.
+6. **Challenge: when does the model matter?** The four models' RMET abilities correlate at 0.97 or above. When would the choice still matter for a decision about one person? Think about the ends of the scale, cut scores and unusual patterns; [Loken & Rulison (2010)](https://doi.org/10.1348/000711009x474502) is one place to start. This one is open: I don't know of a general answer.
+
+```{r}
+#| output: asis
+ask_claude("1pl-to-4pl", "It covers the 1PL, 2PL, 3PL and 4PL item response models: what the slope, lower and upper asymptote parameters do, the weighted score as the sufficient statistic under the 2PL, crossing item characteristic curves and specific objectivity, mirt's intercept parameterization and how each model fixes the scale, why the 3PL's lower asymptote is hard to estimate, and fits of all four models in R to the Reading the Mind in the Eyes Test and a chess test.")
+```
+
+## Across the IRW
+
+How much do slopes vary in real data? For each dichotomous IRW table with at least 250 respondents, 5 to 200 items and a nearly complete response matrix, [`compute.R`](https://github.com/ben-domingue/irw-course/blob/main/deepdives/1pl-to-4pl/compute.R) fits the Rasch model and the 2PL and summarises the slopes' spread by the SD of $\log a$, which rescaling $\theta$ leaves alone. It is 0 under the Rasch model, and 0.42 for the RMET above (0.43 in the corpus run's own sample).
+
+```{r across}
+#| echo: true
+#| code-fold: true
+#| fig-width: 6
+#| fig-height: 3.5
+dd_path <- file.path("..", "deepdives", "1pl-to-4pl", "results.rds")
+dd <- if (file.exists(dd_path)) readRDS(dd_path) else NULL
+if (!is.null(dd)) {
+  s <- dd$summary[order(dd$summary$sd_log_a), ]
+  print(data.frame(table = s$table, items = s$n_items, respondents = s$n_resp,
+                   sd_log_a = round(s$sd_log_a, 2), ratio_90_10 = round(s$ratio_90_10, 1),
+                   BIC_prefers_2PL = s$prefers_2pl, converged = s$converged), row.names = FALSE)
+  op <- par(mar = c(4, 1, 1, 1))
+  known <- s$table %in% c("chess_lnirt", "wilmer-rmet-normative-data-set-2022")
+  plot(s$sd_log_a, rep(0, nrow(s)), pch = 19, cex = 1.3, yaxt = "n", ylab = "", bty = "n",
+       col = ifelse(known, "#c2410c", "#2780e3"), xlim = c(0, max(1.5, s$sd_log_a, na.rm = TRUE)),
+       xlab = "SD of log slope within a table (0 = Rasch)")
+  abline(v = 0, lty = 2, col = "#999")
+  par(op)
+}
+```
+
+```{r}
+#| output: asis
+#| echo: false
+if (is.null(dd)) {
+  cat("::: {.callout-warning}\n## Results not computed\n\nThe corpus results (`deepdives/1pl-to-4pl/results.rds`) haven't been computed yet. Run `compute.R` to produce them.\n:::\n")
+} else {
+  if (isTRUE(dd$pilot))
+    cat(sprintf("::: {.callout-warning}\n## Partial run: %d of %d tables\n\nThis is a pilot run of `compute.R`, on the lesson's two tables and %d others drawn at random, to check the pipeline. The full run replaces it.\n:::\n",
+                nrow(dd$summary), dd$n_all_candidates, nrow(dd$summary) - 2))
+  cat(sprintf("\nRun on %s: %d tables fitted, %d failed. In %d of the %d, BIC prefers the 2PL to the Rasch model. The SD of log slopes runs from %.2f to %.2f (median %.2f); chess and the RMET are marked in orange.\n",
+              format(dd$date_run, "%d %B %Y"), nrow(dd$summary), nrow(dd$failed),
+              sum(dd$summary$prefers_2pl), nrow(dd$summary),
+              min(dd$summary$sd_log_a, na.rm = TRUE), max(dd$summary$sd_log_a, na.rm = TRUE),
+              median(dd$summary$sd_log_a, na.rm = TRUE)))
+}
+```
+
+This answers the Rasch lesson's question: are equal slopes plausible? The nearer a table's SD of $\log a$ is to 0, the more so. The IRW's [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) takes the question to its cognitive tables, slope by slope. Whether the extra parameters improve predictions of new responses is the other half, reported in [Model fit and out-of-sample prediction](fit-prediction.qmd).
+
 ## Going further
+
+- Lord, F. M., & Novick, M. R. (1968). *Statistical theories of mental test scores* (with contributions by A. Birnbaum). Addison-Wesley. <https://openlibrary.org/works/OL6568286W>. Birnbaum's chapters 17–20 introduce the logistic 2PL and 3PL.
+- Lord, F. M. (1980). *Applications of item response theory to practical testing problems*. Erlbaum. <https://doi.org/10.4324/9780203056615>. The 3PL at work on real tests.
+- Barton, M. A., & Lord, F. M. (1981). An upper asymptote for the three-parameter logistic item-response model. *ETS Research Report Series*, 1981(1). <https://doi.org/10.1002/j.2333-8504.1981.tb01255.x>. Where the fourth parameter starts.
+- Loken, E., & Rulison, K. L. (2010). Estimation of a four-parameter item response theory model. *British Journal of Mathematical and Statistical Psychology*, 63(3), 509–525. <https://doi.org/10.1348/000711009x474502>. A Bayesian 4PL, and what simpler models miss at the ends of the scale.
+- Andersen, E. B. (1977). Sufficient statistics and latent trait models. *Psychometrika*, 42(1), 69–81. <https://doi.org/10.1007/BF02293746>. Why only the Rasch model has a sufficient statistic free of item parameters.
+- Domingue, B. W., Kanopka, K., Kapoor, R., Pohl, S., Chalmers, R. P., Rahal, C., & Rhemtulla, M. (2024). The InterModel Vigorish as a lens for understanding (and quantifying) the value of item response models for dichotomously coded items. *Psychometrika*, 89(3), 1034–1054. <https://doi.org/10.1007/s11336-024-09977-2>. How much the 2PL and 3PL add to prediction, in simulation and across IRW datasets.
+- Maris, G., & Bechger, T. (2009). On interpreting the model parameters for the three parameter logistic model. *Measurement: Interdisciplinary Research and Perspectives*, 7(2), 75–88. <https://doi.org/10.1080/15366360903070385>. What the 3PL's parameters can and can't be read as.
+- von Davier, M. (2009). Is there need for the 3PL model? Guess what? *Measurement: Interdisciplinary Research and Perspectives*, 7(2), 110–114. <https://doi.org/10.1080/15366360903117079>. A commentary in the same issue.
+- Haberman, S. J. (2005). Identifiability of parameters in item response models with unconstrained ability distributions. *ETS Research Report Series*, 2005(2), i–22. <https://doi.org/10.1002/j.2333-8504.2005.tb02001.x>. The identification question in general form.
+- Andrich, D. (2004). Controversy and the Rasch model: A characteristic of incompatible paradigms? *Medical Care*, 42(1 Suppl.), I-7–I-16. <https://doi.org/10.1097/01.mlr.0000103528.48582.7c>. The two traditions, set out side by side.
+- Wright, B. D. (1997). A history of social science measurement. *Educational Measurement: Issues and Practice*, 16(4), 33–45. <https://doi.org/10.1111/j.1745-3992.1997.tb00606.x>. The case for choosing items that fit the Rasch model.
+- Samejima, F. (2000). Logistic positive exponent family of models: Virtue of asymmetric item characteristic curves. *Psychometrika*, 65(3), 319–335. <https://doi.org/10.1007/BF02296149>. Curves that aren't symmetric.
+- Lee, S., & Bolt, D. M. (2018). Asymmetric item characteristic curves and item complexity: Insights from simulation and real data analyses. *Psychometrika*, 83(2), 453–475. <https://doi.org/10.1007/s11336-017-9586-5>. What asymmetry might say about items.
+- Schwarz, G. (1978). Estimating the dimension of a model. *The Annals of Statistics*, 6(2), 461–464. <https://doi.org/10.1214/aos/1176344136>. The BIC.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package, including its intercept parameterization.
+- Baron-Cohen, S., Wheelwright, S., Hill, J., Raste, Y., & Plumb, I. (2001). The "Reading the Mind in the Eyes" Test revised version: A study with normal adults, and adults with Asperger syndrome or high-functioning autism. *Journal of Child Psychology and Psychiatry*, 42(2), 241–251. <https://doi.org/10.1111/1469-7610.00715>. The source of the RMET.
+- Kim, H. A., Kaduthodil, J., Strong, R. W., Germine, L. T., Cohan, S., & Wilmer, J. B. (2024). Multiracial Reading the Mind in the Eyes Test (MRMET): An inclusive version of an influential measure. *Behavior Research Methods*, 56(6), 5900–5917. <https://doi.org/10.3758/s13428-023-02323-x>. The source of the RMET data.
+- van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. <https://doi.org/10.2307/30039042>. The source of the chess data.
+- From the IRW: the [2PL discrimination](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) vignette (slopes across its cognitive tables) and the [asymmetric models](https://itemresponsewarehouse.org/vignettes/asymmetric_irt.html) vignette.
 
 ```{r}
 #| output: asis
@@ -29,3 +476,9 @@ data_sources("1pl-to-4pl")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 4 (slides c4, 18–34 and 60–61) and the code in `ben-domingue/252`: `c4/enem1.R`, `c4/enem2.R`, `c4/enem3.R`.
+- **Timing:** the core ideas and widgets take about 60 minutes; the RMET and chess analysis works as a 30-minute lab. The four RMET fits take about a minute in local R.
+- **Changed from 252:** the slides fit the models to ENEM; this lesson uses the RMET instead, which has a tokenless CSV (Ben, 09-24). The finding changes with it: on the RMET, the lower asymptotes are mostly near 0 rather than near chance. The chess data return (deliberately) for Y15, crossing curves and the weighted score. The slide 61 simulation is the Simulate section.
+- **Held back:** out-of-sample comparison and the IMV ([Model fit and out-of-sample prediction](fit-prediction.qmd)); fixing $c$, priors and person-level guessing ([Guessing and priors](guessing-priors.qmd)); information under the 2PL and 3PL ([Information, precision, and short forms](information.qmd)); the RMET's distractors ([Nominal response and multiple-choice models](nominal.qmd)).
+- **Across the IRW:** `deepdives/1pl-to-4pl/compute.R` is run by hand (it needs a Redivis token); the page reads its `results.rds`. The pilot took about a minute and a half for six tables.
+- **Solutions:** held back in `solutions/1pl-to-4pl.qmd` (not published).
