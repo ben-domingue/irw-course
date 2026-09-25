@@ -2,7 +2,18 @@
 
 # Item banks and adaptive testing (`item-banks-cat`)
 
-Module: uses · Prereqs: information, ability-estimation, polytomous · Extension · Status: outline
+**Drafted 2026-09-25 (branch `draft-item-banks-cat`).** What changed from this outline:
+- Numbers recomputed with the lesson's own code (seeded): the CMSCE bank is 271 items (33 with slopes below 0.3 left out, 11 of them negative); information peaks at $\theta = -1.41$ (CSEM 0.12), CSEM 0.31 at 2 and 0.44 at 3. Post-hoc CAT on 600: 20 items by information $r$ = 0.957 (RMSE 0.29) vs 0.869 (0.50) random; 40 items 0.975; SE ≤ 0.3 median 21, mean 33.5; below $\theta = -1$ 12.6 items, above 2 all at the 100 cap. PROMIS: median 5, mean 10.0, $r$ = 0.95; below $-0.5$ 19.6 items. The outline's figures were close; the page's are authoritative.
+- The CAT engine is ~40 lines of base R in `lessons/code/item-banks-cat-irw.R` (works for the 2PL and the GRM through `mirt`'s `probtrace`/`iteminfo`), rather than `catR`/`mirtCAT`, which are cited in Going further. Sanity check: a whole-bank "CAT" reproduces `mirt::fscores` EAP to 1e-14.
+- E12: `deepdives/item-banks-cat/compute.R` runs the page's own chunks (data, calibration, engine) and writes `results.rds`. With the base-R engine the 600 × 5 run takes about 1.5 minutes, not 19; the split is kept as decided.
+- Widgets: three (one CAT step by step; stopping rules by bank shape; exposure under maximum information, randomesque and a-stratification). The paper basal/ceiling widget was dropped for length; basal and ceiling rules get a sentence.
+- Go deeper: two callouts, maximum information vs. expected posterior variance (as planned) and the SPRT (moved out of the main line for length; problem 5 uses it).
+- The IACAT walk-through link (http://iacat.org/irt-based-cat) now returns 404; not linked.
+- Sympson & Hetter (1985) is cited through Hetter & Sympson (1997), doi:10.1037/10244-014, and van der Linden (2003); Reckase (1983) through Spray & Reckase (1996), doi:10.3102/10769986021004405. Both verified on Crossref.
+- Ben's review (09-25, PR #167): the step-by-step widget now says what its dots are (each bank item at its difficulty, at its information at the current EAP; legend: available, already given, given at this step), and every panel has fixed axes (information 0 to the bank's largest $a^2/4$; posterior density 0 to 1.6; RMSE 0 to 1.5 in the stopping-rule widget).
+- PROMIS item text: not shown (HealthMeasures terms of use bar redistribution; A5).
+
+Module: uses · Prereqs: information, ability-estimation, polytomous · Extension · Status: draft
 
 ## Core ideas
 

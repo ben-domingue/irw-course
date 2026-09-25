@@ -2,7 +2,7 @@
 
 # Measurement invariance under treatment and life events (`invariance-experience`)
 
-Module: fairness · Prereqs: dif · Extension · Status: outline
+Module: fairness · Prereqs: dif · Extension · Status: drafted (09-25, #45)
 
 ## Core ideas
 
@@ -75,3 +75,18 @@ Notes, stated gently: `gilbert_meta_20`'s two waves are different forms, so the 
 ## Open questions
 
 - None. Settled 09-24: non-ancestor Recalls as "if you've done" (E2); response formats as a Recall, no `bfi2_zhang_2025` reuse (E4); spousal loss stays a cited figure (E5); the deep dive's wave rule (F10).
+
+## Drafting notes (09-25, #45)
+
+What changed from this outline while drafting, and why:
+
+- **Waves in `gilbert_meta_20`.** The posttest (wave 1) repeats all 37 pretest items and adds 56 (`tuf5`, more procedures, `trans_math`), so the two waves are not different forms. The placebo compares the same 37 items before and after, as well as the full 93.
+- **DIF test.** Uniform DIF only (1-df likelihood-ratio test, $\Delta R^2$ from M0 to M1), since a shift in one item's treatment effect is uniform DIF; complete cases. Numbers: pretest 3 of 37 at .05 (1.9 by chance), 0 after Benjamini–Hochberg, but all 3 reach B on $\Delta R^2$ (the categories are generous at n = 186); posttest 12 of 93, 5 after correction, 8 B and 2 C; the 37 repeated items at posttest 9, 5 after correction. The predict-then-check asks about the 37 repeated items.
+- **Effect sizes.** Sum score 1.08 within-arm SDs, $\theta$ 1.11 (constant effect) and 1.13 (IL-HTE); $\sigma_\zeta$ 0.70 SD (0.59 logits). Pretest $\sigma_\theta$ is 0.31 logits (students selected in a narrow band), so the pretest's $\sigma_\zeta$ in SDs (0.59, p = 0.22) is stated in logits too.
+- **$\rho$ sign.** The lesson's $\rho$ is the correlation of $\zeta_i$ with *difficulty* $b_i$ (notation.md), so it is the negative of what `lme4` prints and of the vignette's $\rho$ (which uses easiness). `gilbert_meta_37`: $\rho$ = +0.33.
+- **Spousal loss (E5).** Checked: the published paper says the depressive rise attenuated within one year (not two); the loneliness/sadness result is in the medRxiv preprint (doi:10.1101/19009878), citing its Supplemental Figures S7–S8. The published supplement was not checked.
+- **Night blindness (digest D).** Checked against Carpena (2024), Supplementary Material A and the replication tables: night blindness was module 5 of 5 (one VHAI film); the paper's own longer-term results by topic have night blindness with the largest effect and the lowest control mean. The IRW table is the endline (10 months) survey; `treat` pools the two film arms (HEE, HEEC) against the placebo arm; `std_baseline` closely tracks the number right on three baseline knowledge items.
+- **Alpha/beta/gamma.** Definitions checked against Livingston et al. (2022, doi:10.1007/s41542-022-00122-y) and Jabrayilov et al. (2017, doi:10.1007/s11136-017-1500-1); Golembiewski et al. (1976) is paywalled, abstract only.
+- **Widgets.** Three: the pretest placebo (MH by treatment at two waves), item effects around an average (with short forms), and the spurious interaction (population expected sum scores, no sampling noise). Go deeper as planned.
+- **Deep dive (#26).** `compute.R` follows the vignette, with the F10 wave rule (processing notes where checked, else "wave 0 is a pretest", else the smallest wave; recorded per table) and pretest waves fitted as placebos; no density filter (longitudinal tables have density > 1). PILOT run only (5 tables: 3 fitted, 2 failed for having no dichotomous items); the partial-run callout shows.
+- **IMV.** Mentioned in one sentence (idea 5) rather than worked, to keep the length.

@@ -8,19 +8,390 @@ source("_course.R")
 lesson_header("validity-causal")
 ```
 
+```{ojs}
+//| echo: false
+import {palette, grid} from "./widgets/irt.js"
+import {ruleAnswer, torqueAnswer, ruleCorrect, itemType, ITEM_TYPES, mixAt, mixP, simEffects} from "./widgets/validity-causal.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+[Validity as an argument](validity-argument.qmd) ended on a tension: an argument for every proposed use is a great deal to ask, and it may never be finished. This lesson takes up a narrower account. [Borsboom, Mellenbergh and van Heerden (2004)](https://doi.org/10.1037/0033-295X.111.4.1061) propose that a test is valid for an attribute when the attribute exists and differences in it cause differences in the responses. The evidence that matters most is then a theory of how respondents arrive at their answers, one that could be shown wrong. We work through the classic example, the balance scale, and then ask two questions of IRW data: does a simple theory of a vocabulary task predict which words are hard, and does a robust Stroop effect mark an attribute on which people differ?
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- state Borsboom et al.'s definition of validity and the two claims it makes;
+- say how it differs from the argument-based view, and what each assumes;
+- derive the predictions of a theory of response behaviour, including an item on which respondents using a less advanced strategy should do better;
+- distinguish an effect that a manipulation causes within each person from an attribute on which people differ, and check which one a score tracks;
+- set out three ways the causal definition might relate to the argument-based view.
+
 ## Core ideas
 
-## Worked example
+### Is the bar too high?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Validity as an argument](validity-argument.qmd): the *Standards* treat validity as the degree to which evidence supports an interpretation of scores for a proposed use, organized as an argument from responses to a decision. Backing some uses would take studies no psychometric analysis supplies.
+:::
+
+Should every measure of length first reckon with every use it might be put to? A ruler cuts shelves and tracks a child's growth, and nobody writes an argument for each. For many educational uses the argument is the right tool, since the uses are narrow and the stakes real. But if no argument is ever complete, a researcher who wants to know whether a task measures what it was built to measure may wonder where to start. Borsboom et al. (2004) narrow the question.
+
+### Borsboom's definition
+
+Their definition has two parts. A test is valid for measuring an attribute if and only if the attribute exists and "variations in the attribute causally produce variations in the outcomes of the measurement procedure" ([Borsboom et al., 2004, p. 1061](https://doi.org/10.1037/0033-295X.111.4.1061)). They present this as a return to an older idea, which they trace to [Kelley (1927, p. 14)](https://openlibrary.org/works/OL22124924W): a test is valid if it measures what it claims to measure (as cited by Borsboom et al., 2004, p. 1061).
+
+Three features set it apart from the argument-based view.
+
+- **Validity is a property of the test.** *Validation* is the research that finds out whether a test has it (p. 1063). A test can have the property while some use of its scores is unwise.
+- **It is yes or no**, as truth is: the attribute exists and affects the responses, or not (p. 1070). Reliability, bias and usefulness still matter, under their own names.
+- **The evidence is about response processes.** A pattern of correlations with other measures, the nomological network of [Cronbach and Meehl (1955)](https://doi.org/10.1037/h0040957), can corroborate a theory, they argue, but networks in psychology are loose enough that many attributes besides the intended one would fit them (pp. 1064–1065). What needs testing is a theory of how the attribute produces the answers (p. 1061): construct representation ahead of nomothetic span, in the terms of [Whitely (1983)](https://doi.org/10.1037/0033-2909.93.1.179), now Embretson (Borsboom et al., 2004, p. 1067).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): measurement is a discovery. Temperature was there all along; what took a century of work was the theory of what an equal step of it is. Whether a psychological attribute is quantitative is a claim about the world that could be false.
+:::
+
+Borsboom et al. take the same realist stance: if an attribute isn't there, no test measures it, however useful the scores. What does the definition assume? That the attribute exists apart from the test; that causation runs from attribute to responses, so formative indices such as socioeconomic status fall outside it (p. 1069); and that we know whether the attribute varies between people or within a person, a point we return to below.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A reading test's scores correlate 0.6 with teacher ratings and 0.5 with grades, as its developers predicted. On Borsboom et al.'s definition, what do these correlations establish?",
+  options: [
+    {text: "They corroborate the theory behind the test but don't settle whether reading ability causes the scores", correct: true, why: "A match with a network of correlations is consistent with many attributes. The definition asks whether reading ability exists and produces differences in the responses, which is a claim about the response process."},
+    {text: "That the test is valid, since the correlations match the prediction", correct: false, why: "That is closer to the nomological-network view. On the causal definition, correlations are evidence that can point toward validity, not what validity consists of."},
+    {text: "Nothing at all, since correlations are irrelevant to validity", correct: false, why: "Borsboom et al. treat correlations as relevant evidence (they can indicate causation), but not as what makes a test valid."}
+  ]
+})
+```
+
+### A theory of response behaviour: the balance scale
+
+What does a theory of response behaviour look like? Borsboom et al.'s example is the balance scale (p. 1068), studied by [Inhelder and Piaget (1958)](https://doi.org/10.1037/10034-000) and turned into rules by [Siegler (1976)](https://doi.org/10.1016/0010-0285(76)90016-5). A child sees a beam with a stack of weights on one peg on each side of the fulcrum, and says whether it will tip left, tip right or balance. Children are proposed to move through four rules:
+
+- **Rule I:** look only at the number of weights; the heavier side goes down.
+- **Rule II:** the same, but when the weights are equal, the side with weights farther out goes down.
+- **Rule III:** consider weights and distances, and when they point opposite ways, guess.
+- **Rule IV:** compare weight times distance on each side (the torque), which is always right.
+
+The theory says what each rule answers on every item, so it predicts whole response patterns, not only totals.
+
+#### Try it: four rules, one beam
+
+Set the weights and pegs. The table gives each rule's answer to this item.
+
+```{ojs}
+//| echo: false
+viewof bs_wl = Inputs.range([1, 5], {value: 4, step: 1, label: "Weights on the left"})
+viewof bs_dl = Inputs.range([1, 5], {value: 2, step: 1, label: "Left peg (distance from the fulcrum)"})
+viewof bs_wr = Inputs.range([1, 5], {value: 2, step: 1, label: "Weights on the right"})
+viewof bs_dr = Inputs.range([1, 5], {value: 3, step: 1, label: "Right peg (distance from the fulcrum)"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const blocks = [
+    ...d3.range(bs_wl).map(k => ({x: -bs_dl, y: 0.15 + k * 0.5})),
+    ...d3.range(bs_wr).map(k => ({x: bs_dr, y: 0.15 + k * 0.5}))
+  ];
+  return Plot.plot({
+    width: 520, height: 230, x: {domain: [-5.8, 5.8], ticks: d3.range(-5, 6), tickFormat: d => Math.abs(d), label: "Peg"},
+    y: {domain: [-1.2, 2.8], axis: null},
+    marks: [
+      Plot.ruleY([0], {x1: -5.5, x2: 5.5, stroke: palette.ink, strokeWidth: 4}),
+      Plot.tickX(d3.range(-5, 6).filter(d => d !== 0), {x: d => d, y1: -0.15, y2: 0.1, stroke: palette.guide}),
+      Plot.dot([{x: 0, y: -0.55}], {x: "x", y: "y", symbol: "triangle", r: 14, fill: palette.guide}),
+      Plot.rect(blocks, {x1: d => d.x - 0.3, x2: d => d.x + 0.3, y1: "y", y2: d => d.y + 0.42, fill: palette.main})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const truth = torqueAnswer(bs_wl, bs_dl, bs_wr, bs_dr);
+  const say = a => a === "balance" ? "balances" : a === "guess" ? "guesses" : `${a} side down`;
+  const cell = "padding:0.25rem 0.7rem;text-align:left";
+  const kind = itemType(bs_wl, bs_dl, bs_wr, bs_dr);
+  const lab = kind === "agree" ? "Weight and distance point the same way" : ITEM_TYPES.find(t => t.key === kind).label;
+  return htl.html`<p>Torques: left ${bs_wl} × ${bs_dl} = ${bs_wl * bs_dl}, right ${bs_wr} × ${bs_dr} = ${bs_wr * bs_dr}. The beam <b>${truth === "balance" ? "balances" : `tips ${truth}`}</b>. Item type: <i>${lab}</i>.</p>
+  <table style="font-size:0.9rem;border-collapse:collapse"><thead><tr><th style=${cell}>Rule</th><th style=${cell}>Says</th><th style=${cell}>Chance of a right answer</th></tr></thead>
+  <tbody>${[1, 2, 3, 4].map(r => { const p = ruleCorrect(r, bs_wl, bs_dl, bs_wr, bs_dr);
+    return htl.html`<tr><td style=${cell}>${["I", "II", "III", "IV"][r - 1]}</td><td style=${cell}>${say(ruleAnswer(r, bs_wl, bs_dl, bs_wr, bs_dr))}</td>
+    <td style=${cell}><span style="color:${p === 1 ? palette.main : palette.contrast}">${p === 1 ? "1" : p === 0 ? "0" : "1 in 3"}</span></td></tr>`; })}</tbody></table>`;
+}
+```
+
+The starting item puts four weights on peg 2 against two on peg 3; the heavier side has more torque (8 against 6) and goes down. Rules I and II get it right from the weights alone; Rule III sees the cues disagree and guesses. On such items, children using an earlier rule should outscore those using a later one. Move the right-hand stack to peg 5 and only Rule IV is sure to be right.
+
+A theory that predicts a *drop* in performance as children develop is a theory the data can break. It says what must happen between showing the item and hearing the answer for the task to measure the child's stage (Borsboom et al., 2004, p. 1068).
+
+#### Try it: rule classes to response patterns
+
+If each child uses one rule, the rules are **latent classes**, and the mix of rule users predicts the proportion correct on each item type. The first slider moves a group along the sequence (0: everyone on Rule I; 3: everyone on Rule IV); the second sets how much rule use overlaps. The curve is stylized, not data.
+
+```{ojs}
+//| echo: false
+viewof rc_pos = Inputs.range([0, 3], {value: 2, step: 0.05, label: "Where the group is in the sequence"})
+viewof rc_spread = Inputs.range([0.2, 1.5], {value: 0.6, step: 0.05, label: "How much rule use overlaps"})
+```
+
+```{ojs}
+//| echo: false
+{
+  const shown = [
+    {j: 2, name: "Same weights, distances differ", colour: palette.guide},
+    {j: 3, name: "Conflict: heavier side goes down", colour: palette.contrast},
+    {j: 4, name: "Conflict: farther side goes down, or it balances", colour: palette.main}
+  ];
+  const curve = grid(0, 3, 121).flatMap(p => { const q = mixP(mixAt(p, rc_spread)); return shown.map(s => ({p, v: q[s.j], name: s.name})); });
+  const now = mixP(mixAt(rc_pos, rc_spread));
+  return Plot.plot({
+    width: 640, height: 300, x: {label: "Position in the rule sequence (0 = Rule I, 3 = Rule IV)"}, y: {label: "Expected proportion correct", domain: [0, 1]},
+    color: {legend: true, domain: shown.map(s => s.name), range: shown.map(s => s.colour)},
+    marks: [
+      Plot.ruleY([1 / 3], {stroke: palette.rule}),
+      Plot.line(curve, {x: "p", y: "v", stroke: "name", strokeWidth: 2.5}),
+      Plot.ruleX([rc_pos], {stroke: palette.guide, strokeDasharray: "4,3"}),
+      Plot.dot(shown.map(s => ({p: rc_pos, v: now[s.j], name: s.name})), {x: "p", y: "v", fill: "name", r: 5})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+{
+  const mix = mixAt(rc_pos, rc_spread), q = mixP(mix), total = q.reduce((u, v) => u + v, 0);
+  return md`Rule users here: I ${(100 * mix[0]).toFixed(0)}%, II ${(100 * mix[1]).toFixed(0)}%, III ${(100 * mix[2]).toFixed(0)}%, IV ${(100 * mix[3]).toFixed(0)}%. Expected proportion correct on the heavier-side conflict item: **${q[3].toFixed(2)}**. Expected total over one item of each of the six types: **${total.toFixed(2)}** of 6.`;
+}
+```
+
+The heavier-side conflict line starts at 1, falls to about 0.56 when most children use Rule III, and climbs again as Rule IV takes over. A single ability that makes every item easier as it grows can't produce that dip, which is why [Jansen and van der Maas (1997)](https://doi.org/10.1006/drev.1997.0437) tested the rules as latent classes. Totals hide the difference: Rule II and Rule III children both expect 4 of the 6 right, but not the same 4. In 805 respondents aged 5 to 19, [Jansen and van der Maas (2002)](https://doi.org/10.1006/jecp.2002.2664) found that children use rules, that different ages use different rules, and that some use them inconsistently. The theory isn't settled (Borsboom et al., 2004, p. 1068); it is definite enough to test.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Constructs and construct maps](constructs.qmd): a good construct map orders items before anyone answers them, and assumes a continuum. The balance-scale theory orders response *patterns*, with latent classes in place of a continuum, the alternative that lesson raised. [Latent classes and cognitive diagnosis](cdm.qmd) fits such models.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Which item separates a Rule II child from a Rule III child?",
+  options: [
+    {text: "Three weights on peg 2 against two on peg 4 (the farther side wins, 8 against 6)", correct: true, why: "Weights and distances conflict. Rule II goes by the weights and says the left side goes down, which is wrong; Rule III guesses and is right a third of the time. Here the Rule III child is expected to do better."},
+    {text: "Three weights on peg 2 against two on peg 2", correct: false, why: "The distances are equal, so both rules go by the weights and both are right."},
+    {text: "Two weights on peg 3 against two on peg 1", correct: false, why: "The weights are equal, so both rules look at distance and both are right. This item separates Rule I from the rest."}
+  ]
+})
+```
+
+### Does the attribute exist, and in whom?
+
+A manipulation can cause differences in responses without there being an attribute on which people differ. [Borsboom, Mellenbergh and van Heerden (2003)](https://doi.org/10.1037/0033-295X.110.2.203) distinguish between-subjects from within-subjects readings of a latent variable, and the 2004 paper draws the consequence: variation across people can only be caused by something that varies across people, and variation within a person only by something that varies within that person (pp. 1069–1070). Evidence at one level doesn't establish the other.
+
+In the Stroop task ([Stroop, 1935](https://doi.org/10.1037/h0054651)), naming a word's ink colour takes longer when the word names another colour, an effect caused within each person. Does each person's effect then measure a trait on which people differ? Only if they differ stably. [Hedge, Powell and Sumner (2018)](https://doi.org/10.3758/s13428-017-0935-1) argue that tasks become established for their effects partly because respondents differ little in them, which leaves the effects unreliable as measures of individuals.
+
+#### Try it: a common cause, small differences
+
+Here 250 simulated respondents do a Stroop-like task twice. Conflict slows them by 0.11 s on average; the sliders set how much the true slowing varies from person to person and how many trials each condition gets. Trial response times have SD 0.8 s, about what the IRW table below shows.
+
+```{ojs}
+//| echo: false
+viewof ws_tau = Inputs.range([0, 0.3], {value: 0.1, step: 0.01, label: "Person SD of the true effect (s)"})
+viewof ws_trials = Inputs.range([10, 300], {value: 25, step: 5, label: "Trials per condition"})
+viewof ws_seed = Inputs.range([1, 20], {value: 1, step: 1, label: "Sample (seed)"})
+```
+
+```{ojs}
+//| echo: false
+ws = simEffects({tau: ws_tau, trials: ws_trials, seed: ws_seed})
+Plot.plot({
+  width: 420, height: 380, x: {label: "Effect at session 1 (s)", domain: [-1.2, 1.4]}, y: {label: "Effect at session 2 (s)", domain: [-1.2, 1.4]},
+  marks: [
+    Plot.ruleX([0], {stroke: palette.rule}), Plot.ruleY([0], {stroke: palette.rule}),
+    Plot.dot(ws.pts, {x: "s1", y: "s2", r: 2.5, fill: palette.main, fillOpacity: 0.6}),
+    Plot.dot([{s1: ws.mean, s2: ws.mean}], {x: "s1", y: "s2", r: 7, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Group effect at session 1: **${ws.mean.toFixed(3)} s**, t = **${ws.t.toFixed(1)}**, positive for ${(100 * ws.pos).toFixed(0)}% of respondents. Retest correlation of the effect: **${ws.r.toFixed(2)}** (the model's reliability: ${ws.rel.toFixed(2)}).`
+```
+
+Set the person SD to 0. The group effect stays clear (t near 7 with 25 trials) while the retest correlation hovers around zero: the manipulation slows everyone, and there is nothing to rank. At 0.1 s the retest correlation is low with 25 trials and passes 0.6 with 240, the number Hedge et al. gave per condition. A clear group effect shows that the cause operates within people, not that there is a between-person attribute.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In the widget, with the person SD at 0, what does the retest correlation of the effect estimate?",
+  options: [
+    {text: "Zero: respondents don't differ in the true effect, so their effects on two occasions are unrelated noise", correct: true, why: "The reliability is the share of variance in observed effects that is true between-person variance, and here there is none."},
+    {text: "A high value, since the group effect is very clear", correct: false, why: "The group effect depends on the average, the retest correlation on differences between people. With no differences, the average can be clear and the ranking empty."},
+    {text: "It depends on the number of trials", correct: false, why: "More trials shrink the noise in each respondent's effect, but with no true differences the correlation is still expected to be zero."}
+  ]
+})
+```
+
+### Replacement, complement, or a different grain size?
+
+How does the causal definition sit beside the argument-based view? If validity concerns only the attribute, where do uses go? What about score variation the attribute doesn't cause, such as familiarity with a tablet? And the examples that make the causal view persuasive, balance scales and small cognitive tasks, are a different grain of instrument from a state test serving several uses. There are three readings, each resting on its own assumptions.
+
+- **A replacement.** Validity means the causal claim and nothing else. Borsboom et al. offer their conception as an alternative to the current consensus, with consequences central to test *use* but not to validity (p. 1069), and a test's fitness for a purpose judged under a plainer heading such as overall quality (p. 1070). This assumes that what a test measures can be settled apart from any use, and that *validity* is clearer kept for it.
+- **A complement.** The causal claim is one warrant inside an argument, for the scoring and extrapolation links, backed by response-process evidence, which the *Standards* already list as a source ([AERA, APA & NCME, 2014, pp. 13–14](https://www.testingstandards.net/open-access-files.html)). This assumes an argument can carry a causal claim as one link, and that uses and consequences belong under the same word.
+- **A concept for a different grain size.** The causal definition fits instruments with one attribute and a known response process; the argument fits instruments whose scores summarize a content domain for many uses, where no single attribute may be doing the causing. This assumes the two answer different questions about different kinds of instrument, so one concept of validity need not cover both.
+
+Which reading holds has no settled answer; challenge problem 6 leaves it open. If you've done [Structural equation modeling with lavaan](sem.qmd), its equivalent models, different causal structures that fit the same covariances equally well, carry the same caution about causal claims.
+
+## Simulate
+
+The code below is the between/within widget in R, for person SDs of 0, 0.1 and 0.2 s and for 25 and 240 trials per condition. It is base R and runs in about a second.
+
+With the seed as written and 25 trials, a person SD of 0 gives t = 6.6 and a retest correlation of 0.04; a person SD of 0.2 gives t = 4.2 and 0.48. A clearer group effect is no sign of a better ranking. Congruent RT retests at 0.9 or above throughout, since the simulated respondents differ in speed. Correlations move by about ±0.06 between runs, so compare `r_effect` with `reliability`. Then set `sigma` to 0.3: how many trials does a person SD of 0.1 need for a retest correlation of 0.7?
+
+```{webr}
+{{< include code/validity-causal-sim.R >}}
+```
+
+[Download this code](code/validity-causal-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/validity-causal-irw.R")
+```
+
+The main example, [vocab_assessment_3_to_8_year_old_children](https://itemresponsewarehouse.org/tables/vocab_assessment_3_to_8_year_old_children/), tests a theory of response behaviour, standing in for the balance scale, which the IRW doesn't hold. The contrast, [robison_2026_retesting_stroop](https://itemresponsewarehouse.org/tables/robison_2026_retesting_stroop/), has a cause that works in everyone and asks whether it ranks anyone. [Download the code](code/validity-causal-irw.R); it needs only base R.
+
+### A vocabulary task with a theory
+
+oREV is a receptive vocabulary task for German-speaking children aged 3 to 8 ([Bohn et al., 2022](https://doi.org/10.31234/osf.io/4z86w)). A child hears a word and picks one of four pictures: the target, a semantically related distractor, a phonologically similar one and an unrelated one. Twenty of the 52 words were added to an existing task for their rated ages of acquisition, between six and ten years (pp. 8–9). A response is 1 when the child picked the target, and nothing is missing. The `item` column is the trial position, which holds different words in the two presentation orders, so the word (`targetword`) is the item here.
+
+```{r orev-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+The theory is simple: a child picks the target once they know the word, and children learn words at about the ages adults rate. Before any response is seen, it predicts that later-acquired words will be harder.
+
+```{r orev-words}
+#| echo: true
+#| code-fold: show
+```
+
+```{r orev-plot}
+#| echo: true
+#| code-fold: true
+#| fig-width: 6
+#| fig-height: 4.5
+```
+
+Age of acquisition correlates 0.88 with difficulty over the 47 words that some child missed (the rank correlation with proportion correct, over all 52, is −0.86). Against the baseline of [Constructs and construct maps](constructs.qmd), where a map written from item text ordered nine number-series items at −0.76, this theory orders the words rather well. Both orders also put later-acquired words later in the task, so fatigue could mimic the pattern; the check below rules that out.
+
+::: {.callout-note collapse="true"}
+## Could position be doing the ordering?
+
+Position and age of acquisition correlate 0.83, by design. But each word sits at different positions in the two orders, so we can ask whether a word does worse where it comes later.
+
+```{r orev-order}
+#| echo: true
+```
+
+It isn't: the difference in position between the orders and the difference in proportion correct correlate −0.05, and the correlation between age of acquisition and difficulty is 0.87 and 0.88 within each order.
+:::
+
+The theory's other prediction, that older children know more words, holds too:
+
+```{r orev-children}
+#| echo: true
+#| code-fold: show
+```
+
+Age correlates 0.63 with the number of words a child got right. And the wrong answers? The theory as stated says a child who doesn't know a word guesses, so wrong answers should split evenly across the three distractors.
+
+```{r orev-wrong}
+#| echo: true
+#| code-fold: show
+```
+
+They don't: 47% go to the semantic distractor, 31% to the phonological one and 22% to the unrelated one. Children who miss a word often know something about it. This part of the theory is broken by the data, which is what a theory of response behaviour is for; the repair is partial knowledge, and a model for which option a respondent picks ([Nominal response and multiple-choice models](nominal.qmd)) can write it down.
+
+### A Stroop task given twice
+
+[Robison et al. (2026)](https://doi.org/10.3758/s13428-025-02897-8) gave undergraduates a battery of cognitive tasks over four weekly sessions, repeating the first two sessions in the last two, so each task was retaken about two weeks later. Ours is a timed Stroop ([Burgoyne et al., 2023](https://doi.org/10.1037/xge0001408)): RED or BLUE appears in red or blue ink, and respondents click the response word that matches the ink, as many times as they can in 90 seconds (Robison et al., 2026, Method). The items are the four word–ink combinations, and `itemcov_conflict` marks whether word and ink disagree. A response is 1 when correct; response times are in seconds.
+
+```{r stroop-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+First, a check on the pipeline: the task's own score, correct minus incorrect responses, retested at 0.80 in Robison et al.'s Table 6.
+
+```{r stroop-score}
+#| echo: true
+#| code-fold: show
+```
+
+We get 0.81. Now the effect: each respondent's mean response time on correct conflicting trials minus that on correct congruent trials.
+
+```{r stroop-effect}
+#| echo: true
+#| code-fold: show
+```
+
+At session 1, conflict slows respondents by 0.11 s on average ($d_z = 0.37$, $t = 5.7$ over 244 respondents), and 70% show a positive effect. The manipulation works. Does each respondent's effect say something stable about them?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "For the 234 respondents with both sessions, what is the correlation between their Stroop effect at session 1 and at session 2, about two weeks later?",
+  choices: ["About 0.15", "About 0.45", "About 0.75"],
+  answer: "About 0.15",
+  reveal: "It is 0.17. Congruent response time alone retests at 0.73 over the same two weeks, and the task score at 0.81. Respondents differ stably in speed, and barely in how much conflict slows them."
+})
+```
+
+```{r stroop-retest}
+#| echo: true
+#| code-fold: show
+```
+
+The effect's retest correlation is 0.17, against 0.73 for congruent and 0.64 for conflicting response time. Each effect rests on a median of 25 correct trials per condition and session, and the widget shows what more trials would buy. Still, the pattern is the one Borsboom et al.'s distinction points to: conflict slows people, clearly enough to detect in 244 of them; people differ stably in speed; they differ little, over two weeks, in how much conflict slows them. [Trials as items](trials.qmd) takes the reliability paradox further.
+
+Where does that leave a practitioner? Before I trust a score as a measure of an attribute, I want two checks. First, one prediction from a theory of how people answer the items that the data could have broken and didn't: which items should be harder, or an item that lower scorers should get right more often. Second, evidence that people differ stably on the attribute, not only that a manipulation moves the group mean. In this lesson's data, oREV meets the first (and shows where its theory needs repair); the Stroop effect is clear at the group level but barely ranks people, so it doesn't meet the second.
 
 ## Problems
 
+1. **The reliability of a difference.** Let $X$ and $Y$ have equal variances, reliabilities $\rho_X$ and $\rho_Y$, and correlation $r$. Show that, if their errors are uncorrelated, the reliability of $X - Y$ is $\frac{(\rho_X + \rho_Y)/2 - r}{1 - r}$ ([Cronbach & Furby, 1970](https://doi.org/10.1037/h0029382)). Plug in the Stroop table's retest correlations for congruent and conflicting response time as rough reliabilities, with $r$ from the same data, and compare the result with the effect's retest correlation of 0.17. What does the formula assume that these data might not give it?
+2. **Words out of line.** Using the oREV table, find the words whose difficulty is furthest from what their age of acquisition predicts (the residuals from the line in the plot). Look at the words and their distractors (`chosenword`). Why might each be out of line? Then fit the Rasch model with `mirt` and check whether its item difficulties order the words as the logits do.
+3. **A screener, the causal way.** California now requires reading screening in kindergarten to grade 2 ([Validity as an argument](validity-argument.qmd), problem 5). Pick one skill a screener measures, such as naming letters quickly. What would a Borsboom-style validity study of that subtest look like: which theory of response behaviour, and which prediction that could fail? What would it leave out that a district deciding who gets extra help needs?
+4. **When the network is all you have.** Name a construct for which a network of correlations is all the evidence you can currently get. On Borsboom et al.'s definition, does that make the measure invalid, or the theory of response behaviour thin? What would it take to do better?
+5. **Design a theory.** For a construct you work with, write a theory of response behaviour strong enough to predict an item on which respondents lower on the construct do better, as conflict items do for the balance scale. What data would test it?
+6. **Challenge (open): what kind of concept is it?** Is Borsboom et al.'s definition a replacement for the argument-based view, a complement to it, or a concept for a different grain size of instrument? Make the best case you can for the reading you find weakest, stating what it assumes. This is open; there is no answer key.
+
+```{r}
+#| output: asis
+ask_claude("validity-causal", "It covers Borsboom, Mellenbergh and van Heerden's (2004) causal definition of validity (the attribute exists and causally produces variation in the responses), how it differs from the argument-based view and from Cronbach and Meehl's nomological network, theories of response behaviour with Siegler's balance-scale rules and the conflict items on which children using an earlier rule do better, between- versus within-person readings of a latent variable and the reliability of experimental effects, and three readings of how the causal and argument-based views relate, with a German receptive vocabulary task (age of acquisition predicting difficulty) and a Stroop task given twice as examples.")
+```
+
 ## Going further
+
+- Borsboom, D., Mellenbergh, G. J., & van Heerden, J. (2004). The concept of validity. *Psychological Review*, 111(4), 1061–1071. <https://doi.org/10.1037/0033-295X.111.4.1061>. The causal definition, the argument against defining validity by a nomological network, and the balance scale as the model of a theory of response behaviour.
+- Borsboom, D., Mellenbergh, G. J., & van Heerden, J. (2003). The theoretical status of latent variables. *Psychological Review*, 110(2), 203–219. <https://doi.org/10.1037/0033-295X.110.2.203>. Realism about latent variables, and the difference between between-subjects and within-subjects readings.
+- Markus, K. A., & Borsboom, D. (2013). *Frontiers of test validity theory: Measurement, causation, and meaning*. Routledge. <https://doi.org/10.4324/9780203501207>. The causal view at book length, set beside other accounts of validity.
+- Whitely, S. E. (1983). Construct validity: Construct representation versus nomothetic span. *Psychological Bulletin*, 93(1), 179–197. <https://doi.org/10.1037/0033-2909.93.1.179>. The distinction between the processes behind a response and a score's relations with other measures (the author now publishes as Embretson).
+- Siegler, R. S. (1976). Three aspects of cognitive development. *Cognitive Psychology*, 8(4), 481–520. <https://doi.org/10.1016/0010-0285(76)90016-5>. The balance-scale rules and the rule assessment method.
+- Jansen, B. R. J., & van der Maas, H. L. J. (1997). Statistical test of the rule assessment methodology by latent class analysis. *Developmental Review*, 17(3), 321–357. <https://doi.org/10.1006/drev.1997.0437>. The balance-scale rules tested as latent classes.
+- Jansen, B. R. J., & van der Maas, H. L. J. (2002). The development of children's rule use on the balance scale task. *Journal of Experimental Child Psychology*, 81(4), 383–416. <https://doi.org/10.1006/jecp.2002.2664>. Rule use in 805 respondents aged 5 to 19, including inconsistent use.
+- Hedge, C., Powell, G., & Sumner, P. (2018). The reliability paradox: Why robust cognitive tasks do not produce reliable individual differences. *Behavior Research Methods*, 50(3), 1166–1186. <https://doi.org/10.3758/s13428-017-0935-1>. Why tasks with robust effects can rank people poorly; see also the IRW vignette on [the reliability paradox](https://itemresponsewarehouse.org/vignettes/hf_reliability_paradox.html).
+- Cronbach, L. J., & Furby, L. (1970). How we should measure "change": Or should we? *Psychological Bulletin*, 74(1), 68–80. <https://doi.org/10.1037/h0029382>. The reliability of difference scores (problem 1).
+- Michell, J. (1997). Quantitative science and the definition of measurement in psychology. *British Journal of Psychology*, 88(3), 355–383. <https://doi.org/10.1111/j.2044-8295.1997.tb02641.x>. The realist view of measurement that the causal definition shares.
 
 ```{r}
 #| output: asis
@@ -29,3 +400,9 @@ data_sources("validity-causal")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 4 (slides c4, "Back to validity" through "What I would worry about", slides 2–15). The two real-data analyses and the between/within simulation are new.
+- **Timing:** about 45 minutes for the core ideas and widgets (the balance-scale widget works well at the board); the real-data section works as a 20-minute lab. Problems 3 and 6 work as small-group discussions, as slides 16–17 use the screener question.
+- **Changed from 252:** slide 6 quotes the whole definition and slides 13–14 a long passage from Borsboom et al. (2004, p. 1068); here the lesson's one quotation is the causal clause of the definition, and the rest is paraphrased. The slide's aside on nomological networks becomes a paraphrase of Borsboom et al.'s argument (pp. 1064–1065). Slide 15's worries become the three readings, left open (Ben, E8a). Kelley (1927) is cited as Borsboom et al. cite it.
+- **Data:** the IRW has no balance-scale responses, so oREV stands in (F4). oREV's `item` column is the trial position, not the word. The distractor codes `dist1`–`dist3` read, from the chosen words, as semantic, phonological and unrelated, a different order from the preprint's description (Bohn et al., 2022, pp. 8–9). The Stroop table records conflict between word and ink only, not whether the two response options conflicted, and averages 57 and 64 trials per respondent at the two sessions against the 43 and 49 Robison et al. report for the 90-second block, so it may include practice trials; they would affect both sessions alike.
+- **Held back:** the reliability paradox in full (in [Trials as items](trials.qmd)); latent class models (in [Latent classes and cognitive diagnosis](cdm.qmd)); item features that explain difficulty, such as age of acquisition as a predictor (in [What is an item?](explanatory-irt.qmd)).
+- **Solutions:** held back in `solutions/validity-causal.qmd` (not published). Problem 6 is open.

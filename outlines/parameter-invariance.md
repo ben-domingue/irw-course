@@ -2,7 +2,7 @@
 
 # Parameter invariance (`parameter-invariance`)
 
-Module: irt · Prereqs: 1pl-to-4pl · Extension · Status: outline
+Module: irt · Prereqs: 1pl-to-4pl · Extension · Status: draft (09-25, #40)
 
 ## Core ideas
 
@@ -14,7 +14,9 @@ Module: irt · Prereqs: 1pl-to-4pl · Extension · Status: outline
 
 DOIs Crossref-checked 09-24.
 
-**Verdict (voice rule A):** how to split a sample when checking invariance (never on the same items' sum score; random halves, a background variable, or a separate set of items).
+**Drafting changes (09-25, #40).** Ideas 1–3 and 5 are H3 sections. Idea 4 (Rasch difficulties look more invariant) has no H3 of its own: the real-data section shows it on every split and problem 6 asks the question, with Wright (1997) cited there. Idea 3 gained a second half: under the Rasch model with conditional ML, the sum-score split is legitimate (it is Andersen's 1973 test), and on the MRMET it rejects the Rasch model (LR = 1,588 on 36 df), with the items that move between halves being the high-slope ones (r = −0.98 with the full-sample 2PL slopes). This pays the specific-objectivity thread. Baker (2001) checked page by page against the ERIC scan (pp. 51–55). Added: Elwert & Winship (2014), doi:10.1146/annurev-soc-071913-043455, for selection on a common effect; psychotools (CRAN) for CML.
+
+**Verdict (voice rule A):** how to split a sample when checking invariance (random halves for a baseline, then a background variable or a score on other items; not the same items' sum score for a 2PL; for the Rasch model with conditional ML that split is Andersen's test, and legitimate).
 
 ## Picks up
 
@@ -34,7 +36,7 @@ DOIs Crossref-checked 09-24.
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `wilmer-mrmet-normative-data-set-2022` | main example | Multiracial RMET (Kim et al., 2024, doi:10.3758/s13428-023-02323-x), 37 items, 9,295 complete respondents with gender, age and country. **Random halves:** difficulties agree almost perfectly (Rasch r ≈ 1.00; 2PL slopes r = 0.98). **Women vs. men:** Rasch difficulties r = 0.99, shifted by 0.24 logits (a scale difference, not an item difference); 2PL slopes r = 0.92. **High vs. low scorers, split on the same items:** Rasch r = 0.95 with a 1.3-logit shift; the 2PL falls apart (slopes near zero in both halves, r of difficulties −0.08). **Split on the odd items, estimating the even ones:** Rasch r = 0.97; 2PL difficulties r = 0.87, slopes r = 0.60. | `1pl-to-4pl` uses the RMET table from the same paper. |
+| `wilmer-mrmet-normative-data-set-2022` | main example | Multiracial RMET (Kim et al., 2024, doi:10.3758/s13428-023-02323-x), 37 items, 9,295 complete respondents with gender, age and country. **Random halves:** difficulties agree almost perfectly (Rasch r ≈ 1.00; 2PL slopes r = 0.97 as drafted). **Women vs. men:** Rasch difficulties r = 0.99, shifted by 0.24 logits (a scale difference, not an item difference); 2PL slopes r = 0.92. **High vs. low scorers, split on the same items:** Rasch r = 0.96 with a 1.18-logit shift; the 2PL collapses (median slopes −0.04 and 0.19, r of difficulties −0.05). **Split on the odd items, estimating the even ones:** Rasch r = 0.98; 2PL difficulties r = 0.77, slopes r = 0.76 (drafted numbers; the outline's earlier 0.87/0.60 came from a different fit). | `1pl-to-4pl` uses the RMET table from the same paper. |
 
 The MRMET items correlate weakly with one another (mean r 0.065), which is common for tests of this kind and sharpens the restricted-range problem. The lesson says so gently.
 
@@ -42,7 +44,7 @@ The MRMET items correlate weakly with one another (mean r 0.065), which is commo
 
 ## Widget / simulation / problem ideas
 
-**Widgets**
+**Widgets** (as drafted: these three plus a fourth, the mean inter-item correlation in halves split on ability vs. on the sum score)
 - Baker's illustration: a true ICC, two groups sampled from different ability ranges; each group's fitted curve, and the same curve underneath (idea 1).
 - Local scales: two groups' difficulty estimates, with a "link" button that removes the shift (idea 2).
 - Restricted range: slide the ability range sampled; watch the spread of the 2PL slope estimate grow (idea 3).
@@ -52,7 +54,7 @@ The MRMET items correlate weakly with one another (mean r 0.065), which is commo
 **Simulate:** 2PL data for one population; fit separately in random halves, in high and low groups (split on true $\theta$), and in groups split on the sum score; compare with the true parameters.
 
 **Problems**
-1. Derivation: if $\theta$ is standardized within a group whose true mean is $\mu$ and SD $\sigma$, show that the 2PL estimates satisfy $a^* = a\sigma$ and $b^* = (b-\mu)/\sigma$.
+1. Derivation: if $\theta$ is standardized within a group whose true mean is $\mu$ and SD $\sigma$, show that the 2PL estimates satisfy $a^* = a\sigma$ and $b^* = (b-\mu)/\sigma$. *(As drafted, this derivation is the Go deeper callout; problem 1 asks instead for the asymptotes' invariance and the Rasch case, shift only.)*
 2. Derivation: use 1 to link the women's and men's 2PL estimates by mean–sigma; how close do they get?
 3. Real data with a twist: split the MRMET by age (under 25 vs. over 40). Are the difficulties invariant after linking?
 4. Judgment: why does splitting on the total score of the same items distort the estimates, and what split would you use instead?

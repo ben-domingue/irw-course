@@ -124,7 +124,7 @@ lessons:
     prereqs: [validity-argument]
     origin: {slides: [c4], ps: [], code: []}
     tables: [vocab_assessment_3_to_8_year_old_children, robison_2026_retesting_stroop]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: rasch
@@ -180,7 +180,7 @@ lessons:
     prereqs: [1pl-to-4pl]
     origin: {slides: [c4], ps: [], code: []}
     tables: [wilmer-mrmet-normative-data-set-2022]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: fit-prediction
@@ -207,7 +207,7 @@ lessons:
     prereqs: [fa-confirmatory]
     origin: {slides: [c4, c6], ps: ["PS6#1"], code: [c6/enem_mirt.R, ps6/personality.R]}
     tables: [florida_twins_dweck, florida_twins_grit]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-25: added at Ben's request while reviewing dif (#150): fairness, impact vs.
@@ -236,7 +236,7 @@ lessons:
     prereqs: [dif]
     origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
     tables: [gilbert_meta_20, gilbert_meta_37]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: item-banks-cat
@@ -245,7 +245,7 @@ lessons:
     prereqs: [information, ability-estimation, polytomous]
     origin: {slides: [c6, c10], ps: [], code: []}
     tables: [choi_2026_cmsce_2020_1, promis1wave1_depression]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: equating
@@ -265,7 +265,7 @@ lessons:
     origin: {slides: [c8], ps: ["PS6#2", "PS7#2"], code: [ps6/hf.R, c8/lmer_example.R]}
     tables: [verbagg, trog_brinchmann_2019, imps2025_hf]
     reuses: [verbagg]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: cdm

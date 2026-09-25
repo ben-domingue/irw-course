@@ -2,7 +2,7 @@
 
 # What is an item? Explanatory item response models (`explanatory-irt`)
 
-Module: beyond · Prereqs: rasch · Extension · Status: outline
+Module: beyond · Prereqs: rasch · Extension · Status: drafted (#48)
 
 ## Core ideas
 
@@ -73,3 +73,14 @@ TROG models take minutes in `glmer`: precompute them; the browser gets the simul
 ## Open questions
 
 - The verdict above is Claude's reading of the verbagg result (voice rule A needs one per lesson). *Default:* use it unless you'd put it differently.
+
+## Drafting notes (09-25, #48)
+
+What the draft changed from this outline, all recomputed from the pinned CSVs:
+
+- `verbagg`: the numbers above reproduce exactly (Rasch AIC 8,129; LLTM 8,250; χ² = 159 on 19 df; r = 0.94, 89%; item residual SD 0.34 vs. person 1.37, AIC 8,164; want × shout +0.69, SE 0.33). New: with the item residual in the model, the two interaction terms together give p = 0.059, so the lesson reports the interaction as modest evidence.
+- `trog_brinchmann_2019`: modelled with items and blocks both random. Between-block variance 5.90, within 0.35 (94%), as above; the child × block effect lowers AIC from 12,042 to 11,800 (χ² = 244), SD 1.07 vs. θ 2.21. (The outline's 11,974 → 11,708 and 1.15 vs. 2.26 came from a different base model.)
+- `imps2025_hf`: the switch is defined from trial n − 1 in the same session and block. Because the IRW drops timed-out trials and holds back a random share, 9,046 of 31,394 trials have no previous trial in the table and are set aside. Switch −0.59 (outline −0.63), grade 5 +0.48 and grade 4 +0.20 over grade 3 (outline +0.59).
+- Rasch fits use `glmerControl(optimizer = "nloptwrap")` (the default optimizer took about two minutes on 24 fixed item effects). The browser simulation uses `nAGQ = 0` so that three fits take seconds; estimates barely change.
+- Dropped: the "if you've done" Recalls to `item-estimation` and `invariance-experience` (both still stubs), and to `sem`, `dimensionality`, `information` and `instrument-building` (not needed by the text). Kept: `dif`, `equating`, `g-theory`.
+- Deep dive #25 is handed to `ai-psychometrics` at the end of *With real data* and in *For instructors*.
