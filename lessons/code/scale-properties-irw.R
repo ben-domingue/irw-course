@@ -190,34 +190,30 @@ rbind(real = c(AIC_rasch = extract.mirt(m1, "AIC"), AIC_2pl = extract.mirt(m2, "
       copy = c(AIC_rasch = extract.mirt(s1, "AIC"), AIC_2pl = extract.mirt(s2, "AIC"),
                LR = lr(s1, s2), fit_summary(fit_copy)))
 
-## ---- cancel
-# Cancellation, checked in the data (a descriptive version of Domingue, 2014).
-# Rows: ten groups of records by theta. Columns: 15 Form A items spread across the
-# test, ordered from hardest to easiest by their Rasch difficulties. Cells:
-# proportion correct, where at least 30 records in the group read the item. Count
-# (i) group-by-item-pair checks in which the group does better on the harder item
-# (single cancellation), and (ii) 3 x 3 submatrices whose double
-# cancellation premises hold but whose conclusion fails.
-cancel_check <- function(R, theta, cols) {
-  grp <- cut(theta, quantile(theta, 0:10 / 10), include.lowest = TRUE, labels = FALSE)
-  P <- sapply(cols, function(j) tapply(R[, j], grp, mean, na.rm = TRUE))
-  N <- sapply(cols, function(j) tapply(!is.na(R[, j]), grp, sum))
-  P[N < 30] <- NA
-  sc <- 0; sc_n <- 0; dc <- 0; dc_n <- 0
-  for (r in 1:nrow(P)) for (c1 in 1:(ncol(P) - 1)) for (c2 in (c1 + 1):ncol(P)) {
-    if (!is.na(P[r, c1]) && !is.na(P[r, c2])) { sc_n <- sc_n + 1; sc <- sc + (P[r, c1] > P[r, c2]) }
-  }
-  tri <- combn(nrow(P), 3); trc <- combn(ncol(P), 3)
-  for (i in seq_len(ncol(tri))) for (j in seq_len(ncol(trc))) {
-    a <- tri[, i]; x <- trc[, j]; M <- P[a, x]
-    if (anyNA(M)) next
-    if (M[2, 1] >= M[1, 2] && M[3, 2] >= M[2, 3]) { dc_n <- dc_n + 1; dc <- dc + (M[3, 1] < M[1, 3]) }
-    if (M[2, 1] <= M[1, 2] && M[3, 2] <= M[2, 3]) { dc_n <- dc_n + 1; dc <- dc + (M[3, 1] > M[1, 3]) }
-  }
-  sc <- unname(sc); dc <- unname(dc)
-  c(order_checks = sc_n, order_violations = sc, share_order = round(sc / sc_n, 3),
-    double_tested = dc_n, double_violations = dc, share_double = round(dc / dc_n, 3))
+## ---- conjoint
+# The cancellation conditions, tested with the ConjointChecks package (Domingue,
+# 2014; install.packages("ConjointChecks")). It needs complete data, so we take a
+# block that every record in it read: form A, positions 2 to 40, for the records
+# whose run reached position 40, keeping items that between 2% and 98% of them
+# read correctly. Rows are sum-score groups (at least 30 records each), columns
+# the items. For each adjacent 3 x 3 submatrix the package draws proportions under
+# the order restrictions (a Bayesian model, as in Karabatsos, 2001) and flags
+# cells whose observed proportion falls outside the 95% credible interval. The
+# summary is the average share of flagged cells.
+library(ConjointChecks)
+set.seed(2014)
+blk <- which(fm == "A" & ps >= 2 & ps <= 40)
+keep_rec <- rowSums(!is.na(X[, blk])) == length(blk)
+B <- as.matrix(X[keep_rec, blk])
+pc <- colMeans(B)
+B <- B[, pc > 0.02 & pc < 0.98]
+dim(B)   # records, items
+# The known answer again: the same records and items simulated from the Rasch model.
+Bc <- matrix(rbinom(length(B), 1, plogis(outer(recs$theta[keep_rec], b[colnames(B)], "-"))),
+             nrow(B), dimnames = dimnames(B))
+share_flagged <- function(R, single) {
+  p <- PrepareChecks(R, ss.lower = 30)
+  ConjointChecks(p$N, p$n, n.3mat = "adjacent", single = single)@means$unweighted
 }
-cols <- which(fm == "A")[round(seq(1, sum(fm == "A"), length.out = 15))]
-cols <- cols[order(-b[cols])]   # from hardest to easiest, by the Rasch difficulties
-rbind(real = cancel_check(X, recs$theta, cols), copy = cancel_check(S, theta_copy, cols))
+round(rbind(real = c(double = share_flagged(B, FALSE), single_and_double = share_flagged(B, TRUE)),
+            copy = c(double = share_flagged(Bc, FALSE), single_and_double = share_flagged(Bc, TRUE))), 2)
