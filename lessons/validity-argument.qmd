@@ -225,6 +225,18 @@ Agreement with a criterion is the usual backing for extrapolation. What if the c
 
 Separation is measured by the **AUC**: the chance that a randomly chosen flagged child has a higher count than a randomly chosen unflagged one, ties counting half (0.5 is none, 1 is perfect; [Gathering validity evidence](validity-evidence.qmd) develops it).
 
+::: {.callout-note collapse="true"}
+## What is the AUC?
+
+Take a score and a group label (case or non-case). Pick a cut: everyone at or above it is flagged. **Sensitivity** is the share of cases flagged; **specificity** is the share of non-cases not flagged. As the cut moves from the top of the scale to the bottom, both change, and plotting sensitivity against $1 - \text{specificity}$ traces the **ROC curve**, from (0, 0) to (1, 1).
+
+The **AUC** is the area under that curve. It has a direct reading: for a randomly chosen case with score $S_1$ and a randomly chosen non-case with score $S_0$,
+$$\text{AUC} = \Pr(S_1 > S_0) + \tfrac{1}{2}\Pr(S_1 = S_0)$$
+([Hanley & McNeil, 1982](https://doi.org/10.1148/radiology.143.1.7063747)). An AUC of 0.5 is chance (a diagonal ROC curve), and 1 is perfect separation: every case scores above every non-case.
+
+What it doesn't tell you: which cut to use, since it averages over all of them, or how many flagged respondents are cases, which depends on the base rate (problem 1).
+:::
+
 ```{ojs}
 //| echo: false
 viewof cc_w = Inputs.range([0, 1], {value: 0, step: 0.05, label: "Weight w on the screener's count"})
