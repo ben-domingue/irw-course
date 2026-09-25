@@ -2,7 +2,7 @@
 
 # Differential item functioning (`dif`)
 
-Module: fairness · Prereqs: 1pl-to-4pl, validity-argument · Core · Status: outline
+Module: fairness · Prereqs: 1pl-to-4pl, validity-argument · Core · Status: draft (#44, 09-25)
 
 The lesson leads with the vocabulary RCT (`gilbert_meta_11`): demographic DIF first, treatment DIF as the twist (Ben, F9).
 
@@ -78,3 +78,24 @@ Notes, stated gently in the lesson:
 ## Open questions
 
 - None (settled 09-24: E1, E2, F8, F9). Finding DECOY : DUCK's secondary source is Claude's (D).
+
+## Drafting notes (09-25, #44)
+
+What changed from this outline while drafting:
+- **Numbers.** The lesson's own MH function (total score incl. studied item, ETS A/B/C rule exactly as in Zwick 2012, continuity-corrected chi-square) gives: demographic groupings 1–5 B items each and one C (`sci12`, Hispanic vs. White, 1.72); girls vs. boys all A (largest 0.81). Treatment: 15 significant, 1 B, 6 C (3 positive, 3 negative); expedition delta 5.74 (9% vs 58%), 28% of the raw treatment gap. The outline's "11 significant, 6 B, 3 C, 4.5" came from a different setup and is superseded. Sanity (20 random splits): 0.80 significant on average, no B/C, largest 0.66.
+- **Race/ethnicity** is three comparisons (Black, Hispanic, Asian vs. White), so the predict-then-check offers "race and ethnicity" as one choice.
+- **Grade.** Kim et al. (2021) enrolled grades 1 and 2 (ERIC abstract); the IRW description and item text ("Grade 1 Final Activities") mark this table as grade 1. Full text not accessible (paywall/bot block); the lesson says so.
+- **CES-D `cov_sex`.** 264 of 518 coded 2 in the source S2 file = the paper's 264 women; stated as an assumption in problem 3. Crying (ces_17) flags: z = 4.28, women higher.
+- **DECOY : DUCK dropped** (source couldn't be checked); the "flag needs a theory" point cites the Standards (2014, p. 51) instead.
+- **DART problem** names Austen/Brontë (women) and Clancy/Tolkien (men), checked with foils removed; Allende and Krabbé weren't flagged in this check.
+- **Camilli (2006)** not cited (unverified); Camilli (2013) in Going further instead.
+- **Deep dive filter** adds `cov_male`/`cov_female` to `cov_gender`/`cov_sex` (otherwise the known-good `gilbert_meta_11` isn't in the corpus) and caps categories at 10; polytomous items use Liu–Agresti with A/B/C by analogy. Pilot only (6 of 1,665 tables).
+
+## Revision after Ben's review (09-25, #148)
+- **Impact vs. bias moved to `fairness`** (new core lesson, drafted in parallel; it becomes dif's prerequisite in that PR). dif opens Core ideas with a Recall to fairness.qmd and keeps one sentence on why the raw gap mixes impact with DIF (widget 1 moved into the DIF section). Sources of bias, the HRS mode example, predictive bias (Cleary) and the impact quick check went with it; the "measures are best at comparing people who start in similar situations" rule was cut here (it belongs with impact in fairness).
+- **Logistic regression is its own core idea**: the three nested models (Swaminathan & Rogers, 1990), effect sizes (group coefficient as odds ratio / 2.35β on the delta scale; Nagelkerke ΔR² with Jodoin & Gierl categories as implemented in difR, checked against difR), why it is the workhorse (Recall to likelihood; extends to ordinal items, problem 3), widget 2 and a new quick check. Real data: LR for every item and grouping beside MH. 2.35β vs MH Δ correlate 0.9991; by Jodoin–Gierl only *expedition* is large (ΔR² 0.244); the other ETS C items have ΔR² 0.021–0.031.
+- **Go deeper: the anchor problem and robust scaling** (Halpin, 2024, Psychometrika 89(3), 796–821; robustDIF, CRAN), described from the abstract and the package README/docs. Real data: robustDIF on treatment (2PL fits per arm, d_fun3): 14 of 24 items flagged; treatment effect on θ 0.48 SD (all items) vs 0.30 SD (robust), p < .001.
+
+## Revision 2 (09-25, #148): DART as the opening example (Ben)
+- `DART_Brysbaert_2020_1` now opens the DIF core idea (loaded in the page, so it is in `tables:`; 3 tables: gilbert_meta_11 main, DART intuition, alexandrowicz_2018_cesd problem 3). Foils removed with Brysbaert et al.'s Appendix A list (42 names, hard-coded in `dif-irw.R`); 199 respondents, 67 men. Matched on the author total (standardization, Dorans & Kulick 1986; MH test): Tolkien −23 and Clancy −20 points (easier for men), Austen +41 and Brontë +22 (women). 9 of 90 authors p < .05; after Holm, only Austen. Framed as an illustration, not a finding.
+- Problem 4 (DART) replaced by an external-anchor problem: match treatment DIF on `std_baseline`.

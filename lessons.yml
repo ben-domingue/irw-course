@@ -226,8 +226,8 @@ lessons:
     module: fairness
     prereqs: [1pl-to-4pl, validity-argument, fairness]
     origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
-    tables: [gilbert_meta_11, alexandrowicz_2018_cesd]
-    status: stub
+    tables: [gilbert_meta_11, DART_Brysbaert_2020_1, alexandrowicz_2018_cesd]
+    status: draft
     tranche: core
 
   - id: invariance-experience
