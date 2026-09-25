@@ -2,7 +2,7 @@
 
 # Rater models: many-facet Rasch and beyond (`rater-models`)
 
-Module: beyond · Prereqs: g-theory, rasch · Extension · Status: outline
+Module: beyond · Prereqs: g-theory, rasch, polytomous · Extension · Status: draft (#150)
 
 ## Core ideas
 
@@ -76,3 +76,16 @@ Data notes, stated gently: `expert_benchmark` is 3,524 of the essay table's 9,82
 - **A third table for drift.** `moralvignettes_rakhmankulova_2025` and `thomeczek2025_les` carry `date` and `rater`, but their raters rate vignettes and parties. *Default:* no third table; drift by widget and simulation, those tables in Going further.
 - **Hierarchical rater model software.** `sirt::rm.hrm` fits it (not yet tried here). *Default:* main line `TAM` and `lme4`; the hierarchical rater model on the simulation and the cleverness table only.
 - **First-person verdict.** *Default:* on problem 3's choice: when scores go to individuals and raters differ reliably, adjust for severity and say so in the report.
+
+## Drafting notes (09-25, #150)
+
+What changed from this outline while drafting `lessons/rater-models.qmd`:
+
+- **Prerequisite:** `polytomous` added in `lessons.yml` (the Open question's default); the rating scale model is recalled, not restated.
+- **The benchmark is the model's output.** The study codebook (osf.io/eu2zb, `Codebook.xlsx`) describes `exp_score` as the FACETS "fair" score from trained experts' ratings, integers in the source. The lesson keeps it out of every teacher model and uses it to validate leniency (random-effect leniency correlates 0.90 with each teacher's mean distance from it), to test adjustment (correlation 0.40 → 0.44, RMSE 1.65 → 1.54) and as the halo baseline.
+- **Numbers recomputed.** Teachers average 0.21 (not 0.3) below the benchmark, unevenly: 1.34 below on structure, within 0.33 elsewhere (new; problem 5). Criterion correlations 0.66 (teachers) vs 0.43 (benchmark, weighted to the same essays; 0.45 over all essays); within-teacher centering leaves 0.64 vs 0.44, so leniency doesn't produce the gap. Centrality: 152 of 315, as outlined.
+- **Cleverness:** severities −0.32 to 0.37 (SE 0.04), SD 0.29 vs person SD 1.19; adjusting buys little even when each respondent keeps only two raters (0.948 vs 0.951). Rater-specific steps find rater 3 central and rater 1 extreme (AIC prefers them, BIC ties).
+- **HRM:** `sirt::rm.hrm` doesn't exist in sirt 4.2; `sirt::rm.sdt` (DeCarlo et al.'s HRM-SDT, marginal ML, ~1.5 min) is used on the cleverness table in the render, not in webR. Reliability 0.92 (facets) vs 0.73 (HRM), AIC 7,135 vs 6,539, next to G theory's 0.71.
+- **Software:** `TAM` runs in webR (check_page: ~21 s); the Simulate cell uses it. The fixed-effects `TAM` fit to the 315 teachers now converges locally but takes 1.3 minutes, so the essays use `lme4` random effects.
+- **Widgets:** harsh rater, central rater, SE under HRM vs local independence (binary version, exact), drift. The Wright map with a rater column is an R figure in *With real data*.
+- **Held as outlined:** drift not fitted (no dates); longitudinal/multidimensional HRMs, DRF and rater-specific discrimination, QWK vs PRMSE in *Going further*.
