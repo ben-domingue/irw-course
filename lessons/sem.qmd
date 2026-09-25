@@ -129,7 +129,7 @@ fit <- sem(model, data = d, estimator = "MLR")
 
 `sem()` lets the two predictors correlate and, by default, lets the two outcomes' residuals $\zeta$ correlate too.
 
-Can the structural part be identified? The measurement model already estimates the six correlations among four factors. The structural model re-expresses them with the predictors' correlation, the paths and any residual covariance. With more than six such parameters, some can't be recovered from the data. Counting is necessary but not sufficient for identification ([Bollen, 1989](https://doi.org/10.1002/9781118619179), ch. 4).
+Can the structural part be identified? The measurement model already estimates the six correlations among four factors. The structural model re-expresses them with the predictors' correlation, the paths and any residual covariance. With more than six such parameters, some can't be recovered from the data. Counting is necessary but not sufficient for identification ([Bollen, 1989](https://doi.org/10.1002/9781118619179)).
 
 The estimator matters as it did in CFA. Maximum likelihood assumes multivariate normal items. **MLR** keeps the ML estimates and makes the standard errors and the test statistic robust to non-normality ([Yuan & Bentler, 2000](https://doi.org/10.1111/0081-1750.00078)); **WLSMV** treats items as ordered categories and suits items with few or skewed categories ([Rhemtulla, Brosseau-Liard & Savalei, 2012](https://doi.org/10.1037/a0029315)).
 
