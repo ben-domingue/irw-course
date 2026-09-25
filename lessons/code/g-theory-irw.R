@@ -7,7 +7,7 @@
 
 ## ---- helpers
 library(lme4)
-options(digits = 7)  # R's default, in case a .Rprofile changes it
+options(digits = 7, scipen = 5)  # R's default digits, in case a .Rprofile changes it; no e-notation
 # Variance components from a crossed random-effects fit, with their shares of the
 # total. `labels` renames lme4's grouping factors (id, item, rater and their
 # interactions) to the facets of the design.
@@ -43,6 +43,15 @@ fit_cl <- lmer(form, data = cl)
 vc_cl <- components(fit_cl, labels)
 vc_cl
 
+## ---- reml-ml
+# REML against plain maximum likelihood, for the two facets with few levels.
+fit_ml <- lmer(form, data = cl, REML = FALSE)   # warns of a singular fit: task is 0
+facet_var <- function(fit) {
+  v <- as.data.frame(VarCorr(fit))
+  setNames(v$vcov, v$grp)[c("item", "rater")]
+}
+round(rbind(REML = facet_var(fit_cl), ML = facet_var(fit_ml)), 4)   # item = task
+
 ## ---- dstudy-clever
 v_cl <- vc_cl$variance
 round(g_coef(v_cl, 3, 5), 2)     # the design as run: 3 tasks, 5 raters
@@ -51,6 +60,12 @@ round(g_coef(v_cl, 6, 1), 2)     # 6 tasks, 1 rater
 round(g_coef(v_cl, 3, 1e6), 2)   # 3 tasks, as many raters as you like
 d_grid <- expand.grid(tasks = 1:10, raters = c(1, 2, 5))
 d_grid$relative <- mapply(function(t, r) g_coef(v_cl, t, r)[1], d_grid$tasks, d_grid$raters)
+
+## ---- interrater
+# Interrater reliability with the tasks fixed: raters score the same tasks, so the
+# person x task effect is part of the universe score. One rater, one task:
+round(c(tasks_fixed = (v_cl[1] + v_cl[4]) / (v_cl[1] + v_cl[4] + v_cl[5] + v_cl[7]),
+        tasks_random = unname(g_coef(v_cl, 1, 1)[1])), 2)
 
 ## ---- plot-clever
 cols <- c("1" = "#93c5fd", "2" = "#2780e3", "5" = "#c2410c")
@@ -87,25 +102,3 @@ v_es <- vc_es$variance
 sapply(c(1, 2, 3, 5), function(r) round(g_coef(v_es, 4, r), 2))   # 4 criteria, 1-5 raters
 round(g_coef(v_es, 1e6, 1), 2)    # one rater, as many criteria as you like
 round(sqrt(v_es[c(1, 3)]), 2)     # SD of essays' universe scores; SD of teachers' severity
-
-## ---- ptask
-# The one-facet design. Average each person's five ratings of a task, which leaves
-# a persons x tasks table with one score per cell (201 respondents rated on all three).
-pt <- tapply(cl$resp, list(cl$id, cl$item), mean)
-pt <- pt[complete.cases(pt), ]
-n_p <- nrow(pt); n_i <- ncol(pt)
-long <- data.frame(y = c(pt), p = factor(rep(rownames(pt), n_i)), i = factor(rep(colnames(pt), each = n_p)))
-ms <- anova(lm(y ~ p + i, data = long))[["Mean Sq"]]   # persons, tasks, residual
-names(ms) <- c("persons", "tasks", "residual")
-round(ms, 4)
-s2_p <- (ms["persons"] - ms["residual"]) / n_i          # sigma^2_p from the EMS
-s2_pi <- ms["residual"]                                  # sigma^2_pi,e
-anova_route <- c(s2_p, s2_pi, s2_p / (s2_p + s2_pi / n_i))
-alpha <- (n_i / (n_i - 1)) * (1 - sum(apply(pt, 2, var)) / var(rowSums(pt)))
-fit_pt <- lmer(y ~ 1 + (1 | p) + (1 | i), data = long)
-v <- as.data.frame(VarCorr(fit_pt))
-lme4_route <- c(v$vcov[v$grp == "p"], v$vcov[v$grp == "Residual"])
-routes <- rbind(anova = anova_route, lme4 = c(lme4_route, lme4_route[1] / (lme4_route[1] + lme4_route[2] / n_i)))
-colnames(routes) <- c("person", "residual (p x t, e)", "G coefficient")
-round(routes, 4)
-round(c(alpha = alpha), 4)
