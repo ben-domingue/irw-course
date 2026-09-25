@@ -22,7 +22,12 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Every model in this course so far has assumed that more of the trait means a higher chance of agreeing. For attitude statements that can fail. A statement that stakes out a middle position is rejected from both sides, by respondents who find it too strong and by those who find it too weak, so its curve rises and then falls. [Where CTT breaks](ctt-limits.qmd) found two such statements among eight about capital punishment and left them there. This lesson picks them up: what an unfolding response process leaves in the data, the models written for it (the hyperbolic cosine model, a folded partial credit model, and the GGUM), and what happens when we fit them to the same eight statements. The short answer: the patterns look very much like unfolding, and yet, with 54 respondents and most statements near the ends, a dominance model describes the responses just as well.
+Two different accounts of how a respondent answers an item:
+
+- **Dominance.** The more of the trait a respondent has, the more likely they are to agree or answer correctly: each item's curve only rises. Every model in this course so far has assumed this.
+- **Ideal point.** A respondent agrees most with statements close to their own position, and less the farther a statement is from it, in either direction. A statement that stakes out a middle position is rejected from both sides, by respondents who find it too strong and by those who find it too weak, so its curve rises and then falls.
+
+For tests of ability dominance is natural; for attitude statements it can fail. [Where CTT breaks](ctt-limits.qmd) found two such statements among eight about capital punishment and left them there. This lesson picks them up: what an unfolding response process leaves in the data, the models written for it (the hyperbolic cosine model, a folded partial credit model, and the GGUM), and what happens when we fit them to the same eight statements. The short answer: the patterns look very much like unfolding, and yet, with 54 respondents and most statements near the ends, a dominance model describes the responses just as well.
 
 ## Goals
 
