@@ -245,7 +245,7 @@ lessons:
     prereqs: [information, ability-estimation, polytomous]
     origin: {slides: [c6, c10], ps: [], code: []}
     tables: [choi_2026_cmsce_2020_1, promis1wave1_depression]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: equating
