@@ -2,7 +2,7 @@
 
 # Differential item functioning (`dif`)
 
-Module: fairness · Prereqs: 1pl-to-4pl, validity-argument · Core · Status: outline
+Module: fairness · Prereqs: 1pl-to-4pl, validity-argument · Core · Status: draft (#44, 09-25)
 
 The lesson leads with the vocabulary RCT (`gilbert_meta_11`): demographic DIF first, treatment DIF as the twist (Ben, F9).
 
@@ -78,3 +78,15 @@ Notes, stated gently in the lesson:
 ## Open questions
 
 - None (settled 09-24: E1, E2, F8, F9). Finding DECOY : DUCK's secondary source is Claude's (D).
+
+## Drafting notes (09-25, #44)
+
+What changed from this outline while drafting:
+- **Numbers.** The lesson's own MH function (total score incl. studied item, ETS A/B/C rule exactly as in Zwick 2012, continuity-corrected chi-square) gives: demographic groupings 1–5 B items each and one C (`sci12`, Hispanic vs. White, 1.72); girls vs. boys all A (largest 0.81). Treatment: 15 significant, 1 B, 6 C (3 positive, 3 negative); expedition delta 5.74 (9% vs 58%), 28% of the raw treatment gap. The outline's "11 significant, 6 B, 3 C, 4.5" came from a different setup and is superseded. Sanity (20 random splits): 0.80 significant on average, no B/C, largest 0.66.
+- **Race/ethnicity** is three comparisons (Black, Hispanic, Asian vs. White), so the predict-then-check offers "race and ethnicity" as one choice.
+- **Grade.** Kim et al. (2021) enrolled grades 1 and 2 (ERIC abstract); the IRW description and item text ("Grade 1 Final Activities") mark this table as grade 1. Full text not accessible (paywall/bot block); the lesson says so.
+- **CES-D `cov_sex`.** 264 of 518 coded 2 in the source S2 file = the paper's 264 women; stated as an assumption in problem 3. Crying (ces_17) flags: z = 4.28, women higher.
+- **DECOY : DUCK dropped** (source couldn't be checked); the "flag needs a theory" point cites the Standards (2014, p. 51) instead.
+- **DART problem** names Austen/Brontë (women) and Clancy/Tolkien (men), checked with foils removed; Allende and Krabbé weren't flagged in this check.
+- **Camilli (2006)** not cited (unverified); Camilli (2013) in Going further instead.
+- **Deep dive filter** adds `cov_male`/`cov_female` to `cov_gender`/`cov_sex` (otherwise the known-good `gilbert_meta_11` isn't in the corpus) and caps categories at 10; polytomous items use Liu–Agresti with A/B/C by analogy. Pilot only (6 of 1,665 tables).

@@ -216,7 +216,7 @@ lessons:
     prereqs: [1pl-to-4pl, validity-argument]
     origin: {slides: [c5], ps: ["PS5#3"], code: [c5/art.R, ps5/dif_itemtext.R, ps5/groupdiff.R, ps5/groupdiff_example.R]}
     tables: [gilbert_meta_11, alexandrowicz_2018_cesd]
-    status: stub
+    status: draft
     tranche: core
 
   - id: invariance-experience
