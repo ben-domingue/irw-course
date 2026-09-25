@@ -23,13 +23,13 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-[The Rasch model](rasch.qmd) left open how far from 1 an outfit statistic can stray, and [From the 1PL to the 4PL](1pl-to-4pl.qmd) noted that BIC says *whether* one model beats another, not by how much. Most fit statistics answer a yes-or-no question, and with a few thousand respondents the answer is nearly always yes: the model misfits. The more useful question is how much a richer model helps. We answer it by predicting responses the model never saw, and scoring those predictions with the InterModel Vigorish (IMV), a measure of predictive gain built to be compared across datasets.
+[The Rasch model](rasch.qmd) left open how far from 1 an outfit statistic can stray, and [From the 1PL to the 4PL](1pl-to-4pl.qmd) noted that BIC says *whether* one model beats another, not by how much. Most fit statistics answer yes or no, and with thousands of respondents the answer is nearly always that the model misfits. The more useful question is how much a richer model helps. We answer it by predicting responses the model never saw, and scoring those predictions with the InterModel Vigorish (IMV), a measure of predictive gain built to be compared across datasets.
 
 ## Goals
 
 By the end of this lesson you should be able to:
 
-- compute outfit and infit, say what they assume, and judge a misfit by its size as well as its $z$;
+- compute outfit and infit and judge a misfit by its size as well as its $z$;
 - explain why likelihood-ratio tests, AIC, BIC and $M_2$ depend on sample size, and what each is for;
 - set up $k$-fold cross-validation over responses and explain why in-sample fit favours extra parameters;
 - turn two sets of predictions into an IMV and read it against published benchmarks;
@@ -47,7 +47,7 @@ The standardized residual is $z_{ij} = (x_{ij} - p_{ij})/\sqrt{p_{ij}(1 - p_{ij}
 
 #### Try it: outfit when the model is true
 
-300 simulated items at one difficulty, each answered by $n$ respondents, with outfit computed from the true parameters. The dashed lines mark 0.8–1.2, the range [Wright and Linacre (1994)](https://www.rasch.org/rmt/rmt83b.htm) suggest for high-stakes multiple-choice items.
+300 simulated items at one difficulty, each answered by $n$ respondents, with outfit computed from the true parameters. The solid line marks 1, the model's expectation; the dashed lines mark 0.8–1.2, the range [Wright and Linacre (1994)](https://www.rasch.org/rmt/rmt83b.htm) suggest for high-stakes multiple-choice items.
 
 ```{ojs}
 //| echo: false
@@ -62,10 +62,19 @@ on_vals = on_sims.flatMap(s => s.outfit)
 on_exact = on_sims[0].exactSD[0]
 on_sd = Math.sqrt(on_vals.reduce((s, v) => s + (v - 1) ** 2, 0) / on_vals.length)
 on_out = on_vals.filter(v => v < 0.8 || v > 1.2).length / on_vals.length
+// The x range always shows 0.75-1.25 and stretches to cover the data (up to 3), with
+// 50 bins across it, so the bars stay visible however narrow the spread.
+on_lo = Math.min(0.75, Math.min(...on_vals))
+on_hi = Math.max(1.25, Math.min(Math.max(...on_vals), 3))
+on_bins = {
+  const w = (on_hi - on_lo) / 50, c = Array(50).fill(0);
+  for (const v of on_vals) c[Math.min(49, Math.max(0, Math.floor((v - on_lo) / w)))]++;
+  return c.map((n, k) => ({x1: on_lo + k * w, x2: on_lo + (k + 1) * w, n}));
+}
 Plot.plot({
-  width: 700, height: 280, x: {label: "Outfit", domain: [0.4, 1.8]}, y: {label: "Items"},
+  width: 700, height: 280, x: {label: "Outfit", domain: [on_lo, on_hi]}, y: {label: "Items"},
   marks: [
-    Plot.rectY(on_vals, Plot.binX({y: "count"}, {x: v => Math.min(Math.max(v, 0.4), 1.8), thresholds: 70, fill: palette.light})),
+    Plot.rectY(on_bins, {x1: "x1", x2: "x2", y: "n", fill: palette.light, insetLeft: 0.5, insetRight: 0.5}),
     Plot.ruleX([0.8, 1.2], {stroke: palette.guide, strokeDasharray: "4,3"}),
     Plot.ruleX([1], {stroke: palette.contrast, strokeWidth: 2}),
     Plot.ruleY([0])
@@ -78,7 +87,7 @@ Plot.plot({
 md`Across ${on_vals.length} simulated items the SD of outfit is **${on_sd.toFixed(3)}**; the model-based SD for this item is ${on_exact.toFixed(3)}, and the rule √(2/n) gives ${Math.sqrt(2 / on_n).toFixed(3)}. ${(100 * on_out).toFixed(0)}% of items fall outside 0.8–1.2. An outfit of 1.08 here would be ${(0.08 / on_exact).toFixed(1)} SDs above 1.`
 ```
 
-With 50 respondents, a fifth of the outfits fall outside 0.8–1.2 although the model is exactly right. With 5,000, the null distribution is a sliver, and 1.08 sits several SDs out. Move the difficulty away from 0 and the spread grows (a strong respondent missing an easy item gives a huge $z^2$), so $\sqrt{2/n}$ is only a rough anchor. A fixed band says little about chance in small samples, and a $z$ says little about size in large ones. I read both: the $z$ says whether a misfit could be chance, the size whether it is worth anyone's time.
+With 50 respondents, a fifth of the outfits fall outside 0.8–1.2 although the model is right; with 5,000, 1.08 sits several SDs out. Move the difficulty away from 0 and the spread grows (a strong respondent missing an easy item gives a huge $z^2$), so $\sqrt{2/n}$ is only a rough anchor. A fixed band says little about chance in small samples, and a $z$ says little about size in large ones. I read both: the $z$ says whether a misfit could be chance, the size whether it is worth anyone's time.
 
 ```{ojs}
 //| echo: false
@@ -118,7 +127,7 @@ For a whole model there are four tools. The **likelihood-ratio test** compares n
 
 **Andersen's test** splits respondents by sum score, estimates the difficulties by conditional ML within each group, and compares with one set of difficulties for everyone, with no assumption about how $\theta$ is distributed.
 
-Each asks whether the data are consistent with a model (or with the smaller of two) up to sampling error. For that question the tests are the right tool, and the criteria a reasonable way to choose among models in modest samples. But sampling error shrinks as $n$ grows while a model's small departures from the data don't, so with thousands of respondents every test rejects, and none says how much better the preferred model predicts. ([Stone and Zhang (2003)](https://doi.org/10.1111/j.1745-3984.2003.tb01150.x) compare tests for single items.)
+Each asks whether the data are consistent with a model (or with the smaller of two) up to sampling error. For that question the tests are the right tool, and the criteria a reasonable way to choose among models in modest samples. But sampling error shrinks as $n$ grows while a model's small departures from the data don't, so with thousands of respondents every test rejects, and none says how much better the preferred model predicts.
 
 ```{ojs}
 //| echo: false
@@ -138,7 +147,7 @@ A model with more parameters fits its own data at least as well as the model it 
 
 #### Try it: more parameters, better in-sample
 
-One item, respondents with known abilities (like Elo in [The likelihood and logistic regression](likelihood.qmd)), and models for the item's curve from a constant (one parameter) through a 2PL (two) to logistic curves in polynomials of $\theta$ (up to seven). Each is fitted to the training respondents and scored on 5,000 new ones.
+The widget simulates one item whose true curve is a 2PL with the slope you choose, answered by respondents whose $\theta$ we know (as Elo was known in [The likelihood and logistic regression](likelihood.qmd)). It fits seven models for that item, labelled by how many parameters they have: **1**, one probability for everyone (the item's proportion correct); **2**, a logistic curve in $\theta$, the true form; **3 to 7**, a logistic curve whose exponent is a polynomial in $\theta$, so the curve can bend and wiggle. Each is fitted to the training respondents only. The upper plot scores each by mean log likelihood per response (closer to 0 is better; −0.69 is a coin flip) on the training respondents (*in-sample*) and on 5,000 new ones (*out-of-sample*). The lower plot shows the training responses and the curves from the 2- and 7-parameter models.
 
 ```{ojs}
 //| echo: false
@@ -155,20 +164,19 @@ of_data = {
   const y = (x, off) => x.map((t, i) => u[off + i] < logistic(of_a * (t - 0.3)) ? 1 : 0);
   return {xtr: xtr.slice(0, of_n), ytr: y(xtr, 0).slice(0, of_n), xte, yte: y(xte, 1000)};
 }
-of_rows = Array.from({length: 7}, (_, d) => {
-  const beta = polyLogitFit(of_data.xtr, of_data.ytr, d);
-  const clip = p => Math.min(Math.max(p, 1e-4), 1 - 1e-4);
-  return {k: d + 1,
-    train: meanLogLik(of_data.ytr, of_data.xtr.map(x => clip(polyLogitPredict(beta, x)))),
-    test: meanLogLik(of_data.yte, of_data.xte.map(x => clip(polyLogitPredict(beta, x))))};
-})
+of_clip = p => Math.min(Math.max(p, 1e-4), 1 - 1e-4)
+of_fits = Array.from({length: 7}, (_, d) => polyLogitFit(of_data.xtr, of_data.ytr, d))
+of_rows = of_fits.map((beta, d) => ({k: d + 1,
+  train: meanLogLik(of_data.ytr, of_data.xtr.map(x => of_clip(polyLogitPredict(beta, x)))),
+  test: meanLogLik(of_data.yte, of_data.xte.map(x => of_clip(polyLogitPredict(beta, x))))}))
 of_best = of_rows.reduce((u, v) => v.test > u.test ? v : u)
 Plot.plot({
-  width: 700, height: 300, x: {label: "Parameters in the item's model", ticks: 7}, y: {label: "Mean log likelihood per response"},
-  color: {legend: true, domain: ["Training respondents", "New respondents"], range: [palette.main, palette.contrast]},
+  width: 700, height: 280, marginLeft: 60,
+  x: {label: "Number of parameters in the item's model", ticks: 7, tickFormat: "d"},
+  y: {label: "Mean log likelihood per response (higher is better)"},
+  color: {legend: true, domain: ["In-sample (training respondents)", "Out-of-sample (new respondents)"], range: [palette.main, palette.contrast]},
   marks: [
-    Plot.ruleX([2], {stroke: palette.guide, strokeDasharray: "4,3"}),
-    Plot.line(of_rows.flatMap(d => [{k: d.k, v: d.train, s: "Training respondents"}, {k: d.k, v: d.test, s: "New respondents"}]),
+    Plot.line(of_rows.flatMap(d => [{k: d.k, v: d.train, s: "In-sample (training respondents)"}, {k: d.k, v: d.test, s: "Out-of-sample (new respondents)"}]),
       {x: "k", y: "v", stroke: "s", strokeWidth: 2.5, marker: "circle"})
   ]
 })
@@ -176,10 +184,25 @@ Plot.plot({
 
 ```{ojs}
 //| echo: false
-md`In the training data the fit improves from ${of_rows[1].train.toFixed(3)} with 2 parameters to ${of_rows[6].train.toFixed(3)} with 7. On new respondents the best model has **${of_best.k}** parameters (${of_best.test.toFixed(3)}); the one with 7 scores ${of_rows[6].test.toFixed(3)}.`
+Plot.plot({
+  width: 700, height: 220, marginLeft: 60, x: {label: "Ability θ", domain: [-3, 3]}, y: {label: "P(correct)", domain: [-0.05, 1.05]},
+  color: {legend: true, domain: ["True curve", "2 parameters", "7 parameters"], range: [palette.guide, palette.main, palette.contrast]},
+  marks: [
+    Plot.dot(of_data.xtr.map((t, i) => ({t, y: of_data.ytr[i]})).filter(d => Math.abs(d.t) < 3), {x: "t", y: "y", r: 2, fill: palette.light}),
+    Plot.line(grid(-3, 3, 121).flatMap(t => [
+      {t, p: logistic(of_a * (t - 0.3)), c: "True curve"},
+      {t, p: polyLogitPredict(of_fits[1], t), c: "2 parameters"},
+      {t, p: polyLogitPredict(of_fits[6], t), c: "7 parameters"}]), {x: "t", y: "p", stroke: "c", strokeWidth: 2})
+  ]
+})
 ```
 
-The blue line only rises. The orange line rises from one parameter to two (the item does depend on $\theta$), then flattens or falls: with 30 or 100 training respondents the wiggly curves chase noise, while with 1,000 there is enough data to hold the extra parameters near zero. Set the true slope near 0.3 and even the second parameter barely helps.
+```{ojs}
+//| echo: false
+md`In-sample, the fit improves from ${of_rows[1].train.toFixed(3)} with 2 parameters to ${of_rows[6].train.toFixed(3)} with 7. Out-of-sample, the best model has **${of_best.k}** parameters (${of_best.test.toFixed(3)}), and the one with 7 scores ${of_rows[6].test.toFixed(3)}.`
+```
+
+What should you have seen? The in-sample line only rises: each added parameter lets the curve bend toward the training responses, noise included. The out-of-sample line rises from 1 parameter to 2, because the item really does depend on $\theta$, and then flattens or falls. With 30 or 100 training respondents the 7-parameter curve in the lower plot wiggles to follow a few responses, and the wiggles are wrong for new respondents; with 1,000 the extra terms stay near zero and both lines are flat after 2 parameters. The gap between the lines is in-sample advantage that doesn't carry over. Held-out responses measure what does; the next section puts it on a scale comparable across tests.
 
 ### The IMV: how much better, on a portable scale
 
@@ -227,7 +250,7 @@ md`Baseline coin w0 = ${co_res.w0.toFixed(2)}; enhanced coin w1 = ${co_res.w1.to
 
 With the paper's values the coins are 0.67 and 0.83 and the IMV is 0.24, as in the paper. Push the second enhanced prediction to 0.99 and the IMV falls: the one tail in those 20 tosses is now punished hard. Set both enhanced values to the baseline's and the IMV is 0.
 
-The IMV always compares two sets of predictions; for an absolute statement, compare with a simple baseline such as each item's proportion correct. In-sample it favours the more complex model, so it is computed on held-out responses ([Domingue et al., 2024, §2.1](https://doi.org/10.1007/s11336-024-09977-2)). As an expected return on a fair bet, it compares across datasets, which makes it a reasonable choice whenever the question is *how much*. Benchmarks from simulations with 50 items and 1,000 respondents ([Domingue et al., 2024, Table 1](https://doi.org/10.1007/s11336-024-09977-2)): 0.1 for the Rasch model over item proportions, 0.01 for the 2PL over the Rasch model when slopes vary substantially (log slopes with SD 0.5), and 0.0005 for the 3PL over the 2PL even when a 3PL generated the data.
+The IMV always compares two sets of predictions (for an absolute statement, use a simple baseline such as item proportions). In-sample it favours the more complex model, so it is computed on held-out responses ([Domingue et al., 2024, §2.1](https://doi.org/10.1007/s11336-024-09977-2)). As an expected return on a fair bet, it compares across datasets, which makes it a reasonable choice whenever the question is *how much*. Benchmarks from simulations with 50 items and 1,000 respondents ([Domingue et al., 2024, Table 1](https://doi.org/10.1007/s11336-024-09977-2)): 0.1 for the Rasch model over item proportions, 0.01 for the 2PL over the Rasch model when slopes vary substantially (log slopes with SD 0.5), and 0.0005 for the 3PL over the 2PL even when a 3PL generated the data.
 
 ```{ojs}
 //| echo: false
@@ -291,13 +314,13 @@ Plot.plot({
 md`Closest 2PL: a = ${lk_fit.a.toFixed(2)}, b = ${lk_fit.b.toFixed(2)}. Over the middle 95% of respondents (shaded) the curves differ by at most **${lk_fit.maxDiff.toFixed(3)}**. For scale, a proportion estimated from 200 respondents near 0.5 has a standard error of ${Math.sqrt(0.25 / 200).toFixed(3)}.`
 ```
 
-The normal ogive is matched almost exactly, by a slope near 1.7. The other curves leave gaps of a few hundredths where the respondents are, about the sampling error of a proportion from 200 respondents. Slope and location absorb most of the misspecification, and residual-based fit statistics see only what is left over.
+The normal ogive is matched almost exactly (slope near 1.7); the others leave gaps of a few hundredths where respondents are, about the sampling error of a proportion from 200 respondents. Slope and location absorb most of the misspecification, and residual-based fit statistics see only what is left over.
 
 ## Simulate
 
 The code below simulates Rasch data for 20 items at three sample sizes, fits the Rasch model with `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)), and summarizes the outfits, computed from `mirt`'s default (EAP) abilities and from maximum-likelihood ones. Then it generates data from the normal ogive and fits the logistic Rasch model anyway. The first run takes 20–30 seconds while R and `mirt` load, and the fits a minute or so more.
 
-With the seed as written, the maximum-likelihood outfits average 0.97 to 0.99, and their SD falls from 0.114 at 100 respondents to 0.043 at 1,600, against 0.141 and 0.035 from $\sqrt{2/n}$: the right size, not an exact match. The EAP outfits average 0.90 at every sample size, although the model is true. EAP pulls abilities toward the mean, so the residuals come out smaller than the model expects. Outfit assumes each ability comes from the respondent's own responses; with 20 items and EAP abilities, "near 1" means near 0.9. In the probit part, the estimated difficulties are 1.7 times the true ones (the constant $D$ again), while the outfits run from 0.72 to about 1.1 and no $|z|$ exceeds 1.9: the fit statistics don't notice that the curve has the wrong shape. Locally, try `ni <- 60`: with more items EAP pulls in less and the two outfits move closer.
+With the seed as written, the maximum-likelihood outfits average 0.97 to 0.99, with SDs of 0.114 at 100 respondents and 0.043 at 1,600 (against 0.141 and 0.035 from $\sqrt{2/n}$). The EAP outfits average 0.90 at every sample size, although the model is true. EAP pulls abilities toward the mean, so the residuals come out smaller than the model expects. Outfit assumes each ability comes from the respondent's own responses; with 20 items and EAP abilities, "near 1" means near 0.9. In the probit part, the estimated difficulties are 1.7 times the true ones (the constant $D$ again), while the outfits run from 0.72 to about 1.1 and no $|z|$ exceeds 1.9: the fit statistics don't notice that the curve has the wrong shape. 
 
 ```{webr}
 {{< include code/fit-prediction-sim.R >}}
@@ -327,7 +350,7 @@ Our main example is [gilbert_meta_2](https://itemresponsewarehouse.org/tables/gi
 #| code-fold: show
 ```
 
-From `mirt`'s defaults, outfit runs from 0.68 (item 15) to 1.08 (item 2), and 16 of the 20 items are below 1. The model-based null SDs run from 0.019 to 0.057, near $\sqrt{2/2174} = 0.03$, while the outfits have an SD of 0.11, and 13 items have $|z| > 2$. Two things temper that. With maximum-likelihood abilities (`outfit_ML`) the median is 1.00 rather than 0.92: part of the overfit is the EAP shrinkage from *Simulate*. And by size most departures are modest: 16 default outfits, and 14 maximum-likelihood ones, sit inside 0.8–1.2. What stands out is items 15 and 8 at one end and item 2, at 1.25 with maximum-likelihood abilities, at the other.
+From `mirt`'s defaults, outfit runs from 0.68 (item 15) to 1.08 (item 2), and 16 of the 20 items are below 1. The model-based null SDs run from 0.019 to 0.057, near $\sqrt{2/2174} = 0.03$, while the outfits have an SD of 0.11, and 13 items have $|z| > 2$. Two things temper that. With maximum-likelihood abilities (`outfit_ML`) the median is 1.00, not 0.92: part of the overfit is EAP shrinkage. And by size most departures are modest: 16 default outfits, and 14 maximum-likelihood ones, sit inside 0.8–1.2. What stands out is items 15 and 8 at one end and item 2, at 1.25 with maximum-likelihood abilities, at the other.
 
 ```{r slopes-gm2}
 #| echo: true
@@ -408,7 +431,7 @@ predict({
 #| code-fold: show
 ```
 
-The 2PL's IMV is 0.0088, smaller than in `gilbert_meta_2` despite the wider slopes: 0.0015 on items with fewer than 10% correct, 0.0154 on the rest. So "for which test does the 2PL help more?" depends on which responses we ask about. The IMV puts both gains on one scale, but no scale makes a test's items less extreme, and the tables also differ in length, design and who took them.
+The 2PL's IMV is 0.0088, smaller than in `gilbert_meta_2` despite the wider slopes: 0.0015 on items with fewer than 10% correct, 0.0154 on the rest. So "for which test does the 2PL help more?" depends on which responses we ask about. The IMV puts both gains on one scale, but no scale makes a test's items less extreme.
 
 So which model would I fit to a test like `gilbert_meta_2`? The 2PL. The tests said the Rasch model misfits, which at this sample size they would say of almost any test. What decides it for me is that the 2PL's out-of-sample gain, 0.012, is the size the benchmarks associate with substantial slope variation, while the 3PL's shrank to almost nothing on new responses. I'd spend a parameter per item for a gain of 0.01; I wouldn't for 0.0001.
 
@@ -466,7 +489,7 @@ if (is.null(dd)) {
 }
 ```
 
-The pilot checks the pipeline: `gilbert_meta_2`, on 2,000 of its students and different folds, lands near this lesson's values. On five-item tables, a 2PL or 3PL fitted without priors can lose a few hundredths: the extra parameters cost more in estimation noise than they return. The full run will say how often the 2PL helps and, read against the slope spreads in [From the 1PL to the 4PL](1pl-to-4pl.qmd), whether slope variation predicts the gain. The IRW's [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at the slopes themselves.
+The pilot checks the pipeline: `gilbert_meta_2` lands near this lesson's values. On five-item tables, a 2PL or 3PL fitted without priors can lose a few hundredths to estimation noise. The full run will say how often the 2PL helps and, read against the slope spreads in [From the 1PL to the 4PL](1pl-to-4pl.qmd), whether slope variation predicts the gain. The IRW's [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at the slopes themselves.
 
 ## Going further
 
