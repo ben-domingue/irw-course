@@ -370,6 +370,7 @@ ask_claude("likelihood", "It covers the likelihood and log likelihood, likelihoo
 - Gail, M. H., Wieand, S., & Piantadosi, S. (1984). Biased estimates of treatment effect in randomized experiments with nonlinear regressions and omitted covariates. *Biometrika*, 71(3), 431–444. <https://doi.org/10.1093/biomet/71.3.431>. The same phenomenon in randomized trials.
 - Albert, A., & Anderson, J. A. (1984). On the existence of maximum likelihood estimates in logistic regression models. *Biometrika*, 71(1), 1–10. <https://doi.org/10.1093/biomet/71.1.1>. When the MLE doesn't exist (problem 5).
 - van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. <https://doi.org/10.2307/30039042>. The Amsterdam Chess Test, and how it relates to Elo.
+- Albert, J. H. (2017). Logit, probit, and other response functions. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 3–22). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-1>. A handbook chapter on the logit, probit and other link functions for item responses.
 
 ```{r}
 #| output: asis
