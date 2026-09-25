@@ -163,7 +163,7 @@ quiz({
   options: [
     {text: "Always: alpha is a lower bound", correct: false, why: "Only under the classical assumptions, in particular uncorrelated errors. Correlated errors (items sharing a stem, a passage, a method) can push alpha *above* reliability."},
     {text: "When the item errors are uncorrelated", correct: true, why: "That's the assumption the proof needs. Given it, alpha ≤ reliability, with equality only for (essentially) tau-equivalent items."},
-    {text: "Only when the scale is unidimensional", correct: false, why: "Unidimensionality isn't what the proof uses. Alpha can be high for a multidimensional scale and is not a test of unidimensionality, a common misreading."}
+    {text: "Only when the scale is unidimensional", correct: false, why: "Unidimensionality isn't what the proof uses. Alpha can be high for a multidimensional scale; it is not a test of unidimensionality."}
   ]
 })
 ```
@@ -303,7 +303,7 @@ predict({
 #| code-fold: show
 ```
 
-An alpha of 0.37 is well below the 0.90 of the reading test. Now look at the item-rest correlations. They are small (none above 0.29, against a median of 0.49 in the reading test), and 17 of the 20 are *positive*, including m04 ("Most people are basically good and kind"), which points the opposite way from m01 ("Never tell anyone the real reason you did something unless it is useful to do so"; both items from Christie & Geis, 1970). Item-rest correlations can't tell us which items are reversed, because the total we correlate against is itself a mix of the two directions. The published key reverses ten of them:
+An alpha of 0.37 is well below the 0.90 of the reading test. Now look at the item-rest correlations. They are small (none above 0.29, against a median of 0.49 in the reading test), and 17 of the 20 are *positive*, including m04 ("Most people are basically good and kind"), which points the opposite way from m01 ("Never tell anyone the real reason you did something unless it is useful to do so"; both items from [Christie & Geis, 1970, ch. 2](https://doi.org/10.1016/B978-0-12-174450-2.50007-5), worded as in the item labels that come with the data). Item-rest correlations can't tell us which items are reversed, because the total we correlate against is itself a mix of the two directions. The published key reverses ten of them:
 
 ```{r mach-keyed}
 #| echo: true
@@ -346,7 +346,7 @@ ask_claude("ctt-reliability", "It covers classical test theory: true scores and 
 - Lord, F. M., & Novick, M. R. (1968). *Statistical theories of mental test scores*. Addison-Wesley. The canonical treatment of the classical model, true scores and parallel measurements.
 - Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *Psychometrika*, 16(3), 297–334. <https://doi.org/10.1007/BF02310555>. Where alpha gets its name, and the split-half result.
 - Novick, M. R., & Lewis, C. (1967). Coefficient alpha and the reliability of composite measurements. *Psychometrika*, 32(1), 1–13. <https://doi.org/10.1007/BF02289400>. The lower-bound proof and the conditions for equality.
-- Sijtsma, K. (2009). On the use, the misuse, and the very limited usefulness of Cronbach's alpha. *Psychometrika*, 74(1), 107–120. <https://doi.org/10.1007/s11336-008-9101-0>. A critique, with the glb as an alternative.
+- Sijtsma, K. (2009). On the use, the misuse, and the very limited usefulness of Cronbach's alpha. *Psychometrika*, 74(1), 107–120. <https://doi.org/10.1007/s11336-008-9101-0>. Argues that alpha says little about a test's internal structure and is a weaker lower bound than the glb, which it proposes instead.
 - Revelle, W., & Zinbarg, R. E. (2009). Coefficients alpha, beta, omega, and the glb: Comments on Sijtsma. *Psychometrika*, 74(1), 145–154. <https://doi.org/10.1007/s11336-008-9102-z>. The reply, which argues for omega.
 - McNeish, D. (2018). Thanks coefficient alpha, we'll take it from here. *Psychological Methods*, 23(3), 412–433. <https://doi.org/10.1037/met0000144>. A readable survey of the alternatives.
 - Green, S. B., & Hershberger, S. L. (2000). Correlated errors in true score models and their effect on coefficient alpha. *Structural Equation Modeling*, 7(2), 251–270. <https://doi.org/10.1207/S15328007SEM0702_6>. When alpha overstates reliability.
