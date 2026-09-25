@@ -2809,37 +2809,37 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">MI3</td>
-<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.1972892</td>
 <td style="text-align: right;">-1.70</td>
 <td style="text-align: right;">0.16</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">MI1</td>
-<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.3298193</td>
 <td style="text-align: right;">-0.79</td>
 <td style="text-align: right;">0.10</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">MH4</td>
-<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.3328313</td>
 <td style="text-align: right;">-0.86</td>
 <td style="text-align: right;">0.16</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">MD2</td>
-<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.7500000</td>
 <td style="text-align: right;">1.47</td>
 <td style="text-align: right;">0.20</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">MC1</td>
-<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.7665663</td>
 <td style="text-align: right;">1.54</td>
 <td style="text-align: right;">0.18</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">MA1</td>
-<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.8855422</td>
 <td style="text-align: right;">2.30</td>
 <td style="text-align: right;">0.12</td>
 </tr>
@@ -2872,13 +2872,13 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">MI1</td>
-<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.3298193</td>
 <td style="text-align: right;">-0.79</td>
 <td style="text-align: right;">0.10</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">MB4</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.3524096</td>
 <td style="text-align: right;">-0.98</td>
 <td style="text-align: right;">0.26</td>
 </tr>
@@ -2918,14 +2918,14 @@ r = 30 1.06  0.95</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>mean_easy mean_hard 
-      9.6       5.7 </code></pre>
+     9.61      5.70 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(r_easy <span class="sc">&gt;</span> r_hard)                 <span class="co"># share of students who score higher on the easy half</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.87</code></pre>
+<pre><code>[1] 0.871988</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2977,8 +2977,10 @@ r = 30 1.06  0.95</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">colMeans</span>(mud), <span class="dv">2</span>)               <span class="co"># proportion agreeing with each statement</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT CRIMDESERV 
-      0.44       0.65       0.67       0.46       0.48       0.44       0.35       0.35 </code></pre>
+<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT 
+      0.44       0.65       0.67       0.46       0.48       0.44       0.35 
+CRIMDESERV 
+      0.35 </code></pre>
 </div>
 </div>
 <p>Unkeyed, a higher total means agreeing with more statements, whatever they say, and KR-20 reflects that:</p>
@@ -2996,8 +2998,10 @@ r = 30 1.06  0.95</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">item_rest</span>(mud), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT CRIMDESERV 
-     -0.39      -0.62      -0.59       0.05       0.25       0.14      -0.06      -0.06 </code></pre>
+<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT 
+     -0.39      -0.62      -0.59       0.05       0.25       0.14      -0.06 
+CRIMDESERV 
+     -0.06 </code></pre>
 </div>
 </div>
 <p>KR-20 is −0.85, far below the zero of the coin flips, because the statements against capital punishment and those in favour pull in opposite directions.</p>
@@ -3045,8 +3049,10 @@ r = 30 1.06  0.95</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">item_rest</span>(keyed), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT CRIMDESERV 
-      0.47       0.73       0.74      -0.09       0.75       0.77       0.68       0.79 </code></pre>
+<pre><code>   HIDEOUS LIFESACRED INEFFECTIV DONTBELIEV WISHNOTNEC MUSTHAVEIT  DETERRENT 
+      0.47       0.73       0.74      -0.09       0.75       0.77       0.68 
+CRIMDESERV 
+      0.79 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -3091,9 +3097,9 @@ WISHNOTNEC  0.00  0.3 0.75 1.00  0.85</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Estimate Std. Error z value Pr(&gt;|z|)
-(Intercept)    -4.21       1.32    -3.2     0.00
-s               3.53       1.22     2.9     0.00
-I(s^2)         -0.42       0.18    -2.4     0.02</code></pre>
+(Intercept)    -4.21       1.32   -3.18     0.00
+s               3.53       1.22    2.89     0.00
+I(s^2)         -0.42       0.18   -2.36     0.02</code></pre>
 </div>
 </div>
 <p>Neighbouring scores are pooled where respondents are thin. DONTBELIEV rises from 0.44 among the most opposed to 0.75 in the 2–3 group, then falls back to 0.33 and 0.38: highest in the middle, though the peak rests on four respondents. WISHNOTNEC, the statement on the “in favour” side of the middle, rises from 0 to 1.00 at a score of 4 and then drops to 0.85 among the most in favour. A squared term in a logistic regression is negative (−0.42, standard error 0.18): the fitted curve turns over inside the range. Two respondents out of 13 make that dip, so WISHNOTNEC alone wouldn’t settle it; together with DONTBELIEV and what the statements say, it is what an unfolding process looks like with 54 respondents. A sum score, keyed or not, treats each statement as pointing one way. <a href="../lessons/unfolding.html">Unfolding models</a> returns to these data with a model built for them.</p>
@@ -3131,6 +3137,7 @@ I(s^2)         -0.42       0.18    -2.4     0.02</code></pre>
 <li>Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. <em>Applied Psychological Measurement</em>, 12(1), 33–51. <a href="https://doi.org/10.1177/014662168801200105" class="uri">https://doi.org/10.1177/014662168801200105</a>. The capital-punishment statements, and a model for them.</li>
 <li>Wainer, H., &amp; Kiely, G. L. (1987). Item clusters and computerized adaptive testing: A case for testlets. <em>Journal of Educational Measurement</em>, 24(3), 185–201. <a href="https://doi.org/10.1111/j.1745-3984.1987.tb00274.x" class="uri">https://doi.org/10.1111/j.1745-3984.1987.tb00274.x</a>. Where the testlet idea comes from (problem 4).</li>
 <li>IRW vignette: <a href="https://itemresponsewarehouse.org/vignettes/local_dependence.html">local dependence</a>. How often items in IRW tables share more than the construct.</li>
+<li>Sijtsma, K., &amp; Molenaar, I. W. (2016). Mokken models. In W. J. van der Linden (Ed.), <em>Handbook of item response theory: Vol. 1. Models</em> (pp.&nbsp;303–321). Chapman and Hall/CRC. <a href="https://doi.org/10.1201/9781315374512" class="uri">https://doi.org/10.1201/9781315374512</a>. A handbook chapter on Mokken’s nonparametric item response models.</li>
 </ul>
 </section>
 <section id="data-sources" class="level2">

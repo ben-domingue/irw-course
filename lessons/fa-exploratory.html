@@ -2502,10 +2502,10 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>domain
-        Agreeableness     Conscientiousness          Extraversion Negative Emotionality 
-                   12                    12                    12                    12 
-      Open-Mindedness 
-                   12 </code></pre>
+        Agreeableness     Conscientiousness          Extraversion 
+                   12                    12                    12 
+Negative Emotionality       Open-Mindedness 
+                   12                    12 </code></pre>
 </div>
 </div>
 <p>Responses run from 1 to 5, and they arrive keyed: the BFI-2’s reverse-worded items have already been reversed, so a higher response always means more of the item’s domain (for Negative Emotionality, more negative emotion). Neither the table’s metadata nor its processing code says so, and the data can only suggest it. If the reverse-worded items were still raw, many pairs of items from the same domain would correlate negatively. The lowest of these correlations is essentially zero:</p>
@@ -2616,7 +2616,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(ev[<span class="dv">1</span>] <span class="sc">/</span> ev[<span class="dv">2</span>], <span class="dv">2</span>)           <span class="co"># ratio of the first to the second eigenvalue</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.7</code></pre>
+<pre><code>[1] 1.67</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>

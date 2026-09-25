@@ -2091,7 +2091,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <strong>Tranche:</strong> preliminary (sets up the course)<br>
 <strong>Before this:</strong> none<br>
 <strong>Builds toward:</strong> <a href="../lessons/constructs.html">Constructs and construct maps</a> · <a href="../lessons/scale-properties.html">Scale properties: is the scale equal-interval?</a><br>
-<strong>Starts threads:</strong> Whether a scale has an equal unit changes group comparisons (→ <a href="../lessons/score-meaning.html">What does a score mean? Norms, error bands, and cut scores</a> · <a href="../lessons/equating.html">Linking and equating</a> · <a href="../lessons/scale-properties.html">Scale properties: is the scale equal-interval?</a>); A mean difference keeps its sign under every rescaling only under stochastic dominance (→ <a href="../lessons/scale-properties.html">Scale properties: is the scale equal-interval?</a> · <a href="../lessons/dif.html">Differential item functioning</a>); What we want from a measure: insensitive to nonfocal attributes, calibrated, precise quickly (→ <a href="../lessons/dif.html">Differential item functioning</a> · <a href="../lessons/validity-argument.html">Validity as an argument</a> · <a href="../lessons/information.html">Information, precision, and short forms</a> · <a href="../lessons/item-banks-cat.html">Item banks and adaptive testing</a>); Constructs are measured through probes (→ <a href="../lessons/constructs.html">Constructs and construct maps</a> · <a href="../lessons/instrument-building.html">From construct map to items: building an instrument</a>); Measurement as discovery; is the attribute quantitative? (→ <a href="../lessons/constructs.html">Constructs and construct maps</a> · <a href="../lessons/validity-causal.html">Validity as causation: Borsboom’s view</a>)<br>
+<strong>Starts threads:</strong> Whether a scale has an equal unit changes group comparisons (→ <a href="../lessons/score-meaning.html">What does a score mean? Norms, error bands, and cut scores</a> · <a href="../lessons/equating.html">Linking and equating</a> · <a href="../lessons/scale-properties.html">Scale properties: is the scale equal-interval?</a>); A mean difference keeps its sign under every rescaling only under stochastic dominance (→ <a href="../lessons/scale-properties.html">Scale properties: is the scale equal-interval?</a> · <a href="../lessons/dif.html">Differential item functioning</a>); What we want from a measure: insensitive to nonfocal attributes, calibrated, precise quickly (→ <a href="../lessons/dif.html">Differential item functioning</a> · <a href="../lessons/validity-argument.html">Validity as an argument</a> · <a href="../lessons/information.html">Information, precision, and short forms</a> · <a href="../lessons/item-banks-cat.html">Item banks and adaptive testing</a> · <a href="../lessons/fairness.html">Fairness in testing: bias, impact, and measurement invariance</a>); Constructs are measured through probes (→ <a href="../lessons/constructs.html">Constructs and construct maps</a> · <a href="../lessons/instrument-building.html">From construct map to items: building an instrument</a>); Measurement as discovery; is the attribute quantitative? (→ <a href="../lessons/constructs.html">Constructs and construct maps</a> · <a href="../lessons/validity-causal.html">Validity as causation: Borsboom’s view</a>)<br>
 <strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/gilbert_meta_12/"><code>gilbert_meta_12</code></a>, <a href="https://itemresponsewarehouse.org/tables/gilbert_meta_15/"><code>gilbert_meta_15</code></a><br>
 <strong>From EDUC 252:</strong> slides c1; problem sets PS1#4<br>
 <strong>Status:</strong> draft<br>
@@ -2825,12 +2825,12 @@ items_answered    0    1
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rbind</span>(<span class="at">k =</span> ks, <span class="at">effect =</span> vocab_eff), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>        [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
-k      -4.00 -3.50 -3.00 -2.50 -2.00 -1.50 -1.0 -0.5 0.00  0.50   1.0  1.50  2.00  2.50
-effect  0.16  0.19  0.22  0.27  0.33  0.41  0.5  0.6 0.68  0.71   0.7  0.67  0.63  0.59
-       [,15] [,16] [,17]
-k       3.00  3.50  4.00
-effect  0.55  0.51  0.47</code></pre>
+<pre><code>        [,1]  [,2]  [,3]  [,4]  [,5]  [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+k      -4.00 -3.50 -3.00 -2.50 -2.00 -1.50 -1.0 -0.5 0.00  0.50   1.0  1.50
+effect  0.16  0.19  0.22  0.27  0.33  0.41  0.5  0.6 0.68  0.71   0.7  0.67
+       [,13] [,14] [,15] [,16] [,17]
+k       2.00  2.50  3.00  3.50  4.00
+effect  0.63  0.59  0.55  0.51  0.47</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2872,10 +2872,10 @@ effect  0.55  0.51  0.47</code></pre>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(vocab_gap, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17 
-0.00 0.00 0.00 0.01 0.03 0.05 0.07 0.09 0.13 0.15 0.17 0.20 0.21 0.23 0.25 0.28 0.29 0.30 
-  18   19   20   21   22   23   24 
-0.30 0.27 0.23 0.17 0.10 0.04 0.00 </code></pre>
+<pre><code>   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15 
+0.00 0.00 0.00 0.01 0.03 0.05 0.07 0.09 0.13 0.15 0.17 0.20 0.21 0.23 0.25 0.28 
+  16   17   18   19   20   21   22   23   24 
+0.29 0.30 0.30 0.27 0.23 0.17 0.10 0.04 0.00 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>

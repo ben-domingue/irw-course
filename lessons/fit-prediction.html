@@ -3064,8 +3064,10 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">median_outfit =</span> <span class="fu">median</span>(fit2<span class="sc">$</span>outfit), <span class="at">median_outfit_ML =</span> <span class="fu">median</span>(fit2_ml<span class="sc">$</span>outfit)), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>        rough_null_sd observed_sd_of_outfit         median_outfit      median_outfit_ML 
-                0.030                 0.110                 0.920                 1.001 </code></pre>
+<pre><code>        rough_null_sd observed_sd_of_outfit         median_outfit 
+                0.030                 0.110                 0.920 
+     median_outfit_ML 
+                1.001 </code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -3319,10 +3321,10 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sort</span>(<span class="fu">setNames</span>(hi<span class="sc">$</span>b <span class="sc">-</span> lo<span class="sc">$</span>b, <span class="fu">names</span>(resp2))), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>item15  item8 item20 item16 item18  item1  item7 item13 item19 item14 item10 item12 
- -1.25  -1.24  -0.53  -0.47  -0.47  -0.41  -0.10  -0.07   0.05   0.11   0.17   0.27 
- item4 item17  item9  item5 item11  item6  item3  item2 
-  0.30   0.44   0.46   0.46   0.46   0.56   0.59   0.66 </code></pre>
+<pre><code>item15  item8 item20 item16 item18  item1  item7 item13 item19 item14 item10 
+ -1.25  -1.24  -0.53  -0.47  -0.47  -0.41  -0.10  -0.07   0.05   0.11   0.17 
+item12  item4 item17  item9  item5 item11  item6  item3  item2 
+  0.27   0.30   0.44   0.46   0.46   0.46   0.56   0.59   0.66 </code></pre>
 </div>
 </div>
 <p>Andersen’s test gives 459 on 19 degrees of freedom. Relative to the other items, items 15 and 8 are about 1.25 logits easier among students above the median sum score than below it, and item 2 is 0.66 harder: a steep item looks easy to the strong and hard to the weak. These are the overfitting items again. The tests agree that the Rasch model misfits; they leave open how much the 2PL, or the 3PL, helps.</p>
@@ -3645,12 +3647,18 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>                              table items respondents mean_p IMV_Rasch IMV_2PL IMV_3PL
- chuemchit_2024_nonpartner_violence     5         494   0.06    0.0017 -0.0273  0.0128
-     taylorabdulai_2025_info_source    12         377   0.66    0.3117  0.0006 -0.0064
-                        chess_lnirt    40         256   0.47    0.0539  0.0057 -0.0020
-                     gilbert_meta_2    20        2000   0.55    0.1281  0.0140  0.0012
-           peters_2025_si_intention     5        2000   0.33    0.0345  0.0275 -0.0067</code></pre>
+<pre><code>                              table items respondents mean_p IMV_Rasch IMV_2PL
+ chuemchit_2024_nonpartner_violence     5         494   0.06    0.0017 -0.0273
+     taylorabdulai_2025_info_source    12         377   0.66    0.3117  0.0006
+                        chess_lnirt    40         256   0.47    0.0539  0.0057
+                     gilbert_meta_2    20        2000   0.55    0.1281  0.0140
+           peters_2025_si_intention     5        2000   0.33    0.0345  0.0275
+ IMV_3PL
+  0.0128
+ -0.0064
+ -0.0020
+  0.0012
+ -0.0067</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -3699,6 +3707,9 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>Kim, J. S., Burkhauser, M. A., Relyea, J. E., Gilbert, J. B., Scherer, E., Fitzgerald, J., Mosher, D., &amp; McIntyre, J. (2023). A longitudinal randomized trial of a sustained content literacy intervention from first to second grade: Transfer effects on students’ reading comprehension. <em>Journal of Educational Psychology</em>, 115(1), 73–98. <a href="https://doi.org/10.1037/edu0000751" class="uri">https://doi.org/10.1037/edu0000751</a>. The study behind <code>gilbert_meta_2</code>.</li>
 <li>Romero, M., Sandefur, J., &amp; Sandholtz, W. A. (2020). Outsourcing education: Experimental evidence from Liberia. <em>American Economic Review</em>, 110(2), 364–400. <a href="https://doi.org/10.1257/aer.20181478" class="uri">https://doi.org/10.1257/aer.20181478</a>. The study behind <code>gilbert_meta_14</code>.</li>
 <li>From the IRW: the <a href="https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html">2PL discrimination vignette</a> (slopes across the warehouse’s cognitive tables).</li>
+<li>Glas, C. A. W. (2017). Frequentist model-fit tests. In W. J. van der Linden (Ed.), <em>Handbook of item response theory: Vol. 2. Statistical tools</em> (pp.&nbsp;343–362). Chapman and Hall/CRC. <a href="https://doi.org/10.1201/b19166-17" class="uri">https://doi.org/10.1201/b19166-17</a>. A handbook chapter on frequentist tests of model fit.</li>
+<li>Cohen, A. S., &amp; Cho, S.-J. (2017). Information criteria. In W. J. van der Linden (Ed.), <em>Handbook of item response theory: Vol. 2. Statistical tools</em> (pp.&nbsp;363–378). Chapman and Hall/CRC. <a href="https://doi.org/10.1201/b19166-18" class="uri">https://doi.org/10.1201/b19166-18</a>. A handbook chapter on information criteria, such as the AIC and BIC, for item response models.</li>
+<li>Wells, C. S., &amp; Hambleton, R. K. (2017). Model fit with residual analyses. In W. J. van der Linden (Ed.), <em>Handbook of item response theory: Vol. 2. Statistical tools</em> (pp.&nbsp;395–414). Chapman and Hall/CRC. <a href="https://doi.org/10.1201/b19166-20" class="uri">https://doi.org/10.1201/b19166-20</a>. A handbook chapter on assessing model fit with residuals.</li>
 </ul>
 </section>
 <section id="data-sources" class="level2">

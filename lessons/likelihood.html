@@ -2587,42 +2587,42 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y17</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">43</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y26</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">44</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y37</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">45</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y39</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">46</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y20</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">47</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Y36</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1.029805</td>
 </tr>
 </tbody>
 </table>
@@ -2661,8 +2661,8 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Estimate Std. Error z value Pr(&gt;|z|)
-(Intercept)    -0.14      0.020    -7.1        0
-cov_elo         0.50      0.021    23.3        0</code></pre>
+(Intercept)   -0.144      0.020  -7.073        0
+cov_elo        0.498      0.021  23.318        0</code></pre>
 </div>
 </div>
 <p>It does, clearly. A player one SD above the mean in Elo has log odds of solving a problem 0.50 higher, so the odds are multiplied by <span class="math inline">\(e^{0.50} \approx 1.6\)</span>. The standard error, 0.021, is small because we have over ten thousand responses. The same slope falls out of the likelihood directly:</p>
@@ -2695,8 +2695,8 @@ cov_elo         0.50      0.021    23.3        0</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>      (Intercept) cov_elo
-optim       -0.14     0.5
-glm         -0.14     0.5</code></pre>
+optim      -0.144   0.498
+glm        -0.144   0.498</code></pre>
 </div>
 </div>
 <p>The log likelihood peaks at the <code>glm()</code> estimate, and <code>optim()</code> on our own function lands in the same place.</p>
@@ -2813,6 +2813,7 @@ glm         -0.14     0.5</code></pre>
 <li>Gail, M. H., Wieand, S., &amp; Piantadosi, S. (1984). Biased estimates of treatment effect in randomized experiments with nonlinear regressions and omitted covariates. <em>Biometrika</em>, 71(3), 431–444. <a href="https://doi.org/10.1093/biomet/71.3.431" class="uri">https://doi.org/10.1093/biomet/71.3.431</a>. The same phenomenon in randomized trials.</li>
 <li>Albert, A., &amp; Anderson, J. A. (1984). On the existence of maximum likelihood estimates in logistic regression models. <em>Biometrika</em>, 71(1), 1–10. <a href="https://doi.org/10.1093/biomet/71.1.1" class="uri">https://doi.org/10.1093/biomet/71.1.1</a>. When the MLE doesn’t exist (problem 5).</li>
 <li>van der Maas, H. L. J., &amp; Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. <em>American Journal of Psychology</em>, 118(1), 29–60. <a href="https://doi.org/10.2307/30039042" class="uri">https://doi.org/10.2307/30039042</a>. The Amsterdam Chess Test, and how it relates to Elo.</li>
+<li>Albert, J. H. (2017). Logit, probit, and other response functions. In W. J. van der Linden (Ed.), <em>Handbook of item response theory: Vol. 2. Statistical tools</em> (pp.&nbsp;3–22). Chapman and Hall/CRC. <a href="https://doi.org/10.1201/b19166-1" class="uri">https://doi.org/10.1201/b19166-1</a>. A handbook chapter on the logit, probit and other link functions for item responses.</li>
 </ul>
 </section>
 <section id="data-sources" class="level2">

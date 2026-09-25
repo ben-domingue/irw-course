@@ -2865,8 +2865,10 @@ g11    0.46       0.87   1.00</code></pre>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">factor_cor_mirt =</span> cf<span class="sc">$</span>cov[<span class="dv">1</span>, <span class="dv">2</span>]), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>            cor_a             cor_b     largest_b_gap factor_cor_lavaan   factor_cor_mirt 
-             0.94              1.00              0.29              0.62              0.61 </code></pre>
+<pre><code>            cor_a             cor_b     largest_b_gap factor_cor_lavaan 
+             0.94              1.00              0.29              0.62 
+  factor_cor_mirt 
+             0.61 </code></pre>
 </div>
 </div>
 <p>The ordinal fit tells the same story in different numbers (CFI 0.906, RMSEA 0.112). The converted slopes track <code>mirt</code>’s (correlation 0.94; single items differ by up to 0.33), the difficulties agree closely (correlation 1.00), and the factor correlation is 0.62 by one route and 0.61 by the other. Item 11 has the weakest loading, 0.46; <a href="../lessons/dimensionality.html">Dimensionality and multidimensional IRT</a> meets it again.</p>
