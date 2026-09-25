@@ -257,7 +257,7 @@ lessons:
     tranche: extension
 
   - id: cdm
-    title: Cognitive diagnostic models
+    title: Latent classes and cognitive diagnosis
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
