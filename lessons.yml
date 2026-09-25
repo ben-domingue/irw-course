@@ -198,7 +198,7 @@ lessons:
     prereqs: [ability-estimation, fit-prediction]
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical, vocabulary_iq]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: dimensionality
