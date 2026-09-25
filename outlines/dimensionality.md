@@ -73,3 +73,13 @@ DOIs Crossref-checked 09-24.
 ## Open questions
 
 - **Home of deep dive #23** (how often unidimensionality and local independence hold across the IRW; issue #23 says `dimensionality` or `fa-exploratory`). *Default:* here, since it is this lesson's question and it pays off `rasch`'s assumption threads; `fa-exploratory` points forward to it.
+
+## Drafting notes (09-25, #43)
+
+- **Keying (florida_twins_grit):** the Florida twins table is raw (the processing script drops the reversed `n*` copies), unlike the Open Psychometrics `grit` table used in `fa-confirmatory`: the six perseverance items are reversed, as decided. Mindset: the four incremental-worded items (3, 5, 7, 8) are reversed, so higher = more incremental ("growth").
+- **Family id (digest D):** there is no family column. The processing script stacks twin 0 and twin 1 of each family, so family = `id %/% 100`; the 777 respondents come from 386 complete pairs plus 5 singletons. Noted where standard errors would matter.
+- **Numbers recomputed:** all of the outline's numbers reproduce except qgrit11's item-rest correlation (−0.10, not −0.08) and the IMV: 0.0116 for the confirmatory 2D model (5-fold, no priors), 0.0075 for the exploratory one. The exploratory IMV needs `fscores(rotate = "none")`; with `mirt`'s default rotated abilities it came out at −0.21, which became a teaching point (the rotation widget's toggle).
+- **Added:** a partially compensatory option in the surface widget (Whitely, 1980); a precomputed sweep of the simulation across correlations (too slow for webR); the wording-direction and omega threads paid on the mindset items (two wording dimensions correlate 0.68; method-factor bifactor, omega_h 0.80, omega_t 0.94, alpha 0.87); Q3 on the grit/mindset model.
+- **Changed:** problem 3 is now about the mindset wording split (the grit/mindset verdict is given in the text); problem 2 asks the reader to refit with qgrit11 rekeyed or dropped. Problem 6 paraphrases the c6 slide rather than quoting it.
+- **Deep dive #23:** `deepdives/dimensionality/compute.R` (IMV of an exploratory 2D over a 1D 2PL, items split near the median, 6–40 items, ≥500 respondents); pilot only (5 tables), partial-run callout shows.
+- **Dropped:** the compensation-trade widget as a separate widget (folded into the surface widget's readout).
