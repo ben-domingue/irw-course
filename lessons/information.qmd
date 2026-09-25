@@ -43,7 +43,30 @@ By the end of this lesson you should be able to:
 **Recall** from [The likelihood and logistic regression](likelihood.qmd): a sharper peak in the log likelihood means a more precise estimate. The negative of the second derivative at the peak is the **Fisher information**, and one over its square root is the standard error. Observations with a probability near 0 or 1 add almost nothing, because each contributes a term $p(1-p)$.
 :::
 
-Nothing in that argument was specific to coins. Take one respondent, hold the item parameters fixed, and treat $\theta$ as the unknown: the observations are that respondent's answers, and the log likelihood for $\theta$ is a sum over items ([Birnbaum, 1968](https://openlibrary.org/works/OL6568286W); [Lord, 1980](https://doi.org/10.4324/9780203056615)). Its curvature says how sure we can be about this respondent's $\theta$. What makes it sharper: more items, or better-placed ones?
+Nothing in that argument was specific to coins. Take one respondent, hold the item parameters fixed, and treat $\theta$ as the unknown: the observations are that respondent's answers, and the log likelihood for $\theta$ is a sum over items ([Birnbaum, 1968](https://openlibrary.org/works/OL6568286W); [Lord, 1980](https://doi.org/10.4324/9780203056615)). Its curvature says how sure we can be about this respondent's $\theta$. The general formula for that curvature, the **information function**, is in the Go deeper callout below; the rest of the lesson uses its special cases, one model at a time. What makes it sharper: more items, or better-placed ones?
+
+::: {.callout-note collapse="true"}
+## Go deeper: the information function in general
+
+**Assumptions:** one respondent answers $I$ dichotomous items; the item parameters are known; $P_i(\theta) = \Pr(x_i = 1 \mid \theta)$ is a smooth function of $\theta$, with derivative $P_i'(\theta)$; responses are locally independent given $\theta$. No particular item model is assumed until the last step.
+
+**Definition.** The log likelihood for $\theta$ is $\ell(\theta) = \sum_i \big[x_i \log P_i + (1 - x_i)\log(1 - P_i)\big]$, a sum because local independence makes the probability of the pattern a product. Its derivative, the **score**, is
+$$\frac{\partial \ell}{\partial \theta} = \sum_i \frac{P_i'\,(x_i - P_i)}{P_i(1 - P_i)}.$$
+The **Fisher information** for $\theta$ is the expected negative second derivative of $\ell$, which equals the variance of the score ([Fisher, 1925](https://doi.org/10.1017/S0305004100009580)):
+$$I(\theta) = -\,E\!\left[\frac{\partial^2 \ell}{\partial \theta^2}\right] = \text{Var}\!\left[\frac{\partial \ell}{\partial \theta}\right].$$
+
+**One item.** Each term of the score has mean 0, and $x_i$ has variance $P_i(1 - P_i)$, so
+$$I_i(\theta) = \frac{P_i'(\theta)^2}{P_i(\theta)\,\big(1 - P_i(\theta)\big)}.$$
+**The test.** Under local independence the terms are independent, so their variances add: $I(\theta) = \sum_i I_i(\theta)$ ([Birnbaum, 1968](https://openlibrary.org/works/OL6568286W); [Lord, 1980](https://doi.org/10.4324/9780203056615)). If two items share something beyond $\theta$ (a reading passage, say), their terms are positively correlated and the sum overstates what the pair tells us ([Sireci, Thissen & Wainer, 1991](https://doi.org/10.1111/j.1745-3984.1991.tb00356.x), show the same problem in reliability).
+
+**The special cases.** Only $P_i'$ changes from model to model.
+
+- Rasch: $P' = P(1 - P)$, so $I_i = P(1-P)$, a Bernoulli variance, at most $1/4$, at $\theta = b$.
+- 2PL: $P' = aP(1 - P)$, so $I_i = a^2P(1-P)$. The score is $\sum_i a_i(x_i - P_i)$, the weighted score minus its expectation, and its second derivative contains no $x_i$, so the observed curvature equals the expected information: a test has one information curve, drawn before anyone takes it.
+- 3PL: $P = c + (1 - c)L$ with $L = \text{logit}^{-1}(a(\theta - b))$, so $P' = a(P - c)(1 - P)/(1 - c)$ and $I_i = a^2\frac{(P - c)^2}{(1 - c)^2}\frac{1 - P}{P}$. Here the observed curvature depends on the responses, and this is the expected information.
+
+The standard error $1/\sqrt{I(\theta)}$ is a large-sample approximation, as it was for the coin; with few items, or near the ends of the scale, it can mislead, and the simulation below shows where.
+:::
 
 #### Try it: one respondent's likelihood
 
@@ -91,7 +114,7 @@ At the defaults this respondent gets 3 of 10 right, and the estimate, −1.01, l
 
 Each item adds one term to the curvature. Under the Rasch model that term is
 $$I_i(\theta) = P_i(\theta)\,\big(1 - P_i(\theta)\big),$$
-the variance of a single 0/1 response. It is largest, 1/4, where $P_i = 1/2$, which under the Rasch model is at $\theta = b_i$, and it fades on either side: a respondent far above or below an item almost always gives the answer we'd have predicted, and a predictable answer carries little news. The Go deeper callout below derives it.
+the variance of a single 0/1 response. It is largest, 1/4, where $P_i = 1/2$, which under the Rasch model is at $\theta = b_i$, and it fades on either side: a respondent far above or below an item almost always gives the answer we'd have predicted, and a predictable answer carries little news. The Go deeper callout above gives the general formula it comes from.
 
 The 2PL multiplies it by the squared slope,
 $$I_i(\theta) = a_i^2\,P_i(\theta)\,\big(1 - P_i(\theta)\big),$$
@@ -103,7 +126,7 @@ so an item with $a = 2$ carries four times the information of a Rasch item at it
 
 Information is where that weighting shows up in precision. Each term of the score equation is $a_i$ times a Bernoulli residual, so its variance is $a_i^2 P_i(1-P_i)$: the item's weight, squared, times the Bernoulli variance. Items that count for more in the score also tell us more about $\theta$, and an item with a slope near zero tells us almost nothing wherever it sits.
 
-The 3PL adds a lower asymptote $c$, and the information becomes
+The 3PL adds a lower asymptote $c$, and the information (the expected information; see the callout above) becomes
 $$I_i(\theta) = a_i^2\,\frac{\big(P_i - c_i\big)^2}{(1 - c_i)^2}\,\frac{1 - P_i}{P_i}.$$
 With $c > 0$ it falls, most of all below the item's difficulty, where a correct answer may be a guess and so says less about $\theta$; the peak moves above $b$ (problem 1 finds by how much). What fixing $c$ or giving it a prior does to information at the bottom of the scale is for [Guessing and priors](guessing-priors.qmd).
 
@@ -163,32 +186,6 @@ quiz({
   ]
 })
 ```
-
-::: {.callout-note collapse="true"}
-## Go deeper: item information from the second derivative, and why it adds
-
-**Assumptions:** one respondent answers $I$ dichotomous items; responses are locally independent given $\theta$; the item parameters are known; the 2PL holds, $P_i = \text{logit}^{-1}\big(a_i(\theta - b_i)\big)$ (the Rasch model is $a_i = 1$).
-
-**The log likelihood is a sum.** Local independence makes the probability of the pattern a product over items, so
-$$\ell(\theta) = \sum_{i=1}^{I} \Big[x_i \log P_i + (1 - x_i)\log(1 - P_i)\Big].$$
-
-**First derivative.** Since $\partial P_i/\partial\theta = a_i P_i(1-P_i)$, the same algebra as in the Go deeper callout of [The likelihood and logistic regression](likelihood.qmd) gives
-$$\frac{\partial \ell}{\partial \theta} = \sum_i a_i\,(x_i - P_i).$$
-
-**Second derivative.** Differentiate again. The $x_i$ are constants, so only $P_i$ moves:
-$$\frac{\partial^2 \ell}{\partial \theta^2} = -\sum_i a_i\,\frac{\partial P_i}{\partial\theta} = -\sum_i a_i^2\,P_i(1 - P_i).$$
-Its negative is the information,
-$$I(\theta) = \sum_i a_i^2\,P_i(\theta)\big(1 - P_i(\theta)\big) = \sum_i I_i(\theta).$$
-Three things follow.
-
-1. **It doesn't depend on the responses.** For the Rasch model and the 2PL the curvature involves no $x_i$, so the observed information (the curvature for this pattern) equals the expected information ([Fisher, 1925](https://doi.org/10.1017/S0305004100009580)). That is why a test has one information curve, which can be drawn before anyone takes it.
-2. **It is a variance.** Each term of the first derivative, $a_i(x_i - P_i)$, has mean 0 and variance $a_i^2 P_i(1 - P_i)$. Under local independence the terms are independent, so the variance of the whole score is the sum. A Bernoulli variance $p(1-p)$ is largest at $p = 1/2$, where it is $1/4$, which is why a Rasch item is most informative at $\theta = b$ and never gives more than 1/4.
-3. **It adds, and only because of local independence.** If two items share something beyond $\theta$ (a reading passage, say), their residuals are positively correlated, the variance of the score is no longer the sum of the item variances, and adding their informations overstates how much the pair tells us about $\theta$ (see [Sireci, Thissen & Wainer, 1991](https://doi.org/10.1111/j.1745-3984.1991.tb00356.x), for the same problem in reliability).
-
-The standard error $1/\sqrt{I(\theta)}$ is a large-sample approximation, as it was for the coin. With few items, or near the ends of the scale, it can mislead; the simulation below shows where.
-
-For the 3PL, the second derivative does involve the $x_i$ (the weight in its score equation depends on $\theta$; see [From the 1PL to the 4PL](1pl-to-4pl.qmd)), and the formula in the main text is the expected information. Problem 1 derives it.
-:::
 
 ### Information adds; precision follows
 
@@ -441,7 +438,7 @@ That is what a screening scale is for. Its items are ones few people endorse, so
 
 ## Problems
 
-1. **The 3PL's information.** Starting from $P = c + (1 - c)L$ with $L = \text{logit}^{-1}(a(\theta - b))$, show that the expected information of a 3PL item is $a^2\frac{(P - c)^2}{(1 - c)^2}\frac{1 - P}{P}$. (Use $I(\theta) = (\partial P/\partial\theta)^2 / [P(1-P)]$, which holds for any dichotomous item.) Then show that it peaks at $\theta = b + \frac{1}{a}\log\frac{1 + \sqrt{1 + 8c}}{2}$, and check the answer against the widget with $a = 1$ and $c = 0.25$. (PS3#1)
+1. **The 3PL's information.** Starting from $P = c + (1 - c)L$ with $L = \text{logit}^{-1}(a(\theta - b))$ and the general formula $I = P'^2/[P(1-P)]$, fill in the algebra that gives the 3PL item information $a^2\frac{(P - c)^2}{(1 - c)^2}\frac{1 - P}{P}$. Then show that it peaks at $\theta = b + \frac{1}{a}\log\frac{1 + \sqrt{1 + 8c}}{2}$, and check the answer against the widget with $a = 1$ and $c = 0.25$. (PS3#1)
 2. **Three items.** A test has three Rasch items with $b = -1, 0, 1.5$. Write down the test information, plot it, and find where it is largest. What is the CSEM there, and at $\theta = 3$? Which single item would you add to bring the CSEM at $\theta = 3$ below 1? (PS4#1)
 3. **What can go?** In the financial-literacy test, which three items could you drop with the least loss of information below $\theta = 0$? Define "below $\theta = 0$" yourself (a point, an average over a range, an average over the respondents there), and say whether your answer depends on the choice.
 4. **Design a form.** Ten Rasch items have difficulties $-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2$. Find the best five-item form for $\theta = -1$ and its CSEM there. Then draw ten random five-item forms and compare. How often does a random form come within 10% of the best one's information? (PS6#3)
@@ -478,6 +475,6 @@ data_sources("information")
 
 - **Source:** EDUC 252 class 3 (slides c3, 35–42) and class 4 (slide 49), problem sets 3 (#1), 4 (#1) and 6 (#3), and the code in `ben-domingue/252`: `c4/info.R`.
 - **Timing:** the core ideas and widgets take about 60 minutes; the two real-data analyses work as a 30-minute lab. The fits take a few seconds each in local R.
-- **Changed from 252:** 2PL and 3PL information are taught here directly, since the lesson follows [From the 1PL to the 4PL](1pl-to-4pl.qmd). The contrast table uses one subscale of the Wisconsin Schizotypy Scales (Perceptual Aberration) rather than all 60 items, because the four subscales form two nearly uncorrelated groups and one information curve assumes one $\theta$. The Rasch and 2PL item-information derivation is a Go deeper callout; problem 1 extends it to the 3PL.
+- **Changed from 252:** 2PL and 3PL information are taught here directly, since the lesson follows [From the 1PL to the 4PL](1pl-to-4pl.qmd). The contrast table uses one subscale of the Wisconsin Schizotypy Scales (Perceptual Aberration) rather than all 60 items, because the four subscales form two nearly uncorrelated groups and one information curve assumes one $\theta$. The general information function, with the Rasch, 2PL and 3PL cases and additivity, is one Go deeper callout at the top of Core ideas (Ben, 09-25); problem 1 fills in the 3PL algebra and finds its peak.
 - **Held back:** the standard error of an individual estimate, and respondents with perfect or zero scores ([Estimating abilities](ability-estimation.qmd)); choosing items by information one at a time ([Item banks and adaptive testing](item-banks-cat.qmd)); error bands on reported scores and precision at cut scores ([What does a score mean?](score-meaning.qmd)); what fixing $c$ or giving it a prior does to information at the bottom of the scale ([Guessing and priors](guessing-priors.qmd)); information from polytomous items ([Models for polytomous responses](polytomous.qmd)) and from distractors ([Nominal response and multiple-choice models](nominal.qmd)). Local dependence, which inflates information, is named here; the lessons that treat it ([Dimensionality and multidimensional IRT](dimensionality.qmd), [Explanatory item response models](explanatory-irt.qmd)) are outside this lesson's prerequisite chain.
 - **Solutions:** held back in `solutions/information.qmd` (not published).

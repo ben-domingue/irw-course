@@ -78,3 +78,11 @@ Wordsum sources: Thorndike (1942), doi:10.1037/h0060053; Cor et al. (2012), doi:
 - PS5#2b (out-of-sample prediction with MLE vs. EAP) is mentioned in the solution to problem 5 rather than posed.
 - A brief "if you've done" Recall of `fit-prediction` (not an ancestor) explains why EAP abilities pull outfit to about 0.9.
 
+
+## Revisions after Ben's review (09-25, #135)
+
+- New subsection *The weighted likelihood estimate* near the end of Core ideas: Warm's correction, its finiteness (Magis & Verhelst, 2017, for the 1PL–4PL), its link to Firth (1993) and separation (Heinze & Schemper, 2002), where it equals the Jeffreys-prior mode (Magis & Raîche, 2012), the evidence (Warm's Monte Carlo studies; Kim & Nicewander, 1993) and the cost (no shrinkage; RMSE 0.77 against the EAP's 0.61 in the simulation). No source found calls it optimal in general, so the lesson doesn't.
+- *Perfect patterns* now points to the WLE as a finite, prior-free alternative; the Go deeper cites Magis & Verhelst (2017).
+- A Recall of `1pl-to-4pl`'s Go deeper: under the 3PL no simple statistic is sufficient, so estimates depend on the whole pattern.
+- The verdict adds the WLE as the choice when a prior is unwelcome.
+- Trimmed to stay near 3,000 words: the four-estimator bullet list became a short MAP/EAP paragraph (the WLE has its own subsection), and Simulate, the real-data intro, the widget commentary and the Problems were tightened.

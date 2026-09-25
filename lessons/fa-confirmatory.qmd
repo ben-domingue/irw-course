@@ -247,11 +247,11 @@ With one factor this is $\Phi\big(a(\eta - b_k)\big)$ with $a = \lambda/\sqrt{1-
 **Why the numbers differ in practice.** The model is the same; the estimators are not. `lavaan`'s WLSMV estimates thresholds and polychoric correlations, which use the data one or two items at a time ([Muthén, 1984](https://doi.org/10.1007/BF02294210); [Flora & Curran, 2004](https://doi.org/10.1037/1082-989X.9.4.466)). `mirt` maximizes the likelihood of whole response patterns. When the model holds they converge on the same values as the sample grows; in a finite sample they differ by sampling error, by the logistic approximation, and wherever the model misfits, since the two estimators weigh the misfit differently.
 :::
 
-When can Likert items be treated as numbers? In simulations by [Rhemtulla, Brosseau-Liard and Savalei (2012)](https://doi.org/10.1037/a0029315), robust maximum likelihood did about as well as the categorical estimator with five or more roughly symmetric categories, and the categorical estimator did better with fewer. Grit has five categories with no pile-up at either end; the DASS-21 has four, most responses at zero. We treat them accordingly.
+When can Likert items be treated as numbers? In simulations by [Rhemtulla, Brosseau-Liard and Savalei (2012)](https://doi.org/10.1037/a0029315), robust maximum likelihood kept up with the categorical estimator given five or more roughly symmetric categories, not fewer. Grit has five balanced categories; the DASS-21 has four, piled at zero.
 
 ### Does the model hold in both groups?
 
-Do women and men with the same level of anxiety answer an anxiety item the same way? If not, a difference in their scores is partly a difference in the items. **Measurement invariance** ([Meredith, 1993](https://doi.org/10.1007/BF02294825)) asks this of a factor model fitted to two or more groups at once, in steps that add constraints ([Vandenberg & Lance, 2000](https://doi.org/10.1177/109442810031002); [Millsap, 2011](https://doi.org/10.4324/9780203821961); [Putnick & Bornstein, 2016](https://doi.org/10.1016/j.dr.2016.06.004)):
+Do women and men with the same level of anxiety answer an anxiety item the same way? **Measurement invariance** ([Meredith, 1993](https://doi.org/10.1007/BF02294825)) asks this of a factor model fitted to two or more groups at once, in steps that add constraints ([Vandenberg & Lance, 2000](https://doi.org/10.1177/109442810031002); [Millsap, 2011](https://doi.org/10.4324/9780203821961); [Putnick & Bornstein, 2016](https://doi.org/10.1016/j.dr.2016.06.004)):
 
 - **configural**: the same items load on the same factors in every group;
 - **metric**: the loadings are equal, so a unit of the factor means the same thing in each group;
@@ -292,13 +292,13 @@ Plot.plot({
 md`Here ${inv.level}. Sum-score gap, B minus A: **${inv.gap.toFixed(2)}** SDs of group A's sum score; if item 4 were invariant it would be **${inv.fair.toFixed(2)}**. (Dashed lines: each group's factor mean.)`
 ```
 
-With both item-4 controls at 0 the lines coincide, and the sum-score gap (0.45 SD) is the latent 0.5 SD shrunk by unreliability. Set the true gap to 0 and item 4's intercept to 0.3: the sum scores differ by 0.10 SD between groups that don't differ at all. A loading difference makes the lines cross, so the item favours one group at low levels and the other at high levels.
+With both item-4 controls at 0 the lines coincide, and the sum-score gap (0.45 SD) is the latent 0.5 SD shrunk by unreliability. Set the true gap to 0 and item 4's intercept to 0.3: the sum scores differ by 0.10 SD between groups that don't differ at all. A loading difference makes the lines cross.
 
 ## Simulate
 
-The code simulates 1,000 respondents answering eight four-category items from two correlated factors, fits the CFA with `lavaan` (items ordered) and the graded model with `mirt` (one factor at a time, to keep it quick), and puts both on the logistic IRT scale. The first run takes 20–30 seconds while the packages load.
+The code simulates 1,000 respondents answering eight four-category items from two correlated factors, fits the CFA with `lavaan` and the graded model with `mirt`, and puts both on the logistic IRT scale. The first run takes 20–30 seconds.
 
-With the seed as written, every slope from either route is within 0.3 of the truth, and the steepest items miss by the most; `lavaan` puts the factor correlation at 0.36, against a true 0.4. Set `np <- 300` and the slopes scatter; with 5,000 respondents (locally) they settle on the truth.
+With the seed as written, every slope from either route is within 0.3 of the truth, and the factor correlation comes out at 0.36 (true 0.4). Set `np <- 300` and the slopes scatter; with 5,000 respondents they settle.
 
 ```{webr}
 {{< include code/fa-confirmatory-sim.R >}}
@@ -341,14 +341,14 @@ The data reject it: one factor gives a CFI of 0.758 and an RMSEA of 0.128. The d
 #| code-fold: show
 ```
 
-The two ways of setting the scale give the same χ² on 53 degrees of freedom; only the loadings' units change.
+Both ways of setting the scale give the same χ² on 53 df; only the loadings' units change.
 
 ```{r grit-omega}
 #| echo: true
 #| code-fold: show
 ```
 
-Omega and alpha nearly agree (0.777 and 0.772 for perseverance): the loadings run from 0.44 to 0.86, so the items aren't tau-equivalent, but the gap is small, as the widget suggested.
+Omega and alpha nearly agree (0.777 and 0.772 for perseverance): the loadings run from 0.44 to 0.86, but the gap is small, as the widget suggested.
 
 Now the items as ordered categories, and the same model as a graded response model in `mirt`:
 
@@ -362,7 +362,7 @@ Now the items as ordered categories, and the same model as a graded response mod
 #| code-fold: show
 ```
 
-The ordinal fit tells the same story in different numbers (CFI 0.906, RMSEA 0.112). The converted slopes track `mirt`'s (correlation 0.94), though single items differ by up to 0.33. The category difficulties agree closely (correlation 1.00, largest gap 0.29), and the factor correlation is 0.62 by one route and 0.61 by the other. Item 11 has the weakest loading, 0.46; [Dimensionality and multidimensional IRT](dimensionality.qmd) meets it again.
+The ordinal fit tells the same story in different numbers (CFI 0.906, RMSEA 0.112). The converted slopes track `mirt`'s (correlation 0.94; single items differ by up to 0.33), the difficulties agree closely (correlation 1.00), and the factor correlation is 0.62 by one route and 0.61 by the other. Item 11 has the weakest loading, 0.46; [Dimensionality and multidimensional IRT](dimensionality.qmd) meets it again.
 
 ### The DASS-21: three scales or one?
 
@@ -404,7 +404,7 @@ The factors correlate 0.84 to 0.87. One factor fits a little worse (CFI 0.948 ag
 
 Omega total is 0.944 and omega hierarchical 0.879: one general factor accounts for almost all of the total score's reliable variance. Within each scale, the specific factor's share of the scale score is 0.24 for depression, 0.23 for anxiety and 0.002 for stress; the stress items carry almost nothing beyond general distress.
 
-Should a clinic report three DASS scores or one? The subscales add information only through their specific factors. In these data those are small, and the DASS authors describe the total as a sensible composite ([DASS FAQ, no. 26](https://www2.psy.unsw.edu.au/dass/DASSFAQ.htm)). For a community sample like this one, I would report the total, and the depression and anxiety scores only alongside it. A clinical sample could give a different answer.
+Should a clinic report three DASS scores or one? The subscales add information only through their specific factors, which are small here, and the DASS authors describe the total as a sensible composite ([DASS FAQ, no. 26](https://www2.psy.unsw.edu.au/dass/DASSFAQ.htm)). For a community sample like this one, I would report the total, and the depression and anxiety scores only alongside it. A clinical sample could give a different answer.
 
 ### Invariance: women and men
 
@@ -422,7 +422,7 @@ Equal loadings cost almost nothing (a scaled Δχ² of 13.5 on 18 df, $p = 0.76$
 #| code-fold: show
 ```
 
-The constraint under most strain is item 16's intercept ("I was unable to become enthusiastic about anything", in the wording of the [English DASS-21](https://www2.psy.unsw.edu.au/dass/Download%20files/Dass21.pdf); Lovibond & Lovibond, 1995), with a score test of 6.9 on 1 df. That is not unusual among 39 tests: its $p$-value is 0.009, and with 39 independent tests at least one that small turns up by chance about three times in ten ($1 - 0.991^{39} \approx 0.30$).
+The constraint under most strain is item 16's intercept ("I was unable to become enthusiastic about anything", in the wording of the [English DASS-21](https://www2.psy.unsw.edu.au/dass/Download%20files/Dass21.pdf); Lovibond & Lovibond, 1995), with a score test of 6.9 on 1 df. Its $p$-value is 0.009, and among 39 independent tests one that small turns up by chance about three times in ten ($1 - 0.991^{39} \approx 0.30$).
 
 ```{r dass-means}
 #| echo: true
@@ -437,16 +437,16 @@ With scalar invariance the factor means can be compared: women sit 0.16 SD above
 #| warning: false
 ```
 
-As ordered categories, the verdict is the same: CFI from 0.978 to 0.987 and RMSEA at most 0.050 at every step. (Some top categories hold a single response in one group, and with data this sparse the scaled χ² behaves erratically, so we don't report difference tests for this version.) The DASS-21 passes. Problem 4 gives a scale that doesn't.
+As ordered categories the verdict is the same (CFI 0.978 to 0.987, RMSEA at most 0.050); with top categories this sparse, we don't trust its difference tests. The DASS-21 passes. Problem 4 gives a scale that doesn't.
 
 ## Problems
 
 1. **Omega and alpha.** Show that under a one-factor model with equal loadings $\lambda$ and equal unique variances, omega equals alpha. Then show that with unequal loadings (and uncorrelated errors) alpha is smaller.
 2. **The probit link.** Starting from $y^* = \lambda\eta + \varepsilon$ with $\text{var}(y^*) = 1$, derive the normal-ogive slope and difficulty of a dichotomized item. Use your result on grit: which facet's items discriminate better, and does `mirt` agree?
-3. **A patch or a finding?** Run `modindices()` on the two-factor grit model. Among the largest suggestions is a correlated error between items 3 and 11. Add it. How much does fit improve? Given the codebook's stems ("My interests...", "I become..."), is it a finding about the construct or a patch? Can any model of these data separate consistency of interest from wording direction ([From construct map to items](instrument-building.qmd))?
-4. **Where invariance breaks.** Fit a one-factor model to the 20-item CES-D ([Radloff, 1977](https://doi.org/10.1177/014662167700100306)) in [alexandrowicz_2018_cesd](https://itemresponsewarehouse.org/tables/alexandrowicz_2018_cesd/) ([Alexandrowicz, Jahn & Wancata, 2018](https://doi.org/10.1371/journal.pone.0197908)) across `cov_sex`, and climb the ladder. Where does it fail? Find the constraint with the largest score test, free it, and compare the latent means with and without partial invariance. (The paper reports 264 women among 518 respondents; the table has 263 coded 2 among 514, so 2 is probably women, but the processing script doesn't say.)
+3. **A patch or a finding?** (a) Run `modindices()` on the two-factor grit model. Among the largest suggestions is a correlated error between items 3 and 11. Add it. How much does fit improve? Given the codebook's stems ("My interests...", "I become..."), is it a finding about the construct or a patch? Can any model of these data separate consistency of interest from wording direction ([From construct map to items](instrument-building.qmd))? (b) Dichotomize the keyed items (4 or 5 against the rest), fit the one- and two-factor models as binary CFAs, and compare them by the IMV on held-out respondents with five-fold cross-validation, as [Zhang et al. (2026)](https://doi.org/10.1080/00273171.2026.2645212) do. ([Model fit and out-of-sample prediction](fit-prediction.qmd) introduces the IMV.) Does prediction tell the same story as the fit indices, and for every item?
+4. **Where invariance breaks.** Fit a one-factor model to the 20-item CES-D ([Radloff, 1977](https://doi.org/10.1177/014662167700100306)) in [alexandrowicz_2018_cesd](https://itemresponsewarehouse.org/tables/alexandrowicz_2018_cesd/) ([Alexandrowicz, Jahn & Wancata, 2018](https://doi.org/10.1371/journal.pone.0197908)) across `cov_sex`, and climb the ladder. Where does it fail? Free the constraint with the largest score test and compare the latent means with and without it. (The paper reports 264 women of 518; the table has 263 coded 2 of 514, so 2 is probably women, but nothing documents it.)
 5. **Design.** You want to compare DASS-21 scores across the education levels in `cov_education`. Which level of invariance do you need to compare means, and which to compare the depression–anxiety correlation? What would you do if one item's intercept failed in one group? Check the group sizes first.
-6. **Challenge (open).** [Credé, Tynan and Harms (2017)](https://doi.org/10.1037/pspp0000102) argue from a meta-analysis that grit overlaps heavily with conscientiousness. What confirmatory model would test that, and what data would you need? Given that fit indices miss some kinds of misfit, how would you guard against that? I don't know of a settled answer.
+6. **Challenge (open).** [Credé, Tynan and Harms (2017)](https://doi.org/10.1037/pspp0000102) argue from a meta-analysis that grit overlaps heavily with conscientiousness. What confirmatory model would test that, and what data would you need? I don't know of a settled answer.
 
 ```{r}
 #| output: asis
@@ -459,6 +459,7 @@ ask_claude("fa-confirmatory", "It covers confirmatory factor analysis with lavaa
 - Rosseel, Y. (2012). lavaan: An R package for structural equation modeling. *Journal of Statistical Software*, 48(2). <https://doi.org/10.18637/jss.v048.i02>. The package and its syntax; [Structural equation modeling with lavaan](sem.qmd) adds paths between factors.
 - Hu, L., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. *Structural Equation Modeling*, 6(1), 1–55. <https://doi.org/10.1080/10705519909540118>. Where the cutoffs come from, and under which conditions.
 - Marsh, H. W., Hau, K.-T., & Wen, Z. (2004). In search of golden rules. *Structural Equation Modeling*, 11(3), 320–341. <https://doi.org/10.1207/s15328007sem1103_2>. Argues against reading the cutoffs as rules.
+- Zhang, L., Rahal, C., Kanopka, K., Ulitzsch, E., Zhang, Z., & Domingue, B. W. (2026). Evaluating model predictive performance in confirmatory factor analysis with binary outcomes using the InterModel Vigorish. *Multivariate Behavioral Research*. <https://doi.org/10.1080/00273171.2026.2645212>. Prediction on held-out data as a complement to fit indices for CFA with binary items, down to the single item (problem 3).
 - Xia, Y., & Yang, Y. (2019). RMSEA, CFI, and TLI in structural equation modeling with ordered categorical data: The story they tell depends on the estimation methods. *Behavior Research Methods*, 51(1), 409–428. <https://doi.org/10.3758/s13428-018-1055-2>. Why the grit indices changed with the estimator.
 - McDonald, R. P. (1999). *Test theory: A unified treatment*. Erlbaum. <https://doi.org/10.4324/9781410601087>. Omega, and test theory built on the factor model.
 - Revelle, W., & Zinbarg, R. E. (2009). Coefficients alpha, beta, omega, and the glb: Comments on Sijtsma. *Psychometrika*, 74(1), 145–154. <https://doi.org/10.1007/s11336-008-9102-z>. Omega hierarchical beside the other coefficients.

@@ -22,14 +22,14 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-A respondent answers all ten items of a vocabulary test correctly. What is their ability? The likelihood, which has given us every estimate so far, says it is larger than any number you care to name. Abilities come to us only through an estimator, and the estimators disagree most for the respondents a test measures worst, at the top and the bottom. With the item parameters known, this lesson starts from maximum likelihood, shows where it fails, brings in a prior to get the expected a posteriori (EAP) estimate, and fits four estimators to the Wordsum vocabulary test, where 12% of respondents have no maximum-likelihood estimate at all.
+A respondent answers all ten items of a vocabulary test correctly. What is their ability? The likelihood, which has given us every estimate so far, says it is larger than any number you care to name. Abilities come to us only through an estimator, and the estimators disagree most for the respondents a test measures worst, at the top and the bottom. With the item parameters known, this lesson starts from maximum likelihood, shows where it has no answer, brings in a prior to get the expected a posteriori (EAP) estimate, and fits four estimators to the Wordsum vocabulary test, where 12% of respondents have no maximum-likelihood estimate at all.
 
 ## Goals
 
 By the end of this lesson you should be able to:
 
 - write down the likelihood for one respondent's $\theta$ with the item parameters known, find its maximum, and give its standard error;
-- explain why an all-correct or all-wrong pattern has no maximum-likelihood estimate, and what each alternative estimator does about it;
+- explain why a perfect pattern has no maximum-likelihood estimate, and how the alternatives stay finite;
 - compute an EAP estimate on a grid of nodes, and explain why it is pulled toward the mean and by how much;
 - say what the MLE, WLE, MAP and EAP each assume, and choose among them for reporting scores to individuals and for comparing groups;
 - show that under the Rasch model every one of these estimates is a function of the sum score, and that under the 2PL it isn't.
@@ -39,7 +39,7 @@ By the end of this lesson you should be able to:
 ### One respondent, one unknown
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [The Rasch model](rasch.qmd): `mirt`, like most software, estimates the item parameters first and then estimates abilities treating them as known.
+**Recall** from [The Rasch model](rasch.qmd): `mirt` estimates the item parameters first, then abilities treating them as known.
 :::
 
 This lesson is the second step. With the item parameters known, a respondent's answers are independent Bernoulli trials whose probabilities depend on one unknown, $\theta$: a logistic regression with the respondent's items as the observations ([Lord, 1980](https://doi.org/10.4324/9780203056615)). For the 2PL,
@@ -96,7 +96,7 @@ md`Pattern **${lp_pattern.join("-")}** (sum score ${lp_r}). ${Number.isFinite(lp
   `The likelihood keeps ${lp_r === 0 ? "rising as θ falls" : "rising as θ grows"}: it has no peak, so there is no maximum-likelihood estimate.`} Item difficulties are the grey lines.`
 ```
 
-The default pattern, 1-1-0, peaks at 1.02, with a standard error of 1.37: three items locate a respondent only roughly. The other two-right patterns peak at the same place, though lower (we come back to this at the end). Now tick all three: the likelihood climbs toward 1 and never turns over.
+The default pattern, 1-1-0, peaks at 1.02, with a standard error of 1.37: three items locate a respondent only roughly. The other two-right patterns peak at the same place, though lower. Tick all three: the likelihood climbs toward 1 and never turns over.
 
 ### Perfect patterns have no maximum
 
@@ -106,7 +106,7 @@ Why does the all-correct pattern never peak? Each item's probability of a correc
 **Recall** from [The likelihood and logistic regression](likelihood.qmd), its Go deeper callout: if a predictor perfectly separates successes from failures, the logistic regression MLE doesn't exist ([Albert & Anderson, 1984](https://doi.org/10.1093/biomet/71.1.1)). It named a respondent who answers every item correctly as the item-response version.
 :::
 
-It is the coin with ten heads in ten flips: $\hat p = 1$, whose log odds is infinite. `mirt` reports $\pm$`Inf`; a general optimizer given bounds, such as `optimize()` on $[-10, 10]$, returns the bound, a number that looks like an estimate (the simulation below shows it). How often it happens depends on the test and the respondents: short tests, and items far from many respondents, produce many.
+It is the coin with ten heads in ten flips: $\hat p = 1$, whose log odds is infinite. `mirt` reports $\pm$`Inf`; `optimize()` on $[-10, 10]$ returns the bound, a number that looks like an estimate (the simulation below shows it). One fix that needs no prior is the weighted likelihood estimate (WLE), which is finite for every pattern under the Rasch model, the 2PL and even the 3PL and 4PL ([Magis & Verhelst, 2017](https://doi.org/10.1007/s11336-016-9518-9)); it has its own subsection below.
 
 ```{ojs}
 //| echo: false
@@ -131,7 +131,7 @@ The log likelihood is strictly increasing, bounded above by 0, and approaches 0 
 
 **The WLE stays finite.** [Warm (1989)](https://doi.org/10.1007/bf02294627) adds a term to the score equation that removes the first-order bias of the MLE. For the Rasch model it is
 $$\sum_i (x_i - P_i) + \frac{J(\theta)}{2I(\theta)} = 0, \qquad J(\theta) = \sum_i P_i(1 - P_i)(1 - 2P_i),\quad I(\theta) = \sum_i P_i(1 - P_i).$$
-For a perfect score the first term is $\sum_i (1 - P_i)$, which falls to 0 as $\theta$ grows, while the second tends to $-1/2$: as every $P_i \to 1$, $1 - 2P_i \to -1$ and $J \to -I$. As $\theta$ falls, the first term tends to $I$, the number of items, and the second to $+1/2$. The left-hand side is positive at the bottom of the scale and negative at the top, so it has a root: the WLE is finite.
+For a perfect score the first term is $\sum_i (1 - P_i)$, which falls to 0 as $\theta$ grows, while the second tends to $-1/2$: as every $P_i \to 1$, $1 - 2P_i \to -1$ and $J \to -I$. As $\theta$ falls, the first term tends to $I$, the number of items, and the second to $+1/2$. The left-hand side is positive at the bottom of the scale and negative at the top, so it has a root: the WLE is finite. [Magis and Verhelst (2017)](https://doi.org/10.1007/s11336-016-9518-9) prove this for every response pattern under the one- to four-parameter logistic models.
 
 **The EAP and MAP stay finite.** With a normal prior, the log posterior is $\ell(\theta) - (\theta - \mu)^2/(2\sigma^2)$ plus a constant. The first term is bounded above by 0 and the second falls without limit, so the log posterior has a maximum (the MAP). The posterior is a bounded function times a normal density, so it has a finite mean (the EAP).
 
@@ -140,9 +140,9 @@ For a perfect score the first term is $\sum_i (1 - P_i)$, which falls to 0 as $\
 
 ### Bring in a prior: the EAP estimate
 
-The likelihood lesson set the Bayesian reading aside for this lesson. In it, $\theta$ gets a **prior** distribution, $g(\theta)$, and the data turn it into a **posterior**,
+The likelihood lesson set aside the Bayesian reading, in which $\theta$ gets a **prior** distribution, $g(\theta)$, and the data turn it into a **posterior**,
 $$p(\theta \mid \mathbf{x}) = \frac{L(\theta \mid \mathbf{x})\,g(\theta)}{\int L(t \mid \mathbf{x})\,g(t)\,dt}.$$
-For ability, the prior has a natural source: the distribution of $\theta$ in the respondent's population, which `mirt` estimates along with the items (a normal with mean 0 and an SD fixed at 1 or estimated). The **expected a posteriori** (EAP) estimate is the posterior mean, and its standard error is the posterior SD ([Bock & Mislevy, 1982](https://doi.org/10.1177/014662168200600405)). The integral has no closed form, and it doesn't need one: evaluate likelihood × prior at a grid of nodes $t_1, \dots, t_Q$ and take a weighted average,
+For ability, the natural prior is the distribution of $\theta$ in the respondent's population, which `mirt` estimates with the items (a normal with mean 0 and an SD fixed at 1 or estimated). The **expected a posteriori** (EAP) estimate is the posterior mean, and its standard error is the posterior SD ([Bock & Mislevy, 1982](https://doi.org/10.1177/014662168200600405)). The integral needs no closed form: evaluate likelihood × prior at nodes $t_1, \dots, t_Q$ and average,
 $$\hat\theta_{\text{EAP}} = \frac{\sum_q t_q\,L(t_q)\,g(t_q)}{\sum_q L(t_q)\,g(t_q)}.$$
 Nothing iterates and nothing fails: a normal prior times a bounded likelihood always has a mean, even when the likelihood never peaks. The posterior's peak is the **maximum a posteriori** (MAP) estimate, also called Bayes modal ([Mislevy, 1986](https://doi.org/10.1007/bf02293979)).
 
@@ -184,7 +184,7 @@ Plot.plot({
 md`Sum score ${pp_r} of 10. MLE: **${Number.isFinite(pp_mle) ? pp_mle.toFixed(2) : (pp_mle > 0 ? "+∞" : "−∞")}**${Number.isFinite(pp_mle) ? ` (SE ${seR(pp_mle, wsB).toFixed(2)}; dashed line)` : " (no peak)"}. MAP: **${pp_map.toFixed(2)}**. EAP: **${pp.eap.toFixed(2)}** (posterior SD ${pp.psd.toFixed(2)}; solid line).`
 ```
 
-At the defaults, a score of 9 gives an MLE of 2.55, a MAP of 1.95 and an EAP of 2.08: the prior pulls the estimate about half a logit toward 0. At a score of 10 the likelihood never falls, yet the posterior has a peak (2.83) and a mean (3.05). With a prior SD of 1, the EAP for a score of 9 is 1.34; with 4, it is 2.66, a little beyond the MLE, because the posterior is skewed toward the open end. At a score of 6, the EAP stays within about 0.1 of the MLE (0.09) at any prior SD. That pull toward the prior mean is **shrinkage**, largest where the likelihood is flattest: at the ends of the scale, and on short tests.
+At a score of 9 the MLE is 2.55, the MAP 1.95 and the EAP 2.08: the prior pulls about half a logit toward 0. At 10 the likelihood never falls, yet the posterior has a peak (2.83) and a mean (3.05). With a prior SD of 1 the EAP for a score of 9 is 1.34; with 4 it is 2.66, just beyond the MLE, as the posterior is skewed toward the open end. At a score of 6 the EAP stays within about 0.1 of the MLE at any prior SD. That pull toward the prior mean is **shrinkage**, largest where the likelihood is flattest: at the ends of the scale, and on short tests.
 
 #### Try it: shrinkage by score, and by test length
 
@@ -221,9 +221,9 @@ sh_90 = sh_rows[Math.round(0.9 * sh_n)]
 md`At 90% correct (${sh_90.r} of ${sh_n}): MLE **${sh_90.mle.toFixed(2)}**, WLE ${sh_90.wle.toFixed(2)}, EAP **${sh_90.eap.toFixed(2)}**. At 100%: no MLE, WLE ${sh_rows[sh_n].wle.toFixed(2)}, EAP ${sh_rows[sh_n].eap.toFixed(2)}.`
 ```
 
-The MLE at 90% correct is 2.55 whatever the length, because repeating every item multiplies both sides of the score equation by the same number. The EAP moves toward it as the test grows, from 2.08 with 10 items to 2.42 with 40, as the likelihood sharpens. The WLE sits nearer the MLE, and gives a perfect score a finite value (3.59 with 10 items).
+The MLE at 90% correct is 2.55 whatever the length, because repeating every item multiplies both sides of the score equation by the same number. The EAP moves toward it as the test grows, from 2.08 with 10 items to 2.42 with 40, as the likelihood sharpens. The WLE, taken up below, sits nearer the MLE and gives a perfect score a finite value (3.59 with 10 items).
 
-Shrinkage carries into anything computed from estimated abilities, residuals included. If you've done [Model fit and out-of-sample prediction](fit-prediction.qmd), it is why outfit computed from `mirt`'s default EAP abilities averaged about 0.9 on simulated 20-item data where the model was true.
+Shrinkage carries into anything computed from the estimates. If you've done [Model fit and out-of-sample prediction](fit-prediction.qmd), it is why outfit computed from `mirt`'s default EAP abilities averaged about 0.9 on simulated 20-item data where the model was true.
 
 ```{ojs}
 //| echo: false
@@ -237,16 +237,17 @@ quiz({
 })
 ```
 
-### Other estimators, and plausible values
+### MAP, EAP and plausible values
 
-Four estimators come up in practice ([Kim & Nicewander, 1993](https://doi.org/10.1007/bf02294829), compare them on conventional tests):
+The MAP sits close to the EAP; it is found by Newton–Raphson with the prior adding a term to the score equation, and suits software that finds modes more easily than means. If the prior describes the population, the EAP has the smallest mean squared error averaged over that population, since squared error is what a posterior mean minimizes; shrinkage is the other side of that coin.
 
-- **MLE**: the $\theta$ that makes the responses most probable. It assumes nothing about the population. It is biased in short tests, which [Lord (1983)](https://doi.org/10.1007/BF02294018) derives along with a correction, and it doesn't exist for perfect patterns.
-- **WLE**: [Warm's (1989)](https://doi.org/10.1007/bf02294627) weighted likelihood estimate adds a term to the score equation that removes the MLE's first-order bias, with the same large-sample variance. It uses no prior and is finite for every pattern.
-- **MAP**: the posterior mode, found by Newton–Raphson with the prior adding a term to the score equation. Always finite.
-- **EAP**: the posterior mean, computed on a grid. Always finite, and if the prior describes the population it has the smallest mean squared error averaged over that population, since squared error is what a posterior mean minimizes. Shrinkage is the other side of that coin.
+No individual estimate carries the spread of $\theta$ itself (EAPs vary too little, MLEs too much), so variances, correlations and regressions built on them are off. Large-scale assessments such as NAEP use **plausible values** ([Mislevy, 1991](https://doi.org/10.1007/bf02294457); [Mislevy, Beaton, Kaplan & Sheehan, 1992](https://doi.org/10.1111/j.1745-3984.1992.tb00371.x)): several random draws from each respondent's posterior, under a prior that is a regression of $\theta$ on background variables. Each set has the spread and group differences of $\theta$; the analysis is run on each and combined as in multiple imputation. They are a tool for population quantities, not scores to report for individuals ([Wu, 2005](https://doi.org/10.1016/j.stueduc.2005.05.005)). [What does a score mean?](score-meaning.qmd) takes them up in full.
 
-No individual estimate carries the spread of $\theta$ itself: EAPs vary too little and MLEs too much, so variances, correlations and regressions built on them are off by an amount that depends on the test. Large-scale assessments such as NAEP handle this with **plausible values** ([Mislevy, 1991](https://doi.org/10.1007/bf02294457); [Mislevy, Beaton, Kaplan & Sheehan, 1992](https://doi.org/10.1111/j.1745-3984.1992.tb00371.x)): several random draws from each respondent's posterior, under a prior that is a regression of $\theta$ on background variables. Each set of draws has the spread and the group differences of $\theta$, the analysis is run on each set, and the results are combined as in multiple imputation. They are a tool for population quantities, not scores to report for individuals ([Wu, 2005](https://doi.org/10.1016/j.stueduc.2005.05.005)). [What does a score mean?](score-meaning.qmd) takes them up in full.
+### The weighted likelihood estimate
+
+What if we want an estimate that borrows nothing from the population but exists for every pattern? [Warm (1989)](https://doi.org/10.1007/bf02294627) weights the likelihood by a function of $\theta$ chosen to cancel the leading term of the MLE's bias, the bias that [Lord (1983)](https://doi.org/10.1007/BF02294018) derives. This adds $J(\theta)/2I(\theta)$ to the score equation (the Go deeper callout writes it out). The WLE has the MLE's large-sample variance, less bias, and a finite value for every pattern ([Magis & Verhelst, 2017](https://doi.org/10.1007/s11336-016-9518-9)). It is [Firth's (1993)](https://doi.org/10.1093/biomet/80.1.27) bias reduction, which penalizes the likelihood by the Jeffreys prior and also gives finite logistic regressions under separation ([Heinze & Schemper, 2002](https://doi.org/10.1002/sim.1047)); for the Rasch model and 2PL the WLE is the peak of the likelihood times that prior, while under the 3PL the two part ([Magis & Raîche, 2012](https://doi.org/10.1007/s11336-011-9233-5)).
+
+How does it compare? Warm's Monte Carlo studies favoured it over the MLE and Bayes modal estimates on several criteria across a wide range of abilities, and [Kim and Nicewander (1993)](https://doi.org/10.1007/bf02294829) found the WLE, MAP and EAP all close to unbiased where the test's items are. That is the evidence: less bias than the MLE at the same variance, and finiteness, not optimality in general. The cost is the EAP's lower error. The WLE doesn't shrink, so in the simulation below its RMSE is 0.77 against the EAP's 0.61, and its SD 1.28 against a true 1. It suits estimates that must not depend on a population prior, as when respondents come from different populations.
 
 ### Sufficiency, revisited
 
@@ -254,13 +255,17 @@ No individual estimate carries the spread of $\theta$ itself: EAPs vary too litt
 **Recall** from [The Rasch model](rasch.qmd): under the Rasch model the sum score $r$ is sufficient for $\theta$. The likelihood factorizes into $e^{r\theta}$, times a term free of $\theta$, over a term free of the pattern.
 :::
 
-Every estimator here uses the responses only through the likelihood, so under the Rasch model every one depends on them only through $r$. The MLE's and WLE's score equations contain the data only as $r$; in the EAP and MAP, the factor that depends on the pattern cancels from the posterior. Ten Wordsum items have eleven possible EAPs, one per sum score, which is how the widgets above could list every estimate.
+Every estimator here uses the responses only through the likelihood, so under the Rasch model every one depends on them only through $r$: the score equations contain the data only as $r$, and in the posterior the pattern's own factor cancels. Ten Wordsum items give eleven possible EAPs, which is how the widgets above could list every estimate.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd): under the 2PL the likelihood depends on the pattern only through the weighted score $\sum_i a_i x_i$, which is therefore sufficient; the score equation is $\sum_i a_i (x_i - P_i) = 0$.
 :::
 
-The same argument now runs through the weighted score: respondents with the same sum score but different items right get different estimates, ordered by $\sum_i a_i x_i$. The real-data section counts how many.
+So respondents with the same sum score but different items right get different estimates, ordered by $\sum_i a_i x_i$.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd), its Go deeper callout: under the 3PL the weight of each correct answer depends on $\theta$, so no simple statistic is sufficient. There an estimate depends on the whole pattern, not on a weighted sum.
+:::
 
 ```{ojs}
 //| echo: false
@@ -276,9 +281,9 @@ quiz({
 
 ## Simulate
 
-Which estimator lands closest to the truth? The code below simulates Rasch responses to ten items (difficulties from −2 to 2) from 5,000 respondents in two groups whose true means differ by 1 (overall mean 0, SD 1). It estimates every $\theta$ four ways, with the difficulties known and a normal(0, 1) prior, and reports bias and root mean squared error (RMSE) by true $\theta$, the SD of the estimates and the group difference. It is base R and runs in a second.
+Which estimator lands closest to the truth? The code below simulates Rasch responses to ten items ($b$ from −2 to 2) from 5,000 respondents in two groups whose means differ by 1 (overall mean 0, SD 1), estimates every $\theta$ four ways with the difficulties known and a normal(0, 1) prior, and reports bias and root mean squared error (RMSE) by true $\theta$, the SD of the estimates and the group difference. It is base R and runs in a second.
 
-With the seed as written, 112 of the 5,000 respondents (2.2%) have no finite MLE, and `optimize()` on a perfect score returns 10, its upper bound. The MLE and WLE are close to unbiased across the middle; the EAP and MAP are pulled toward 0, by about 0.16 within one SD of the mean, 0.5 between one and two SDs out, and 1 beyond. In return, the EAP's RMSE in the middle is 0.52, against 0.78 to 0.80 for the MLE, and overall 0.61 against 0.79 (leaving out the 112 with no MLE). At the ends the order reverses. The SD of the MLEs is 1.26 and of the EAPs 0.80, against a true 1, and the group difference follows: 0.98 (MLE), 1.03 (WLE) and 0.65 (EAP). Change `length.out = 10` to 20 or 40: the EAP's group difference rises to 0.80 and then 0.89 as the likelihood takes over from the prior.
+With the seed as written, 112 of the 5,000 respondents (2.2%) have no finite MLE, and `optimize()` on a perfect score returns 10, its upper bound. The MLE and WLE are close to unbiased across the middle; the EAP and MAP are pulled toward 0, by about 0.16 within one SD of the mean, 0.5 one to two SDs out, and 1 beyond. In return the EAP's RMSE is 0.52 in the middle, against 0.78 to 0.80 for the MLE, and 0.61 overall against 0.79 (without the 112). At the ends the order reverses. The SDs are 1.26 (MLE) and 0.80 (EAP) against a true 1, and the group difference is 0.98 (MLE), 1.03 (WLE) and 0.65 (EAP). With `length.out` at 20 or 40, the EAP's group difference rises to 0.80 and 0.89.
 
 ```{webr}
 {{< include code/ability-estimation-sim.R >}}
@@ -294,7 +299,7 @@ knitr::read_chunk("code/ability-estimation-irw.R")
 options(digits = 7)  # R's default, so the page prints what a fresh R session prints
 ```
 
-Our main example is [c19prc_uk_mcbride_2021_wordsum](https://itemresponsewarehouse.org/tables/c19prc_uk_mcbride_2021_wordsum/): the Wordsum vocabulary test as answered by 2,058 UK adults in the sixth wave of the COVID-19 Psychological Research Consortium study ([Bentall et al., 2022](https://doi.org/10.5255/UKDA-SN-855552); the study's design is described by [McBride et al., 2021](https://doi.org/10.1002/mpr.1861)). Wordsum is the ten-item vocabulary test of the US General Social Survey, drawn from a test by [Thorndike (1942)](https://doi.org/10.1037/h0060053); [Cor, Haertel, Krosnick and Malhotra (2012)](https://doi.org/10.1016/j.ssresearch.2012.05.007) analyse it with item response theory. For each target word the respondent chooses the closest in meaning from five words, or "don't know". Its job here is to be a short test on which many respondents reach the floor or the ceiling. A response is 1 for the right word and 0 for anything else, including "don't know". [Download the code](code/ability-estimation-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
+Our main example is [c19prc_uk_mcbride_2021_wordsum](https://itemresponsewarehouse.org/tables/c19prc_uk_mcbride_2021_wordsum/): the Wordsum vocabulary test as answered by 2,058 UK adults in the sixth wave of the COVID-19 Psychological Research Consortium study ([Bentall et al., 2022](https://doi.org/10.5255/UKDA-SN-855552); the study's design is described by [McBride et al., 2021](https://doi.org/10.1002/mpr.1861)). Wordsum is the ten-item vocabulary test of the US General Social Survey, drawn from [Thorndike (1942)](https://doi.org/10.1037/h0060053) and analysed with item response theory by [Cor, Haertel, Krosnick and Malhotra (2012)](https://doi.org/10.1016/j.ssresearch.2012.05.007): for each target word, choose the closest in meaning from five words, or "don't know". Its job here is to be a short test on which many respondents reach the floor or the ceiling. A response is 1 for the right word and 0 otherwise, "don't know" included. [Download the code](code/ability-estimation-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
 
 ```{r fetch-ws}
 #| echo: true
@@ -325,14 +330,14 @@ predict({
 #| code-fold: show
 ```
 
-The 251 respondents with a score of 0 or 10 are 12.2% of the sample, and `mirt` gives them $-\infty$ and $+\infty$. The ten-item simulation above, with items over a similar range but an ability SD of 1, had 2.2%: the spread of the respondents matters as much as where the items are.
+The 251 respondents with a score of 0 or 10 are 12.2% of the sample, and `mirt` gives them $-\infty$ and $+\infty$. The simulation above, with an ability SD of 1, had 2.2%.
 
 ```{r estimators-ws}
 #| echo: true
 #| code-fold: show
 ```
 
-Each estimator gives one value per sum score (the largest spread within a score is 0 to four decimals). In the middle they nearly agree: a score of 5 gives −0.57 (MLE), −0.60 (WLE), −0.48 (MAP) and −0.47 (EAP). They part at the ends. A score of 9 gives 2.55, 2.26, 1.95 and 2.07, and a score of 10 gives $+\infty$, 3.59, 2.83 and 3.03. The MLE's standard error is 0.79 at a score of 4 and 1.13 at 9; the posterior SDs are smaller everywhere, because the prior adds information.
+Each estimator gives one value per sum score (the largest spread within a score is 0). In the middle they nearly agree: a score of 5 gives −0.57 (MLE), −0.60 (WLE), −0.48 (MAP) and −0.47 (EAP). They part at the ends. A score of 9 gives 2.55, 2.26, 1.95 and 2.07, and a score of 10 gives $+\infty$, 3.59, 2.83 and 3.03. The MLE's standard error is 0.79 at a score of 4 and 1.13 at 9; the posterior SDs are smaller everywhere.
 
 ```{r se-ws}
 #| echo: true
@@ -346,7 +351,7 @@ Each estimator gives one value per sum score (the largest spread within a score 
 #| code-fold: show
 ```
 
-The EAPs have an SD of 1.69, below the model's 1.88; the WLEs, at 1.96, are above it. The shortfall isn't lost: the variance of the EAPs (2.86) plus the average posterior variance (0.67) is 3.53, the model's variance (3.54) to rounding. What the responses can't locate stays in the posterior SD.
+The EAPs have an SD of 1.69, below the model's 1.88; the WLEs, at 1.96, are above it. The shortfall isn't lost: the variance of the EAPs (2.86) plus the average posterior variance (0.67) is 3.53, the model's variance (3.54) to rounding.
 
 ```{r twopl-ws}
 #| echo: true
@@ -357,21 +362,21 @@ BIC ([Schwarz, 1978](https://doi.org/10.1214/aos/1176344136)) prefers the 2PL to
 
 ### Which estimate to report
 
-The choice rests on what we're willing to assume about the respondent and on what the numbers will be used for.
+The choice rests on what we'll assume and on what the numbers are for.
 
 - The MLE and WLE assume nothing about the population: the estimate comes from the respondent's own responses, which suits comparisons across populations. The price is noise: on Wordsum the MLE's standard errors run from 0.79 to 1.13, and 12% of respondents have no MLE.
 - The EAP and MAP assume the respondent comes from the population the prior describes. If so, they are closer to the truth on average (in the simulation, an RMSE of 0.61 against 0.79). The price is shrinkage toward that population's mean, largest at the ends and on short tests, which carries into spreads and group differences.
 
-When I report a score to an individual from a test like this one, I report the EAP with its posterior SD, and I say that it is pulled toward the mean of the population the prior describes. It always exists, it is the most accurate on average for the people the test was given to, and its standard error grows where the test runs out of items. What I don't do is average EAPs to compare groups: the simulation's group difference of 1 came back as 0.65. The MLEs and WLEs came closer there, but they vary too much for spreads and correlations, and the MLE loses everyone at the floor and the ceiling. For group questions I'd put the groups into the model, or use plausible values. And if the Rasch model fits and everyone took the same items, [The Rasch model](rasch.qmd) has already argued for the sum score: every estimator in the table above is a relabelling of it.
+When I report a score to an individual from a test like this one, I report the EAP with its posterior SD, and I say that it is pulled toward the mean of the population the prior describes. It always exists, it is the most accurate on average for the people the test was given to, and its standard error grows where the items run out. What I don't do is average EAPs to compare groups: the simulation's group difference of 1 came back as 0.65. The MLEs and WLEs came closer, but they vary too much for spreads and correlations. If a prior is unwelcome, say because respondents come from different populations, I'd use the WLE rather than the MLE, which loses everyone at the floor and the ceiling. For group questions I'd put the groups into the model, or use plausible values. And if the Rasch model fits and everyone took the same items, [The Rasch model](rasch.qmd) has already argued for the sum score: every estimator in the table above is a relabelling of it.
 
 ## Problems
 
-1. **Three items by hand.** For three Rasch items with $b = -1, 0, 1.5$, write down the likelihood of the pattern 1-1-0 and plot it. At what $\theta$ does 1-1-0 become more likely than 1-0-0, and why is the answer one of the difficulties? (PS4#1)
-2. **The Rasch score equation.** Show that under the Rasch model the MLE solves $\sum_i P_i(\theta) = r$, so it depends on the pattern only through the sum score. Then show that the EAP does too, by writing the posterior with the factorization from the Rasch lesson's Go deeper callout.
+1. **Three items by hand.** For Rasch items with $b = -1, 0, 1.5$, plot the likelihood of 1-1-0. At what $\theta$ does 1-1-0 become more likely than 1-0-0, and why is that a difficulty? (PS4#1)
+2. **The Rasch score equation.** Show that the Rasch MLE solves $\sum_i P_i(\theta) = r$. Then use the factorization from the Rasch lesson's Go deeper callout to show that the EAP depends on the pattern only through $r$ too.
 3. **Change the prior.** Rescore Wordsum by EAP with a prior SD of 1 instead of 1.88 (`fscores(m, method = "EAP", mean = 0, cov = 1)`). Which respondents move most? What happens to the SD of the EAPs, and why?
-4. **Classroom averages.** A school reports each student's EAP from a 15-item test and compares classroom means, using one normal prior for all students. What goes wrong with the comparison, and in which direction? What would you report instead, and to whom?
+4. **Classroom averages.** A school compares classroom means of students' EAPs from a 15-item test, with one normal prior for everyone. What goes wrong, in which direction, and what would you report instead?
 5. **Does EAP reduce error?** Extend the simulation: 1,000 respondents at each true $\theta$ from −3 to 3 in steps of 0.5. Where does the EAP's RMSE beat the MLE's, and where not? Then score normal(0, 1) respondents with a prior of mean 1. What changes? (PS5#2)
-6. **Challenge (open): the floor and the ceiling.** Twelve percent of Wordsum respondents score 0 or 10. A survey analyst wants vocabulary as a predictor in a regression of, say, trust in science. What should they do with those 251 respondents: drop them, use WLEs, EAPs or plausible values, or fit the regression inside the item response model? Does it depend on the question? I don't think there is a single answer; make the case for yours.
+6. **Challenge (open): the floor and the ceiling.** A survey analyst wants Wordsum as a predictor of, say, trust in science. What should they do with the 251 respondents at 0 or 10: drop them, use WLEs, EAPs or plausible values, or fit the regression inside the item response model? Does it depend on the question? I don't think there is a single answer; make the case for yours.
 
 ```{r}
 #| output: asis
@@ -382,6 +387,10 @@ ask_claude("ability-estimation", "It covers estimating one respondent's ability 
 
 - Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431–444. <https://doi.org/10.1177/014662168200600405>. The EAP estimate on a grid of nodes, and its posterior SD as a standard error.
 - Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. *Psychometrika*, 54(3), 427–450. <https://doi.org/10.1007/bf02294627>. The WLE, compared with the MLE and Bayes modal estimates.
+- Magis, D., & Verhelst, N. (2017). On the finiteness of the weighted likelihood estimator of ability. *Psychometrika*, 82(3), 637–647. <https://doi.org/10.1007/s11336-016-9518-9>. The WLE is finite for every pattern under the 1PL to 4PL and many polytomous models.
+- Magis, D., & Raîche, G. (2012). On the relationships between Jeffreys modal and weighted likelihood estimation of ability under logistic IRT models. *Psychometrika*, 77(1), 163–169. <https://doi.org/10.1007/s11336-011-9233-5>. Where the WLE and the Jeffreys-prior mode coincide, and where they part.
+- Firth, D. (1993). Bias reduction of maximum likelihood estimates. *Biometrika*, 80(1), 27–38. <https://doi.org/10.1093/biomet/80.1.27>. The general form of Warm's correction.
+- Heinze, G., & Schemper, M. (2002). A solution to the problem of separation in logistic regression. *Statistics in Medicine*, 21(16), 2409–2419. <https://doi.org/10.1002/sim.1047>. Firth's correction as a fix for separation, the logistic-regression version of perfect patterns.
 - Kim, J. K., & Nicewander, W. A. (1993). Ability estimation for conventional tests. *Psychometrika*, 58(4), 587–599. <https://doi.org/10.1007/bf02294829>. Five estimators compared for bias, standard error and reliability.
 - Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. *Psychometrika*, 48(2), 233–245. <https://doi.org/10.1007/BF02294018>. The bias of the MLE, and estimators without it.
 - Mislevy, R. J. (1986). Bayes modal estimation in item response models. *Psychometrika*, 51(2), 177–195. <https://doi.org/10.1007/bf02293979>. Priors in item response models.
