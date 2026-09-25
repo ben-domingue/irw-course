@@ -22,6 +22,9 @@ lesson_header("item-banks-cat")
 
 ## Going further
 
+- van der Linden, W. J. (2017). Adaptive testing. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 197–228). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on adaptive testing.
+- Gershon, R. C., Hays, R. D., & Kallen, M. A. (2017). Health measurement. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 349–364). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on item response theory in health measurement.
+
 ```{r}
 #| output: asis
 data_sources("item-banks-cat")

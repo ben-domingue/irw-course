@@ -414,6 +414,7 @@ ask_claude("ctt-limits", "It covers where classical test theory stops being enou
 - Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. *Applied Psychological Measurement*, 12(1), 33–51. <https://doi.org/10.1177/014662168801200105>. The capital-punishment statements, and a model for them.
 - Wainer, H., & Kiely, G. L. (1987). Item clusters and computerized adaptive testing: A case for testlets. *Journal of Educational Measurement*, 24(3), 185–201. <https://doi.org/10.1111/j.1745-3984.1987.tb00274.x>. Where the testlet idea comes from (problem 4).
 - IRW vignette: [local dependence](https://itemresponsewarehouse.org/vignettes/local_dependence.html). How often items in IRW tables share more than the construct.
+- Sijtsma, K., & Molenaar, I. W. (2016). Mokken models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 303–321). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on Mokken's nonparametric item response models.
 
 ```{r ojs-data}
 #| echo: false

@@ -465,6 +465,7 @@ ask_claude("information", "It covers item and test information in item response 
 - Christensen, A. P., Kenett, Y. N., Aste, T., Silvia, P. J., & Kwapil, T. R. (2018). Network structure of the Wisconsin Schizotypy Scales–Short Forms: Examining psychometric network filtering approaches. *Behavior Research Methods*, 50(6), 2531–2550. <https://doi.org/10.3758/s13428-018-1032-9>. The source of the schizotypy data.
 - Lusardi, A., & Mitchell, O. S. (2014). The economic importance of financial literacy: Theory and evidence. *Journal of Economic Literature*, 52(1), 5–44. <https://doi.org/10.1257/jel.52.1.5>. A review of research on financial literacy.
 - Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. `testinfo()` and `iteminfo()` compute the curves in this lesson.
+- Chang, H.-H., Wang, C., & Ying, Z. (2017). Information theory and its application to testing. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 105–124). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-7>. A handbook chapter on Fisher information, Kullback–Leibler information and related measures in testing.
 
 ```{r}
 #| output: asis

@@ -484,6 +484,8 @@ ask_claude("score-meaning", "It covers what makes a test score interpretable: no
 - Zenisky, A. L., & Hambleton, R. K. (2012). Developing test score reports that work: The process and best practices for effective communication. *Educational Measurement: Issues and Practice*, 31(2), 21–26. <https://doi.org/10.1111/j.1745-3992.2012.00231.x>. How to design a report that readers read correctly.
 - Wu, M. (2005). The role of plausible values in large-scale surveys. *Studies in Educational Evaluation*, 31(2–3), 114–128. <https://doi.org/10.1016/j.stueduc.2005.05.005>. What plausible values are for, with worked comparisons.
 - Kroenke, K., Spitzer, R. L., & Williams, J. B. W. (2001). The PHQ-9: Validity of a brief depression severity measure. *Journal of General Internal Medicine*, 16(9), 606–613. <https://doi.org/10.1046/j.1525-1497.2001.016009606.x>. The PHQ-9's first validation, with the cut of 10 and the severity bands.
+- Hambleton, R. K., & Zenisky, A. L. (2017). Score reporting and interpretation. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 127–142). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on score reporting and interpretation.
+- Lewis, D., & Lord-Bessen, J. (2017). Standard setting. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 229–248). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on standard setting.
 
 ```{r}
 #| output: asis

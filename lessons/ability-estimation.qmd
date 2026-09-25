@@ -406,6 +406,7 @@ ask_claude("ability-estimation", "It covers estimating one respondent's ability 
 - McBride, O., Murphy, J., Shevlin, M., Gibson-Miller, J., Hartman, T. K., Hyland, P., et al. (2021). Monitoring the psychological, social, and economic impact of the COVID-19 pandemic in the population: Context, design and conduct of the longitudinal COVID-19 Psychological Research Consortium (C19PRC) Study. *International Journal of Methods in Psychiatric Research*, 30(1), e1861. <https://doi.org/10.1002/mpr.1861>. The study that gave Wordsum to these respondents.
 - Schwarz, G. (1978). Estimating the dimension of a model. *The Annals of Statistics*, 6(2), 461–464. <https://doi.org/10.1214/aos/1176344136>. The BIC.
 - Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. `fscores()` computes every estimator in this lesson.
+- Johnson, M. S., & Sinharay, S. (2017). Bayesian estimation. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 237–258). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-13>. A handbook chapter on Bayesian estimation for item response models.
 
 ```{r}
 #| output: asis
