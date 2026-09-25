@@ -528,7 +528,7 @@ threads:
     idea: "Chess item Y15: Elo barely predicts it"
     introduced: likelihood
     returns:
-      - {lesson: rasch, how: finds it the worst-fitting item (largest outfit)}
+      - {lesson: rasch, how: finds it among the worst-fitting items (largest outfit by default)}
       - {lesson: 1pl-to-4pl, how: gives it a slope near zero in the 2PL}
   - id: sum-score-sufficiency
     idea: The sum score is sufficient under the Rasch model
@@ -698,7 +698,7 @@ threads:
     idea: "Wording direction can act as a second dimension"
     introduced: instrument-building
     returns:
-      - {lesson: fa-exploratory, how: finds it in the BFI-2}
+      - {lesson: fa-exploratory, how: finds at most a trace of it in the BFI-2}
       - {lesson: dimensionality, how: models it as a method factor}
   - id: contaminated-criterion
     idea: "A criterion built from the same items inflates validity evidence"
