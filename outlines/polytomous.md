@@ -2,7 +2,7 @@
 
 # Models for polytomous responses (`polytomous`)
 
-Module: irt · Prereqs: information · Core · Status: outline
+Module: irt · Prereqs: information · Core · Status: draft (#50)
 
 ## Core ideas
 
@@ -73,6 +73,19 @@ DOIs Crossref-checked 09-24.
 
 - **The PCM is a Rasch model.** Factor the likelihood to show the sum score is sufficient. Why: `irtrees`, `item-banks-cat`. Length: half a page.
 - **Information for a polytomous item.** $I(\theta)$ = the variance of the score given θ (for the PCM); why polytomous items carry more information. Why: `item-banks-cat`, `nominal`. Length: half a page.
+
+## Drafting notes (#50, 09-25)
+
+- **PROMIS items changed.** The draft uses the seven interference items PAININ36–42 (1,908 complete cases), not the ten most-answered items, which mix interference, behaviour and quality. One section is one construct, and the IRW item-text notes find that some six-option behaviour/quality items merge their two lowest options into one code. Recomputed: GRM best (AIC 23,992; sequential 24,155; GPCM 24,160; PCM 24,445); GRM slopes 2.71–5.17; EAP correlations 0.994–0.999; GPCM steps disordered for PAININ40–42 (category 1 never modal under the GPCM or the GRM); 31% at 0 on every item; information 27.4 (GRM) vs 4.4 (2PL at x ≥ 1) at θ = 1, 21.7 vs 0.2 at θ = 2, about equal near 0.
+- **science_ltm keying.** The table's `resp_raw` labels say 4 = strongly agree for all seven items, but the IRW item-text check (batch_169) found the three negatively worded items already reversed. The reverse-keying Recall is paid here. Four-item fits: AIC GRM 3,250, sequential 3,252, GPCM 3,257, PCM 3,265; RSM (problem 2) 3,288.
+- **Widgets:** the four outlined; helpers in `lessons/widgets/polytomous.js`.
+- **Dropped:** nothing. Item-level fit for polytomous models (which `fit-prediction` says it holds for this lesson) isn't covered; flagged in the PR.
+
+## Revisions after Ben's review (#139, 09-25)
+
+- *What this is for* now opens on "Every model so far…" (dichotomous responses), then why ordered categories (Likert, partial credit, symptom frequency) and what dichotomizing loses.
+- Tutz's typology cited where the three splits are introduced: Tutz (2022, doi:10.1002/wics.1545, abstract read), Tutz (1990) and Tutz (1997, doi:10.1007/978-1-4757-2691-6_8); Tutz (2020, doi:10.1016/j.jmp.2020.102346) in Going further. Crossref-checked; the 1997 and 2020 texts weren't read (Ben can supply PDFs).
+- The CRF and expected-score panels sit side by side (flex row, wraps on narrow screens).
 
 ## Open questions
 
