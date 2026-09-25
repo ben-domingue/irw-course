@@ -272,7 +272,7 @@ lessons:
     prereqs: [information]
     origin: {slides: [c8, c9], ps: ["PS8#1", "PS8#2", "PS8#3"], code: [c8/basic_polytomous_analysis.R, c9/polyexample.R, ps8/ratingscale.R, ps8/polytomous_estimates.R, ps8/polydif.R]}
     tables: [promis1wave1_pain, science_ltm]
-    status: stub
+    status: draft
     tranche: core
 
   - id: irtrees

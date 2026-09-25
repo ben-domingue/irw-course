@@ -8,19 +8,480 @@ source("_course.R")
 lesson_header("polytomous")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, dnorm, palette} from "./widgets/irt.js"
+import {catProbs, expectedScore, polyInfo, adjacentLogit, everModal} from "./widgets/polytomous.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Ask adults how often, over the past week, pain kept them from standing for an hour, and each answer is one of five ordered categories, from never to always. Every model so far has been for responses scored 0 or 1. We could collapse the categories (any pain, or none), but [Information, precision, and short forms](information.qmd) showed that an item measures well near its difficulty, and an item with five categories has four boundaries, so four places to be informative. This lesson builds the standard models for ordered categories, each of which splits a response into binary questions answered by a model we already know. It fits four of them to seven PROMIS pain items and asks what the choice among them changes, and what collapsing would cost. The short answers: not much, and most of the information above the middle of the scale.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say what makes a response polytomous, and write the graded response, (generalized) partial credit and sequential models as different ways of splitting a response into binary questions;
+- read category response functions and the expected score curve, and say what disordered steps do and don't mean;
+- explain why the sum score is sufficient under the partial credit model, and what takes its place under the other models;
+- compute the information in a polytomous item, and say what collapsing its categories costs and where;
+- fit and compare these models with `mirt`, and judge how much the choice matters for respondents' scores.
+
 ## Core ideas
 
-## Worked example
+### Ordered categories
+
+A response is **polytomous** when it can fall in more than two categories. The models here need the categories to be mutually exclusive and ordered, each step up meaning more of what is measured: a rating from strongly disagree to strongly agree, a frequency from never to always, or partial credit on a problem (0 for nothing, 1 for a correct setup, 2 for a correct method, 3 for a correct answer). We score the categories $0, 1, \dots, K$, so an item has $K$ steps; [Ostini and Nering (2006)](https://doi.org/10.4135/9781412985413) survey the models. More categories carry more information, as this lesson will show, but they take more parameters, and when a person rather than a key scores the response, the rater becomes a source of error ([Many sources of error: generalizability theory](g-theory.qmd)).
+
+### Three ways to split a response
+
+How can models for 0/1 responses handle four categories? Split the response into binary questions, each with its own item response curve. There are three standard splits ([Mellenbergh, 1995](https://doi.org/10.1177/014662169501900110); [Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)), and each gives a model.
+
+- **Cumulative** splits ask "is $x$ at least $k$?" for each $k$. The **graded response model** (GRM; [Samejima, 1969](https://doi.org/10.1007/BF03372160)) gives each a 2PL with the item's slope:
+$$\Pr(x \ge k) = \frac{\exp\big(a(\theta - b_k)\big)}{1 + \exp\big(a(\theta - b_k)\big)}, \qquad \Pr(x = k) = \Pr(x \ge k) - \Pr(x \ge k + 1).$$
+$b_k$ is the $\theta$ at which half of respondents reach category $k$ or above. The boundaries must be ordered, $b_1 < b_2 < \dots$, or some probabilities would be negative.
+- **Adjacent-category** splits ask "is $x$ equal to $k$ rather than $k-1$?", among responses in one of the two. The **generalized partial credit model** (GPCM; [Muraki, 1992](https://doi.org/10.1177/014662169201600206)) gives each a 2PL, $\Pr(x = k \mid x \in \{k-1, k\}) = \text{logit}^{-1}\big(a(\theta - b_k)\big)$, which works out to
+$$\Pr(x = k) \propto \exp\Big(\sum_{v=1}^{k} a(\theta - b_v)\Big).$$
+$b_k$, the **step difficulty**, is the $\theta$ at which categories $k-1$ and $k$ are equally likely. With $a = 1$ for every item this is the **partial credit model** (PCM; [Masters, 1982](https://doi.org/10.1007/BF02296272)).
+- **Sequential** splits ask "having reached category $k - 1$, does the respondent go on to $k$?" The **sequential model** ([Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)) gives each step a 2PL, $\Pr(x \ge k \mid x \ge k-1) = \text{logit}^{-1}\big(a(\theta - b_k)\big)$, and the respondent stops at the first step failed. It suits a problem solved in stages.
+
+In [Thissen and Steinberg's (1986)](https://doi.org/10.1007/BF02295596) terms, the GRM is a *difference* model and the partial credit family *divide-by-total* models (the $\propto$ hides a division by the sum over categories).
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Factor analysis II](fa-confirmatory.qmd): an ordinal factor model, a continuous latent response cut at thresholds, is the GRM with a normal ogive in place of the logistic. Each threshold becomes a boundary $b_k$.
+:::
+
+#### Try it: three ways to split a response
+
+Pick a response on a 0–3 item and a set of splits. Each row is one binary question; the cells say how each category answers it. The outlined column is the chosen response.
+
+```{ojs}
+//| echo: false
+viewof sp_x = Inputs.radio([0, 1, 2, 3], {value: 2, label: "Response x"})
+viewof sp_model = Inputs.radio(["Cumulative (GRM)", "Adjacent categories (PCM, GPCM)", "Sequential"], {value: "Cumulative (GRM)", label: "Splits"})
+```
+
+```{ojs}
+//| echo: false
+sp_role = (k, c) => sp_model.startsWith("Cum") ? (c >= k ? "1" : "0") :
+  sp_model.startsWith("Adj") ? (c === k ? "1" : c === k - 1 ? "0" : "not used") :
+  (c >= k ? "1" : c === k - 1 ? "0" : "not used")
+sp_q = k => sp_model.startsWith("Cum") ? `Is x ≥ ${k}?` : sp_model.startsWith("Adj") ? `x = ${k} rather than ${k - 1}?` : `Given x ≥ ${k - 1}, is x ≥ ${k}?`
+sp_cells = [1, 2, 3].flatMap(k => [0, 1, 2, 3].map(c => ({split: sp_q(k), cat: `x = ${c}`, role: sp_role(k, c), mine: c === sp_x})))
+Plot.plot({
+  width: 700, height: 200, marginLeft: 190, padding: 0.06,
+  x: {label: null, domain: [0, 1, 2, 3].map(c => `x = ${c}`), axis: "top"}, y: {label: null, domain: [1, 2, 3].map(sp_q)},
+  color: {domain: ["1", "0", "not used"], range: [palette.main, palette.light, palette.white], legend: true},
+  marks: [
+    Plot.cell(sp_cells, {x: "cat", y: "split", fill: "role", stroke: palette.rule}),
+    Plot.text(sp_cells, {x: "cat", y: "split", text: d => d.role === "not used" ? "–" : d.role, fill: d => d.role === "1" ? palette.white : palette.ink, fontSize: 14}),
+    Plot.cell(sp_cells.filter(d => d.mine), {x: "cat", y: "split", fill: null, stroke: palette.contrast, strokeWidth: 3})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`A response of ${sp_x} answers ${[1, 2, 3].filter(k => sp_role(k, sp_x) !== "not used").length} of the three questions: ${[1, 2, 3].filter(k => sp_role(k, sp_x) !== "not used").map(k => `"${sp_q(k)}" ${sp_role(k, sp_x) === "1" ? "yes" : "no"}`).join("; ")}.`
+```
+
+Cumulative splits use the response in every question; adjacent-category splits only in the comparisons that involve its category; sequential splits up to the first "no". Same response, three sets of binary data, three models.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A respondent answers 1 on a 0–3 item. Under the sequential model, what does that response say about step 3 (going from 2 to 3)?",
+  options: [
+    {text: "Nothing: the respondent never reached it", correct: true, why: "The sequential model passes steps in order and stops at the first failure. This respondent passed step 1 and failed step 2, so step 3 was never attempted."},
+    {text: "That the respondent failed it", correct: false, why: "That is the cumulative reading ($x \\ge 3$? no). The sequential model only records a failure at the step where the respondent stopped."},
+    {text: "That the respondent passed it", correct: false, why: "Passing step 3 would mean reaching category 3."}
+  ]
+})
+```
+
+### Category curves and the expected score
+
+Plotting $\Pr(x = k)$ against $\theta$ for each category gives the **category response functions** (CRFs). The **expected score curve**, $E(x \mid \theta) = \sum_k k \Pr(x = k \mid \theta)$, plays the part of the ICC, on the response scale.
+
+#### Try it: category curves and the expected score
+
+```{ojs}
+//| echo: false
+viewof cr_model = Inputs.radio(["GRM", "GPCM", "Sequential"], {value: "GPCM", label: "Model"})
+viewof cr_a = Inputs.range([0.3, 3], {value: 1.5, step: 0.05, label: "Slope a"})
+viewof cr_b1 = Inputs.range([-3, 3], {value: -1.5, step: 0.1, label: "b1"})
+viewof cr_b2 = Inputs.range([-3, 3], {value: 0, step: 0.1, label: "b2"})
+viewof cr_b3 = Inputs.range([-3, 3], {value: 1.5, step: 0.1, label: "b3"})
+```
+
+```{ojs}
+//| echo: false
+cr_bs = [cr_b1, cr_b2, cr_b3]
+cr_th = grid(-4, 4, 321)
+cr_cols = [palette.light, palette.main, palette.contrast, palette.ink]
+cr_rows = cr_th.flatMap(t => catProbs(cr_model, t, cr_a, cr_bs).map((p, k) => ({theta: t, p, cat: `x = ${k}`})))
+Plot.plot({
+  width: 700, height: 280, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(x = k)", domain: [0, 1]},
+  color: {legend: true, domain: ["x = 0", "x = 1", "x = 2", "x = 3"], range: cr_cols},
+  marks: [Plot.ruleX(cr_model === "GRM" ? [...cr_bs].sort((u, v) => u - v) : cr_bs, {stroke: palette.guide, strokeDasharray: "4,3"}),
+          Plot.line(cr_rows, {x: "theta", y: "p", stroke: "cat", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 700, height: 200, x: {label: "θ", domain: [-4, 4]}, y: {label: "Expected score", domain: [0, 3]},
+  marks: [Plot.ruleY([0, 1, 2, 3], {stroke: palette.rule}),
+          Plot.line(cr_th.map(t => ({theta: t, e: expectedScore(catProbs(cr_model, t, cr_a, cr_bs))})), {x: "theta", y: "e", stroke: palette.main, strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+cr_never = [1, 2].filter(k => !everModal(cr_model, cr_a, cr_bs, k, cr_th))
+md`${cr_model === "GRM" && (cr_b1 > cr_b2 || cr_b2 > cr_b3) ? "The GRM needs ordered boundaries, so the widget has sorted them. " : ""}Expected score at θ = 0: **${expectedScore(catProbs(cr_model, 0, cr_a, cr_bs)).toFixed(2)}**. ${cr_never.length ? `Category ${cr_never.join(" and ")} is never the most likely response, anywhere on the scale.` : "Every category is the most likely response somewhere on the scale."} The dashed lines mark the b parameters.`
+```
+
+At the defaults each category has its turn as the most likely response; under the GPCM the dashed lines sit where neighbouring curves cross. The same $b$ values mean different things in each model: the expected score at $\theta = 0$ is 1.50 under the GRM and GPCM, 1.40 under the sequential model.
+
+Now, under the GPCM, set $b_1 = 0.5$ and $b_2 = -0.5$. The steps are **disordered**, and category 1 is never the most likely response. The GRM can't do this: it reorders the same values, and category 1 becomes most likely between them. What do disordered steps say? Not that the categories are out of order, since the expected score still rises with $\theta$, but that a middle category is seldom chosen. What to do about it depends on an assumption. [Andrich (2013)](https://doi.org/10.1177/0013164412450877) takes the categories to be designed so that each should be most likely somewhere, and reads disordered steps as a reason to revisit them. [Adams, Wu and Wilson (2012)](https://doi.org/10.1177/0013164411432166) take the steps as describing category frequencies, which a small middle category explains without any problem in the ordering. The pain data below have three such items.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A GPCM item on a 0–3 scale has step difficulties $b_1 = 0.2$, $b_2 = -0.4$, $b_3 = 1.1$. What follows?",
+  options: [
+    {text: "Category 1 is never the most likely response", correct: true, why: "With $b_2 < b_1$, category 2 overtakes category 1 before category 1 has overtaken category 0, so category 1 never tops both its neighbours. Try it in the widget."},
+    {text: "Respondents higher on θ tend to give lower scores", correct: false, why: "The expected score still rises with θ whatever the steps. Disordered steps are about how likely one category is, not about the order of the categories."},
+    {text: "The model cannot be fitted", correct: false, why: "The GPCM fits such items without difficulty; only the GRM needs its boundaries in order."}
+  ]
+})
+```
+
+### The partial credit model is a Rasch model
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): under the Rasch model the sum score $r$ is sufficient for $\theta$, so respondents with the same sum score get the same estimate, and conditioning on $r$ removes $\theta$ altogether. [From the 1PL to the 4PL](1pl-to-4pl.qmd) showed the 2PL weighting items by their slopes instead.
+:::
+
+Does sufficiency survive more than two categories? Under the PCM, take two adjacent categories: the log odds of $k$ against $k - 1$ is $\theta - b_k$. Each adjacent pair is a Rasch item.
+
+#### Try it: adjacent categories on the log-odds scale
+
+The item has $b = -1.5, 0, 1.5$. Each line is the log odds of one category against the one below it.
+
+```{ojs}
+//| echo: false
+viewof ad_model = Inputs.radio(["PCM", "GPCM", "GRM"], {value: "PCM", label: "Model"})
+viewof ad_a = Inputs.range([0.5, 3], {value: 1.5, step: 0.05, label: "Slope a (GPCM, GRM)"})
+```
+
+```{ojs}
+//| echo: false
+ad_bs = [-1.5, 0, 1.5]
+ad_slope = (k, t) => (adjacentLogit(ad_model, t + 0.01, ad_a, ad_bs, k) - adjacentLogit(ad_model, t - 0.01, ad_a, ad_bs, k)) / 0.02
+Plot.plot({
+  width: 700, height: 300, x: {label: "θ", domain: [-4, 4]}, y: {label: "Log odds, k against k − 1", domain: [-8, 8]},
+  color: {legend: true, domain: ["1 vs 0", "2 vs 1", "3 vs 2"], range: [palette.light, palette.main, palette.contrast]},
+  marks: [Plot.ruleY([0], {stroke: palette.rule}),
+          Plot.line(grid(-4, 4, 161).flatMap(t => [1, 2, 3].map(k => ({theta: t, lo: adjacentLogit(ad_model, t, ad_a, ad_bs, k), pair: `${k} vs ${k - 1}`}))).filter(d => Math.abs(d.lo) < 8),
+            {x: "theta", y: "lo", stroke: "pair", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Slopes of the three lines at θ = −2: **${[1, 2, 3].map(k => ad_slope(k, -2).toFixed(2)).join(", ")}**; at θ = 2: **${[1, 2, 3].map(k => ad_slope(k, 2).toFixed(2)).join(", ")}**.`
+```
+
+Under the PCM the lines are straight and parallel, with slope 1: three Rasch items, crossing zero at their steps. Under the GPCM the slope is $a$. Under the GRM they bend (with $a = 1.5$, the first line's slope is 1.43 at $\theta = -2$ and 0.07 at $\theta = 2$): built on cumulative splits, its adjacent comparisons aren't logistic.
+
+Because every adjacent comparison in the PCM is a Rasch item, the Rasch algebra goes through: $\theta$ meets the responses only through the sum of the category scores, $r = \sum_i x_i$, so $r$ is sufficient (the Go deeper callout below factors the likelihood), and conditional maximum likelihood works as before. Under the GPCM the weighted score $\sum_i a_i x_i$ takes $r$'s place, as under the 2PL; the GRM has no such statistic. The **rating scale model** ([Andrich, 1978](https://doi.org/10.1007/BF02293814)) restricts the PCM further, giving every item the same pattern of steps; problem 2 tries it.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two respondents answer the same three 0–4 items. A answers 4, 0, 0; B answers 1, 2, 1. Under the partial credit model, how do their estimates of θ compare?",
+  options: [
+    {text: "They are equal", correct: true, why: "Both sum scores are 4, and under the PCM the sum of the category scores is sufficient for θ."},
+    {text: "B's is higher: B's responses are more consistent", correct: false, why: "Consistency bears on how well the model fits B's pattern (person fit), not on the estimate. Only the sum score enters it."},
+    {text: "It depends on the items' step difficulties", correct: false, why: "The step difficulties enter the likelihood only in a term that doesn't involve θ. Under the GRM your answer would be right."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: the PCM's sum score, and what the other models lack
+
+**Assumptions:** one respondent answers $I$ items with categories $0, \dots, K_i$; the PCM holds for every item; responses are locally independent given $\theta$; the step difficulties $b_{iv}$ are known.
+
+**One item.** Write $\beta_{ik} = \sum_{v=1}^{k} b_{iv}$ (with $\beta_{i0} = 0$; these are sums of step difficulties, not regression coefficients). The PCM is
+$$\Pr(x_i = k \mid \theta) = \frac{\exp(k\theta - \beta_{ik})}{D_i(\theta)}, \qquad D_i(\theta) = \sum_{h=0}^{K_i} \exp(h\theta - \beta_{ih}).$$
+Dividing two neighbouring categories gives $\Pr(x_i = k)/\Pr(x_i = k-1) = \exp(\theta - b_{ik})$: the Rasch model for the adjacent pair.
+
+**The pattern.** Multiply over items:
+$$\Pr(\mathbf{x} \mid \theta) = \frac{\exp(r\theta)\,\exp\big(-\sum_i \beta_{i x_i}\big)}{\prod_i D_i(\theta)}, \qquad r = \sum_i x_i.$$
+As in [The Rasch model](rasch.qmd), the data meet $\theta$ only in $\exp(r\theta)$, so $r$ is sufficient. Summing over the patterns with the same $r$ and dividing gives $\Pr(\mathbf{x} \mid r) = \exp(-\sum_i \beta_{i x_i}) / \sum_{\mathbf{y}:\,\sum y_i = r} \exp(-\sum_i \beta_{i y_i})$, with no $\theta$ in it: conditional maximum likelihood for the steps ([Masters, 1982](https://doi.org/10.1007/BF02296272)). The same cancellation with two items gives specific objectivity for comparisons between items.
+
+**The GPCM.** With slopes, $k\theta$ becomes $a_i k\theta$, and $\theta$ meets the data in $\exp(\theta\sum_i a_i x_i)$: the weighted score is sufficient, but its weights are item parameters, as in the 2PL.
+
+**The GRM.** $\Pr(x_i = k)$ is a difference of two logistic curves, which doesn't factor into a term in $\theta$ times a term in the data. The likelihood depends on which categories were chosen, not only on a weighted sum of them, so no statistic simpler than the pattern is sufficient. [van der Ark (2001)](https://doi.org/10.1177/01466210122032073) compares what the sum score does and doesn't guarantee under each family.
+:::
+
+### Information, and what collapsing costs
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Information, precision, and short forms](information.qmd): a 2PL item's information is $a^2 P(1 - P)$, the variance of its score term, largest at $\theta = b$. Test information is the sum over items, and the conditional SEM is $1/\sqrt{I(\theta)}$.
+:::
+
+What is the information in a polytomous item? The same curvature argument gives
+$$I(\theta) = \sum_{k=0}^{K} \frac{\big(\partial \Pr(x = k)/\partial\theta\big)^2}{\Pr(x = k)}$$
+([Samejima, 1969](https://doi.org/10.1007/BF03372160)), which for a 0/1 item is $a^2P(1-P)$; for the GPCM it is $a^2$ times the variance of the response given $\theta$. An item with well-spaced categories is informative across the range its boundaries cover. Under the GRM, collapsing is easy to compare: the item "is $x \ge k$?" is a 2PL with slope $a$ and difficulty $b_k$, informative around that one boundary.
+
+#### Try it: what collapsing costs
+
+A GRM item scored 0–3. Compare its information with the item collapsed to 0/1 at one of its boundaries. The shading is where respondents are (a standard normal).
+
+```{ojs}
+//| echo: false
+viewof co_a = Inputs.range([0.5, 3], {value: 2, step: 0.05, label: "Slope a"})
+viewof co_b1 = Inputs.range([-3, 3], {value: -1, step: 0.1, label: "b1"})
+viewof co_b2 = Inputs.range([-3, 3], {value: 0.5, step: 0.1, label: "b2"})
+viewof co_b3 = Inputs.range([-3, 3], {value: 2, step: 0.1, label: "b3"})
+viewof co_cut = Inputs.radio(["x ≥ 1", "x ≥ 2", "x ≥ 3"], {value: "x ≥ 1", label: "Collapse at"})
+```
+
+```{ojs}
+//| echo: false
+co_bs = [co_b1, co_b2, co_b3].sort((u, v) => u - v)
+co_k = Number(co_cut.slice(-1))
+co_bin = t => { const p = 1 / (1 + Math.exp(-co_a * (t - co_bs[co_k - 1]))); return co_a * co_a * p * (1 - p); }
+co_th = grid(-4, 4, 321)
+co_top = Math.max(...co_th.map(t => polyInfo("GRM", t, co_a, co_bs)), 0.3)
+Plot.plot({
+  width: 700, height: 290, x: {label: "θ", domain: [-4, 4]}, y: {label: "Item information", domain: [0, co_top * 1.1]},
+  color: {legend: true, domain: ["Four categories", `Collapsed at ${co_cut}`], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.areaY(co_th.map(t => ({theta: t, d: dnorm(t) / dnorm(0) * co_top * 0.5})), {x: "theta", y: "d", fill: palette.light, fillOpacity: 0.4}),
+    Plot.line(co_th.flatMap(t => [{theta: t, I: polyInfo("GRM", t, co_a, co_bs), item: "Four categories"},
+                                 {theta: t, I: co_bin(t), item: `Collapsed at ${co_cut}`}]), {x: "theta", y: "I", stroke: "item", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Information at θ = −1, 0.5 and 2: four categories **${[-1, 0.5, 2].map(t => polyInfo("GRM", t, co_a, co_bs).toFixed(2)).join(", ")}**; collapsed at ${co_cut}, **${[-1, 0.5, 2].map(t => co_bin(t).toFixed(2)).join(", ")}**.`
+```
+
+At the defaults the full item gives about 1 from $\theta = -1$ to 2 (1.04, 1.09, 1.04). Collapsed at $x \ge 1$ it keeps 1.00 at $\theta = -1$ and has 0.01 at $\theta = 2$. Each cut does well near its own boundary only, and no cut beats the full item anywhere; the second Go deeper callout proves that merging categories can't add information. [MacCallum, Zhang, Preacher and Rucker (2002)](https://doi.org/10.1037/1082-989X.7.1.19) make the parallel case for continuous variables. Collapsing is a reasonable choice when a category is nearly empty, or when the only decision sits at one boundary.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A GRM item scored 0–4 has boundaries $b = -1, 0, 1, 2$ and slope 2. You collapse it to 'any symptom' ($x \\ge 1$). For whom is the loss of information largest?",
+  options: [
+    {text: "Respondents near θ = 2", correct: true, why: "The collapsed item is a 2PL at $b = -1$, informative only near −1. At θ = 2 the full item still has boundaries nearby; the collapsed one has none."},
+    {text: "Respondents near θ = −1", correct: false, why: "That is where the collapsed item's one boundary sits, so it keeps most of the information there."},
+    {text: "Everyone loses the same amount", correct: false, why: "Information is a curve, and each boundary contributes near its own location. Dropping boundaries costs most where they were."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: information for a polytomous item, and why merging categories loses it
+
+**Assumptions:** one item with categories $0, \dots, K$; $P_k(\theta) = \Pr(x = k \mid \theta)$ is differentiable and positive; item parameters known.
+
+**Information.** The log likelihood of one response is $\log P_x(\theta)$. Its derivative is $P_x'/P_x$, which has mean $\sum_k P_k' = 0$ (the $P_k$ sum to 1). Fisher information is its variance:
+$$I(\theta) = \sum_k P_k \left(\frac{P_k'}{P_k}\right)^2 = \sum_k \frac{(P_k')^2}{P_k}.$$
+With $K = 1$ and $P_1 = \text{logit}^{-1}(a(\theta - b))$, $P_1' = aP_1(1-P_1)$ and $P_0' = -P_1'$, and this is $a^2P_1(1-P_1)$.
+
+**The GPCM.** Here $\log P_k = ak\theta - (\text{a term without } \theta) - \log D(\theta)$, so $P_k'/P_k = a\big(k - E(x \mid \theta)\big)$, and
+$$I(\theta) = a^2 \sum_k P_k \big(k - E(x \mid \theta)\big)^2 = a^2\,\text{Var}(x \mid \theta).$$
+
+**Merging loses information.** Merge categories $j$ and $k$ into one. Their joint contribution to $I$ becomes $(P_j' + P_k')^2/(P_j + P_k)$. By the Cauchy–Schwarz inequality,
+$$(P_j' + P_k')^2 = \left(\sqrt{P_j}\,\frac{P_j'}{\sqrt{P_j}} + \sqrt{P_k}\,\frac{P_k'}{\sqrt{P_k}}\right)^2 \le (P_j + P_k)\left(\frac{(P_j')^2}{P_j} + \frac{(P_k')^2}{P_k}\right),$$
+so the merged term is never larger than the two separate terms, and equals them only where $P_j'/P_j = P_k'/P_k$, where the two categories respond to $\theta$ identically. Collapsing to 0/1 is a sequence of such merges.
+:::
+
+The choice among these models is a small decision; the choice to keep the categories is a large one.
+
+## Simulate
+
+The code below simulates 1,000 respondents answering six 0–3 items from the PCM, fits the PCM and the GRM, and compares both with the truth. Then it collapses every item at $x \ge 2$, fits a 2PL, and compares test information. The first run takes 20–30 seconds while R and `mirt` load. `mirt` fits the PCM with the itemtype `"Rasch"`, which for polytomous items fixes every slope at 1 and estimates the SD of $\theta$.
+
+With the seed as written, the PCM recovers every step within 0.15, including item 6's disordered pair (0.5 and −0.5, estimated 0.54 and −0.65), and AIC prefers it to the GRM (14,443 against 14,470). In the plot of item 6, the GRM still gives category 1 a curve of about the right height, with outer curves a little steeper than the truth. Collapsing costs information everywhere, least in the middle (4.09 against 4.79 at $\theta = 0$) and most in the tails (0.56 against 1.60 at $\theta = -2$). Try `np <- 200`, steps far apart such as `c(-2.5, 0, 2.5)`, or a collapse at `resp >= 1`.
+
+```{webr}
+{{< include code/polytomous-sim.R >}}
+```
+
+[Download this code](code/polytomous-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/polytomous-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### Pain interference
+
+Our main example is [promis1wave1_pain](https://itemresponsewarehouse.org/tables/promis1wave1_pain/), from the first wave of testing of the Patient-Reported Outcomes Measurement Information System (PROMIS), which tested item banks for health outcomes on adults from the US general population and clinical groups ([Cella et al., 2010](https://doi.org/10.1016/j.jclinepi.2010.04.011); data at <https://doi.org/10.7910/DVN/0NGAKG>). Its job is to be a polytomous scale on which most respondents report little. We use seven of the 56 candidate items for the pain-interference bank ([Amtmann et al., 2010](https://doi.org/10.1016/j.pain.2010.04.025)). They ask, for the past seven days, how much pain interfered with enjoying social activities, and how often it caused anxiety, led to avoiding social activities or long trips, made simple tasks hard, or prevented walking a mile or standing for an hour. HealthMeasures, which distributes PROMIS, doesn't permit republishing the items, so we summarize them. Responses run from 1 (never, or not at all) to 5 (always, or very much): higher means more interference, and no item needs reversing. We recode them 0–4. [Download the code](code/polytomous-irw.R) to run every chunk yourself.
+
+```{r fetch-pain}
+#| echo: true
+#| code-fold: show
+```
+
+The table's 168 items (interference, behaviour and quality) were given in overlapping blocks, so each of the 15,961 respondents answered some of them; 1,908 answered all seven of ours. (In the behaviour and quality sections, some six-option items share one code between their two lowest options, per the IRW's [item-text notes](https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_022/provenance.csv); the interference items keep their five categories.) Of all responses, 55% are 0, and 31% of respondents chose 0 on every item.
+
+```{r fit-pain}
+#| echo: true
+#| code-fold: show
+```
+
+AIC ([Akaike, 1974](https://doi.org/10.1109/TAC.1974.1100705)) and BIC ([Schwarz, 1978](https://doi.org/10.1214/aos/1176344136)) agree: the GRM fits best (AIC 23,992), then the sequential model and the GPCM (24,155 and 24,160), then the PCM (24,445), with six fewer parameters. PROMIS calibrated its banks with the GRM ([Cella et al., 2010](https://doi.org/10.1016/j.jclinepi.2010.04.011)). The slopes, 2.71 to 5.17, are steep beside the RMET's 0.19 to 1.13 ([From the 1PL to the 4PL](1pl-to-4pl.qmd)), and every boundary lies between $-0.11$ and 2.50, above the middle of the scale.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): AIC and BIC say which model is preferred, not how much better it predicts new responses. Whether the choice among these models ever matters much across the IRW is a question the IMV could answer.
+:::
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The GRM beats the GPCM by 168 AIC points. How closely will the four models' scores for the 1,908 respondents agree?",
+  choices: ["Correlations near 0.8", "Correlations near 0.9", "Correlations of 0.99 or above"],
+  answer: "Correlations of 0.99 or above",
+  reveal: "0.994 to 0.999. Four models with nearly the same number of parameters, fitted to the same seven items, order the respondents almost identically. Check the output below."
+})
+```
+
+```{r scores-pain}
+#| echo: true
+#| code-fold: show
+```
+
+The scores correlate from 0.994 to 0.999. The category curves for one item show why:
+
+```{r crf-pain}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+For PAININ40 (walking a mile) the GRM, GPCM and sequential curves follow each other closely: different parameters, much the same probabilities.
+
+```{r steps-pain}
+#| echo: true
+#| code-fold: show
+```
+
+Three items have disordered GPCM steps ($b_2 < b_1$): PAININ40, 41 and 42 (walking a mile, avoiding long trips, standing for an hour). For all three, category 1 (rarely) is never the most likely response, under the GPCM and equally under the GRM, whose boundaries can't be disordered. The proportions say why: 10% to 12% chose category 1 on these items, against 15% to 22% on the other four, while PAININ40 and 42 have the most responses in the top category (16% and 12%). Whether that calls for rewording, or is how people experience these activities, is a question for the item writers; the model raises it without settling it.
+
+```{r sufficiency-pain}
+#| echo: true
+#| code-fold: show
+```
+
+Sufficiency, in data: under the PCM, equal sum scores get equal estimates (largest spread 0.00); under the GRM they spread by up to 0.91.
+
+So which model would I fit to these items? The PCM offers a sufficient sum score and asks for equal slopes in return. The GRM and GPCM let slopes vary, which these items need (2.71 to 5.17), and the GRM fits best by AIC and BIC. Yet all four give scores that correlate at 0.994 or above. I'd fit the GRM and report its scores, and not spend long choosing between it and the GPCM. I'd spend the time on the next question: what would we lose by not using the categories at all?
+
+```{r info-pain}
+#| echo: true
+#| code-fold: show
+```
+
+```{r info-plot-pain}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+Collapsed to "any interference", the seven items give about the same information near $\theta = 0$ (23.5 against the GRM's 22.8; each fit sets its own scale, so a small difference means little), where every collapsed item has its one boundary. Above that little is left: 4.4 against 27.4 at $\theta = 1$, and 0.2 against 21.7 at $\theta = 2$, among the respondents a pain measure most needs to tell apart. Below the middle neither helps: 49% of respondents have GRM scores below 0, the 31% who reported no interference share one score, $-1.10$, and information at $\theta = -1$ is 1.5 under either model. The categories carry the information above the floor; no model recovers what the floor hides.
+
+### Attitudes to science
+
+For contrast, [science_ltm](https://itemresponsewarehouse.org/tables/science_ltm/): seven statements about science and technology put to 392 respondents in Great Britain in the 1992 Euro-Barometer 38.1 ([Reif & Melich, 1995](https://doi.org/10.3886/ICPSR06045); [European Commission, 2012](https://doi.org/10.4232/1.10904)), as distributed in the `ltm` package ([Rizopoulos, 2006](https://doi.org/10.18637/jss.v017.i05)). Each statement was rated in four categories, from strongly disagree to strongly agree. Its job is to show a short scale, in a small sample, whose responses bunch in the middle rather than at a floor. Four statements favour science (it makes life more comfortable, work more interesting and the future brighter, and its benefits outweigh its harms); three are worded against it (research doesn't matter for the environment, new technology or industry), all summarized from the `ltm` documentation.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): items worded against the construct have to be reverse-keyed before they are combined, and the data don't always say which ones they are. For a rating scale, reversing maps category $k$ to $K - k$: the whole order of the categories flips, not just a 0 and a 1.
+:::
+
+```{r fetch-sci}
+#| echo: true
+#| code-fold: show
+```
+
+The `resp_raw` labels, from the `ltm` package, say 4 means strongly agree for every item. Read that way, 85% of respondents agreed that research does not matter to industrial development, while majorities agreed with every statement favouring science. The IRW's [item-text check](https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_169/verify_science_ltm.R) compared each item's distribution with the 1992 codebook's figures for Great Britain: for the three statements worded against science, 4 is strongly *disagree*. The data arrive already reverse-keyed, every item running toward a favourable view of science; only the labels weren't updated. Could the correlations have told us?
+
+```{r clusters-sci}
+#| echo: true
+#| code-fold: show
+```
+
+No. Rank correlations between the two sets run from $-0.08$ to 0.15, near zero whichever way the three are keyed, and a two-factor analysis of the polychoric correlations puts the sets on factors that correlate 0.03.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Factor analysis I](fa-exploratory.qmd): polychoric correlations estimate the correlation between the continuous responses that ordered categories are assumed to coarsen, which suits Likert items better than Pearson correlations do.
+:::
+
+One $\theta$ for all seven would describe two things at once; several dimensions are the subject of [Dimensionality and multidimensional IRT](dimensionality.qmd). We fit the four statements favouring science.
+
+```{r fit-sci}
+#| echo: true
+#| code-fold: show
+```
+
+From 49% (Benefit) to 68% (Comfort) of responses are in the third category, agree to some extent. The four models fit about equally well: AIC runs from 3,250 (GRM) to 3,265 (PCM), BIC from 3,313 to 3,321, the PCM second by BIC with three fewer parameters. The GRM slopes (1.04 to 2.29) are far flatter than the pain items'. The scores correlate at 0.96 or above, 0.99 or above among the models with free slopes. A different scale and sample, the same result: models with similar numbers of parameters describe the data about equally well.
 
 ## Problems
 
+1. **The PCM's adjacent categories.** Starting from $\Pr(x = k) \propto \exp\big(\sum_{v \le k}(\theta - b_v)\big)$, show that $\Pr(x = k \mid x \in \{k - 1, k\})$ is a Rasch curve with difficulty $b_k$. Then show that the sum score is sufficient for $\theta$ under the PCM, and find the statistic that is sufficient under the GPCM.
+2. **The rating scale model.** Fit the rating scale model (`itemtype = "rsm"`) and the PCM to the four `science_ltm` items worded in favour of science. What does the rating scale model assume about the items' steps, and how many parameters does that save here? Compare AIC and BIC, and look at the PCM's steps: do the data support the assumption? (PS8#1)
+3. **Which scores?** For the pain items, compare each respondent's GRM and GPCM scores. How large is the largest difference, and for whom? Would the choice of model change anyone's score by more than its standard error? Would you report scores from the GRM or the GPCM, and why?
+4. **How many categories?** You are writing a new frequency item for a symptom survey. Would you offer three, five or seven categories? Say what you would check in pilot data before deciding (empty categories, disordered steps, information where your respondents are), and how you would check each in `mirt`.
+5. **A PCM item the GRM can't describe.** Using the simulation, find step difficulties for a PCM item that the GRM describes poorly. Measure "poorly" by the largest difference between the true and the GRM's fitted category curves, and by AIC. What kind of steps do it, and would you expect to meet them in real data? (PS8#2)
+6. **Challenge (open): the floor.** Almost a third of the pain respondents chose 0 on every item, and share one score. Is a floor like that a problem for the model, for the population, or for neither? What would you change (the items, the sample, the model) to learn more about respondents at the floor, and what would each change cost? I don't have a general answer.
+
+```{r}
+#| output: asis
+ask_claude("polytomous", "It covers item response models for ordered polytomous responses: the graded response model, the partial credit and generalized partial credit models, and the sequential model as different ways of splitting a response into binary questions; category response functions and expected scores; disordered step parameters; sum-score sufficiency under the partial credit model; item information for polytomous items and what collapsing categories costs; and fits in R with the mirt package to PROMIS pain-interference items and a Euro-Barometer attitudes-to-science scale.")
+```
+
 ## Going further
+
+- Ostini, R., & Nering, M. L. (2006). *Polytomous item response theory models*. Sage. <https://doi.org/10.4135/9781412985413>. A short book on the whole family, with the models' assumptions side by side.
+- Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. *Psychometrika*, 34(S1), 1–97. <https://doi.org/10.1007/BF03372160>. The graded response model, and information for graded items.
+- Masters, G. N. (1982). A Rasch model for partial credit scoring. *Psychometrika*, 47(2), 149–174. <https://doi.org/10.1007/BF02296272>. The partial credit model.
+- Muraki, E. (1992). A generalized partial credit model: Application of an EM algorithm. *Applied Psychological Measurement*, 16(2), 159–176. <https://doi.org/10.1177/014662169201600206>. The partial credit model with slopes.
+- Andrich, D. (1978). A rating formulation for ordered response categories. *Psychometrika*, 43(4), 561–573. <https://doi.org/10.1007/BF02293814>. The rating scale model (problem 2).
+- Tutz, G. (1990). Sequential item response models with an ordered response. *British Journal of Mathematical and Statistical Psychology*, 43(1), 39–55. <https://doi.org/10.1111/j.2044-8317.1990.tb00925.x>. The sequential model, which [IRTree models](irtrees.qmd) generalizes.
+- Thissen, D., & Steinberg, L. (1986). A taxonomy of item response models. *Psychometrika*, 51(4), 567–577. <https://doi.org/10.1007/BF02295596>. Difference and divide-by-total models.
+- Mellenbergh, G. J. (1995). Conceptual notes on models for discrete polytomous item responses. *Applied Psychological Measurement*, 19(1), 91–100. <https://doi.org/10.1177/014662169501900110>. Cumulative, adjacent-category and sequential splits.
+- van der Ark, L. A. (2001). Relationships and properties of polytomous item response theory models. *Applied Psychological Measurement*, 25(3), 273–282. <https://doi.org/10.1177/01466210122032073>. What each family guarantees about the sum score.
+- Andrich, D. (2013). An expanded derivation of the threshold structure of the polytomous Rasch model that dispels any "threshold disorder controversy". *Educational and Psychological Measurement*, 73(1), 78–124. <https://doi.org/10.1177/0013164412450877>. Disordered steps as evidence about the categories.
+- Adams, R. J., Wu, M. L., & Wilson, M. (2012). The Rasch rating model and the disordered threshold controversy. *Educational and Psychological Measurement*, 72(4), 547–573. <https://doi.org/10.1177/0013164411432166>. Disordered steps as a consequence of small categories.
+- MacCallum, R. C., Zhang, S., Preacher, K. J., & Rucker, D. D. (2002). On the practice of dichotomization of quantitative variables. *Psychological Methods*, 7(1), 19–40. <https://doi.org/10.1037/1082-989X.7.1.19>. What dichotomizing costs, for continuous variables.
+- Amtmann, D., Cook, K. F., Jensen, M. P., Chen, W.-H., Choi, S., Revicki, D., Cella, D., Rothrock, N., Keefe, F., Callahan, L., & Lai, J.-S. (2010). Development of a PROMIS item bank to measure pain interference. *Pain*, 150(1), 173–182. <https://doi.org/10.1016/j.pain.2010.04.025>. How the pain-interference bank went from 56 candidate items to 41.
+- Cella, D., Riley, W., Stone, A., Rothrock, N., Reeve, B., Yount, S., et al. (2010). The Patient-Reported Outcomes Measurement Information System (PROMIS) developed and tested its first wave of adult self-reported health outcome item banks: 2005–2008. *Journal of Clinical Epidemiology*, 63(11), 1179–1194. <https://doi.org/10.1016/j.jclinepi.2010.04.011>. The source of the pain data, and PROMIS's calibration with the GRM.
+- Reif, K., & Melich, A. (1995). *Euro-barometer 38.1: Consumer protection and perceptions of science and technology, November 1992*. ICPSR. <https://doi.org/10.3886/ICPSR06045>. The source of the attitudes-to-science data.
+- Rizopoulos, D. (2006). ltm: An R package for latent variable modeling and item response theory analyses. *Journal of Statistical Software*, 17(5). <https://doi.org/10.18637/jss.v017.i05>. The package that distributes the science data.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package used throughout, with every model here as an `itemtype`.
+- Akaike, H. (1974). A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>. The AIC.
 
 ```{r}
 #| output: asis
@@ -29,3 +490,9 @@ data_sources("polytomous")
 
 ## For instructors
 
+- **Source:** EDUC 252 classes 8 (slides c8, 3–30) and 9 (slides c9, 1–11), problem set 8 (#1–#3), and the code in `ben-domingue/252`: `c8/basic_polytomous_analysis.R`, `c9/polyexample.R`, `ps8/ratingscale.R`, `ps8/polytomous_estimates.R`, `ps8/polydif.R`.
+- **Timing:** the core ideas and widgets take about 60 minutes; the two analyses work as a 30-minute lab. The real-data code takes under a minute in local R.
+- **Changed from 252:** PS8#1's `ffm_CSN` has no tokenless CSV, so the rating scale model moves to `science_ltm` (problem 2). The pain analysis uses seven interference items that 1,908 respondents all answered, rather than the ten most-answered items across the interference, behaviour and quality sections, so that one $\theta$ is plausible and every item has its five categories as asked. `science_ltm`'s seven items form two nearly uncorrelated clusters, so the lesson fits the four worded in favour of science.
+- **Held back:** splitting a response into a tree ([IRTree models](irtrees.qmd)); nominal responses ([Nominal response and multiple-choice models](nominal.qmd)); ideal-point responses ([Unfolding models](unfolding.qmd)); polytomous items in banks and adaptive tests ([Item banks and adaptive testing](item-banks-cat.qmd)); several dimensions ([Dimensionality and multidimensional IRT](dimensionality.qmd)). Ordinal DIF (PS8#3) is a problem on the CES-D in [Differential item functioning](dif.qmd), which doesn't depend on this lesson. Item-level fit statistics for polytomous models aren't covered.
+- **Item text:** PROMIS items are summarized, not quoted (HealthMeasures' terms). The Euro-Barometer statements are summarized from the `ltm` documentation; the questionnaire's licence isn't confirmed.
+- **Solutions:** held back in `solutions/polytomous.qmd` (not published).
