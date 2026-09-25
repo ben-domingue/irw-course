@@ -1,0 +1,31 @@
+---
+title: "Rater models: many-facet Rasch and beyond"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("rater-models")
+```
+
+## What this is for
+
+*To be written.*
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("rater-models")
+```
+
+## For instructors
+

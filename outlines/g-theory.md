@@ -26,7 +26,7 @@ References verified 09-24 against Crossref unless noted; table citations from IR
 - Random-effects models for item responses → `explanatory-irt` (items and persons as random effects).
 - Absolute error for decisions against a cut score → `score-meaning` (not a descendant: an "if you've done `g-theory`" Recall there, per E2).
 - Occasions as a facet → `invariance-experience` (a Recall, per E2); ESM data otherwise unpaid.
-- Raters as a facet in item response models → unpaid (rater models, many-facet Rasch); flagged for the Beyond module.
+- Raters as a facet in item response models → `rater-models` (many-facet Rasch and the hierarchical rater model, on this lesson's two tables; added by Ben, 09-25). Problem 6 (harsh vs. inconsistent raters) is its opening question.
 
 ## Tables
 

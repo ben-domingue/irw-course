@@ -429,6 +429,18 @@ lessons:
     status: stub
     tranche: extension
 
+  # 2026-09-25: added by Ben, reviewing g-theory ("we should have an advanced page on
+  # rater models"); pays g-theory's hook on raters as a facet in item response models.
+  - id: rater-models
+    title: "Rater models: many-facet Rasch and beyond"
+    module: beyond
+    prereqs: [g-theory, rasch]
+    origin: {slides: [], ps: [], code: []}
+    tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
+    reuses: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]  # g-theory's two tables, returned to with a measurement model for raters
+    status: stub
+    tranche: extension
+
 # Paths are orderings through the map. Anyone teaching from this can add their own.
 paths:
   - id: first-course
