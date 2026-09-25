@@ -81,6 +81,12 @@ DOIs Crossref-checked 09-24.
 - **Widgets:** the four outlined; helpers in `lessons/widgets/polytomous.js`.
 - **Dropped:** nothing. Item-level fit for polytomous models (which `fit-prediction` says it holds for this lesson) isn't covered; flagged in the PR.
 
+## Revisions after Ben's review (#139, 09-25)
+
+- *What this is for* now opens on "Every model so far…" (dichotomous responses), then why ordered categories (Likert, partial credit, symptom frequency) and what dichotomizing loses.
+- Tutz's typology cited where the three splits are introduced: Tutz (2022, doi:10.1002/wics.1545, abstract read), Tutz (1990) and Tutz (1997, doi:10.1007/978-1-4757-2691-6_8); Tutz (2020, doi:10.1016/j.jmp.2020.102346) in Going further. Crossref-checked; the 1997 and 2020 texts weren't read (Ben can supply PDFs).
+- The CRF and expected-score panels sit side by side (flex row, wraps on narrow screens).
+
 ## Open questions
 
 - None.

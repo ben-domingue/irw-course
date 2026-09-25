@@ -22,7 +22,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Ask adults how often, over the past week, pain kept them from standing for an hour, and each answer is one of five ordered categories, from never to always. Every model so far has been for responses scored 0 or 1. We could collapse the categories (any pain, or none), but [Information, precision, and short forms](information.qmd) showed that an item measures well near its difficulty, and an item with five categories has four boundaries, so four places to be informative. This lesson builds the standard models for ordered categories, each of which splits a response into binary questions answered by a model we already know. It fits four of them to seven PROMIS pain items and asks what the choice among them changes, and what collapsing would cost. The short answers: not much, and most of the information above the middle of the scale.
+Every model so far has been for dichotomous responses: right or wrong, scored 0 or 1. Much of what respondents give us isn't like that. A Likert rating runs from strongly disagree to strongly agree, a problem earns partial credit for a correct method with a wrong answer, and a symptom item asks how often, from never to always. We could collapse them to 0 and 1, but [Information, precision, and short forms](information.qmd) showed that an item measures well near its difficulty, and five ordered categories have four boundaries, so four places to be informative; collapsing keeps one. This lesson builds the standard models for ordered categories, each splitting a response into binary questions answered by a model we already know. It fits four to seven PROMIS pain items and asks what the choice among them changes, and what collapsing would cost. The short answers: not much, and most of the information above the middle of the scale.
 
 ## Goals
 
@@ -38,11 +38,11 @@ By the end of this lesson you should be able to:
 
 ### Ordered categories
 
-A response is **polytomous** when it can fall in more than two categories. The models here need the categories to be mutually exclusive and ordered, each step up meaning more of what is measured: a rating from strongly disagree to strongly agree, a frequency from never to always, or partial credit on a problem (0 for nothing, 1 for a correct setup, 2 for a correct method, 3 for a correct answer). We score the categories $0, 1, \dots, K$, so an item has $K$ steps; [Ostini and Nering (2006)](https://doi.org/10.4135/9781412985413) survey the models. More categories carry more information, as this lesson will show, but they take more parameters, and when a person rather than a key scores the response, the rater becomes a source of error ([Many sources of error: generalizability theory](g-theory.qmd)).
+A response is **polytomous** when it can fall in more than two categories. The models here need the categories to be mutually exclusive and ordered, each step up meaning more of what is measured: a rating from strongly disagree to strongly agree, a frequency from never to always, or partial credit on a problem (0 for nothing, 1 for a correct setup, 2 for a correct method, 3 for a correct answer). We score the categories $0, 1, \dots, K$, so an item has $K$ steps; [Ostini and Nering (2006)](https://doi.org/10.4135/9781412985413) survey the models. More categories carry more information but take more parameters, and when a person scores the response, the rater becomes a source of error ([Many sources of error: generalizability theory](g-theory.qmd)).
 
 ### Three ways to split a response
 
-How can models for 0/1 responses handle four categories? Split the response into binary questions, each with its own item response curve. There are three standard splits ([Mellenbergh, 1995](https://doi.org/10.1177/014662169501900110); [Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)), and each gives a model.
+How can models for 0/1 responses handle four categories? Split the response into binary questions, each with its own curve. [Tutz (2022)](https://doi.org/10.1002/wics.1545) builds a taxonomy of ordinal models on this view. Three standard splits give three families: cumulative, sequential and adjacent-category ([Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x), [1997](https://doi.org/10.1007/978-1-4757-2691-6_8); [Mellenbergh, 1995](https://doi.org/10.1177/014662169501900110)).
 
 - **Cumulative** splits ask "is $x$ at least $k$?" for each $k$. The **graded response model** (GRM; [Samejima, 1969](https://doi.org/10.1007/BF03372160)) gives each a 2PL with the item's slope:
 $$\Pr(x \ge k) = \frac{\exp\big(a(\theta - b_k)\big)}{1 + \exp\big(a(\theta - b_k)\big)}, \qquad \Pr(x = k) = \Pr(x \ge k) - \Pr(x \ge k + 1).$$
@@ -92,7 +92,7 @@ Plot.plot({
 md`A response of ${sp_x} answers ${[1, 2, 3].filter(k => sp_role(k, sp_x) !== "not used").length} of the three questions: ${[1, 2, 3].filter(k => sp_role(k, sp_x) !== "not used").map(k => `"${sp_q(k)}" ${sp_role(k, sp_x) === "1" ? "yes" : "no"}`).join("; ")}.`
 ```
 
-Cumulative splits use the response in every question; adjacent-category splits only in the comparisons that involve its category; sequential splits up to the first "no". Same response, three sets of binary data, three models.
+Same response, three sets of binary data, three models.
 
 ```{ojs}
 //| echo: false
@@ -127,21 +127,19 @@ cr_bs = [cr_b1, cr_b2, cr_b3]
 cr_th = grid(-4, 4, 321)
 cr_cols = [palette.light, palette.main, palette.contrast, palette.ink]
 cr_rows = cr_th.flatMap(t => catProbs(cr_model, t, cr_a, cr_bs).map((p, k) => ({theta: t, p, cat: `x = ${k}`})))
-Plot.plot({
-  width: 700, height: 280, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(x = k)", domain: [0, 1]},
-  color: {legend: true, domain: ["x = 0", "x = 1", "x = 2", "x = 3"], range: cr_cols},
+cr_legend = Plot.legend({color: {domain: ["x = 0", "x = 1", "x = 2", "x = 3"], range: cr_cols}})
+cr_crf = Plot.plot({
+  width: 420, height: 260, marginLeft: 45, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(x = k)", domain: [0, 1]},
+  color: {domain: ["x = 0", "x = 1", "x = 2", "x = 3"], range: cr_cols},
   marks: [Plot.ruleX(cr_model === "GRM" ? [...cr_bs].sort((u, v) => u - v) : cr_bs, {stroke: palette.guide, strokeDasharray: "4,3"}),
           Plot.line(cr_rows, {x: "theta", y: "p", stroke: "cat", strokeWidth: 2.5})]
 })
-```
-
-```{ojs}
-//| echo: false
-Plot.plot({
-  width: 700, height: 200, x: {label: "θ", domain: [-4, 4]}, y: {label: "Expected score", domain: [0, 3]},
+cr_erf = Plot.plot({
+  width: 420, height: 260, marginLeft: 45, x: {label: "θ", domain: [-4, 4]}, y: {label: "Expected score", domain: [0, 3]},
   marks: [Plot.ruleY([0, 1, 2, 3], {stroke: palette.rule}),
           Plot.line(cr_th.map(t => ({theta: t, e: expectedScore(catProbs(cr_model, t, cr_a, cr_bs))})), {x: "theta", y: "e", stroke: palette.main, strokeWidth: 2.5})]
 })
+htl.html`<div>${cr_legend}<div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">${cr_crf}${cr_erf}</div></div>`
 ```
 
 ```{ojs}
@@ -470,6 +468,9 @@ ask_claude("polytomous", "It covers item response models for ordered polytomous 
 - Muraki, E. (1992). A generalized partial credit model: Application of an EM algorithm. *Applied Psychological Measurement*, 16(2), 159–176. <https://doi.org/10.1177/014662169201600206>. The partial credit model with slopes.
 - Andrich, D. (1978). A rating formulation for ordered response categories. *Psychometrika*, 43(4), 561–573. <https://doi.org/10.1007/BF02293814>. The rating scale model (problem 2).
 - Tutz, G. (1990). Sequential item response models with an ordered response. *British Journal of Mathematical and Statistical Psychology*, 43(1), 39–55. <https://doi.org/10.1111/j.2044-8317.1990.tb00925.x>. The sequential model, which [IRTree models](irtrees.qmd) generalizes.
+- Tutz, G. (1997). Sequential models for ordered responses. In W. J. van der Linden & R. K. Hambleton (Eds.), *Handbook of modern item response theory* (pp. 139–152). Springer. <https://doi.org/10.1007/978-1-4757-2691-6_8>. The sequential model as an item response model.
+- Tutz, G. (2020). On the structure of ordered latent trait models. *Journal of Mathematical Psychology*, 96, 102346. <https://doi.org/10.1016/j.jmp.2020.102346>. How ordered latent trait models are built, and how they relate.
+- Tutz, G. (2022). Ordinal regression: A review and a taxonomy of models. *WIREs Computational Statistics*, 14(2), e1545. <https://doi.org/10.1002/wics.1545>. Ordinal models as compositions of binary models: the taxonomy behind this lesson's three splits.
 - Thissen, D., & Steinberg, L. (1986). A taxonomy of item response models. *Psychometrika*, 51(4), 567–577. <https://doi.org/10.1007/BF02295596>. Difference and divide-by-total models.
 - Mellenbergh, G. J. (1995). Conceptual notes on models for discrete polytomous item responses. *Applied Psychological Measurement*, 19(1), 91–100. <https://doi.org/10.1177/014662169501900110>. Cumulative, adjacent-category and sequential splits.
 - van der Ark, L. A. (2001). Relationships and properties of polytomous item response theory models. *Applied Psychological Measurement*, 25(3), 273–282. <https://doi.org/10.1177/01466210122032073>. What each family guarantees about the sum score.
