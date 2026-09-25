@@ -124,7 +124,7 @@ lessons:
     prereqs: [validity-argument]
     origin: {slides: [c4], ps: [], code: []}
     tables: [vocab_assessment_3_to_8_year_old_children, robison_2026_retesting_stroop]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: rasch
