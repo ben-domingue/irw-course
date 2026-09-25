@@ -348,7 +348,7 @@ lessons:
     prereqs: [instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
-    status: stub
+    status: draft
     tranche: core
 
   - id: fa-exploratory
@@ -375,7 +375,7 @@ lessons:
     prereqs: [validity-argument, ctt-reliability, instrument-building]
     origin: {slides: [], ps: [], code: []}
     tables: [de_vries_2022_hexaco_self, de_vries_2022_hexaco_other, ieswriting_molloy_2022]
-    status: stub
+    status: draft
     tranche: core
 
   - id: score-meaning

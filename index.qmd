@@ -35,7 +35,8 @@ tranches:
 - **Extensions** go further.
 
 Each lesson lists what it assumes and what builds on it. The lessons grew out of
-EDUC 252 (Introduction to Psychometrics) at Stanford.
+EDUC 252 (Introduction to Psychometrics) at Stanford. The source (lessons, code and data notes) is on
+[GitHub](https://github.com/ben-domingue/irw-course); comments and issues are welcome there.
 
 The lessons were written largely by Claude (Anthropic), an AI model, working from the
 EDUC 252 materials and under Ben Domingue's direction. Ben reviews each lesson before

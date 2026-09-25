@@ -2,7 +2,7 @@
 
 # Many sources of error: generalizability theory (`g-theory`)
 
-Module: ctt · Prereqs: instrument-building · Core · Status: outline
+Module: ctt · Prereqs: instrument-building · Core · Status: draft (09-25, #57)
 
 ## Core ideas
 
@@ -35,7 +35,7 @@ References verified 09-24 against Crossref unless noted; table citations from IR
 | `Forthmann-2024-cleverness_ratings` | main example | Cleverness ratings of alternate-uses responses (Forthmann & Myszkowski, 2024, "Analysis of a divergent thinking dataset", OSF, https://osf.io/a9qnc; CC BY 4.0; no DOI). 202 respondents, 3 tasks, 5 raters, fully crossed. Persons 32% of variance, person × task 29%, residual 30%; raters small (rater 2%, person × rater 6%). So a D study says: add tasks, not raters. | — |
 | `teacherjudgements_lohmann_2026_essayratings` | contrast | Teachers rating student essays (Lohmann et al., 2026, *Journal of Educational Psychology* 118(6), 941–960, doi:10.1037/edu0000969; CC BY 4.0). 881 essays, 4 criteria, 316 raters (sparse). Here raters matter: rater 14%, essay × rater 19%, against essays 28%. More raters per essay is the lever. | — |
 
-Numbers from the 09-24 outline pass (not recomputed). Sanity: the simulation (known components recovered) checks the `lme4` pipeline before the real tables.
+Numbers from the 09-24 outline pass (not recomputed). **Recomputed in the draft (09-25):** cleverness as above (person 32.1%, person × task 29.4%, residual 29.6%, rater 2.1%, person × rater 5.5%). Essays, with the expert-benchmark rows removed (315 teachers, 5 essays each; 435 of 881 essays have one teacher): essay 29.7%, rater 9.7%, essay × rater 25.2%, essay × criterion 9.6%. The rater and essay × rater shares differ from the outline's (14%, 19%), but the conclusion (more raters is the lever) stands. Sanity: the simulation (known components recovered) checks the `lme4` pipeline before the real tables.
 
 ## Widget / simulation / problem ideas
 
@@ -63,3 +63,12 @@ Numbers from the 09-24 outline pass (not recomputed). Sanity: the simulation (kn
 ## Open questions
 
 - **#76 (questions for colleagues) is pending.** Is `lme4` the right main tool for a first course, or should the classic ANOVA/EMS tables lead? *Default:* `lme4` in the main line, EMS as the Go deeper (C8); revise when #76 answers.
+
+## Drafting notes (09-25)
+
+- Drafted on the #76 default: `lme4` main line; EMS/ANOVA as a Go deeper, with the one-facet ANOVA, `lme4` and alpha compared numerically on the cleverness task means in *With real data*.
+- `lme4` runs in webR (2.0-1): the Simulate fit (1,350 rows, seven components) takes about 2 s in the browser, so nothing is precomputed. The essay fit (about 25 s in local R) runs only at render.
+- Widgets: variance components by role (ideas 2–3), D study with lines by raters (idea 4), consistency vs. agreement (idea 5). The "D-study surface" became lines by number of raters; the per-table D study is an R figure in *With real data*, so the predict-then-check is not spoiled.
+- The D study in the essays treats the four criteria as a random facet; fixed facets and nested D-study designs are named, not developed.
+- Pointers only: many-facet Rasch (Going further, Eckes 2011), random item effects (`explanatory-irt`), error at a cut (`score-meaning`), occasions (`invariance-experience`).
+- **Revision after Ben's review (09-25, PR #147):** Ben asked for a widget showing how the two G coefficients differ. The first widget ("where the variance goes") became "the two coefficients side by side", placed where Eρ² and Φ are introduced: sliders for all seven components and n_t, n_r, starting at the cleverness estimates with an essay preset; one stacked bar per coefficient, with the absolute-only pieces (task, rater, task × rater) in a distinct colour. It feeds the D-study widget, so the count stays at 3. Because the widget now shows the cleverness components, the predict-then-check moved from "tasks or raters?" to the D study (6 tasks × 1 rater vs. 3 × 5), just before the output that answers it.
