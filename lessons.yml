@@ -79,7 +79,7 @@ lessons:
     prereqs: [irw-data]
     origin: {slides: [c1], ps: ["PS1#1", "PS1#2", "PS1#5"], code: [c1/likelihood.R, ps1/ps1-like.R, ps1/ll_logreg.R, ps1/ps1-chess.R]}
     tables: [chess_lnirt]
-    status: done
+    status: draft
     tranche: preliminary
 
   - id: constructs
@@ -550,3 +550,85 @@ threads:
       - {lesson: explanatory-irt, how: models the dependence with random effects}
       - {lesson: unfolding, how: keeps it but drops the monotone curve the Rasch model pairs with it}
 
+  # Pass 2 (09-24 night): proposed by the wave-0 drafts (#123-#126); returns kept only
+  # where they are descendants of the introducing lesson (E2).
+  - id: sum-score-part-whole
+    idea: "The sum score contains the item"
+    introduced: ctt-limits
+    returns:
+      - {lesson: rasch, how: shows r = 0 and r = max agreeing by construction (wirs)}
+  - id: items-rise-with-score
+    idea: "Item curves rise with the sum score (monotonicity)"
+    introduced: ctt-limits
+    returns:
+      - {lesson: rasch, how: models them as ICCs}
+      - {lesson: unfolding, how: finds single-peaked curves (andrich_mudfold)}
+  - id: sum-score-depends-on-items
+    idea: "The sum score depends on which items were taken"
+    introduced: ctt-limits
+    returns:
+      - {lesson: rasch, how: puts people and items on one scale instead}
+      - {lesson: equating, how: links scores across forms}
+  - id: equal-unit
+    idea: "Whether a scale has an equal unit changes group comparisons"
+    introduced: measurement
+    returns:
+      - {lesson: score-meaning, how: percentile ranks need only order}
+      - {lesson: equating, how: links on θ}
+      - {lesson: scale-properties, how: asks what the Rasch model licenses}
+  - id: dominance
+    idea: "A mean difference keeps its sign under every rescaling only under stochastic dominance"
+    introduced: measurement
+    returns:
+      - {lesson: scale-properties, how: applies it to gains}
+      - {lesson: dif, how: compares groups on θ}
+  - id: desiderata
+    idea: "What we want from a measure: insensitive to nonfocal attributes, calibrated, precise quickly"
+    introduced: measurement
+    returns:
+      - {lesson: dif, how: tests insensitivity}
+      - {lesson: validity-argument, how: argues for it}
+      - {lesson: information, how: measures precision}
+      - {lesson: item-banks-cat, how: delivers it quickly}
+  - id: probes
+    idea: "Constructs are measured through probes"
+    introduced: measurement
+    returns:
+      - {lesson: constructs, how: builds a construct map}
+      - {lesson: instrument-building, how: writes the probes}
+  - id: measurement-discovery
+    idea: "Measurement as discovery; is the attribute quantitative?"
+    introduced: measurement
+    returns:
+      - {lesson: constructs, how: asks what the construct is}
+      - {lesson: validity-causal, how: asks whether the attribute exists}
+  - id: long-format
+    idea: "IRW tables are long: one row per response"
+    introduced: irw-data
+    returns:
+      - {lesson: likelihood, how: fits a logistic regression to one row per response}
+      - {lesson: ctt-reliability, how: reshapes to wide for item analysis}
+  - id: keying-check
+    idea: "Check keying in the documentation and in the data"
+    introduced: irw-data
+    returns:
+      - {lesson: ctt-reliability, how: meets the unkeyed Mach IV}
+  - id: slow-errors
+    idea: "Errors are slower than correct responses, partly because of where errors happen"
+    introduced: irw-data
+    returns:
+      - {lesson: rt-process-models, how: models slow errors}
+      - {lesson: trials, how: treats conditions as items}
+  - id: lower-asymptote-identification
+    idea: "The data say little about c when few respondents sit near chance"
+    introduced: 1pl-to-4pl
+    returns:
+      - {lesson: guessing-priors, how: fixes c or puts a prior on it}
+      - {lesson: nominal, how: looks at the distractors}
+      - {lesson: fit-prediction, how: compares the 2PL and 3PL out of sample}
+  - id: weighted-score
+    idea: "Under the 2PL the weighted score is sufficient"
+    introduced: 1pl-to-4pl
+    returns:
+      - {lesson: ability-estimation, how: estimates θ from it}
+      - {lesson: information, how: weights items by slope}

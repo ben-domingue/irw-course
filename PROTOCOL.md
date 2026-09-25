@@ -155,6 +155,8 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 - **Breadth.** A table appears in one lesson only, unless the reuse is deliberate (a
   thread returning to the same data) and recorded: the later lesson lists the table
   under `reuses:` in `lessons.yml`. `Rscript check_tables.R` flags any other reuse.
+- **Loads, not links.** `tables:` lists the tables a lesson *loads*. A link to a
+  table's landing page alone is a mention and needs no entry (09-24).
 - **Tokenless CSV only.** Use only tables with a tokenless CSV on their IRW landing
   page. Redivis serves those only under 100 MB. When a lesson genuinely needs a
   larger dataset, a teaching subsample is stored in this repo under `lessons/data/`,
@@ -309,8 +311,10 @@ From what broke while building the pilots and the draft site. Source:
   carry OJS widgets or math; until #13 closes, run the browser check three times.
 
 **Widgets and quizzes**
-- Widget math goes in `lessons/widgets/irt.js` (shared, pure functions). Add new
-  helpers there rather than inline in a lesson.
+- Shared widget math is in `lessons/widgets/irt.js` (pure functions). A drafting
+  session puts new helpers in its own `lessons/widgets/<id>.js` and never edits
+  `irt.js`, which parallel drafts would all conflict on; helpers another lesson
+  needs are moved into `irt.js` between waves (09-24).
 - Widget colours come from `palette` in `irt.js` (`main`, `contrast`, `light`,
   `guide` for dashed reference lines, …), never a colour literal in the lesson (#71).
 - Simulated samples in widgets use the seeded `rng(seed)` from `irt.js`, so the
@@ -334,6 +338,9 @@ From what broke while building the pilots and the draft site. Source:
   easiness): say so where the code converts.
 
 **Render and publish**
+- `lessons/.Rprofile` isolates renders from the renderer's own `~/.Rprofile` (R
+  reads it in place of the user's), so pages print what a fresh R session prints.
+  Set seeds in the lesson code (09-24).
 - `freeze: auto` caches the empirical results in `_freeze/`, which is committed. The
   publish workflow has no R, so **every page must have an up-to-date `_freeze/` entry**:
   render any page you add or edit (and every page, after editing `lessons.yml`, since
