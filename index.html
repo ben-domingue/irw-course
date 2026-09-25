@@ -154,6 +154,19 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>These are stand-alone lessons on psychometrics, each built around open data from the <a href="https://itemresponsewarehouse.org">Item Response Warehouse</a>. You can teach them in sequence as a full course or pick out individual lessons. The lessons come in three tranches: <em>preliminary</em> lessons set up the course, <em>core</em> lessons make a first course in psychometrics, and <em>extensions</em> go further. Each lesson lists what it assumes and what builds on it. The lessons grew out of EDUC 252 (Introduction to Psychometrics) at Stanford.</p>
 <p>The lessons were written largely by Claude (Anthropic), an AI model, working from the EDUC 252 materials and under Ben Domingue’s direction. Ben reviews each lesson before it is marked done; until then, read its text, code and interpretations as a draft.</p>
+<section id="why-psychometrics" class="level2">
+<h2 class="anchored" data-anchor-id="why-psychometrics">Why psychometrics?</h2>
+<p>Much of what we want to know about people hinges on attributes we cannot observe directly: how a child’s executive functioning changes with age, whether an intervention reduces anxiety, how reading develops across school. What we observe instead are responses to items: a tap on the correct arrow, “most days” on a survey, a wrong answer to question 7. Psychometrics is the discipline that turns those responses into measurements and tells us how far to trust them.</p>
+<p>Consider a ruler. It measures a child’s height regardless of that child’s background; a different ruler gives a reading with the same meaning; and a well-chosen ruler measures quickly across the whole range of heights we care about. Psychological measures rarely do all of this, but the ruler suggests what to aim for (<a href="https://doi.org/10.1146/annurev-devpsych-111124-041520">Domingue, 2026</a>):</p>
+<ul>
+<li>Measurements should be insensitive to differences in attributes other than the one being measured.</li>
+<li>Measurements from different instruments should be comparable.</li>
+<li>Measurement should deliver precise information about the attribute as quickly as possible.</li>
+</ul>
+<p>None of these comes for free. Suppose we measure executive functioning with a tablet task. Children with less tablet experience may look worse for reasons that have nothing to do with executive functioning. The task that suits a four-year-old is not the one that suits a ten-year-old, yet we want to talk about growth across those ages. And time with a child is short, so every item has to earn its place. Psychometrics has tools for each problem: checking whether items work the same way across groups (<a href="./lessons/dif.html">Differential item functioning</a>), putting scores from different forms on a common scale (<a href="./lessons/equating.html">Linking and equating</a>), and choosing items to fit the respondent (<a href="./lessons/item-banks-cat.html">Item banks and adaptive testing</a>).</p>
+<p>The common thread is a probabilistic model for how people respond to items. Such a model can be falsified, so we can interrogate whether it works in a given setting; when it does, it gives a compact description of how an instrument functions, one that can be reused with new people, new forms and new ages.</p>
+<p>Psychological measurement is hard, and whether it deserves the name “measurement” at all has been argued over for most of a century (<a href="./lessons/measurement.html">What is measurement?</a>). Interval scales do not come easily (<a href="./lessons/scale-properties.html">Scale properties</a>). But the limits of our measures are limits on what we can learn about the attributes themselves. Psychometrics is how we find out where those limits are, and how we push them back.</p>
+</section>
 <section id="lessons-by-module" class="level2">
 <h2 class="anchored" data-anchor-id="lessons-by-module">Lessons by module</h2>
 <p>Lessons in blue have a draft to read. Lessons in grey are still stubs: a placeholder page with no content yet.</p>
@@ -173,7 +186,7 @@ a.lesson-stub:hover { color: #6c757d; }
 <section id="foundations" class="level3 module-card">
 <h3 class="anchored" data-anchor-id="foundations">Foundations</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a> <span class="lesson-tranche">preliminary</span> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/measurement.html">What is measurement?</a> <span class="lesson-tranche">preliminary</span> <span class="lesson-status">draft</span></li>
 <li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a> <span class="lesson-tranche">preliminary</span> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a> <span class="lesson-tranche">preliminary</span></li>
 </ol>
@@ -183,7 +196,7 @@ a.lesson-stub:hover { color: #6c757d; }
 <ol type="1">
 <li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a> <span class="lesson-status">draft</span></li>
-<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a> <span class="lesson-status">stub</span></li>
+<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a> <span class="lesson-status">draft</span></li>
 <li><a href="./lessons/instrument-building.html" class="lesson-stub">From construct map to items: building an instrument</a> <span class="lesson-status">stub</span></li>
 <li><a href="./lessons/g-theory.html" class="lesson-stub">Many sources of error: generalizability theory</a> <span class="lesson-status">stub</span></li>
 </ol>
@@ -445,14 +458,14 @@ a.lesson-stub:hover { color: #6c757d; }
 <section id="a-first-course-preliminary-and-core-lessons" class="level3">
 <h3 class="anchored" data-anchor-id="a-first-course-preliminary-and-core-lessons">A first course (preliminary and core lessons)</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
+<li><a href="./lessons/measurement.html">What is measurement?</a></li>
 <li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
 <li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
 <li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
 <li><a href="./lessons/instrument-building.html" class="lesson-stub">From construct map to items: building an instrument</a></li>
 <li><a href="./lessons/g-theory.html" class="lesson-stub">Many sources of error: generalizability theory</a></li>
-<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a></li>
+<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a></li>
 <li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a></li>
 <li><a href="./lessons/validity-evidence.html" class="lesson-stub">Gathering validity evidence</a></li>
 <li><a href="./lessons/fa-exploratory.html">Factor analysis I: exploring dimensionality</a></li>
@@ -471,12 +484,12 @@ a.lesson-stub:hover { color: #6c757d; }
 <section id="educ-252-stanford-a-10-week-course" class="level3">
 <h3 class="anchored" data-anchor-id="educ-252-stanford-a-10-week-course">EDUC 252 (Stanford), a 10-week course</h3>
 <ol type="1">
-<li><a href="./lessons/measurement.html" class="lesson-stub">What is measurement?</a></li>
+<li><a href="./lessons/measurement.html">What is measurement?</a></li>
 <li><a href="./lessons/irw-data.html" class="lesson-stub">Item response data and the IRW</a></li>
 <li><a href="./lessons/likelihood.html">The likelihood and logistic regression</a></li>
 <li><a href="./lessons/constructs.html" class="lesson-stub">Constructs and construct maps</a></li>
 <li><a href="./lessons/ctt-reliability.html">Classical test theory and reliability</a></li>
-<li><a href="./lessons/ctt-limits.html" class="lesson-stub">Where CTT breaks: toward item response models</a></li>
+<li><a href="./lessons/ctt-limits.html">Where CTT breaks: toward item response models</a></li>
 <li><a href="./lessons/validity-argument.html" class="lesson-stub">Validity as an argument</a></li>
 <li><a href="./lessons/rasch.html">The Rasch model</a></li>
 <li><a href="./lessons/1pl-to-4pl.html" class="lesson-stub">From the 1PL to the 4PL</a></li>
