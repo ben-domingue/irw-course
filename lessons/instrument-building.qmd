@@ -8,19 +8,363 @@ source("_course.R")
 lesson_header("instrument-building")
 ```
 
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {simWording, simAcquiescence, spearmanBrown} from "./widgets/instrument-building.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Most of the work of building an instrument happens before anyone answers it. [Constructs and construct maps](constructs.qmd) ended with a map or a blueprint; [Classical test theory and reliability](ctt-reliability.qmd) gave us tools for judging items once there are responses. This lesson sits between the two. It walks through the steps from a map to a pilot, gives the item-writing rules that carry the most weight, and spends most of its time on one design choice that looks harmless and isn't: writing some items in the reverse direction. The worked example is the Rosenberg Self-Esteem Scale, answered by 1,238 medical students in China, where the reversed items form a second cluster and one of them appears to have been read the other way.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- lay out the steps from a construct map or blueprint to a piloted instrument, and say what each step can catch that the others can't;
+- choose between selected-response and constructed-response formats for a construct, and say what each costs;
+- spot and repair the item-writing faults that matter most (two ideas in one item, double negatives, unbalanced options, implausible distractors);
+- explain why scales include reverse-worded items, and show how they can bring in a second, wording-related dimension that alpha does not reveal;
+- read a pilot's item analysis alongside the items' text and decide whether to keep, rewrite or drop each item.
+
 ## Core ideas
 
-## Worked example
+### From a map to a pilot
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is measurement?](measurement.qmd): a **probe** is anything we present to a respondent to draw out a response that bears on the construct (a question, a task, a statement to agree or disagree with), and an item is a probe whose response is scored. Probes are standardized: the same items, given and scored the same way for everyone.
+:::
+
+That lesson took probes as given. Where do they come from? [Wilson (2005)](https://doi.org/10.4324/9781410611697) describes instrument building as a cycle, and the *Standards* treat much the same sequence as the core of test development ([AERA, APA & NCME, 2014, ch. 4](https://www.testingstandards.net/open-access-files.html)). In outline:
+
+1. **Construct map or blueprint.** What the instrument is for, and what a score should mean ([Constructs and construct maps](constructs.qmd)).
+2. **Items.** Written to the map's levels, or to the blueprint's cells.
+3. **Review.** Content experts check that each item belongs where it was written; others look for wording that some groups would find harder for reasons unrelated to the construct.
+4. **Cognitive interviews.** A handful of respondents answer the items aloud, saying what they took each to ask and how they arrived at an answer ([Willis, 2005](https://doi.org/10.4135/9781412983655)).
+5. **Pilot.** A larger sample answers the draft instrument, and we run an item analysis.
+6. **Revise**, and go round again.
+
+Only steps 5 and 6 produce data, and every later lesson works on their output. Why bother with the rest? [Tourangeau, Rips and Rasinski (2000)](https://doi.org/10.1017/CBO9780511819322) break answering a question into understanding the item, recalling what is relevant, forming a judgment, and fitting it to the response options. A pilot sees only the result. If everyone misreads an item in the same way, it can correlate well with the rest and still ask something we didn't mean; a cognitive interview is where that shows up. And the blueprint fixes something no pilot can change: how many items each part of the domain gets.
+
+#### Try it: a blueprint and its cells
+
+A fractions test has three content areas and two kinds of task (recall, and applying to a new problem). Set its length and weights. Given the reliability of one item (last slider), the Spearman–Brown formula from [Classical test theory and reliability](ctt-reliability.qmd) gives the reliability of the whole test and of a score on each cell.
+
+```{ojs}
+//| echo: false
+viewof bp_len = Inputs.range([10, 60], {value: 30, step: 1, label: "Items on the test"})
+viewof bp_w1 = Inputs.range([0, 100], {value: 40, step: 5, label: "Weight: comparing fractions"})
+viewof bp_w2 = Inputs.range([0, 100], {value: 40, step: 5, label: "Weight: adding fractions"})
+viewof bp_w3 = Inputs.range([0, 100], {value: 20, step: 5, label: "Weight: fractions on a number line"})
+viewof bp_apply = Inputs.range([0, 100], {value: 50, step: 10, label: "Share of items that ask to apply (%)"})
+viewof bp_rel1 = Inputs.range([0.05, 0.4], {value: 0.15, step: 0.01, label: "Reliability of one item"})
+```
+
+```{ojs}
+//| echo: false
+bp_cells = {
+  const areas = ["Comparing", "Adding", "Number line"], w = [bp_w1, bp_w2, bp_w3];
+  const tot = w.reduce((u, v) => u + v, 0) || 1;
+  const want = [];
+  areas.forEach((a, i) => ["Recall", "Apply"].forEach(p => {
+    const share = (w[i] / tot) * (p === "Apply" ? bp_apply / 100 : 1 - bp_apply / 100);
+    want.push({area: a, task: p, exact: share * bp_len});
+  }));
+  // Round to whole items, keeping the total (the largest remainders get the spare items).
+  want.forEach(d => d.n = Math.floor(d.exact));
+  const spare = bp_len - want.reduce((u, d) => u + d.n, 0);
+  [...want].sort((a, b) => (b.exact - b.n) - (a.exact - a.n)).slice(0, spare).forEach(d => d.n += 1);
+  return want.map(d => ({...d, rel: d.n > 0 ? spearmanBrown(bp_rel1, d.n) : null}));
+}
+Plot.plot({
+  width: 520, height: 200, marginLeft: 90,
+  x: {domain: ["Recall", "Apply"], label: null, axis: "top"}, y: {domain: ["Comparing", "Adding", "Number line"], label: null},
+  color: {domain: [0, 1], range: [palette.white, palette.main]},
+  marks: [
+    Plot.cell(bp_cells, {x: "task", y: "area", fill: d => d.rel ?? 0, stroke: palette.rule, inset: 1}),
+    Plot.text(bp_cells, {x: "task", y: "area", text: d => d.n > 0 ? `${d.n} items, reliability ${d.rel.toFixed(2)}` : "no items", fill: d => (d.rel ?? 0) > 0.6 ? palette.white : palette.ink, fontSize: 11})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+bp_filled = bp_cells.filter(d => d.n > 0)
+bp_min = bp_filled.reduce((a, b) => (b.rel < a.rel ? b : a))
+md`Whole test: ${bp_len} items, reliability **${spearmanBrown(bp_rel1, bp_len).toFixed(2)}**. The least reliable cell score is ${bp_min.area.toLowerCase()} × ${bp_min.task.toLowerCase()}, with ${bp_min.n} item${bp_min.n === 1 ? "" : "s"} and reliability **${bp_min.rel.toFixed(2)}**.${bp_cells.some(d => d.n === 0) ? " Some cells have no items at all, so the test can say nothing about them." : ""}`
+```
+
+At the starting values the whole test reaches 0.84 while the three-item cells sit at 0.35. A blueprint can guarantee coverage without supporting a score for each cell; a subscore needs enough items in its cell, and that is settled before any item is written.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A team has drafted 40 items and plans to pilot them on 2,000 respondents next week, skipping cognitive interviews because 'the item analysis will flag any bad items'. What could the pilot miss?",
+  options: [
+    {text: "An item that every respondent reads in the same unintended way", correct: true, why: "If the misreading is shared, the item can still correlate with the rest, so its item-rest correlation looks fine. Only asking respondents what they understood reveals it."},
+    {text: "An item that nobody endorses", correct: false, why: "The pilot catches that directly: the item's mean sits at the floor."},
+    {text: "An item keyed in the wrong direction", correct: false, why: "A negative or near-zero item-rest correlation usually flags that, as with the Mach IV. The pilot's statistics do this well; the harder case is a misreading that leaves the correlations intact."}
+  ]
+})
+```
+
+### Formats: selected and constructed responses
+
+What form should the response take? In a **selected-response** item the respondent picks from a list: multiple-choice options, or the steps of a Likert scale from "strongly disagree" to "strongly agree". In a **constructed-response** item the respondent produces the answer: a typed number (the number-series items in [Constructs and construct maps](constructs.qmd)), a short answer, an essay.
+
+Every model in this course needs each response to fall in exactly one of a fixed set of categories, usually ordered. A selected response arrives that way; a constructed response has to be put there by **scoring**, with a key or with a rubric and a rater. Scoring is where constructed responses get expensive, and the rater is a new source of error; [Many sources of error](g-theory.qmd) treats raters as a facet of measurement. Selected response is a reasonable choice when recognition or judgment reaches the construct and many items are needed cheaply. Constructed response is a reasonable choice when producing the answer is the construct: writing, explaining a proof, carrying out a procedure.
+
+### Writing items
+
+Guidance on writing items fills whole books, and it mostly agrees. [Haladyna, Downing and Rodriguez (2002)](https://doi.org/10.1207/S15324818AME1503_5) distilled 31 guidelines for multiple-choice items from 27 measurement textbooks and 27 research studies and reviews; [Haladyna and Rodriguez (2013)](https://doi.org/10.4324/9780203850381) cover item development at book length; and [Clark and Watson (2019)](https://doi.org/10.1037/pas0000626) do the same for rating-scale instruments. A few rules do most of the work:
+
+- **One idea per item.** An item that asks about two things (a *double-barrelled* item) leaves a respondent who agrees with one and not the other nowhere to go ([Clark & Watson, 2019](https://doi.org/10.1037/pas0000626)).
+- **No negatives stacked on negatives.** A "not" in the stem makes the respondent do extra work; two of them invite errors that have nothing to do with the construct. [Haladyna et al. (2002)](https://doi.org/10.1207/S15324818AME1503_5) advise wording the stem positively and, where a negative is needed, making it stand out.
+- **Options that fit the question.** Response labels should cover the range the construct needs, in an order and spacing respondents can read. If most labels sit on one side of neutral, the middle option isn't neutral.
+- **Plausible distractors.** A multiple-choice distractor that nobody would choose adds only reading time. Distractors built from specific errors earn their place ([Haladyna et al., 2002](https://doi.org/10.1207/S15324818AME1503_5)), and [Nominal response and multiple-choice models](nominal.qmd) shows that which distractor a respondent picks carries information of its own.
+
+#### Try it: fix this item
+
+Each item below breaks one rule. Decide what is wrong before you reveal the diagnosis and a rewrite. (The items are invented for this lesson.)
+
+```{ojs}
+//| echo: false
+fx_items = ({
+  "I enjoy reading novels and writing poetry.": {
+    fault: "Two ideas in one item. A respondent who reads novels but never writes poetry has no accurate answer.",
+    fix: "Two items: \"I enjoy reading novels.\" and \"I enjoy writing poetry.\""},
+  "It is not true that I never feel nervous before a test.": {
+    fault: "A double negative. To agree, the respondent has to unpack \"not true that ... never\", which is a reading task, not a question about nerves.",
+    fix: "\"I feel nervous before a test.\""},
+  "How would you rate your teacher's feedback? (Poor / Good / Very good / Excellent / Outstanding)": {
+    fault: "Unbalanced options. Four of the five labels are positive, so the middle option, \"Very good\", is not neutral. That can be deliberate when nearly everyone rates highly and the aim is to separate the top, but then it should be a stated choice.",
+    fix: "(Very poor / Poor / Fair / Good / Very good), or keep the positive skew on purpose and say so in the scoring guide."},
+  "What is 1/2 + 1/3?  (a) 5/6  (b) 2/5  (c) 1/6  (d) A triangle": {
+    fault: "An implausible distractor. Nobody who reads the question chooses (d), so the item is in effect a three-option item. Options (b) (adding tops and bottoms) and (c) (multiplying) each come from a specific error.",
+    fix: "Replace (d) with another answer produced by an error, such as 2/6 (adding the numerators over the product of the denominators)."}
+})
+viewof fx_which = Inputs.radio(Object.keys(fx_items), {value: Object.keys(fx_items)[0], label: "Item"})
+viewof fx_show = Inputs.toggle({label: "Reveal", value: false})
+```
+
+```{ojs}
+//| echo: false
+md`${fx_show ? `**What's wrong:** ${fx_items[fx_which].fault}
+
+**A rewrite:** ${fx_items[fx_which].fix}` : "*Decide what is wrong, then reveal.*"}`
+```
+
+Each fault puts something between the respondent and the construct, and none need show in an item analysis: a double-barrelled item can correlate well with the rest, because respondents who like one of its two things tend to like the other.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A job-satisfaction scale includes \"My manager is supportive and I am paid fairly.\" In the pilot its item-rest correlation is 0.55, in line with the others. Keep it as is?",
+  options: [
+    {text: "No: split it into two items, even though the statistics look fine", correct: true, why: "The item is double-barrelled. A respondent with a supportive manager and low pay can't answer it cleanly, and the score can't say which half they were answering. Good statistics don't repair the item's meaning."},
+    {text: "Yes: an item-rest correlation of 0.55 shows the item works", correct: false, why: "It shows the item goes along with the total. Support and pay are both parts of job satisfaction, so the item correlates with the rest whichever half a respondent answers."},
+    {text: "Drop it: double-barrelled items always have low item-rest correlations", correct: false, why: "They needn't. This one doesn't, which is why the fault has to be caught by reading the item."}
+  ]
+})
+```
+
+### Reverse-worded items
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): half the Mach IV's items are worded so that agreeing is the *less* Machiavellian answer, and they must be reverse-keyed before sums, alpha or item-rest correlations mean anything. Keying had to be checked: automated keying found all ten published reversals and added m19, the one item the data couldn't settle.
+:::
+
+Here we write reversed items on purpose. Why? The usual answer is **acquiescence**, a respondent's tendency to agree with statements whatever they say ([Paulhus, 1991](https://doi.org/10.1016/B978-0-12-590241-0.50006-X); [Baumgartner & Steenkamp, 2001](https://doi.org/10.1509/jmkr.38.2.143.18840)). If every item is worded so that agreeing means more of the construct, a respondent who agrees easily gets a higher score for reasons unrelated to the construct. If half the items are reversed, the extra agreement raises the forward items and, once keyed, lowers the reversed ones, and the two cancel in the sum.
+
+#### Try it: agreeing with everything
+
+Six hundred simulated respondents answer ten four-point items, each loading 0.6 on the trait. Each respondent also has a tendency to agree, added to their raw agreement with every item; the slider sets how much it varies between respondents. The two designs are an all-forward scale and a balanced one with five items reversed (and then keyed).
+
+```{ojs}
+//| echo: false
+viewof aq_sd = Inputs.range([0, 1.5], {value: 0.5, step: 0.1, label: "Spread of acquiescence (SD)"})
+```
+
+```{ojs}
+//| echo: false
+aq = simAcquiescence({seed: 7, n: 600, acq: aq_sd})
+aq_rows = [
+  {design: "All forward", what: "Alpha", v: aq.forward.alpha}, {design: "All forward", what: "Trait's share of the sum score", v: aq.forward.r2},
+  {design: "Balanced", what: "Alpha", v: aq.balanced.alpha}, {design: "Balanced", what: "Trait's share of the sum score", v: aq.balanced.r2}
+]
+Plot.plot({
+  width: 620, height: 220, marginLeft: 100, marginRight: 40,
+  x: {domain: [0, 1], label: null, grid: true}, y: {label: null, axis: null}, fy: {label: null},
+  color: {legend: true, domain: ["Alpha", "Trait's share of the sum score"], range: [palette.contrast, palette.main]},
+  marks: [Plot.barX(aq_rows, {x: "v", y: "what", fy: "design", fill: "what"}),
+          Plot.text(aq_rows, {x: "v", y: "what", fy: "design", text: d => d.v.toFixed(2), dx: 16})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`All forward: alpha **${aq.forward.alpha.toFixed(2)}**, trait's share of the sum score's variance **${aq.forward.r2.toFixed(2)}**. Balanced: alpha **${aq.balanced.alpha.toFixed(2)}**, trait's share **${aq.balanced.r2.toFixed(2)}**.`
+```
+
+With no acquiescence the designs are alike (alpha 0.80 and 0.82). As the slider moves right, the all-forward scale's alpha *rises*, because acquiescence is shared by every item and alpha counts anything shared as signal, while the trait's share of the sum score falls, to 0.44 at the starting value. The balanced scale keeps the trait's share near 0.8 and its alpha falls instead. The simulation assumes respondents read a reversed item as exactly the opposite of a forward one.
+
+Do they? Not always. [Marsh (1996)](https://doi.org/10.1037/0022-3514.70.4.810), analysing the Rosenberg Self-Esteem Scale in a large US longitudinal study of school students, found that the negatively worded items shared a method effect beyond the general factor, and later studies modelled such effects for the same scale and others ([Tomás & Oliver, 1999](https://doi.org/10.1080/10705519909540120); [DiStefano & Motl, 2006](https://doi.org/10.1207/s15328007sem1303_6)). [Weijters, Baumgartner and Schillewaert (2013)](https://doi.org/10.1037/a0032121) model three mechanisms that can produce one: acquiescence, careless responding, and confirmation bias (reading a reversed item in the light of the items before it). [Swain, Weathers and Niedrich (2008)](https://doi.org/10.1509/jmkr.45.1.116) found about a fifth of responses to reversed items landing on the same side of the scale as the forward items, and trace it to the extra work of checking a reversed statement against one's belief. Whatever the mechanism, reversed items correlate more with each other than their content predicts, and wording direction becomes a second dimension.
+
+#### Try it: a wording factor
+
+The same ten items, keyed. Each loads 0.6 on the trait; the reversed items (R1–R5) also load on a wording factor unrelated to the trait, and a second slider gives the forward items (F1–F5) a wording factor of their own. The heat map is the correlation matrix for 600 simulated respondents.
+
+```{ojs}
+//| echo: false
+viewof wf_g = Inputs.range([0, 0.7], {value: 0.6, step: 0.05, label: "Reversed items' wording loading"})
+viewof wf_gf = Inputs.range([0, 0.7], {value: 0, step: 0.05, label: "Forward items' wording loading"})
+```
+
+```{ojs}
+//| echo: false
+wf = simWording({seed: 56, n: 600, lambda: 0.6, gamma: wf_g, gammaF: wf_gf})
+wf_lab = ["F1", "F2", "F3", "F4", "F5", "R1", "R2", "R3", "R4", "R5"]
+wf_cells = wf.R.flatMap((row, i) => row.map((v, j) => ({i: wf_lab[i], j: wf_lab[j], v: i === j ? null : v})))
+Plot.plot({
+  width: 420, height: 420, marginLeft: 40, x: {domain: wf_lab, label: null, axis: "top"}, y: {domain: wf_lab, label: null},
+  color: {domain: [0, 1], range: [palette.white, palette.main], legend: true, label: "Correlation"},
+  marks: [Plot.cell(wf_cells, {x: "j", y: "i", fill: d => d.v ?? 1, stroke: palette.rule}),
+          Plot.text(wf_cells.filter(d => d.v !== null), {x: "j", y: "i", text: d => d.v.toFixed(2), fontSize: 9, fill: d => d.v > 0.55 ? palette.white : palette.ink})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Average correlation among forward items **${wf.withinF.toFixed(2)}**, among reversed items **${wf.withinR.toFixed(2)}**, across the two **${wf.across.toFixed(2)}**. Alpha **${wf.alpha.toFixed(2)}**. The trait's share of the sum score's variance **${wf.r2.toFixed(2)}**. Largest eigenvalues of the correlation matrix: ${wf.eig.slice(0, 3).map(v => v.toFixed(2)).join(", ")}.`
+```
+
+At a reversed loading of 0 the matrix is one even block, with alpha 0.83 and the trait accounting for 0.83 of the sum score's variance. At 0.6 the reversed items form their own block (0.65 among themselves, 0.32 with the forward items), alpha *rises* to 0.87, and the trait's share falls to 0.69. Give the forward items a wording factor too and there are two blocks, alpha 0.90 and the trait's share 0.59. The wording factor acts like the correlated errors that [Classical test theory and reliability](ctt-reliability.qmd) warned can push alpha above reliability. The second eigenvalue passing 1 is a first hint of the extra dimension; [Factor analysis I](fa-exploratory.qmd) explains eigenvalues and how to count dimensions with them.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A ten-item scale with five reversed items has alpha 0.90. A colleague concludes that wording effects can't be a concern, since they would have lowered alpha. What does the widget say?",
+  options: [
+    {text: "That doesn't follow: a wording factor shared by the reversed items can raise alpha", correct: true, why: "In the widget alpha went from 0.83 to 0.87 as the reversed items' wording loading rose from 0 to 0.6, while the trait's share of the sum score fell from 0.83 to 0.69. Alpha counts shared wording variance as if it were signal."},
+    {text: "It's right: wording effects always lower alpha", correct: false, why: "Only when they work against the trait. A shared wording factor adds covariance within the reversed block, and alpha goes up."},
+    {text: "It's right only if the scale is balanced", correct: false, why: "The widget's scale is balanced (five and five), and alpha still rose with the wording loading."}
+  ]
+})
+```
+
+Should a scale include reversed items, then? Including them assumes acquiescence is a large enough source of variance, for this population and format, to guard against; the first widget shows its cost. Treating them as plain opposites of the forward items assumes respondents read them that way; the second widget shows what happens when they don't. [Suárez-Álvarez et al. (2018)](https://doi.org/10.7334/psicothema2018.33), giving a self-efficacy test in forward, reversed and mixed forms, found lower reliability and extra variance in the mixed form. [Weijters and Baumgartner (2012)](https://doi.org/10.1509/jmr.11.0368) review both sides, distinguish items reversed in meaning from items reversed by a negation, and recommend using reversed items with care. My own practice is this: I include reversed items when acquiescence is a real risk, as with agree–disagree formats and respondents who may answer quickly; I write them as opposites in meaning ("I am often bored") rather than negations ("I am not often interested"); and I plan the analysis expecting a wording factor rather than hoping it away.
+
+### The pilot, and reading the items
+
+The pilot's item analysis uses the tools of [Classical test theory and reliability](ctt-reliability.qmd): item means, item-rest correlations, alpha with each item removed. What this lesson adds is the reading. A weak item may be keyed backwards, measure something else, or be read in a sense we didn't intend, and those call for different decisions: rekey, drop, rewrite. The number flags the item; the text and the cognitive interviews decide.
+
+Two later lessons carry this further. Content review is the first kind of validity evidence in [Gathering validity evidence](validity-evidence.qmd), which picks up where steps 1 to 4 leave off. And an item can work well on average but differently for groups of respondents at the same level of the construct; [Differential item functioning](dif.qmd) shows how to find such items.
+
+## Simulate
+
+The code below generates ten four-point items from one trait, with a wording factor on the five reversed items, and prints the correlation matrix, alpha, the block averages, the largest eigenvalues, and the trait's share of the sum score's variance. It is base R and runs in a second.
+
+With the seed as written (`gamma <- 0.6`), alpha is 0.87, the reversed items correlate 0.66 on average with each other and 0.33 with the forward items, the second eigenvalue is 1.17, and the trait accounts for 0.72 of the sum score's variance. Set `gamma <- 0` and alpha falls to 0.83 while the trait's share rises to 0.82. Then set `gamma <- 0.6` and `gamma_f <- 0.6`: alpha reaches 0.90, the second eigenvalue 1.95, and the trait's share falls to 0.63. Keep that last setting in mind for the real data. Then try `n <- 100`: how noisy are the block averages in a small pilot?
+
+```{webr}
+{{< include code/instrument-building-sim.R >}}
+```
+
+[Download this code](code/instrument-building-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/instrument-building-irw.R")
+```
+
+Our table is [song_2023_rses](https://itemresponsewarehouse.org/tables/song_2023_rses/): the Rosenberg Self-Esteem Scale ([Rosenberg, 1965](https://doi.org/10.1515/9781400876136)) as answered by 1,238 medical students in China, in a study of anxiety about writing in English ([Song et al., 2023](https://doi.org/10.1371/journal.pone.0284335); data CC BY 4.0). Its job is to be our pilot: five items worded for self-esteem and five against, so we can see what reverse wording does. Responses run from 1 to 4, and every respondent answered all ten items. [Download the code](code/instrument-building-irw.R); it needs only base R.
+
+```{r fetch}
+#| echo: true
+#| code-fold: show
+```
+
+Rosenberg wrote items 3, 5, 8, 9 and 10 against self-esteem. Item 3, for example, is "All in all, I am inclined to feel that I am a failure" (wording from the scale as published by the [University of Maryland Department of Sociology](https://socy.umd.edu/about-us/using-rosenberg-self-esteem-scale), which states that the scale is in the public domain). The respondents answered a Chinese version, so the English wording is the original the translation starts from, not what they read. Song et al. say the negatively worded items were reverse-scored. Are the stored responses already keyed?
+
+```{r keying}
+#| echo: true
+#| code-fold: show
+```
+
+Summed as stored, the table reproduces the mean, SD and alpha Song et al. report (29.92, 4.79 and 0.863), and un-reversing items 3, 5, 9 and 10 drops alpha to 0.658. So the table holds the authors' scored responses, and on those four items higher means more self-esteem. Item 8 we come back to.
+
+```{r itemrest}
+#| echo: true
+#| code-fold: show
+```
+
+Every item-rest correlation is between 0.41 and 0.69. By the standard of [Classical test theory and reliability](ctt-reliability.qmd), where 24 of the 30 reading items reached 0.40, the scale hangs together, and an item analysis would stop here. But as one set, or as two?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Keyed, the five positively worded items correlate 0.71 on average with each other, and four of the negatively worded items (3, 5, 9, 10) correlate 0.61 with each other. What is the average correlation between a positively worded item and one of those four?",
+  choices: ["About 0.65: they measure the same thing", "About 0.45", "About 0.2"],
+  answer: "About 0.2",
+  reveal: "0.23, with all 20 cross-correlations between 0.11 and 0.33. Items correlate about three times as strongly with items worded in their own direction as with items worded the other way."
+})
+```
+
+```{r blocks}
+#| echo: true
+#| code-fold: show
+```
+
+```{r heatmap}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 5.5
+```
+
+Two blocks, as in the simulation with wording factors on both sets of items, but sharper: 0.71 and 0.61 within, 0.23 across, and a second eigenvalue of 2.32, above any of the simulation's settings. [Marsh (1996)](https://doi.org/10.1037/0022-3514.70.4.810) reported the same pattern for this scale in a very different population. Are the blocks one construct seen through two wordings, or two constructs (feeling good and feeling bad about oneself)? The correlations alone can't say; problem 6 takes it up, and [Factor analysis II](fa-confirmatory.qmd) gives the models.
+
+Now item 8. Rosenberg wrote it against self-esteem: "I wish I could have more respect for myself" ([UMD Department of Sociology](https://socy.umd.edu/about-us/using-rosenberg-self-esteem-scale)). In the heat map it sits with the positive items, not the negative ones.
+
+```{r item8}
+#| echo: true
+#| code-fold: show
+```
+
+Item 8 correlates 0.54 to 0.59 with the positively worded items and 0.01 to 0.16 with the other negatively worded ones. Its stored values rise with self-esteem, so it points the right way for the sum: reversing it would drop alpha from 0.863 to 0.793. But it doesn't share the wording factor the other four negatively worded items share. Why not?
+
+The likeliest answer is the translation. [Peng et al. (2024)](https://doi.org/10.2147/PRBM.S494452) report that in the Chinese version of the scale item 8 is understood in a positive sense, and so is scored as a positively worded item. Read that way the item isn't reversed at all, and respondents who think well of themselves agree with it; here 798 + 330 = 1,128 of the 1,238 stored responses are 3 or 4. The IRW's own check of this table's item text reaches the same reading ([`verify_song_2023_rses.R`](https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_177/verify_song_2023_rses.R)). Song et al. list item 8 among the negatively rated items, following Rosenberg, while the stored scores appear to follow the Chinese version. That is a question of documentation, not a fault in the data, which reproduce the published results exactly. And the data can't settle it: whether a stored 4 means "strongly agree" or "strongly disagree", every correlation is the same, and only the wording respondents read says which. The respondent answers the item they read, not the item we wrote.
 
 ## Problems
 
+1. **Two factors in a correlation.** Let each keyed item be $y_i = \lambda f + \gamma_i w + e_i$, with trait $f$ and wording factor $w$ of variance 1, everything uncorrelated, $\gamma_i = \gamma$ for reversed items and 0 otherwise, and $\text{Var}(y_i) = 1$. Derive the correlation between two forward items, two reversed items, and one of each. What $\lambda$ and $\gamma$ would the RSES block averages (0.71, 0.61, 0.23) need? What goes wrong, and what does that suggest?
+2. **Alpha if deleted.** Compute alpha for the RSES with each item removed in turn. Which item's removal raises alpha? Read its wording on the [UMD page](https://socy.umd.edu/about-us/using-rosenberg-self-esteem-scale): does anything about how it is worded suggest why? Would you drop it, and does your answer depend on what the scale is used for?
+3. **Choose a format.** For a construct of your choice, sketch one selected-response and one constructed-response item. For each, what does it cost to write, to administer and to score? What would a rater have to decide, and how could two raters disagree?
+4. **Write six items.** Take the construct map you drew in [Constructs and construct maps](constructs.qmd) (its problem 4), or draw one. Write six rating-scale items for it, two of them reverse-worded as opposites in meaning rather than negations. For each, say which level of the map it targets and which item-writing rules it follows.
+5. **A cognitive interview.** Choose two of your items from problem 4, one of them reversed. Write the questions you would ask in a cognitive interview to find out whether respondents read them as intended. What answer would make you rewrite the reversed item?
+6. **Challenge: nuisance or construct?** Is the RSES's second dimension a nuisance of wording, or a real distinction between feeling good about oneself and feeling bad about oneself? [Marsh (1996)](https://doi.org/10.1037/0022-3514.70.4.810) proposes ways to test this. What data would decide it: a translation experiment, a version with every item worded positively, relations with other variables, change over time? This is open.
+
+```{r}
+#| output: asis
+ask_claude("instrument-building", "It covers building an instrument from a construct map or blueprint: the steps from items through review, cognitive interviews and a pilot to revision; selected- and constructed-response formats; rules for writing items; why scales use reverse-worded items (acquiescence) and how reverse wording can add a second dimension that alpha doesn't reveal; with the Rosenberg Self-Esteem Scale answered by Chinese medical students as the worked example.")
+```
+
 ## Going further
+
+- Wilson, M. (2005). *Constructing measures: An item response modeling approach*. Lawrence Erlbaum. <https://doi.org/10.4324/9781410611697>. The cycle from construct map to items to a measurement model, at book length.
+- Haladyna, T. M., & Rodriguez, M. C. (2013). *Developing and validating test items*. Routledge. <https://doi.org/10.4324/9780203850381>. Item formats and item writing for tests, with the research behind the guidelines.
+- Haladyna, T. M., Downing, S. M., & Rodriguez, M. C. (2002). A review of multiple-choice item-writing guidelines for classroom assessment. *Applied Measurement in Education*, 15(3), 309–333. <https://doi.org/10.1207/S15324818AME1503_5>. The 31 guidelines, and where each comes from.
+- Clark, L. A., & Watson, D. (2019). Constructing validity: New developments in creating objective measuring instruments. *Psychological Assessment*, 31(12), 1412–1427. <https://doi.org/10.1037/pas0000626>. Developing rating-scale instruments, updating [Clark & Watson (1995)](https://doi.org/10.1037/1040-3590.7.3.309).
+- Willis, G. B. (2005). *Cognitive interviewing: A tool for improving questionnaire design*. Sage. <https://doi.org/10.4135/9781412983655>. How to run cognitive interviews, and what they turn up.
+- Tourangeau, R., Rips, L. J., & Rasinski, K. (2000). *The psychology of survey response*. Cambridge University Press. <https://doi.org/10.1017/CBO9780511819322>. What a respondent does between reading a question and answering it.
+- Weijters, B., & Baumgartner, H. (2012). Misresponse to reversed and negated items in surveys: A review. *Journal of Marketing Research*, 49(5), 737–747. <https://doi.org/10.1509/jmr.11.0368>. The case for and against reversed items, with recommendations.
+- Marsh, H. W. (1996). Positive and negative global self-esteem: A substantively meaningful distinction or artifactors? *Journal of Personality and Social Psychology*, 70(4), 810–819. <https://doi.org/10.1037/0022-3514.70.4.810>. The wording factor in the RSES, and how to ask what it is.
+- Weijters, B., Baumgartner, H., & Schillewaert, N. (2013). Reversed item bias: An integrative model. *Psychological Methods*, 18(3), 320–334. <https://doi.org/10.1037/a0032121>. Acquiescence, carelessness and confirmation bias as sources of the wording factor, in one model.
+- Peng, W., Zhou, Y., Chu, J., Liu, Z., Zheng, K., Yao, S., & Yi, J. (2024). Factorial and criterion validities of the Chinese version of Rosenberg Self-Esteem Scale among undergraduate students. *Psychology Research and Behavior Management*, 17, 4135–4144. <https://doi.org/10.2147/PRBM.S494452>. The Chinese RSES, including how item 8 is scored.
 
 ```{r}
 #| output: asis
@@ -29,3 +373,8 @@ data_sources("instrument-building")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 2 (slides c2, "Constructs to items" and "Items & responses", slides 18–25). The point that every response must end up in a fixed set of ordered categories comes from the slides, in new words; the item-writing rules, the reverse-wording material and the RSES analysis are new.
+- **Timing:** about 40 minutes for the core ideas and widgets; the RSES analysis works as a 20-minute lab. Problems 4 and 5 work as a small-group activity, with partners interviewing each other.
+- **Held back:** raters and constructed-response scoring (in [Many sources of error](g-theory.qmd)); wording direction as a dimension, modelled (in [Factor analysis I](fa-exploratory.qmd), [Factor analysis II](fa-confirmatory.qmd) and [Dimensionality and multidimensional IRT](dimensionality.qmd)); response styles such as acquiescence and extreme responding, modelled (in [IRTree models](irtrees.qmd)); distractors as information (in [Nominal response and multiple-choice models](nominal.qmd)); item features that predict difficulty (in [What is an item?](explanatory-irt.qmd)); content evidence (in [Gathering validity evidence](validity-evidence.qmd)); items that work differently across groups (in [Differential item functioning](dif.qmd)).
+- **Item text:** the RSES is in the public domain according to the [University of Maryland Department of Sociology](https://socy.umd.edu/about-us/using-rosenberg-self-esteem-scale), which publishes it. The lesson still quotes only items 3 and 8, the two the argument needs. The Chinese wording respondents saw is in the IRW's item-text table (Redivis login needed) and is not reproduced.
+- **Solutions:** held back in `solutions/instrument-building.qmd` (not published). Problem 6 is open.
