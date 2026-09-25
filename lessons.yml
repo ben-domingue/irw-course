@@ -302,7 +302,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#3"], code: [ps9/unfold.R]}
     tables: [andrich_mudfold, eurpar2_mudfold]
     reuses: [andrich_mudfold]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: nominal
