@@ -8,21 +8,432 @@ source("_course.R")
 lesson_header("invariance-experience")
 ```
 
+```{webr}
+#| context: setup
+webr::install("lme4", quiet = TRUE)
+suppressPackageStartupMessages(library(lme4))
+```
+
+```{r}
+#| include: false
+knitr::read_chunk("code/invariance-experience-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {itemEffects, expectedCorrect, placeboTrial, spuriousInteraction} from "./widgets/invariance-experience.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+A fractions program for struggling fifth graders raises its students' test scores by more than a standard deviation. Did it raise every item, or a handful? [Differential item functioning](dif.qmd) ended on a vocabulary trial in which one word, *expedition*, carried over a quarter of the raw effect. This lesson takes that finding further. Experience, whether a program, the loss of a spouse or a second sitting of the same test, can change how a measure works, and a randomized trial is the one setting where we can separate that change from a change in the respondents. We read treatment as a grouping variable, use the pretest as a placebo, fit a model that gives every item its own treatment effect, and ask what the spread of those effects does to the average effect we report.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- say how experience can change a measure (alpha, beta and gamma change; response shift) as well as respondents' standing on it;
+- use randomization to read treatment DIF as caused by the treatment, and a pretest as a placebo check on the whole analysis;
+- write down and fit the item-level heterogeneous treatment effects (IL-HTE) model with `lme4`, and interpret $\sigma_\zeta$ and $\rho$;
+- explain what item-level effects do to the precision and generalizability of an average effect, and how they can produce a treatment-by-pretest interaction that no respondent has;
+- decide, for a given use of the scores, whether the items that move most are a threat or the signal.
+
 ## Core ideas
 
-## Worked example
+### When experience changes the measure
+
+After a spouse dies, older adults in the Health and Retirement Study report more depressive symptoms on an eight-item, yes/no version of the CES-D ([Radloff, 1977](https://doi.org/10.1177/014662167700100306)), and the rise fades within about a year ([Domingue, Duncan, Harrati & Belsky, 2021](https://doi.org/10.1093/geronb/gbaa044)). The items don't share the rise equally: loneliness and sadness carry most of it (the preprint, [Domingue et al., 2019](https://doi.org/10.1101/19009878), Supplemental Figures S7–S8). Is that more depression, or depression measured differently? A widow who now reports feeling lonely may be no more depressed, in the sense the other items capture, than a year earlier; the loneliness item is also answering a question about her circumstances. The IRW has no item-level data from this study, so the result stays a cited figure.
+
+The possibility has names. [Golembiewski, Billingsley and Yeager (1976)](https://doi.org/10.1177/002188637601200201) distinguished three kinds of change. **Alpha** change is a change in level on an instrument that stays the same; **beta** change, a change in the scale respondents use to answer; **gamma** change, a redefinition of the construct itself ([Livingston et al., 2022](https://doi.org/10.1007/s41542-022-00122-y), give a short account). In health research, [Sprangers and Schwartz (1999)](https://doi.org/10.1016/S0277-9536(99)00045-3) call the last two **response shift**: a change in what a self-evaluation means, from new internal standards, new values or a new conception of the construct. Each is a failure of invariance across occasions. Gamma change is a change in the factor structure; beta change, unequal loadings or intercepts ([Jabrayilov, Emons, de Jong & Sijtsma, 2017](https://doi.org/10.1007/s11136-017-1500-1); [Oort, 2005](https://doi.org/10.1007/s11136-004-0830-y); [Widaman, Ferrer & Conger, 2010](https://doi.org/10.1111/j.1750-8606.2009.00110.x)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Fairness in testing](fairness.qmd): impact is a difference in the attribute itself; bias is a difference in scores that comes from something else. Invariance is always relative to the other items: a shift shared by every item looks like impact.
+:::
+
+Swap "group" for "occasion" and the fairness lesson carries over: a change in level is impact across time, and an item whose meaning shifts is DIF across time. A program, a bereavement and a second sitting are all experiences between two measurements, and each can change the measure along with the person.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Factor analysis II](fa-confirmatory.qmd): longitudinal invariance is the multigroup ladder (configural, metric, scalar) with occasions in place of groups. [Generalizability theory](g-theory.qmd) treats the occasion as a facet, a source of error to average over; here it is a condition that may change what is measured. [Factor analysis I](fa-exploratory.qmd) used BFI-2 data in which students were randomly assigned a response format, the same design with the format as the treatment. And [What does a score mean?](score-meaning.qmd) computed a reliable change index, which assumes the scale measures the same thing at both waves ([Jacobson & Truax, 1991](https://doi.org/10.1037/0022-006x.59.1.12)).
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "After a mindfulness course, participants' scores on a stress scale fall. Nearly all of the fall is on one item, about feeling unable to control what matters in one's life. What is the most careful reading?",
+  options: [
+    {text: "Stress fell, or the course changed how participants read that item; the item-level pattern is a reason to check before reporting a general fall in stress", correct: true, why: "A change concentrated in one item is what beta or gamma change would produce. It is also what a real but narrow change in stress would produce. The pattern calls for a check, not a verdict."},
+    {text: "Stress fell: the total went down and the scale is reliable", correct: false, why: "Reliability at each occasion says nothing about whether the items mean the same thing at both. The item-level pattern is exactly what invariance across occasions asks about."},
+    {text: "The item is biased and should be dropped", correct: false, why: "A flag isn't a verdict. A sense of control may be precisely what the course teaches, in which case the item is carrying the effect, not distorting it."}
+  ]
+})
+```
+
+### Treatment as the grouping, and the pretest as a placebo
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Differential item functioning](dif.qmd): in a randomized trial, treatment assignment is a grouping too. Among children with the same total, the vocabulary item *expedition* was far easier for treated children, and DIF by treatment is variation in the treatment effect from item to item.
+:::
+
+After a bereavement we can't separate change in the person from change in the measure, since who is bereaved isn't random. A randomized trial removes the problem. At the pretest, treated and control respondents come from the same population, so there is no impact and, since the program hasn't happened yet, no reason for any item to work differently. Any treatment DIF found then is a false positive, and the pretest becomes a **placebo test** for the whole analysis, from the handling of waves to the matching score. At the posttest the arms differ only by assignment, so an item that works differently for treated respondents does so *because* of the treatment ([Gilbert, Kim & Miratrix, 2023](https://doi.org/10.3102/10769986231171710); [Ahmed et al., 2025](https://doi.org/10.1080/19345747.2024.2361337)).
+
+What the treatment causes is still relative. If the program raised every item by the same amount, the matched comparison would find nothing: that is impact, the average effect. Treatment DIF is each item's departure from the average.
+
+#### Try it: the pretest as a placebo
+
+A simulated trial: respondents in each arm answer the same Rasch items twice. At the pretest nobody has been treated. At the posttest everyone has grown by 0.5 logits, treated respondents by a further 0.5 on average, and each item's effect departs from that average with the spread you set. Each dot is an item's Mantel–Haenszel delta by treatment (positive: easier for treated respondents with the same total), orange when $p < .05$.
+
+```{ojs}
+//| echo: false
+viewof pl_n = Inputs.range([50, 500], {value: 200, step: 50, label: "Respondents per arm"})
+viewof pl_items = Inputs.range([10, 60], {value: 30, step: 5, label: "Items"})
+viewof pl_sz = Inputs.range([0, 1], {value: 0.5, step: 0.05, label: "Spread of item effects (logits)"})
+viewof pl_seed = Inputs.range([1, 20], {value: 1, step: 1, label: "Sample"})
+```
+
+```{ojs}
+//| echo: false
+pl = placeboTrial({seed: pl_seed, nPer: pl_n, nItems: pl_items, beta1: 0.5, sigmaZeta: pl_sz})
+{
+  const rows = [...pl.pre.map(d => ({...d, wave: "pretest"})), ...pl.post.map(d => ({...d, wave: "posttest"}))];
+  return Plot.plot({
+    width: 700, height: 260, x: {label: "Item", tickFormat: d => d + 1, ticks: []}, y: {label: "MH delta by treatment"},
+    fx: {label: null, domain: ["pretest", "posttest"]},
+    marks: [
+      Plot.ruleY([0], {stroke: palette.rule}),
+      Plot.ruleY([-1, 1], {stroke: palette.guide, strokeDasharray: "4,3"}),
+      Plot.dot(rows, {x: "item", y: "delta", fx: "wave", r: 4, fill: d => (d.p < 0.05 ? palette.contrast : palette.main)})
+    ]
+  });
+}
+```
+
+```{ojs}
+//| echo: false
+md`Pretest: **${pl.pre.filter(d => d.p < 0.05).length}** of ${pl_items} items significant at .05 (chance alone would give about ${(0.05 * pl_items).toFixed(1)}). Posttest: **${pl.post.filter(d => d.p < 0.05).length}** of ${pl_items}.`
+```
+
+Step through the samples: the pretest flags hover around what chance allows, while the posttest, with the spread at 0.5, flags about a third of the items. Now set the spread to 0. Every item moves by the same amount and the posttest looks like the pretest again: a treatment that lifts all items equally shows up as impact, not DIF.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A trial's pretest has 40 items. Checked for treatment DIF at $\\alpha = .05$, 11 are flagged. What does that suggest?",
+  options: [
+    {text: "Something outside the program: about 2 flags are expected, so check randomization, the data (are the waves what you think?) and the matching score", correct: true, why: "Before treatment the arms come from the same population and no item can respond to a program that hasn't happened. Eleven flags, against about 2 expected, point to a problem in the design or the analysis."},
+    {text: "The program works on those 11 items", correct: false, why: "At the pretest the program hasn't happened yet. Whatever produced the flags, it wasn't the treatment."},
+    {text: "Nothing unusual; with 40 items some DIF is expected", correct: false, why: "Some is: about $40 \\times .05 = 2$. Eleven is well beyond that, which is what makes the pretest useful as a placebo."}
+  ]
+})
+```
+
+### A treatment effect for every item
+
+Rather than test items one at a time, we can model the variation. The **IL-HTE model** ([Gilbert, Kim & Miratrix, 2023](https://doi.org/10.3102/10769986231171710); [Gilbert, Himmelsbach, Soland, Joshi & Domingue, 2025](https://doi.org/10.1002/pam.70025)) is the Rasch model with persons and items both random ([De Boeck & Wilson, 2004](https://doi.org/10.1007/978-1-4757-3990-9)) and a random item slope on treatment, $T_j$:
+$$\begin{aligned}
+\text{logit}\Pr(x_{ij} = 1) &= \theta_j - b_i + \zeta_i T_j,\\
+\theta_j &= \beta_0 + \beta_1 T_j + \varepsilon_j, \qquad \varepsilon_j \sim N(0, \sigma_\theta^2),\\
+\begin{pmatrix} b_i \\ \zeta_i \end{pmatrix} &\sim N\!\left(\begin{pmatrix} 0 \\ 0 \end{pmatrix}, \begin{pmatrix} \sigma_b^2 & \rho\sigma_b\sigma_\zeta \\ \rho\sigma_b\sigma_\zeta & \sigma_\zeta^2 \end{pmatrix}\right).
+\end{aligned}$$
+$\beta_1$ is the average effect on $\theta$; item $i$'s effect is $\beta_1 + \zeta_i$. $\sigma_\zeta$ is the spread of item effects around the average. At zero every item moves by $\beta_1$, which is what a Rasch model fitted to both arms assumes: treatment changes $\theta$ and nothing else. $\rho$ says whether harder items (positive) or easier items (negative) move more. Dividing $\beta_1$ and $\sigma_\zeta$ by $\sigma_\theta$ puts them in standard deviations of ability.
+
+It is a generalized linear mixed model, so `lme4` fits it ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01); [De Boeck et al., 2011](https://doi.org/10.18637/jss.v039.i12)):
+
+```r
+glmer(resp ~ treat + (1 | id) + (treat | item), data, family = binomial)
+```
+
+`lme4`'s item intercept is an easiness, $-b_i$, so the correlation it prints is $-\rho$. Is $\sigma_\zeta$ zero? Compare this model with one that has `(1 | item)` by a likelihood ratio. A variance can't be negative, so the null value sits on the boundary of the parameter space, and halving the $\chi^2$ $p$-value is the usual correction ([Self & Liang, 1987](https://doi.org/10.1080/01621459.1987.10478472)).
+
+#### Try it: item effects around an average
+
+Twenty items with difficulties spread around the average respondent. Set the average effect $\beta_1$, the spread $\sigma_\zeta$ and the correlation $\rho$ between difficulty and effect. The five items that respond most are orange.
+
+```{ojs}
+//| echo: false
+viewof ie_b1 = Inputs.range([0, 1], {value: 0.5, step: 0.05, label: "Average effect β₁ (logits)"})
+viewof ie_sz = Inputs.range([0, 1], {value: 0.5, step: 0.05, label: "Spread of item effects (logits)"})
+viewof ie_rho = Inputs.range([-0.9, 0.9], {value: 0, step: 0.1, label: "Correlation ρ (difficulty, effect)"})
+```
+
+```{ojs}
+//| echo: false
+ie = {
+  const {b, zeta} = itemEffects({nItems: 20, sigmaZeta: ie_sz, rho: ie_rho});
+  const eff = zeta.map(z => ie_b1 + z);
+  const order = eff.map((e, i) => i).sort((i, j) => eff[j] - eff[i]);
+  const avg = (ix) => ix.reduce((u, i) => u + eff[i], 0) / ix.length;
+  const ec = expectedCorrect(b, zeta, ie_b1);
+  return {items: b.map((bi, i) => ({b: bi, effect: eff[i], top: ie_sz > 0 && order.slice(0, 5).includes(i)})),
+          top: avg(order.slice(0, 5)), bottom: avg(order.slice(-5)),
+          pp: 100 * ec.reduce((u, d) => u + d.treated - d.control, 0) / ec.length};
+}
+Plot.plot({
+  width: 700, height: 270, x: {label: "Item difficulty b (logits)", domain: [-2.2, 2.2]},
+  y: {label: "Item's treatment effect (logits)", domain: [-2, 3]},
+  marks: [
+    Plot.ruleY([0], {stroke: palette.rule}),
+    Plot.ruleY([ie_b1], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.dot(ie.items, {x: "b", y: "effect", r: 5, fill: d => (d.top ? palette.contrast : palette.main)})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Average item effect over all 20 items: **${ie_b1.toFixed(2)}** logits; over the 5 that respond most, **${ie.top.toFixed(2)}**; over the 5 that respond least, **${ie.bottom.toFixed(2)}**. On the expected proportion correct over all 20 items, the effect is **${ie.pp.toFixed(1)}** percentage points.`
+```
+
+With $\sigma_\zeta$ at 0 every dot sits on the dashed line, and a test built from any five items would show the same effect in logits. At the default, the five most responsive items average more than twice the overall effect and the five least about zero: two short forms of one test, one program, two conclusions. Move $\rho$ to −0.8 and the orange dots move left, among the easy items.
+
+### What item-level effects do to the estimate
+
+Does the spread change the average? Not by itself: the sum score, a constant-effect model and the IL-HTE model estimate much the same average, as the fractions trial below shows. It changes three other things.
+
+**Precision.** The items are a sample from those that could have been written, and if they respond unequally, a different sample would give a different average. Treating the items as fixed leaves that variation out, which understates standard errors and inflates false positives ([Gilbert, Kim & Miratrix, 2023](https://doi.org/10.3102/10769986231171710)). Across 15 trials, [Ahmed et al. (2025)](https://doi.org/10.1080/19345747.2024.2361337) found one item driving nearly 40% of an effect, and item-level patterns that could make 31% of the significant effects null once counted as uncertainty.
+
+**Generalizability.** $\sigma_\zeta$ says how far the effect on a fresh set of items from the same domain could fall from the one observed. A claim about the construct, rather than about these items, needs it ([Gilbert, Himmelsbach, et al., 2025](https://doi.org/10.1002/pam.70025)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Validity as an argument](validity-argument.qmd): an interpretation/use argument has a generalization link, from the observed score to the score over all the tasks it stands for. $\sigma_\zeta$ is evidence on that link for an effect rather than a score.
+:::
+
+**Interactions.** Trialists ask who benefits most by interacting treatment with a pretest. Suppose every respondent gains the same amount on $\theta$, but easier items respond more. In the treated arm the items' effective difficulties, $b_i - \zeta_i$, are more spread out than in the control arm, the sum score rises less steeply with $\theta$, and a sum-score regression finds a negative treatment-by-pretest interaction that no respondent has. From sum scores alone the two stories can't be told apart; item-level data can tell them apart ([Gilbert, Miratrix, Joshi & Domingue, 2025](https://doi.org/10.3102/10769986241240085)).
+
+#### Try it: an interaction nobody has
+
+Treatment adds 0.5 logits to every respondent's $\theta$, whatever their pretest; the 20 items' effects have the spread and correlation you set. The curves are the expected sum score at each pretest level in each arm, computed from the model, so there is no sampling noise.
+
+```{ojs}
+//| echo: false
+viewof si_sz = Inputs.range([0, 1], {value: 0.8, step: 0.05, label: "Spread of item effects (logits)"})
+viewof si_rho = Inputs.range([-0.9, 0.9], {value: -0.8, step: 0.1, label: "Correlation ρ (difficulty, effect)"})
+```
+
+```{ojs}
+//| echo: false
+si = spuriousInteraction({...itemEffects({nItems: 20, sigmaZeta: si_sz, rho: si_rho}), beta1: 0.5})
+si0 = spuriousInteraction({...itemEffects({nItems: 20, sigmaZeta: 0, rho: 0}), beta1: 0.5})
+Plot.plot({
+  width: 700, height: 270, x: {label: "Pretest (SDs)"}, y: {label: "Expected sum score (of 20)", domain: [0, 20]},
+  color: {legend: true, domain: ["control", "treated"], range: [palette.main, palette.contrast]},
+  marks: [Plot.line(si.rows.map(d => ({...d, arm: d.T ? "treated" : "control"})), {x: "pre", y: "s", stroke: "arm", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Slope on the pretest: control **${si.control.slope.toFixed(2)}**, treated **${si.treated.slope.toFixed(2)}** points per SD. Treatment-by-pretest interaction: **${si.interaction.toFixed(2)}**; with every item moving equally it would be ${si0.interaction.toFixed(2)}.`
+```
+
+With every item moving equally the interaction is already slightly negative, from the sum score's bounded range. At the default, where easier items move more, it is five times that, with no heterogeneity among respondents at all. Set $\rho$ to +0.8 and it changes sign.
+
+::: {.callout-note collapse="true"}
+## Go deeper: why the interaction appears
+
+**Assumptions:** the IL-HTE model above; no person-level heterogeneity (every respondent's $\theta$ rises by $\beta_1$); the outcome analysed is the sum score $S = \sum_i x_i$.
+
+**Two tests in one.** In the control arm item $i$ has difficulty $b_i$. In the treated arm it behaves as if its difficulty were $b_i - \zeta_i$, on top of the shift of $\beta_1$ in $\theta$. The spread of effective difficulties in the treated arm is
+$$\text{Var}(b_i - \zeta_i) = \sigma_b^2 + \sigma_\zeta^2 - 2\rho\sigma_b\sigma_\zeta,$$
+which exceeds $\sigma_b^2$ whenever $\rho \le 0$, and can fall below it when $\rho$ is positive and large enough.
+
+**What spread does to the sum score.** The expected sum score is the test characteristic curve, $E(S \mid \theta) = \sum_i P_i(\theta)$ with $P_i(\theta) = \text{logit}^{-1}(\theta - b_i)$. Its slope at $\theta$ is $\sum_i P_i(1 - P_i)$, the test information under the Rasch model. An item near $\theta$ contributes close to the maximum of 1/4; spreading the items out moves some of them where they contribute little. So in the middle of the ability range the treated arm's curve is flatter when $\rho < 0$.
+
+**The interaction.** A regression of $S$ on treatment, pretest and their product estimates the slope of $S$ on the pretest in each arm. The pretest predicts $\theta$ equally well in both arms, but the treated arm's flatter curve turns a unit of $\theta$ into fewer points, so its slope is smaller and the interaction is negative, although every respondent gained the same. [Gilbert, Miratrix, Joshi and Domingue (2025)](https://doi.org/10.3102/10769986241240085) show analytically and by simulation that a sum score cannot distinguish this from a true interaction, and that a model with item-specific effects can. The bounded range of $S$ adds a smaller effect of its own, which is why the widget's interaction is not quite zero when $\sigma_\zeta = 0$.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An IL-HTE model gives an average effect of 0.40 SD and $\\sigma_\\zeta$ = 0.50 SD on a 10-item outcome. A colleague plans to replicate with 10 different items written to the same blueprint. What should she expect?",
+  options: [
+    {text: "An average effect that could differ noticeably from 0.40, since items respond unequally and hers are a new sample", correct: true, why: "The mean of 10 new item effects varies around the true average with an SD of roughly $0.50/\\sqrt{10} \\approx 0.16$ SD, before any sampling of respondents. That is the generalizability question $\\sigma_\\zeta$ answers."},
+    {text: "0.40 again, up to sampling error in respondents", correct: false, why: "That holds only if every item responds alike ($\\sigma_\\zeta = 0$). With a spread of 0.50 SD, which items she writes matters too."},
+    {text: "An effect about 0.50 SD larger", correct: false, why: "$\\sigma_\\zeta$ is a spread around the average, not a shift. Her items' average effect is as likely to fall below 0.40 as above it."}
+  ]
+})
+```
+
+### Bias, or what the program taught?
+
+Is an item that moves most a biased item? It may be the item closest to what an intervention taught. For evaluating the intervention, that can be the signal: the program changed what it set out to change, and the near items show it. For a claim of general gain, it is a threat: a test made mostly of near items overstates transfer, in the sense of [Barnett and Ceci's (2002)](https://doi.org/10.1037/0033-2909.128.4.612) taxonomy of near and far transfer. Whether item-level heterogeneity is bias depends on the interpretation and the use, as [Validity as an argument](validity-argument.qmd) would lead you to expect. Group-specific item parameters can also be judged by prediction: do they predict new responses better than shared ones? The InterModel Vigorish measures that ([Domingue et al., 2024](https://doi.org/10.1007/s11336-024-09977-2)). Explaining *which* items move, with features such as alignment to the curriculum, is a job for [What is an item?](explanatory-irt.qmd).
+
+## Simulate
+
+The code simulates a trial with 800 respondents and 20 items. Treatment raises every respondent's $\theta$ by 0.5, whatever their pretest; the items' departures have $\sigma_\zeta = 0.8$ and $\rho = -0.8$ (easier items move more). It fits a sum-score regression, a constant-effect model and the IL-HTE model, each with treatment, pretest and their product. Loading `lme4` takes 10 to 20 seconds the first time the page runs code; the fits take a few seconds more.
+
+With the seed as written, the IL-HTE model recovers $\sigma_\zeta$ = 0.78 and $\rho$ = −0.78, and its item effects correlate 0.99 with the true ones. The interaction, 0 in truth, is −0.08 SD in the sum-score regression and −0.10 logits in the constant-effect model; the IL-HTE model puts it at 0.04. Its standard error is about 0.06 in both models, so a single run is noisy: try other seeds. Set `rho <- 0.8` and the constant-effect interaction turns positive (0.03); set `sigma_zeta <- 0` and the three models agree.
+
+```{webr}
+{{< include code/invariance-experience-sim.R >}}
+```
+
+[Download this code](code/invariance-experience-sim.R) to run it with more respondents, or many replications, in your own R session.
+
+## With real data
+
+[Download the code](code/invariance-experience-irw.R); it needs `lme4`, and the model fits take about a minute.
+
+### A fractions trial, before and after
+
+Our main table is [gilbert_meta_20](https://itemresponsewarehouse.org/tables/gilbert_meta_20/), from a randomized trial of a small-group fractions intervention for fifth graders performing well below grade level ([Jayanthi et al., 2021](https://doi.org/10.1177/00144029211008851); data at [doi:10.7910/DVN/Z4WMFE](https://doi.org/10.7910/DVN/Z4WMFE)), part of the trial collection of [Gilbert, Himmelsbach, et al. (2025)](https://doi.org/10.1002/pam.70025). Its job is to be a trial with a pretest, so the placebo check is real. Students who scored between the 15th and 37th percentiles on a fractions screener were randomized within teacher, and the table holds the final analytic sample of 186 ([data description](https://doi.org/10.7910/DVN/Z4WMFE)). Items are scored 1 for correct.
+
+```{r fetch20}
+#| echo: true
+#| code-fold: show
+```
+
+On waves: wave 0 is the pretest and wave 1 the posttest. The posttest repeats all 37 pretest items (26 from the fourth-grade Test for Understanding of Fractions, `tuf4`, and 11 fractions procedures) and adds 56: the fifth-grade form (`tuf5`), more procedures, and a block the dataset labels TransMath (`trans_math`). Eighteen posttest responses are missing, all from one student, who drops out of the complete-case analyses.
+
+We match on the total score and test uniform DIF, the kind a shift in one item's treatment effect produces, with the logistic regression of the DIF lesson ([Swaminathan & Rogers, 1990](https://doi.org/10.1111/j.1745-3984.1990.tb00754.x)). With 37 or 93 tests, we also control the false discovery rate ([Benjamini & Hochberg, 1995](https://doi.org/10.1111/j.2517-6161.1995.tb02031.x)), and give the $\Delta R^2$ categories of [Jodoin and Gierl (2001)](https://doi.org/10.1207/S15324818AME1404_2).
+
+```{r dif-fn}
+#| echo: true
+#| code-fold: true
+```
+
+The pretest is also our sanity table: before treatment, its flags estimate the false-positive rate. It has 3 flags at .05 among 37 items, about what chance allows, and none survives the correction (the table below).
+
+```{ojs}
+//| echo: false
+predict({
+  q: "On the same 37 items at the posttest, how many will show treatment DIF after the false-discovery correction?",
+  choices: ["None, as at the pretest", "One or two", "Five or more"],
+  answer: "Five or more",
+  reveal: "Five of the 37 survive the correction at the posttest (9 are significant before it), against none at the pretest. Across all 93 posttest items, 12 are significant and 5 survive. Check the table below."
+})
+```
+
+```{r dif-waves}
+#| echo: true
+#| code-fold: show
+```
+
+With 186 students the $\Delta R^2$ categories are generous: all three pretest flags reach B, so here the correction is the better guide. After the program the same 37 items give 9 flags, 5 of which survive; across all 93, 12 and 5, with 8 items in B and 2 in C.
+
+```{r dif-post-items}
+#| echo: true
+#| code-fold: show
+```
+
+Most items that favour treated students come from the procedures and TransMath blocks; several from the understanding tests (`tuf4`, `tuf5`) go the other way, moved less than the rest of the test.
+
+The IL-HTE model summarizes all of this in a few numbers:
+
+```{r ilhte-fn}
+#| echo: true
+#| code-fold: true
+```
+
+```{r ilhte20}
+#| echo: true
+#| code-fold: show
+```
+
+At the pretest $\sigma_\zeta$ is not distinguishable from zero ($p$ = 0.22). Its 0.59 SD looks large only because $\sigma_\theta$ is small there: the screener selected students from a narrow band, so a logit is a large share of an SD (in logits, $\sigma_\zeta$ is 0.18 at the pretest and 0.59 at the posttest). At the posttest the average effect is 1.13 SD, $\sigma_\zeta$ is 0.70 SD and the likelihood ratio is 140. On the 37 repeated items alone, $\sigma_\zeta$ is 0.83 SD.
+
+```{r sum-vs-theta}
+#| echo: true
+#| code-fold: show
+```
+
+The sum score, $\theta$ with a constant effect and $\beta_1$ from the IL-HTE model agree on the average: 1.08, 1.11 and 1.13 SD. The spread sits underneath. Procedures items moved most, 1.43 SD on average against 0.85 for the fifth-grade understanding form, as the paper's own effects by measure would suggest: largest for fractions procedures ($g$ = 1.07), 0.66 to 0.78 for proficiency and understanding ([Jayanthi et al., 2021](https://doi.org/10.1177/00144029211008851), abstract). Within every block, item effects span more than a standard deviation.
+
+### Health knowledge in India
+
+For contrast, [gilbert_meta_37](https://itemresponsewarehouse.org/tables/gilbert_meta_37/): health knowledge ten months after an entertainment-education programme in India. Respondents in the programme watched short films on hygiene, midwives and child health, condoms and AIDS, and night blindness; the control arm watched films on financial planning ([Carpena, 2024](https://doi.org/10.1080/00220388.2024.2312832), Supplementary Material A; data at [doi:10.7910/DVN/EJ03JR](https://doi.org/10.7910/DVN/EJ03JR)). Its job: item-level effects whose content we can read. Items are knowledge questions scored 1 for a correct answer, and several are options of one select-all-that-apply question (ways to contract AIDS, times to wash hands). The table's `treat` pools the paper's two film arms, with and without cash incentives for the test, against the control arm. There is one wave, and nothing is missing.
+
+```{r fetch37}
+#| echo: true
+#| code-fold: show
+```
+
+```{r ilhte37}
+#| echo: true
+#| code-fold: show
+```
+
+The average effect is 0.48 SD and $\sigma_\zeta$ is 0.28 SD ($p$ = 0.00019), a much smaller spread than in the fractions trial. The three items that moved most are the three about night blindness (0.68 to 0.81 logits), the subject of one of the programme's five modules: a single film about a boy who can't see at dusk (Supplementary Material A). The paper's own results by topic agree: night blindness had the largest effect of the four topics, and the lowest knowledge in the control arm ([Carpena, 2024](https://doi.org/10.1080/00220388.2024.2312832), longer-term knowledge by topic). Knowing to wash hands before cooking and knowing that condoms prevent pregnancy moved least (0.17 and 0.12 logits). $\rho$ = 0.33: harder items moved somewhat more.
+
+```{r interaction37}
+#| echo: true
+#| code-fold: show
+```
+
+Does IL-HTE change the answer to "who gained most?" here? Barely: the treatment-by-baseline interaction is 0.024 logits with a constant effect for every item and 0.020 with IL-HTE, both well inside their standard errors. With a spread of 0.28 SD, against 0.70 in the fractions trial, and a moderate $\rho$, there is little for the constant-effect model to misread.
+
+What should a trialist take from this? Two positions rest on different assumptions. If the outcome's items *are* the target (the state test a program will be judged on), the average over these items is the estimand, and the sum score answers it. If the items stand for a domain (fractions, health knowledge), the effect on the domain is the estimand, and the spread of item effects is part of its uncertainty. My practice, when a trial's outcome comes with item-level data, is to fit the IL-HTE model beside the sum-score analysis, report $\sigma_\zeta$ next to the average effect, and use the pretest as a placebo when there is one. In the fractions trial that means reporting an effect of about 1.1 SD together with the fact that items on the same test moved by amounts more than a standard deviation apart. An average effect is a claim about items as well as people.
 
 ## Problems
 
+1. **Raw effects and difficulty.** Under the IL-HTE model with every $\zeta_i = 0$, and $\theta \sim N(0, 1)$ in control and $N(\beta_1, 1)$ in the treated arm, write the effect on item $i$'s expected proportion correct as a function of $b_i$. Show that it is largest for items near the average ability and small for very easy or very hard items. Why, then, can raw differences in proportion correct and item effects on the logit scale rank the items differently, and which would you use to say which items a program moved?
+2. **How much do the flagged items carry? (PS5#4).** In `gilbert_meta_20` at the posttest, drop the 10 items in B or C and re-estimate the effect on the sum score and on $\theta$. How much of the effect did they carry? Now drop instead the 10 items with the smallest estimated IL-HTE effects. Which short form would a program developer prefer, and which would you report?
+3. **The interaction, with and without item slopes (PS7#1).** In `gilbert_meta_37`, estimate the treatment-by-baseline interaction on the sum score, with a constant-effect model and with IL-HTE. From the IL-HTE fit, compute the SD of the items' effective difficulties in each arm. Using the Go deeper, explain why the three estimates are so close here.
+4. **Bereavement.** After spousal loss, the CES-D items on loneliness and sadness carry most of the rise in symptoms ([Domingue et al., 2019](https://doi.org/10.1101/19009878)). Set out what you would have to assume to report "depression rose", and what you would have to assume to report "the CES-D measured something different". Given item-level data from waves before and after the loss, which model would you fit, and what result would lead you to each report?
+5. **Near and far.** You are designing the outcome measure for a vocabulary intervention that teaches 40 words. Design a test that can separate near transfer (taught words) from far transfer (untaught words of similar frequency), and say how you would model item-level effects so that the two can be compared. What would you report if the near items moved and the far items didn't?
+6. **Challenge: evidence for or against?** Suppose the items that move most in a trial are exactly those most aligned with the intervention's content. Is item-level heterogeneity then evidence against the measure's validity for evaluating the intervention, evidence for it, or neither? Does your answer change if the same test is also used to report students' general proficiency? This one is open.
+
+```{r}
+#| output: asis
+ask_claude("invariance-experience", "It covers measurement invariance under experience: alpha, beta and gamma change and response shift, the spousal-loss finding on the CES-D, treatment as a DIF grouping in a randomized trial with the pretest as a placebo, the item-level heterogeneous treatment effects (IL-HTE) model fitted with lme4 (sigma_zeta, rho, the boundary likelihood-ratio test), what item-level effects do to precision, generalizability and treatment-by-pretest interactions, and whether the items that move most are bias or signal, with a fractions trial (gilbert_meta_20) and a health-knowledge trial in India (gilbert_meta_37).")
+```
+
+## Across the IRW
+
+How common are item-level treatment effects across the trials in the warehouse? Following the IRW's [IL-HTE vignette](https://itemresponsewarehouse.org/vignettes/il_hte.html), [`compute.R`](https://github.com/ben-domingue/irw-course/blob/main/deepdives/invariance-experience/compute.R) takes every table with a treatment indicator and at least 100 respondents, keeps the dichotomous items (at least 3), samples at most 5,000 respondents, and fits this lesson's two models. It departs from the vignette on waves: the outcome is the first wave after randomization, read from the processing notes where they have been checked and otherwise by a stated rule, and any pretest wave is fitted too, as a placebo.
+
+```{r across}
+#| echo: true
+#| code-fold: true
+dd_path <- file.path("..", "deepdives", "invariance-experience", "results.rds")
+dd <- if (file.exists(dd_path)) readRDS(dd_path) else NULL
+if (!is.null(dd)) {
+  s <- dd$summary[order(-dd$summary$sigma_zeta_sd), ]
+  print(data.frame(table = s$table, wave = s$wave, respondents = s$n_persons, items = s$n_items,
+                   effect_SD = round(s$ate_sd, 2), sigma_zeta_SD = round(s$sigma_zeta_sd, 2),
+                   rho = round(s$rho, 2), p = signif(s$p, 2)), row.names = FALSE)
+  if (!is.null(dd$placebo)) {
+    cat("\nPlacebo (pretest waves):\n")
+    print(data.frame(table = dd$placebo$table, wave = dd$placebo$wave,
+                     sigma_zeta_SD = round(dd$placebo$sigma_zeta_sd, 2), p = signif(dd$placebo$p, 2)),
+          row.names = FALSE)
+  }
+  if (nrow(dd$failed)) { cat("\nFailed:\n"); print(dd$failed, row.names = FALSE) }
+}
+```
+
+```{r}
+#| output: asis
+#| echo: false
+if (is.null(dd)) {
+  cat("::: {.callout-warning}\n## Results not computed\n\nThe corpus results (`deepdives/invariance-experience/results.rds`) haven't been computed yet. Run `compute.R` to produce them.\n:::\n")
+} else {
+  if (isTRUE(dd$pilot))
+    cat(sprintf("::: {.callout-warning}\n## Partial run: %d of %d tables\n\nThis is a pilot run of `compute.R`, on two tables whose answers are known (`gilbert_meta_20` and `gilbert_meta_37`) and %d others drawn at random, to check the pipeline. The full run replaces it.\n:::\n",
+                nrow(dd$summary), dd$n_all_candidates, length(dd$run_tables) - 2))
+  cat(sprintf("\nRun on %s: %d tables analysed, %d failed. Item-level variation is significant at .05 in %d of the %d.\n",
+              format(dd$date_run, "%d %B %Y"), nrow(dd$summary), nrow(dd$failed),
+              sum(dd$summary$p < 0.05), nrow(dd$summary)))
+}
+```
+
+The pilot checks the pipeline. `gilbert_meta_20` and `gilbert_meta_37` reproduce this lesson's estimates, and `gilbert_meta_20`'s pretest again shows no item-level variation. In `gilbert_meta_89` the arms end up level, and so do the items: the average effect and $\sigma_\zeta$ are both near zero, at the pretest and after. The two tables that failed have no dichotomous items. The full run will say how often items respond unequally across the IRW's trials, and whether the pretest placebo passes where there is one. The vignette itself is the place to read more.
+
 ## Going further
 
+- Gilbert, J. B., Kim, J. S., & Miratrix, L. W. (2023). Modeling item-level heterogeneous treatment effects with the explanatory item response model: Leveraging large-scale online assessments to pinpoint the impact of educational interventions. *Journal of Educational and Behavioral Statistics*, 48(6), 889–913. <https://doi.org/10.3102/10769986231171710>. The IL-HTE model, and what ignoring it does to standard errors.
+- Gilbert, J. B., Himmelsbach, Z., Soland, J., Joshi, M., & Domingue, B. W. (2025). Estimating heterogeneous treatment effects with item-level outcome data: Insights from item response theory. *Journal of Policy Analysis and Management*, 44(4), 1417–1449. <https://doi.org/10.1002/pam.70025>. The model across 75 datasets from 48 trials, the collection this lesson's tables come from.
+- Gilbert, J. B., Miratrix, L. W., Joshi, M., & Domingue, B. W. (2025). Disentangling person-dependent and item-dependent causal effects: Applications of item response theory to the estimation of treatment effect heterogeneity. *Journal of Educational and Behavioral Statistics*, 50(1), 72–101. <https://doi.org/10.3102/10769986241240085>. The interaction of the Go deeper, derived and simulated.
+- Ahmed, I., Bertling, M., Zhang, L., Ho, A. D., Loyalka, P., Xue, H., Rozelle, S., & Domingue, B. W. (2025). Heterogeneity of item-treatment interactions masks complexity and generalizability in randomized controlled trials. *Journal of Research on Educational Effectiveness*, 18(4), 854–877. <https://doi.org/10.1080/19345747.2024.2361337>. DIF by treatment across 15 trials.
+- Sprangers, M. A. G., & Schwartz, C. E. (1999). Integrating response shift into health-related quality of life research: A theoretical model. *Social Science & Medicine*, 48(11), 1507–1515. <https://doi.org/10.1016/S0277-9536(99)00045-3>. Response shift, defined, with a model of how it arises.
+- Oort, F. J. (2005). Using structural equation modeling to detect response shifts and true change. *Quality of Life Research*, 14(3), 587–598. <https://doi.org/10.1007/s11136-004-0830-y>. Response shift as non-invariance across occasions.
+- Widaman, K. F., Ferrer, E., & Conger, R. D. (2010). Factorial invariance within longitudinal structural equation models: Measuring the same construct across time. *Child Development Perspectives*, 4(1), 10–18. <https://doi.org/10.1111/j.1750-8606.2009.00110.x>. Longitudinal invariance in a few pages.
 - Fischer, G. H. (2017). Measuring change using Rasch models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 387–404). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on measuring change with Rasch models.
+- De Boeck, P., & Wilson, M. (Eds.). (2004). *Explanatory item response models: A generalized linear and nonlinear approach*. Springer. <https://doi.org/10.1007/978-1-4757-3990-9>. Item response models as mixed models, the frame the IL-HTE model sits in.
+- Domingue, B. W., Duncan, L., Harrati, A., & Belsky, D. W. (2021). Short-term mental health sequelae of bereavement predict long-term physical health decline in older adults: U.S. Health and Retirement Study analysis. *The Journals of Gerontology: Series B*, 76(6), 1231–1240. <https://doi.org/10.1093/geronb/gbaa044>. The spousal-loss example; the item-level figures are in the supplement to the preprint (<https://doi.org/10.1101/19009878>).
+- From the IRW: the [IL-HTE vignette](https://itemresponsewarehouse.org/vignettes/il_hte.html), the corpus question of *Across the IRW*.
 
 ```{r}
 #| output: asis
@@ -31,3 +442,9 @@ data_sources("invariance-experience")
 
 ## For instructors
 
+- **Source:** EDUC 252 problem sets 5 (#4: treatment DIF in `gilbert_meta_20`, and the spousal-loss question) and 7 (#1: the treatment-by-baseline interaction with and without random item slopes), with the code in `ben-domingue/252`: `ps5/rctdif.R` and `ps7/ilhte.R` (which used `gilbert_meta_2`). There are no slides; the widgets, the simulation and the two-table analysis are new.
+- **Timing:** about 50 minutes for the core ideas and widgets; the real-data section works as a 30-minute lab (the model fits take about a minute locally). Problems 4 and 6 work as small-group discussions.
+- **Held back:** explaining which items move with item features (in [What is an item?](explanatory-irt.qmd)); then-tests and other designs for response shift are named only; item-level effects in polytomous outcomes are left out, as in the deep dive; life events with real data wait for an IRW table with item-level data around a bereavement.
+- **Data:** `gilbert_meta_20` has a pretest (wave 0, 37 items) and a posttest (wave 1, the same 37 items and 56 more); the table doesn't say what the `trans_math` block is beyond its label. `gilbert_meta_37` is the endline survey only, and its `treat` pools two film arms against the control arm. Its `std_baseline` closely tracks the number right on three knowledge questions asked at baseline (Carpena, 2024, baseline summary statistics), from our check against the replication data.
+- **Across the IRW:** `deepdives/invariance-experience/compute.R` is run by hand (it needs a Redivis token); the page reads its `results.rds`. The pilot took about three minutes for five tables.
+- **Solutions:** held back in `solutions/invariance-experience.qmd` (not published). Problem 6 is open.

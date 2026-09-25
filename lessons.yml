@@ -236,7 +236,7 @@ lessons:
     prereqs: [dif]
     origin: {slides: [], ps: ["PS5#4", "PS7#1"], code: [ps5/rctdif.R, ps7/ilhte.R]}
     tables: [gilbert_meta_20, gilbert_meta_37]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: item-banks-cat
