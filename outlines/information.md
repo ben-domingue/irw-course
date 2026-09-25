@@ -2,7 +2,7 @@
 
 # Information, precision, and short forms (`information`)
 
-Module: irt · Prereqs: 1pl-to-4pl · Core · Status: outline
+Module: irt · Prereqs: 1pl-to-4pl · Core · Status: drafted (#36)
 
 ## Core ideas
 
@@ -74,3 +74,14 @@ Instrument sources: Winterstein, Silvia, Kwapil, Kaufman, Reiter-Palmon & Wigert
 ## Open questions
 
 - None.
+
+## Changes made while drafting (#36, 09-24)
+
+- **Contrast table: one subscale, not all 60 items.** The four WSS-SF subscales form two groups whose sum scores barely correlate (Perceptual Aberration–Magical Ideation 0.59, the two anhedonia scales 0.31, across groups −0.06 to 0.19), so one information curve for all 60 items would assume a single θ the data don't support. The lesson uses Perceptual Aberration (15 items): endorsement 4%–16%, 59% of respondents endorse none; 2PL information peaks at 18.22 at θ = 1.83 (CSEM 0.23); CSEM 0.88 at θ = 0, 2.27 at θ = −1, 1.49 at the estimate shared by zero scorers (−0.55); 16% of respondents have a CSEM below 0.4. Framed as a screening scale spending its precision where a screen decides (C13).
+- **Main table fitted with the 2PL** (BIC 80,012 vs Rasch 81,439), since the lesson teaches 2PL information. Recomputed: information peaks at 7.45 at θ = −0.77 (CSEM 0.37), 1.01 at θ = 2 (CSEM 1.00); marginal reliability 0.81 (one SEM 0.44) against a CSEM curve from 0.37 to 0.81 over the middle 95% of respondents. Two near-flat items (FL_2, a = 0.14; FL_9, a = 0.36) add under half a percent of the peak information. Best five for θ = −1: 4.18 (full test 7.25; median random five-item form 1.99, 90th percentile 2.88); the same five give 0.20 at θ = 1.5.
+- **Keying and waves checked.** Financial literacy: 0/1 correctness, "don't know" scored 0, three wordings (grammatical gender) pooled by the IRW table; no waves. WSS-SF: keyed toward schizotypy (Christensen et al., 2018, p. 2537); no waves.
+- **Go deeper (revised 09-25, Ben's review):** one callout, "The information function in general", at the top of Core ideas: Fisher information as the expected negative second derivative = variance of the score; the general dichotomous-item form $P'^2/[P(1-P)]$; test information adds under local independence; Rasch, 2PL and 3PL as special cases (observed = expected for Rasch/2PL). It replaces the earlier derivation callout, so the lesson has one Go deeper. The main text points to it in one sentence. Problem 1 fills in the 3PL algebra and finds its peak.
+- **Simulate** uses base R (difficulties known, ML by the score equation) rather than `mirt`, so it runs in a second; it shows the CSEM matching in the middle and the zero/perfect-score dropout at the ends (hand-off to `ability-estimation`).
+- **Verdict** (voice rule A): "When I know where the decisions are made, I build the short form from the items most informative there and report its CSEM at that point, not its reliability." For Ben to confirm.
+- Unverified: none of the cited DOIs; Winterstein et al. (2011) and Chapman et al. (1978) are cited only for what their titles and the Christensen et al. (2018) text establish.
+

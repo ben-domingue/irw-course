@@ -88,7 +88,7 @@ lessons:
     prereqs: [measurement]
     origin: {slides: [c2], ps: [], code: []}
     tables: [himmelstein-number_series-2025]
-    status: stub
+    status: draft
     tranche: core
 
   - id: ctt-reliability
@@ -143,7 +143,7 @@ lessons:
     prereqs: [1pl-to-4pl]
     origin: {slides: [c3, c4], ps: ["PS3#1", "PS4#1", "PS6#3"], code: [c4/info.R]}
     tables: [bialowolski_2024_financial_literacy, christensen_2018_wsssf_5831]
-    status: stub
+    status: draft
     tranche: core
 
   - id: ability-estimation
