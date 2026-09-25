@@ -10,28 +10,23 @@ library(mirt)
 set.seed(2014)
 # Each IRW table has a landing page (itemresponsewarehouse.org/tables/<name>/) with
 # a CSV download. This link is pinned to one version of the data.
-lw_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.project_kids_wj_lwid_wave/rows?format=csv"
+lw_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v61_0.project_kids_wj_lwid_wave/rows?format=csv"
 df <- read.csv(lw_url)
 # Items are scored 1 (read correctly) or 0; higher = better word reading. Waves 1,
 # 2 and 3 are the fall, winter and spring of one school year.
-df$pos <- as.integer(gsub("\\D", "", df$item))   # the item's position on the test
 c(responses = nrow(df), children = length(unique(df$id)))
 table(wave = df$wave[!duplicated(paste(df$id, df$wave))])   # children per wave
 
 ## ---- forms
 # The WJ-III has two parallel forms, A and B, with different words at the same
-# positions, and the IRW table records only the position. The form is in the Project
-# KIDS total-scores file on LDbase (open, no login). The IRW's id is the row number
-# of the Project KIDS files (see the IRW processing script), so we check that the
-# project each id belongs to agrees in the two files before using the form.
-full <- read.csv("https://ldbase.org/system/files/datasets/2021-08/PK_FullData.csv")
-stopifnot(all(full$project[df$id] == df$cov_project))
-form <- cbind(full$PK_WJLW_FORM_w1, full$PK_WJLW_FORM_w2, full$PK_WJLW_FORM_w3)
-df$form <- c("A", "B")[form[cbind(df$id, df$wave)] + 1]
-table(form = df$form, wave = df$wave, useNA = "ifany")
-# Project 3 recorded no form at wave 3, so those responses can't be assigned to
-# items. We set them aside.
-df <- df[!is.na(df$form), ]
+# positions. Item names carry the form and the position: wj_lw_A_13s is form A's
+# item 13. (IRW versions before 435 recorded only the position, pooling the two
+# forms.) Responses with no recorded form, mostly project 3's spring, are named
+# wj_lw_formunknown_<n>s and can't be assigned to an item; we set them aside.
+df$form <- sub("^wj_lw_([^_]+)_.*", "\\1", df$item)
+table(form = df$form, wave = df$wave)
+df <- df[df$form %in% c("A", "B"), ]
+df$pos <- as.integer(gsub("\\D", "", df$item))   # the item's position on the test
 df$it <- sprintf("%s%02d", df$form, df$pos)
 # Same position, different words: proportion correct at a few positions, grade 1
 # fall (projects 5, 6 and 9 split their children between the forms).
@@ -80,7 +75,7 @@ th <- reshape(recs[, c("id", "wave", "theta")], idvar = "id", timevar = "wave",
               direction = "wide")
 names(th) <- c("id", "t1", "t2", "t3")
 kids <- th[!is.na(th$t1) & !is.na(th$t3), ]
-kids$project <- full$project[kids$id]
+kids$project <- tapply(df$cov_project, df$id, function(x) x[1])[as.character(kids$id)]
 kids$grade <- factor(grade_of[as.character(kids$project)], levels = c("K", "1", "2", "3"))
 kids$gain <- kids$t3 - kids$t1
 kids$q <- cut(kids$t1, quantile(kids$t1, 0:4 / 4), include.lowest = TRUE,
@@ -140,7 +135,7 @@ nrow(w2)
 # classroom or school, so these naive standard errors are too small: the point is
 # the sign, not the p-value.
 tr <- kids
-tr$treat <- full$treatment[tr$id]
+tr$treat <- tapply(df$treat, df$id, function(x) x[1])[as.character(tr$id)]
 tr <- tr[tr$project %in% c(1, 2, 5, 6) & tr$treat %in% c(0, 1), ]
 table(project = tr$project, treat = tr$treat)
 tz1 <- (tr$t1 - mean(kids$t1)) / sd1; tz3 <- (tr$t3 - mean(kids$t1)) / sd1
