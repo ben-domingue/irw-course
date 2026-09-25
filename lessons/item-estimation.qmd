@@ -22,6 +22,11 @@ lesson_header("item-estimation")
 
 ## Going further
 
+- Glas, C. A. W. (2017). Maximum-likelihood estimation. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 197–217). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-11>. A handbook chapter on maximum-likelihood estimation for item response models.
+- Aitkin, M. (2017). Expectation maximization algorithm and extensions. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 217–236). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-12>. A handbook chapter on the EM algorithm and its extensions.
+- Haberman, S. J. (2017). Models with nuisance and incidental parameters. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 151–170). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-9>. A handbook chapter on estimation when a model has nuisance or incidental parameters, such as person parameters.
+- Junker, B. W., Patz, R. J., & VanHoudnos, N. M. (2017). Markov chain Monte Carlo for item response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 271–312). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-15>. A handbook chapter on Markov chain Monte Carlo estimation for item response models.
+
 ```{r}
 #| output: asis
 data_sources("item-estimation")

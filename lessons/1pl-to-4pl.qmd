@@ -468,6 +468,7 @@ This answers the Rasch lesson's question: are equal slopes plausible? The nearer
 - Kim, H. A., Kaduthodil, J., Strong, R. W., Germine, L. T., Cohan, S., & Wilmer, J. B. (2024). Multiracial Reading the Mind in the Eyes Test (MRMET): An inclusive version of an influential measure. *Behavior Research Methods*, 56(6), 5900–5917. <https://doi.org/10.3758/s13428-023-02323-x>. The source of the RMET data.
 - van der Maas, H. L. J., & Wagenmakers, E.-J. (2005). A psychometric analysis of chess expertise. *American Journal of Psychology*, 118(1), 29–60. <https://doi.org/10.2307/30039042>. The source of the chess data.
 - From the IRW: the [2PL discrimination](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) vignette (slopes across its cognitive tables) and the [asymmetric models](https://itemresponsewarehouse.org/vignettes/asymmetric_irt.html) vignette.
+- van der Linden, W. J. (2016). Unidimensional logistic response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 13–30). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the one-, two- and three-parameter logistic models.
 
 ```{r}
 #| output: asis

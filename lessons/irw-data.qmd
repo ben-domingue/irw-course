@@ -422,6 +422,8 @@ ask_claude("irw-data", "It covers item response data and the Item Response Wareh
 - Goldberg, L. R., et al. (2006). The international personality item pool and the future of public-domain personality measures. *Journal of Research in Personality*, 40(1), 84–96. <https://doi.org/10.1016/j.jrp.2005.08.007>. Why IPIP items are free to quote.
 - Ratcliff, R., & Rouder, J. N. (1998). Modeling response times for two-choice decisions. *Psychological Science*, 9(5), 347–356. <https://doi.org/10.1111/1467-9280.00067>. The brightness experiment and a model for it.
 - IRW vignettes: [response time and accuracy](https://itemresponsewarehouse.org/vignettes/rt_imv.html) across many tables; [item language and difficulty](https://itemresponsewarehouse.org/vignettes/item_text_difficulty.html).
+- Mislevy, R. J. (2017). Missing responses in item response modeling. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 171–194). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-10>. A handbook chapter on missing responses in item response modelling.
+- Rusch, T., Mair, P., & Hatzinger, R. (2017). IRT packages in R. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 407–420). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on R packages for item response theory.
 
 ```{r}
 #| output: asis

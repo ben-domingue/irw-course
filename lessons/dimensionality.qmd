@@ -22,6 +22,10 @@ lesson_header("dimensionality")
 
 ## Going further
 
+- Reckase, M. D. (2016). Logistic multidimensional models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 189–209). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on multidimensional logistic item response models.
+- Cai, L. (2016). Two-tier item factor analysis modeling. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 421–435). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on two-tier item factor models, which include the bifactor model.
+- Gibbons, R. D., & Cai, L. (2017). Dimensionality analysis. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 47–66). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on assessing the dimensionality of item response data.
+
 ```{r}
 #| output: asis
 data_sources("dimensionality")

@@ -22,6 +22,9 @@ lesson_header("guessing-priors")
 
 ## Going further
 
+- Johnson, M. S., & Sinharay, S. (2017). Bayesian estimation. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 237–258). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-13>. A handbook chapter on Bayesian estimation for item response models.
+- Sinharay, S. (2017). Bayesian model fit and model comparison. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 379–394). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-19>. A handbook chapter on Bayesian checks of model fit and Bayesian model comparison.
+
 ```{r}
 #| output: asis
 data_sources("guessing-priors")

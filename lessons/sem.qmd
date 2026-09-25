@@ -22,6 +22,8 @@ lesson_header("sem")
 
 ## Going further
 
+- Muthén, B., & Asparouhov, T. (2016). Multidimensional, multilevel, and multi-timepoint item response modeling. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 527–539). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on multidimensional, multilevel and longitudinal item response models.
+
 ```{r}
 #| output: asis
 data_sources("sem")

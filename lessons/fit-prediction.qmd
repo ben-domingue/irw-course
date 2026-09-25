@@ -513,6 +513,9 @@ The pilot checks the pipeline: `gilbert_meta_2` lands near this lesson's values.
 - Kim, J. S., Burkhauser, M. A., Relyea, J. E., Gilbert, J. B., Scherer, E., Fitzgerald, J., Mosher, D., & McIntyre, J. (2023). A longitudinal randomized trial of a sustained content literacy intervention from first to second grade: Transfer effects on students' reading comprehension. *Journal of Educational Psychology*, 115(1), 73–98. <https://doi.org/10.1037/edu0000751>. The study behind `gilbert_meta_2`.
 - Romero, M., Sandefur, J., & Sandholtz, W. A. (2020). Outsourcing education: Experimental evidence from Liberia. *American Economic Review*, 110(2), 364–400. <https://doi.org/10.1257/aer.20181478>. The study behind `gilbert_meta_14`.
 - From the IRW: the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) (slopes across the warehouse's cognitive tables).
+- Glas, C. A. W. (2017). Frequentist model-fit tests. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 343–362). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-17>. A handbook chapter on frequentist tests of model fit.
+- Cohen, A. S., & Cho, S.-J. (2017). Information criteria. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 363–378). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-18>. A handbook chapter on information criteria, such as the AIC and BIC, for item response models.
+- Wells, C. S., & Hambleton, R. K. (2017). Model fit with residual analyses. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 395–414). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-20>. A handbook chapter on assessing model fit with residuals.
 
 ```{r}
 #| output: asis
