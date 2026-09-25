@@ -171,7 +171,7 @@ lessons:
     origin: {slides: [c4], ps: [], code: [c4/enem1.R, c4/enem2.R, c4/enem3.R]}
     tables: [wilmer-rmet-normative-data-set-2022, chess_lnirt]
     reuses: [chess_lnirt]
-    status: stub
+    status: draft
     tranche: core
 
   - id: parameter-invariance
