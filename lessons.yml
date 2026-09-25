@@ -632,3 +632,26 @@ threads:
     returns:
       - {lesson: ability-estimation, how: estimates θ from it}
       - {lesson: information, how: weights items by slope}
+
+  # Pass 3 (09-24 night): proposed by the wave-1 drafts (#129-#133); returns kept only
+  # where they are descendants of the introducing lesson (E2).
+  - id: imv
+    idea: "The IMV: predictive gain on a portable scale"
+    introduced: fit-prediction
+    returns:
+      - {lesson: guessing-priors, how: asks whether c helps out of sample}
+  - id: measurement-invariance
+    idea: "Comparing group means needs scalar invariance"
+    introduced: fa-confirmatory
+    returns:
+      - {lesson: sem, how: fits it in multigroup SEM}
+  - id: omega
+    idea: "Model-based reliability (omega) in place of alpha"
+    introduced: fa-confirmatory
+    returns:
+      - {lesson: dimensionality, how: computes it for a bifactor model}
+  - id: ordinal-fa-is-grm
+    idea: "Ordinal factor analysis is the graded response model"
+    introduced: fa-confirmatory
+    returns:
+      - {lesson: dimensionality, how: fits multidimensional IRT as factor analysis}
