@@ -2,7 +2,7 @@
 
 # What does a score mean? Norms, error bands, and cut scores (`score-meaning`)
 
-Module: uses · Prereqs: ctt-reliability, information · Core · Status: outline
+Module: uses · Prereqs: ctt-reliability, information · Core · Status: drafted (#61)
 
 ## Core ideas
 
@@ -75,3 +75,19 @@ The reliability of a difference score stays problem 1, not a callout.
 ## Open questions
 
 - None. Settled 09-24: prerequisites (E10); standard setting as one idea with an Angoff widget (F14); the PHQ-9 (F15); the German contrast as a lesson about reference groups (F16); the boundary with `validity-evidence` (B).
+
+## Changes in drafting (#61, 09-25)
+
+- **Sanity check verified:** Shevlin et al. (2020) report 22.1% (95% CI 20.3–23.9) at PHQ-9 ≥ 10 and alpha 0.92 in wave 1; the page reproduces 22.1% and 0.921.
+- **German sample:** collected in 2012 by face-to-face household interviews (Coroiu et al., 2018, Methods); UK wave 1 online, 23–28 March 2020 (Shevlin et al., 2020). The page says the gap can't be put down to the pandemic, and cites Kocalevent et al. (2013) for an earlier German figure (5.6% at ≥ 10).
+- **Cut on θ:** where the test characteristic curve reaches 10 (0.86). Error bands are compared on the raw scale too: the model's SEM at 10 is 2.36 against CTT's 1.74, which carries the verdict.
+- **Simulate:** compares the model's consistency prediction with CTT's normal approximation (Livingston–Lewis is described in the Go deeper callout, not coded).
+- **Sources:** Glass (1978) dropped (couldn't verify what it argues beyond a reply's summary); the bookmark chapter is cited from Cizek & Bunch (2007, ch. 10, doi:10.4135/9781412985918.n10) instead of Cizek (Ed.) (2012). Angoff (1971) verified against Open Library (the volume) and a citing reference list (pages 508–600). Added Lord & Wingersky (1984) and Lee (2010, doi:10.1111/j.1745-3984.2009.00096.x) for the callout.
+- **PHQ-9 reuse (A5):** the instruction manual (p. 8) says the PHQ measures are in the public domain and need no permission; phqscreeners.com/select-screener says the same. The page quotes only item 1.
+- **`ability-estimation`** was a stub on the base branch, so there is no Recall of it; plausible values get their full treatment here (C12).
+
+## Revisions after Ben's review (#137, 09-25)
+
+- The *Standards* now link to the open-access full text (PDF, with `#page=` anchors for Standards 2.4, 2.14, 5.1, 5.8, 5.9, 5.21, 5.23 and 6.10) and are in Going further.
+- "One score, four reference groups": the table stays; the single-group chart is replaced by four stacked panels on a shared axis with a movable cut line and each group's share at or above it (at 10: 36.9%, 22.1%, 10.5%, 4.1%).
+- Error-band widget: the bars are bands in PHQ-9 score points (the spread of the sum at a given θ), which narrow near the floor and ceiling because the expected-score curve flattens there, while the CSEM on θ grows. Axis and legend now name the scale; the text explains it, and the `raw-csem` chunk prints the curve's slope and shows score-point SEM ÷ slope ≈ θ-scale CSEM (0.44 vs 0.41 at a score of 1; 0.21 vs 0.21 at 10).

@@ -384,7 +384,7 @@ lessons:
     prereqs: [ctt-reliability, information]
     origin: {slides: [], ps: [], code: []}
     tables: [c19prc_uk_mcbride_2021_phq9, coroiu_2018_phq9]
-    status: stub
+    status: draft
     tranche: core
 
   # 2026-09-24: sem and rt-process-models added at Ben's suggestion; both optional (#64, #65).
