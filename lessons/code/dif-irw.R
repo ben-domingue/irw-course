@@ -1,8 +1,9 @@
 # Differential item functioning: which items in a first-grade vocabulary test work
 # differently for groups of children matched on their total score? The Mantel-Haenszel
-# procedure with the ETS A/B/C categories, and logistic regression, on gilbert_meta_11
-# from the Item Response Warehouse. Runs as-is in base R (no login or token needed);
-# one chunk also checks the result against the difR package if it is installed.
+# procedure with the ETS A/B/C categories and logistic regression, on gilbert_meta_11
+# from the Item Response Warehouse, then robust scaling (Halpin, 2024). Runs as-is in
+# base R (no login or token needed), except the last chunk, which needs the mirt and
+# robustDIF packages; one chunk also checks the result against difR if installed.
 # Source: EDUC 252 class 5 (slides c5) and problem set 5 (#3, code ps5/dif_itemtext.R).
 
 ## ---- fetch
@@ -150,29 +151,52 @@ legend("topleft", c("control", "treated"), col = c("#999", "#2780e3"), pch = 19,
 par(op)
 
 ## ---- logistic
-# Logistic regression DIF (Swaminathan & Rogers, 1990) for expedition: the total
-# score, then the group (uniform DIF), then the group-by-score interaction
-# (non-uniform DIF). Likelihood-ratio tests compare the three nested models.
-dd <- data.frame(y = X[, "ss2"], total = tot, group = w$treat)
-m0 <- glm(y ~ total, binomial, dd)
-m1 <- glm(y ~ total + group, binomial, dd)
-m2 <- glm(y ~ total * group, binomial, dd)
-anova(m0, m1, m2, test = "LRT")
-round(coef(summary(m1)), 3)
-# The group coefficient is a log odds ratio at a fixed total, as the MH alpha is;
-# on the delta scale it is 2.35 times the coefficient.
-round(c(logistic_delta = 2.35 * unname(coef(m1)["group"]), mh_delta = tr["ss2", "delta"]), 2)
+# Logistic regression DIF (Swaminathan & Rogers, 1990): three nested models per item,
+#   M0: total score;  M1: + group (uniform DIF);  M2: + group x total (non-uniform DIF).
+# Likelihood-ratio tests compare them. The effect size is the change in Nagelkerke's
+# R^2 from M0 to M2, classified as Jodoin & Gierl (2001) do in difR: below .035
+# negligible (A), .035 to .07 moderate (B), above .07 large (C).
+nagelkerke <- function(m, ll0, n) {
+  cs <- 1 - exp(2 * (ll0 - as.numeric(logLik(m))) / n)
+  cs / (1 - exp(2 * ll0 / n))
+}
+lr_item <- function(y, g, total) {
+  d <- data.frame(y = y, g = g, total = total)[!is.na(g), ]
+  ll0 <- as.numeric(logLik(glm(y ~ 1, binomial, d)))
+  m0 <- glm(y ~ total, binomial, d)
+  m1 <- glm(y ~ total + g, binomial, d)
+  m2 <- glm(y ~ total * g, binomial, d)
+  c(beta_group = unname(coef(m1)["g"]),
+    p_uniform = anova(m0, m1, test = "LRT")[2, "Pr(>Chi)"],
+    p_nonuniform = anova(m1, m2, test = "LRT")[2, "Pr(>Chi)"],
+    p_both = anova(m0, m2, test = "LRT")[2, "Pr(>Chi)"],
+    dR2 = nagelkerke(m2, ll0, nrow(d)) - nagelkerke(m0, ll0, nrow(d)))
+}
+lr_all <- function(g) {
+  out <- as.data.frame(t(sapply(items, function(i) lr_item(X[, i], g, rowSums(X)))))
+  out$jg <- ifelse(out$p_both >= 0.05 | out$dR2 < 0.035, "A", ifelse(out$dR2 < 0.07, "B", "C"))
+  out
+}
+lr <- lapply(groups, lr_all)
+# Side by side with Mantel-Haenszel: items significant (2-df test), and the Jodoin &
+# Gierl categories.
+t(sapply(lr, function(r) c(significant = sum(r$p_both < 0.05), A = sum(r$jg == "A"),
+                           B = sum(r$jg == "B"), C = sum(r$jg == "C"),
+                           largest_dR2 = round(max(r$dR2), 3))))
 
-## ---- nonuniform
-# Non-uniform DIF by treatment: for which items does the group-by-score interaction
-# improve the fit, at the .05 level?
-nu <- sapply(items, function(i) {
-  d <- data.frame(y = X[, i], total = tot, group = w$treat)
-  anova(glm(y ~ total + group, binomial, d), glm(y ~ total * group, binomial, d),
-        test = "LRT")[2, "Pr(>Chi)"]
-})
-sum(nu < 0.05)
-signif(sort(nu)[1:6], 2)
+## ---- logistic-treat
+# Treatment, item by item: the group coefficient (a log odds ratio at a fixed total;
+# 2.35 times it is on the MH delta scale), the non-uniform test, and the effect size.
+lt <- lr[["treated vs. control"]]
+lt <- data.frame(word = tr[rownames(lt), "word"], beta_group = round(lt$beta_group, 2),
+                 odds_ratio = round(exp(lt$beta_group), 2),
+                 lr_delta = round(2.35 * lt$beta_group, 2),
+                 mh_delta = round(tr[rownames(lt), "delta"], 2),
+                 p_nonuniform = signif(lt$p_nonuniform, 2), dR2 = round(lt$dR2, 3),
+                 jg = lt$jg, mh_ets = tr[rownames(lt), "ets"], row.names = rownames(lt))
+lt[order(-lt$dR2), ][1:8, ]
+round(cor(lt$lr_delta, lt$mh_delta), 4)
+sum(lr[["treated vs. control"]]$p_nonuniform < 0.05)
 
 ## ---- purify
 # Purification: drop the C items from the matching score (each studied item stays
@@ -191,3 +215,21 @@ cmp <- data.frame(total = round(res[["treated vs. control"]]$delta, 2),
 cmp[order(-cmp$total), ]
 table(total = cmp$ets_total, purified = cmp$ets_purified)
 round(c(mean_total = mean(cmp$total), mean_purified = mean(cmp$purified)), 2)
+
+## ---- robust
+# Robust scaling (Halpin, 2024; robustDIF package): fit a 2PL in each arm, then
+# estimate the difference between the arms on theta while down-weighting items whose
+# item-level estimates of that difference are outliers. No anchor is chosen in
+# advance. Needs the mirt and robustDIF packages; skipped if they are missing.
+if (requireNamespace("mirt", quietly = TRUE) && requireNamespace("robustDIF", quietly = TRUE)) {
+  fits <- lapply(0:1, function(k) mirt::mirt(as.data.frame(X[w$treat == k, ]), 1,
+                                              itemtype = "2PL", SE = TRUE, verbose = FALSE))
+  rob <- robustDIF::rdif(mle = robustDIF::get_model_parms(fits), fun = "d_fun3", alpha = 0.05)
+  rt <- rob$dif.test
+  rownames(rt) <- items   # the package labels items by position
+  print(data.frame(word = tr[items, "word"], delta = round(rt$delta, 2), z = round(rt$z.test, 1),
+                   weight = round(rob$weights, 2), row.names = items)[order(-abs(rt$delta)), ][1:8, ])
+  print(c(flagged = sum(rt$p.val < 0.05), zero_weight = sum(rob$weights == 0)))
+  # Treatment effect on theta (in SDs): all items weighted equally vs. robust.
+  print(robustDIF::delta_test(rob)[, c("naive.est", "rdif.est", "delta", "z.test", "p.val")], digits = 3)
+}
