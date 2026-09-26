@@ -322,7 +322,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
     tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed, rapm_poulton_2022_untimed]
     reuses: [roar_lexical]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: trials
@@ -416,7 +416,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [mturkddm_lexical, motion, credentialform_lnirt]
     reuses: [credentialform_lnirt]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-24: added at Ben's suggestion (#66); module placement is a first guess.

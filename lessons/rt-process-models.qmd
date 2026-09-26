@@ -8,20 +8,425 @@ source("_course.R")
 lesson_header("rt-process-models")
 ```
 
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {diffusionTrials, bins, satCurves, diffusionIRT} from "./widgets/rt-process-models.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+[Response time and the speed-accuracy tradeoff](response-time.qmd) modelled time and accuracy separately, joined by a correlation, and then found in four tables that a response's time said something about whether it was right. Where does that dependence come from? A process model answers by describing the decision itself: evidence builds up, noisily, until there is enough to act on, and that one process produces both the choice and the time. This lesson builds the **diffusion model** from a random walk, finds the 2PL inside it, and fits it to three IRW tables: a lexical decision task where its simple form roughly holds, a motion task whose errors are slower than it allows, and a licensure exam whose items it wasn't built for.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- describe the diffusion model's four parameters and simulate trials from it;
+- predict what a harder stimulus and a speed instruction do, and estimate the parameters with EZ-diffusion;
+- derive the 2PL from the diffusion model and say what discrimination means as a process;
+- explain why errors can be slower than correct responses, and why that has to be checked within a condition;
+- say when a diffusion model, or a race model, suits the data in hand.
+
 ## Core ideas
 
-## Worked example
+### A decision as a random walk
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Response time and the speed-accuracy tradeoff](response-time.qmd): the hierarchical model assumes **conditional independence**. Given ability, speed and the item parameters, a response's time says nothing more about whether it was right. In all four tables the conditional accuracy function said otherwise, in a different shape each time.
+:::
+
+A respondent is deciding whether a string of letters is a word. Keep a running total of the evidence, $x$, that starts at $z$ and moves upward on average when the string is a word. When it reaches an upper boundary at $\alpha$ the respondent says "word"; when it falls to 0 they say "nonword". The time to get there plus a **non-decision time** $T_{er}$, for seeing the string and pressing the key, is the response time. Formally, over each small interval $dt$ the total moves by $v\,dt$ plus normal noise with SD $s\sqrt{dt}$. This is the diffusion model ([Ratcliff, 1978](https://doi.org/10.1037/0033-295X.85.2.59); [Ratcliff & McKoon, 2008](https://doi.org/10.1162/neco.2008.12-06-420)), with four parameters:
+
+- the **drift** $v$: the quality of the evidence, how fast the total moves toward the correct boundary;
+- the **boundary separation** $\alpha$: how much evidence the respondent requires, their caution;
+- the **starting point** $z$: a bias toward one response ($z = \alpha/2$ is unbiased);
+- the **non-decision time** $T_{er}$.
+
+The noise $s$ only sets the scale ([Ratcliff & McKoon, 2008](https://doi.org/10.1162/neco.2008.12-06-420)). We fix $s = 1$; the documentation of the R package `rtdists` ([Singmann et al., 2014](https://doi.org/10.32614/CRAN.package.rtdists)) notes that Ratcliff and others often use $s = 0.1$, which makes $v$ and $\alpha$ ten times smaller. The diffusion literature calls the boundary $a$; we write $\alpha$ to keep $a$ for the item slope, though the two turn out to be the same thing.
+
+#### Try it: the random walk
+
+Each thin line is one trial (blue ends correct, orange in an error). Below, times for 1,500 trials: correct responses above the axis, errors below.
+
+```{ojs}
+//| echo: false
+viewof rw_v = Inputs.range([-1, 4], {value: 1.5, step: 0.1, label: "Drift v"})
+viewof rw_a = Inputs.range([0.4, 3], {value: 1.2, step: 0.1, label: "Boundary separation α"})
+viewof rw_z = Inputs.range([0.2, 0.8], {value: 0.5, step: 0.05, label: "Starting point (share of α)"})
+viewof rw_t = Inputs.range([0.1, 0.6], {value: 0.3, step: 0.05, label: "Non-decision time (s)"})
+```
+
+```{ojs}
+//| echo: false
+rw = diffusionTrials(rw_v, rw_a, rw_z, rw_t)
+rw_max = Math.max(1.5, 1.1 * rw.rows.map(d => d.rt).sort((x, y) => x - y)[Math.floor(0.99 * rw.rows.length)])
+rw_cb = bins(rw.rows.filter(d => d.resp === 1).map(d => d.rt), 0, rw_max, 50)
+rw_eb = bins(rw.rows.filter(d => d.resp === 0).map(d => d.rt), 0, rw_max, 50)
+html`<div style="display:flex;flex-direction:column;gap:0.5rem">${
+  Plot.plot({width: 700, height: 240, x: {label: "Seconds", domain: [0, rw_max]}, y: {label: "Evidence", domain: [-0.05 * rw_a, 1.05 * rw_a]},
+    marks: [Plot.ruleY([0, rw_a], {stroke: palette.ink}),
+            Plot.ruleX([rw_t], {stroke: palette.guide, strokeDasharray: "4 3"}),
+            Plot.line(rw.paths.filter(d => d.t <= rw_max), {x: "t", y: "x", z: "trial", stroke: d => d.resp === 1 ? palette.main : palette.contrast, strokeWidth: 1})]})
+}${
+  Plot.plot({width: 700, height: 200, x: {label: "Seconds", domain: [0, rw_max]}, y: {label: "Trials (errors below)"},
+    marks: [Plot.rectY(rw_cb, {x1: "x1", x2: "x2", y: "count", fill: palette.main}),
+            Plot.rectY(rw_eb, {x1: "x1", x2: "x2", y: d => -d.count, fill: palette.contrast}),
+            Plot.ruleY([0], {stroke: palette.rule})]})
+}</div>`
+```
+
+```{ojs}
+//| echo: false
+md`Accuracy **${rw.acc.toFixed(2)}**. Median time: correct **${rw.medCorrect.toFixed(2)} s**, errors **${isNaN(rw.medError) ? "none" : rw.medError.toFixed(2) + " s"}**.`
+```
+
+Both histograms have the long right tail that the lognormal model assumed, here produced by the walk. With the start halfway, the two medians agree to within sampling noise (0.53 and 0.55 s as the widget loads). Move the starting point to 0.3 and errors become common and fast: a walk that starts near the error boundary gets there quickly.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "With an unbiased start ($z = \\alpha/2$) and the same drift on every trial, correct responses and errors have the same distribution of times. Why?",
+  options: [
+    {text: "Mirroring a path about the midpoint turns a correct response into an error at the same time, and the two paths' probabilities differ by a factor that doesn't depend on the time", correct: true, why: "For a walk with drift, the ratio of a path's probability to its mirror image's depends only on where the path ends. So conditioning on the boundary reached leaves the same distribution of times."},
+    {text: "Errors are rare, so their times are noisy and happen to match", correct: false, why: "The equality is exact in the model, whatever the accuracy. The widget's small differences are sampling noise."},
+    {text: "The non-decision time is added to both", correct: false, why: "$T_{er}$ shifts both distributions by the same amount, but it can't make the decision times equal. The symmetry of the walk does that."}
+  ]
+})
+```
+
+So the simple model assumes conditional independence, trial by trial. [Kang, De Boeck and Ratcliff (2022)](https://doi.org/10.1007/s11336-021-09819-5) show that letting drift vary across persons and items, and the starting point vary too, produces the positive, negative and curved conditional accuracy functions found in test data, shapes like the inverted U in the response-time lesson's lexical task.
+
+### What the parameters mean, and EZ-diffusion
+
+With an unbiased start and $s = 1$ the model gives two closed forms:
+$$\Pr(\text{correct}) = \frac{1}{1 + e^{-\alpha v}}, \qquad \text{mean decision time} = \frac{\alpha}{2v}\,\tanh\!\left(\frac{\alpha v}{2}\right).$$
+A harder stimulus lowers the drift, so the respondent is less accurate *and* slower. An instruction to hurry lowers the boundary, so they are faster but less accurate. The response-time lesson's speed–accuracy tradeoff becomes one parameter, $\alpha$, and moving along it leaves the drift alone. [Ratcliff and McKoon (2008)](https://doi.org/10.1162/neco.2008.12-06-420) review experiments in which stimulus difficulty moved the drift and speed or accuracy instructions moved the boundaries.
+
+#### Try it: drift or boundary?
+
+Accuracy against mean response time ($T_{er}$ = 0.3 s) as the boundary changes (blue) or the drift changes (orange); the dot is the current setting.
+
+```{ojs}
+//| echo: false
+viewof sa_v = Inputs.range([0.2, 4], {value: 1.5, step: 0.1, label: "Drift v"})
+viewof sa_a = Inputs.range([0.3, 3], {value: 1.2, step: 0.1, label: "Boundary separation α"})
+```
+
+```{ojs}
+//| echo: false
+sa = satCurves(sa_v, sa_a)
+Plot.plot({
+  width: 700, height: 320, x: {label: "Mean response time (s)", domain: [0.3, 1.6]}, y: {label: "P(correct)", domain: [0.5, 1]},
+  color: {legend: true, domain: ["change the boundary", "change the drift"], range: [palette.main, palette.contrast]},
+  marks: [Plot.line(sa.curves.filter(d => d.rt <= 1.6), {x: "rt", y: "p", stroke: "which", strokeWidth: 2.5}),
+          Plot.dot([sa.point], {x: "rt", y: "p", r: 6, fill: palette.ink})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Accuracy **${sa.point.p.toFixed(3)}**, mean response time **${sa.point.rt.toFixed(2)} s**.`
+```
+
+Lower α and the dot slides down the blue curve, toward faster and less accurate responses. Lower the drift and it slides down the orange curve, toward slower *and* less accurate ones. The two leave different marks on time and accuracy together, which is how a model tells them apart.
+
+The closed forms can be run backwards. **EZ-diffusion** ([Wagenmakers, van der Maas & Grasman, 2007](https://doi.org/10.3758/BF03194023)) takes three numbers from a set of trials (the proportion correct and the mean and variance of the correct response times) and returns $v$, $\alpha$ and $T_{er}$ in closed form. It assumes the simple model (an unbiased start, no variability across trials) and ignores the error times. [Ratcliff (2008)](https://doi.org/10.3758/PBR.15.6.1218) shows that it is sensitive to outlying times and can mislead when its assumptions don't hold, and suggests it for exploration rather than final estimates. EZ is a reasonable choice for a first look at many respondents with many trials each, and it is a few lines of base R; full fits are in *Going further*.
+
+::: {.callout-note collapse="true"}
+## Go deeper: the EZ equations
+
+**Assumptions:** the diffusion model with $s = 1$, an unbiased start $z = \alpha/2$, and no across-trial variability in drift, start or non-decision time; one condition, with proportion correct $P_c$ (not 0.5 or 1) and mean $M$ and variance $V$ of the correct response times.
+
+Accuracy gives the product: $L = \text{logit}(P_c) = \alpha v$. The variance of the decision time (which is also the variance of the response time, since $T_{er}$ is constant) is a second function of $\alpha$ and $v$; eliminating $\alpha$ gives
+$$v = \text{sign}\!\left(P_c - \tfrac12\right)\left[\frac{L\left(P_c^2 L - P_c L + P_c - \tfrac12\right)}{V}\right]^{1/4}, \qquad \alpha = \frac{L}{v}.$$
+The mean decision time then follows from the closed form in the main text, and $T_{er} = M - \frac{\alpha}{2v}\,\frac{1 - e^{-\alpha v}}{1 + e^{-\alpha v}}$ ([Wagenmakers et al., 2007](https://doi.org/10.3758/BF03194023)). With $s = 0.1$, multiply $v$ and $\alpha$ by 0.1.
+
+Two edge cases need care. At $P_c = 1$ the logit is infinite; the code replaces $P_c$ with $1 - 1/(2n)$ for $n$ trials, counting half an error. At $P_c = 0.5$ the drift is zero and $\alpha$ is undefined. The Simulate section checks the equations by recovery: data generated with known parameters give them back.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In a lexical decision experiment, the same respondents are told on some blocks to respond as fast as they can. Accuracy falls from 0.92 to 0.85 and responses get faster. Under the diffusion model, which parameter changed?",
+  options: [
+    {text: "The boundary separation $\\alpha$", correct: true, why: "An instruction changes how much evidence the respondent waits for, not the quality of the evidence. A lower $\\alpha$ gives faster, less accurate responses, as observed."},
+    {text: "The drift $v$", correct: false, why: "The strings haven't changed, so the evidence they carry hasn't either. And a lower drift would make responses slower, not faster."},
+    {text: "The non-decision time $T_{er}$", correct: false, why: "A shorter $T_{er}$ speeds every response but leaves accuracy alone. It can't explain the drop from 0.92 to 0.85."}
+  ]
+})
+```
+
+### The diffusion model is an item response model
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd): the 2PL is $\Pr(x_{ij} = 1) = \text{logit}^{-1}\big(a_i(\theta_j - b_i)\big)$, where the slope or discrimination $a_i$ says how quickly the probability rises as $\theta$ passes $b_i$.
+:::
+
+Now let the drift depend on who meets which item: $v_{ij} = \theta_j - b_i$, the respondent's ability minus the item's difficulty. Put that into the accuracy formula:
+$$\Pr(x_{ij} = 1) = \frac{1}{1 + e^{-\alpha(\theta_j - b_i)}}.$$
+That is a 2PL whose slope is the boundary separation. [Tuerlinckx and De Boeck (2005)](https://doi.org/10.1007/s11336-000-0810-3) read discrimination this way: the amount of information collected before responding. Whose boundary is it? If it belongs to the item (a time limit, a format that invites care), $\alpha_i$ is an ordinary item slope. If it belongs to the respondent, a cautious respondent's answers discriminate more: a slope that varies by person, which the 2PL doesn't have. [Van der Maas et al. (2011)](https://doi.org/10.1037/a0022749) follow this line to a new model for accuracy and speed, and `diffIRT` fits diffusion item response models ([Molenaar, Tuerlinckx & van der Maas, 2015](https://doi.org/10.18637/jss.v066.i04)).
+
+#### Try it: the 2PL inside the walk
+
+Drift is θ − b. Curves are the closed forms for two boundaries; dots are proportions correct in 200 simulated walks at each ability (first boundary).
+
+```{ojs}
+//| echo: false
+viewof ir_b = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "Item difficulty b"})
+viewof ir_a1 = Inputs.range([0.4, 3], {value: 1, step: 0.1, label: "First boundary α"})
+viewof ir_a2 = Inputs.range([0.4, 3], {value: 2, step: 0.1, label: "Second boundary α"})
+```
+
+```{ojs}
+//| echo: false
+ir = diffusionIRT(ir_b, ir_a1, ir_a2)
+ir_dom = [`boundary ${ir_a1.toFixed(1)}`, `boundary ${ir_a2.toFixed(1)}`]
+html`<div style="display:flex;flex-wrap:wrap;gap:1rem">${
+  Plot.plot({width: 340, height: 280, x: {label: "Ability θ"}, y: {label: "P(correct)", domain: [0, 1]},
+    color: {legend: true, domain: ir_dom, range: [palette.main, palette.contrast]},
+    marks: [Plot.ruleX([ir_b], {stroke: palette.rule}),
+            Plot.line(ir.curves, {x: "theta", y: "p", stroke: "curve", strokeWidth: 2.5}),
+            Plot.dot(ir.dots, {x: "theta", y: "p", fill: palette.ink, r: 3.5})]})
+}${
+  Plot.plot({width: 340, height: 280, x: {label: "Ability θ"}, y: {label: "Mean decision time (s)"},
+    color: {domain: ir_dom, range: [palette.main, palette.contrast]},
+    marks: [Plot.ruleX([ir_b], {stroke: palette.rule}),
+            Plot.line(ir.curves, {x: "theta", y: "mdt", stroke: "curve", strokeWidth: 2.5})]})
+}</div>`
+```
+
+The dots, from nothing but random walks, sit on a logistic curve, steeper for the wider boundary, as for a larger slope. The right panel is what a 2PL can't see: decisions take longest for respondents near the item's difficulty, where the drift is near zero, and the wider boundary takes longer everywhere. The model predicts which responses should be slow, not only which should be right.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two respondents have the same ability. One sets a boundary of 2, the other of 1. On an item with $b$ one logit below their ability, what are their chances of a correct response?",
+  options: [
+    {text: "About 0.88 for the cautious one and 0.73 for the other", correct: true, why: "The drift is $\\theta - b = 1$, so $1/(1 + e^{-2}) \\approx 0.88$ and $1/(1 + e^{-1}) \\approx 0.73$. The cautious respondent pays for the extra accuracy in time."},
+    {text: "The same, 0.73, because they have the same ability", correct: false, why: "Under the diffusion model accuracy depends on the product $\\alpha v$, not on $v$ alone. Equal abilities give equal drifts, not equal accuracies."},
+    {text: "About 0.98 and 0.73", correct: false, why: "$1/(1+e^{-4}) \\approx 0.98$ would need $\\alpha v = 4$. Here it is $2 \\times 1 = 2$."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: from the random walk to the 2PL
+
+**Assumptions:** a diffusion process with drift $v$ and noise SD $s$ per unit time, absorbing boundaries at 0 and $\alpha$, a start at $z$, and no across-trial variability. The process ends at one boundary or the other with probability 1.
+
+Let $h(x)$ be the probability of reaching $\alpha$ before 0 from position $x$. Over a short step, $h(x) = \mathbb{E}\,h(x + v\,dt + s\,dW)$; expanding to second order gives $v\,h'(x) + \tfrac{s^2}{2} h''(x) = 0$, with $h(0) = 0$ and $h(\alpha) = 1$. The solution is
+$$h(z) = \frac{1 - e^{-2vz/s^2}}{1 - e^{-2v\alpha/s^2}}.$$
+At $z = \alpha/2$ the numerator is $1 - e^{-v\alpha/s^2}$ and the denominator factors as $(1 - e^{-v\alpha/s^2})(1 + e^{-v\alpha/s^2})$, so
+$$h(\alpha/2) = \frac{1}{1 + e^{-\alpha v/s^2}}.$$
+With $v = \theta_j - b_i$ this is a 2PL with slope $\alpha/s^2$ ([Tuerlinckx & De Boeck, 2005](https://doi.org/10.1007/s11336-000-0810-3)). Two assumptions did the work. A biased start ($z \ne \alpha/2$) moves the curve, so it no longer passes through 0.5 at $\theta = b$. Across-trial variability in drift averages logistic curves with different arguments, which flattens the curve. Either way the model is still an item response model, just not exactly a 2PL.
+:::
+
+### Slow errors
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): in the brightness experiment of `rr98_accuracy`, errors were slower than correct responses (median 0.65 s against 0.56 s), but within a brightness level by only about 0.02 s. Most of the gap came from errors crowding into the hard levels, which are slow for every response.
+:::
+
+The simple model predicts no gap within a condition, as the first widget showed. Data can have one (the motion task below does), and [Ratcliff and Rouder (1998)](https://doi.org/10.1111/1467-9280.00067) account for it with variability *across* trials. If the drift varies from trial to trial (SD $\eta$), errors come mostly from trials whose drift happened to be low, and those trials are slow however they end: errors are slower. If the starting point varies, errors come mostly from trials that began near the wrong boundary, and those end quickly: errors are faster ([Ratcliff & McKoon, 2008](https://doi.org/10.1162/neco.2008.12-06-420)).
+
+The pooled `rr98_accuracy` gap is the same mechanism one level up, with conditions of different difficulty playing the part of trials with different drift. So before reading slow errors as drift variability, compare error and correct times *within* a condition, and within a respondent.
+
+#### Try it: variability across trials
+
+3,000 trials with drift 1.5 and boundary 2 on average.
+
+```{ojs}
+//| echo: false
+viewof se_eta = Inputs.range([0, 2], {value: 0, step: 0.1, label: "Across-trial SD of drift (η)"})
+viewof se_sz = Inputs.range([0, 0.9], {value: 0, step: 0.05, label: "Across-trial range of the start (share of α)"})
+```
+
+```{ojs}
+//| echo: false
+se = diffusionTrials(1.5, 2, 0.5, 0.3, se_eta, se_sz, 3000, 7, 0)
+se_cb = bins(se.rows.filter(d => d.resp === 1).map(d => d.rt), 0, 3, 50)
+se_eb = bins(se.rows.filter(d => d.resp === 0).map(d => d.rt), 0, 3, 50)
+Plot.plot({width: 700, height: 240, x: {label: "Seconds", domain: [0, 3]}, y: {label: "Trials (errors below)"},
+  marks: [Plot.rectY(se_cb, {x1: "x1", x2: "x2", y: "count", fill: palette.main}),
+          Plot.rectY(se_eb, {x1: "x1", x2: "x2", y: d => -d.count, fill: palette.contrast}),
+          Plot.ruleX([se.medCorrect], {stroke: palette.main, strokeDasharray: "4 3"}),
+          Plot.ruleX([se.medError], {stroke: palette.contrast, strokeDasharray: "4 3"}),
+          Plot.ruleY([0], {stroke: palette.rule})]})
+```
+
+```{ojs}
+//| echo: false
+md`Accuracy **${se.acc.toFixed(2)}**. Median time: correct **${se.medCorrect.toFixed(2)} s**, errors **${se.medError.toFixed(2)} s** (a gap of ${(se.medError - se.medCorrect).toFixed(2)} s, from ${se.nError} errors).`
+```
+
+With both sliders at 0 the dashed medians nearly coincide (a gap of 0.03 s). Raise η to 1 and errors become slower by about a quarter of a second, and accuracy falls. Put η back to 0 and raise the start's range to 0.8: now errors are *faster*, by about as much.
+
+### Race models for more than two options
+
+One accumulator with two boundaries suits two responses. With three or more (the ink colours in a Stroop task, the options of a multiple-choice item) the natural extension is a **race**: each option has its own accumulator, and the first to reach its threshold gives the response and the time ([Heathcote & Matzke, 2022](https://doi.org/10.1177/09637214221095852)). [Tuerlinckx and De Boeck (2005)](https://doi.org/10.1007/s11336-000-0810-3) derive the 2PL from a race model too. The **linear ballistic accumulator** ([Brown & Heathcote, 2008](https://doi.org/10.1016/j.cogpsych.2007.12.002)) is the tractable case: independent accumulators rise in straight lines, without noise within a trial, toward a common threshold, which gives closed-form solutions for any number of options. Problem 6 sketches one.
+
+## Simulate
+
+The code generates 100 respondents × 200 trials as plain random walks in base R (a second or two), each respondent with their own drift, boundary and non-decision time. It recovers them with EZ-diffusion and compares an accuracy-only ability, the logit of the proportion correct, with the truth.
+
+With the seed as written, EZ's average drift matches the truth (1.47), and its estimates correlate 0.97 with the true drifts, 0.97 with the boundaries and 0.93 with the non-decision times (boundaries run slightly wide, 1.32 against 1.29, from the walk's step size). The accuracy-only ability correlates 0.86 with drift and 0.47 with the boundary: judged by accuracy alone, a careful respondent looks abler. Now set `eta <- 1`. EZ's average drift falls to 1.18 against a true 1.47, though it still orders respondents well (0.95), and errors become slower than correct responses (0.67 against 0.64 s).
+
+```{webr}
+{{< include code/rt-process-models-sim.R >}}
+```
+
+[Download this code](code/rt-process-models-sim.R) to run it as large as you like in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/rt-process-models-irw.R")
+```
+
+[mturkddm_lexical](https://itemresponsewarehouse.org/tables/mturkddm_lexical/) is the main example: fast two-choice decisions, many trials per respondent. [motion](https://itemresponsewarehouse.org/tables/motion/) is the contrast: stimulus strength is varied by design, and errors are slow. [credentialform_lnirt](https://itemresponsewarehouse.org/tables/credentialform_lnirt/), the licensure exam from the response-time lesson, is the failure case: items that take most of a minute. [Download the code](code/rt-process-models-irw.R); it needs `lme4`. EZ and the trimming rule are shared by all three:
+
+```{r ez}
+#| echo: true
+#| code-fold: true
+```
+
+### Lexical decision online
+
+[Ratcliff and Hendrickson (2021)](https://doi.org/10.3758/s13428-021-01573-x) repeated a lexical decision experiment with respondents recruited on Amazon Mechanical Turk to see whether online data reproduce laboratory results. Each respondent judged 480 strings, real words and made-up ones. Keying: 1 is a correct judgement.
+
+```{r fetch-lex}
+#| echo: true
+#| code-fold: show
+```
+
+Responses under 0.3 s (1% of trials) are right about half the time, like guesses, so we set them aside with the slowest 1% (over 2 s). Does the simple model's symmetry hold?
+
+```{r errors-lex}
+#| echo: true
+#| code-fold: show
+```
+
+Roughly. Errors take 0.633 s and correct responses 0.639 s; within a respondent, errors are slower by 0.014 s, in 61% of respondents. Against responses of about 0.64 s the gap is small, so EZ's simple model is a fair approximation. EZ for each respondent:
+
+```{r ez-lex}
+#| echo: true
+#| code-fold: show
+```
+
+The median respondent has drift 1.98, boundary 1.13 and non-decision time 0.44 s. EZ pools each respondent's words and nonwords into one drift, a simplification problem 2 undoes. Set these beside the response-time lesson's estimates: an ability from a Rasch-type `glmer` fit and a speed from the lognormal `lmer` fit.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Across respondents, which EZ parameter will correlate most strongly with the Rasch-type ability estimated from accuracy alone?",
+  choices: ["Drift v", "Boundary separation α", "Non-decision time", "None: all below 0.3"],
+  answer: "Drift v",
+  reveal: "Drift, at 0.82. But the boundary correlates 0.50 with ability too: the accuracy-only ability mixes skill with caution, as the Simulate section predicted. Speed is mostly boundary (−0.71) and non-decision time (−0.77)."
+})
+```
+
+```{r models-lex}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot-lex}
+#| echo: true
+#| code-fold: true
+#| fig-width: 7
+#| fig-height: 3.2
+```
+
+Ability tracks drift ($r = 0.82$), and the boundary as well ($r = 0.50$): a respondent who waits for more evidence gets more right, and a model of accuracy alone credits that to ability. Speed from the lognormal model is mostly the boundary ($r = -0.71$) and the non-decision time ($r = -0.77$), and barely relates to drift ($r = 0.19$). Ability and speed are nearly unrelated ($r = -0.19$), much as in the ROAR lexical task of the response-time lesson. The diffusion model reads that near-zero as speed and ability being built from different parts of the process.
+
+### Random-dot motion: the model's story, and slow errors
+
+In [O'Brien and Yeatman's (2021)](https://doi.org/10.1111/desc.13039) study of dyslexia, 106 school-aged children reported the direction of a field of moving dots, of which 6%, 12%, 24%, 48% or 100% moved together (the coherence). An IRW item is a block of the session and a coherence level, met 10 times, so each child has 60 trials per level ([processing script](https://github.com/ben-domingue/irw/blob/main/data/motion_discrimination.R)). Keying: 1 is correct.
+
+```{r fetch-motion}
+#| echo: true
+#| code-fold: show
+```
+
+Again, responses under 0.3 s are at chance (0.46), and we set them aside with the slowest 1% (over 7.5 s). EZ for each child at each coherence level, and the medians across children:
+
+```{r ez-motion}
+#| echo: true
+#| code-fold: show
+```
+
+From 6% to 48% coherence the median drift rises from 0.28 to 1.12, while the boundary barely moves (2.52 to 2.39). That is the model's story: the stimulus changed, so the evidence changed, and the children's caution didn't. At 100% the drift falls back to 0.85; the authors report that many children found full coherence difficult, and they left it out of their analysis. The last two columns hold something the simple model doesn't allow: errors are slower than correct responses at every level. Is that composition again, as in `rr98_accuracy`?
+
+```{r errors-motion}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot-motion}
+#| echo: true
+#| code-fold: true
+#| fig-width: 7
+#| fig-height: 3.2
+```
+
+No. Within a child and a coherence level, errors are slower by 0.13 to 0.34 s, in 64% to 79% of cells. These are slow errors that one drift per condition can't produce and across-trial variability in drift can; O'Brien and Yeatman's own fits included it. EZ leaves it out, so by the Simulate section's result its drifts here are probably too low, though their order should hold.
+
+### A licensure exam: where the reading runs out
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Response time and the speed-accuracy tradeoff](response-time.qmd): on this exam's 170 scored items the median response takes 54 s, and responses slower than expected are less often right.
+:::
+
+Nothing in the EZ equations refuses seconds:
+
+```{r fetch-cf}
+#| echo: true
+#| code-fold: show
+```
+
+```{r ez-cf}
+#| echo: true
+#| code-fold: show
+```
+
+The numbers come out, but not with the model's meaning. The median non-decision time is 12.8 s, and it is negative, which is impossible, for 6.7% of respondents; five respondents at exactly half right get no estimate at all. On 95% of items errors are slower than correct responses, by a median 19 s. A 54-second item is not one accumulation of evidence toward two boundaries but reading, working and choosing among several options. The failure is in the model's assumptions for these items, not in the data.
+
+So when would I reach for a diffusion model? When each response is a single fast decision between two options and each respondent gives many trials, as in lexical decision, motion and brightness judgements. There it separates what accuracy alone mixes, ability and caution, and in the lexical data the mixing is substantial (ability and boundary correlate 0.50). For test items that take most of a minute I wouldn't: the licensure exam gives parameters with no process to belong to. A model of the decision needs data made of decisions.
 
 ## Problems
 
+1. **Discrimination as a boundary.** From the absorption probability in the second *Go deeper* callout, show that with $z = \alpha/2$, $\Pr(\text{correct}) = 1/(1 + e^{-\alpha v/s^2})$. With $v = \theta - b$, read off the 2PL's discrimination. What is it for a paper that reports $\alpha = 0.12$ with $s = 0.1$? Why does the non-decision time not enter?
+2. **Words and nonwords.** The IRW table doesn't say which strings are words; the original deposit does: `Experiment1.data` at [osf.io/za9y8](https://osf.io/za9y8/) ([Ratcliff & Hendrickson, 2021](https://doi.org/10.3758/s13428-021-01573-x); CC BY 4.0) has `column_7_value` (1 = word, 2 = nonword) for each `test_word_string`, which is the IRW's `item`, and `column_8_value` (the frequency pool). Run EZ separately on words and nonwords for each respondent. Which parameter differs, and is that what the model says should change? Repeat for high- and low-frequency words.
+3. **Slow errors in the motion task.** Errors are slower within a child and a coherence level. Which extension of the diffusion model produces that, and what else does it predict about accuracy and about the error distribution? Check one prediction in the data. Why might the gap be largest at 100% coherence?
+4. **A non-decision time per respondent?** A colleague wants to report each respondent's $T_{er}$ from a 12-item untimed reasoning test, as a measure of processing speed. Advise them, using what EZ did on the licensure exam and what the diffusion model assumes a response is.
+5. **Separating drift from caution.** For a two-choice screening task in schools, what would you vary within respondents so that each child's drift and boundary are separately identified? How many trials per condition would you want, and how would you check by simulation that EZ recovers individual differences well enough?
+6. **Challenge (open).** Sketch a race model for a Stroop task ([Stroop, 1935](https://doi.org/10.1037/h0054651)) with three or more ink colours. What would the word's meaning do to the accumulators? How would an item's difficulty and a respondent's ability enter, and what item response model for the *choice* among colours falls out? I don't know of a derivation that gives a standard polytomous model exactly.
+
+```{r}
+#| output: asis
+ask_claude("rt-process-models", "It covers process models for response times: the drift diffusion model (drift, boundary separation, starting point and non-decision time) as a random walk, what harder stimuli and speed instructions do to it, EZ-diffusion as a closed-form estimator, the derivation of the 2PL from the diffusion model with the boundary as discrimination, slow and fast errors from across-trial variability in drift and starting point, and race models such as the linear ballistic accumulator, with a lexical decision task, a random-dot motion task and a licensure exam as examples.")
+```
+
 ## Going further
 
+- Ratcliff, R. (1978). A theory of memory retrieval. *Psychological Review*, 85(2), 59–108. <https://doi.org/10.1037/0033-295X.85.2.59>. Where the diffusion model starts.
+- Ratcliff, R., & McKoon, G. (2008). The diffusion decision model: Theory and data for two-choice decision tasks. *Neural Computation*, 20(4), 873–922. <https://doi.org/10.1162/neco.2008.12-06-420>. A review of the model, its variability parameters and the experiments that move each parameter.
+- Ratcliff, R., & Rouder, J. N. (1998). Modeling response times for two-choice decisions. *Psychological Science*, 9(5), 347–356. <https://doi.org/10.1111/1467-9280.00067>. The brightness experiment, with fast and slow errors explained by variability across trials.
+- Ratcliff, R., & Tuerlinckx, F. (2002). Estimating parameters of the diffusion model: Approaches to dealing with contaminant reaction times and parameter variability. *Psychonomic Bulletin & Review*, 9(3), 438–481. <https://doi.org/10.3758/BF03196302>. Fitting the full model, variability and outlying times included.
+- Wagenmakers, E.-J., van der Maas, H. L. J., & Grasman, R. P. P. P. (2007). An EZ-diffusion model for response time and accuracy. *Psychonomic Bulletin & Review*, 14(1), 3–22. <https://doi.org/10.3758/BF03194023>. The EZ equations and their recovery in simulation.
+- Ratcliff, R. (2008). The EZ diffusion method: Too EZ? *Psychonomic Bulletin & Review*, 15(6), 1218–1228. <https://doi.org/10.3758/PBR.15.6.1218>. Where EZ's estimates can mislead, and what the full fits do instead.
+- Vandekerckhove, J., Tuerlinckx, F., & Lee, M. D. (2011). Hierarchical diffusion models for two-choice response times. *Psychological Methods*, 16(1), 44–62. <https://doi.org/10.1037/a0021765>. The diffusion model as a hierarchical Bayesian model, with persons and conditions as levels.
+- Wiecki, T. V., Sofer, I., & Frank, M. J. (2013). HDDM: Hierarchical Bayesian estimation of the drift-diffusion model in Python. *Frontiers in Neuroinformatics*, 7, 14. <https://doi.org/10.3389/fninf.2013.00014>. Software for hierarchical fits.
+- Tuerlinckx, F., & De Boeck, P. (2005). Two interpretations of the discrimination parameter. *Psychometrika*, 70(4), 629–650. <https://doi.org/10.1007/s11336-000-0810-3>. The 2PL from a diffusion model and from a race model.
+- van der Maas, H. L. J., Molenaar, D., Maris, G., Kievit, R. A., & Borsboom, D. (2011). Cognitive psychology meets psychometric theory: On the relation between process models for decision making and latent variable models for individual differences. *Psychological Review*, 118(2), 339–356. <https://doi.org/10.1037/a0022749>. What a diffusion process implies for measuring abilities and attitudes.
+- Molenaar, D., Tuerlinckx, F., & van der Maas, H. L. J. (2015). Fitting diffusion item response theory models for responses and response times using the R package diffIRT. *Journal of Statistical Software*, 66(4). <https://doi.org/10.18637/jss.v066.i04>. Software for diffusion item response models.
+- Kang, I., De Boeck, P., & Ratcliff, R. (2022). Modeling conditional dependence of response accuracy and response time with the diffusion item response theory model. *Psychometrika*, 87(2), 725–748. <https://doi.org/10.1007/s11336-021-09819-5>. Variability in drift and starting point as a source of conditional dependence.
+- Brown, S. D., & Heathcote, A. (2008). The simplest complete model of choice response time: Linear ballistic accumulation. *Cognitive Psychology*, 57(3), 153–178. <https://doi.org/10.1016/j.cogpsych.2007.12.002>. The linear ballistic accumulator.
+- Heathcote, A., & Matzke, D. (2022). Winner takes all! What are race models, and why and how should psychologists use them? *Current Directions in Psychological Science*, 31(5), 383–394. <https://doi.org/10.1177/09637214221095852>. A short introduction to race models.
+- Singmann, H., Brown, S., Gretton, M., Heathcote, A., & Fernandez, A. (2014). *rtdists: Response time distributions* [R package]. <https://doi.org/10.32614/CRAN.package.rtdists>. Densities and random draws for the diffusion model and the LBA.
 - Tuerlinckx, F., Molenaar, D., & van der Maas, H. L. J. (2016). Diffusion-based response-time models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 283–300). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on diffusion models for responses and response times.
 
 ```{r}
@@ -31,3 +436,9 @@ data_sources("rt-process-models")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 9, slides 55–56, which sketch diffusion and race models; the rest is new.
+- **Timing:** about 45 minutes for the core ideas and widgets, and a 30-minute lab. The licensure table takes a minute to download.
+- **Software:** EZ and the random walk are base R. `rtdists` is in the webR repository, but drawing 20,000 trials with a drift per respondent–item pair ran over two minutes locally; the plain walk takes a second or two.
+- **Changed from the outline:** boundary separation is written $\alpha$, keeping $a$ for the item slope.
+- **Held back:** full or hierarchical fits with across-trial variability (*Going further*); diffusion item response models for test items (problem 4); rapid guessing as a separate process.
+- **Solutions:** held back in `solutions/rt-process-models.qmd` (not published). Problem 6 is open.
