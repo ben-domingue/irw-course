@@ -8,21 +8,411 @@ source("_course.R")
 lesson_header("nominal")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, palette} from "./widgets/irt.js"
+import {nominalProbs, nominalInfo, keyedInfo, mcProbs} from "./widgets/nominal.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Score a multiple-choice item 0/1 and two respondents who both got it wrong look the same, though one chose the answer a nearly-right reader would choose and the other the answer nobody who read the question would. [Guessing and priors](guessing-priors.qmd) asked what to do about the floor of an item's curve; this lesson asks what the wrong answers say. It gives every option its own curve (Bock's nominal response model), reads those curves, adds a "don't know" state (Thissen and Steinberg's multiple-choice model), and fits the models to the Reading the Mind in the Eyes Test and a medical residency exam. The short answers: the wrong answers add information about the respondents who miss items, and they point to the handful of items where the keyed answer behaves like a wrong one. On a multiple-choice test I'd keep the option chosen and read its curves before scoring anything 0/1.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write down Bock's nominal response model, say how its slopes order the options along $\theta$, and say when it becomes the generalized partial credit model;
+- read option curves: tell a key from a falling distractor, one that draws partial knowledge, and one that rises with $\theta$;
+- say where distractors add information and why, and compare an item's information with and without them;
+- explain how Thissen and Steinberg's multiple-choice model and the nested logit model describe guessing, and how that differs from the 3PL's floor;
+- fit the nominal and nested logit models with `mirt`, and use option curves to find items that need a second look.
+
 ## Core ideas
 
-## Worked example
+### Every option gets a curve
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Models for polytomous responses](polytomous.qmd): the partial credit family are *divide-by-total* models ([Thissen & Steinberg, 1986](https://doi.org/10.1007/BF02295596)). Each category gets an exponential, and its probability is its share of the total. The GPCM has $\Pr(x = k) \propto \exp\big(\sum_{v \le k} a(\theta - b_v)\big)$, with the categories ordered in advance.
+:::
+
+What if we can't trust an order in advance? The options of a multiple-choice item are four answers, one of them keyed. [Bock (1972)](https://doi.org/10.1007/bf02291411) dropped the ordering and gave each option $k$ of item $i$ its own slope $a_{ik}$ and intercept $\gamma_{ik}$:
+$$\Pr(x_{ij} = k \mid \theta_j) = \frac{\exp(a_{ik}\theta_j + \gamma_{ik})}{\sum_{h} \exp(a_{ih}\theta_j + \gamma_{ih})}.$$
+Only differences between options matter, so one option is fixed at $a = \gamma = 0$ as a reference. With two options this is the 2PL, with slope $a_{i1} - a_{i0}$. [Thissen, Cai and Bock (2010)](https://doi.org/10.4324/9780203861264.ch3) describe the model's parameterizations and uses. We write $\gamma$ for the intercept because $c$ is the lower asymptote; `mirt` calls it `d`.
+
+What do the slopes do? The log odds of option $k$ against option $h$ is $(a_k - a_h)\theta + (\gamma_k - \gamma_h)$, a straight line in $\theta$. So the option with the largest slope wins at the top of the scale, the one with the smallest wins at the bottom, and an option whose slope is in between can be the most likely only in the middle, and only if its intercept is large enough. The model, not the scorer, orders the options along $\theta$.
+
+#### Try it: option curves
+
+A four-option item. The key's slope is 1 and its intercept 0; set the three distractors.
+
+```{ojs}
+//| echo: false
+viewof oc_aB = Inputs.range([-2, 2], {value: -1, step: 0.1, label: "B: slope"})
+viewof oc_gB = Inputs.range([-2, 2], {value: -0.5, step: 0.1, label: "B: intercept"})
+viewof oc_aC = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "C: slope"})
+viewof oc_gC = Inputs.range([-2, 2], {value: 0.5, step: 0.1, label: "C: intercept"})
+viewof oc_aD = Inputs.range([-2, 2], {value: -0.5, step: 0.1, label: "D: slope"})
+viewof oc_gD = Inputs.range([-2, 2], {value: -1, step: 0.1, label: "D: intercept"})
+```
+
+```{ojs}
+//| echo: false
+oc_names = ["Key", "B", "C", "D"]
+oc_cols = [palette.main, palette.contrast, palette.ink, palette.guide]
+oc_a = [1, oc_aB, oc_aC, oc_aD]
+oc_g = [0, oc_gB, oc_gC, oc_gD]
+oc_th = grid(-4, 4, 161)
+oc_rows = oc_th.flatMap(t => nominalProbs(t, oc_a, oc_g).map((p, k) => ({theta: t, p, option: oc_names[k]})))
+Plot.plot({
+  width: 700, height: 300, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(option chosen)", domain: [0, 1]},
+  color: {legend: true, domain: oc_names, range: oc_cols},
+  marks: [Plot.line(oc_rows, {x: "theta", y: "p", stroke: "option", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+oc_peak = k => oc_th.reduce((best, t) => nominalProbs(t, oc_a, oc_g)[k] > nominalProbs(best, oc_a, oc_g)[k] ? t : best, oc_th[0])
+oc_order = [0, 1, 2, 3].sort((u, v) => oc_a[u] - oc_a[v]).map(k => oc_names[k])
+oc_ties = [[1, 2], [1, 3], [2, 3]].filter(([u, v]) => Math.abs(oc_a[u] - oc_a[v]) < 1e-9).map(([u, v]) => `${oc_names[u]} and ${oc_names[v]}`)
+md`From the bottom of the scale to the top, the slopes order the options **${oc_order.join(", ")}**. ${[1, 2, 3].map(k => `${oc_names[k]} peaks at θ = ${oc_peak(k).toFixed(1)}`).join("; ")} (−4 or 4 means it keeps falling or rising). ${oc_ties.length ? `${oc_ties.join("; ")} have the same slope: their odds against each other don't change with θ, so which of them was chosen says nothing about θ.` : ""} ${oc_a.slice(1).some(v => v > 1) ? "A distractor with a slope above the key's overtakes it at the top of the scale." : ""}`
+```
+
+At the defaults B, with the smallest slope, takes over at the bottom; C, with a slope between B's and the key's, peaks near $\theta = 0$ at about 0.46; and the key leads from $\theta = 0.5$ up. Give D a slope of 1.5 and it overtakes the key at the top.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In a nominal model, option C has slope $a_C = 0.4$, between the key's $1.2$ and the other two distractors' $-0.8$ and $-0.5$. Which statement must be true?",
+  options: [
+    {text: "C is not the most likely option at the very top or the very bottom of the scale", correct: true, why: "At the top the largest slope (the key) wins; at the bottom the smallest (−0.8) wins. C can be most likely only in between, and only if its intercept is large enough."},
+    {text: "C is the most likely option somewhere in the middle", correct: false, why: "Only if its intercept is large enough. With a small intercept, C sits under the other curves everywhere (try C's intercept at −2 in the widget)."},
+    {text: "C's curve rises with θ, because its slope is positive", correct: false, why: "What matters is how C's slope compares with the others'. At the top, the key's larger slope drives C's probability back toward 0, so C's curve rises and then falls."}
+  ]
+})
+```
+
+### Reading option curves
+
+What do the curves say about an item? [Thissen, Steinberg and Fitzpatrick (1989)](https://doi.org/10.1111/j.1745-3984.1989.tb00326.x) treat the distractors as part of the item and read their curves as evidence about it. Four shapes recur:
+
+- the **key** rises;
+- a distractor that **falls** draws the respondents lowest on $\theta$;
+- a distractor that **peaks in the middle** draws respondents who know part of the answer;
+- a distractor that **rises at the top** is chosen more by stronger respondents: a second defensible answer, or a sign that the key should be checked.
+
+A distractor almost nobody chooses has a flat, low curve. [Gierl, Bulut, Guo and Zhang (2017)](https://doi.org/10.3102/0034654317726529) review how distractors are written, analysed and used.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [From construct map to items: building an instrument](instrument-building.qmd): a distractor nobody would choose adds only reading time, and distractors built from specific errors earn their place ([Haladyna, Downing & Rodriguez, 2002](https://doi.org/10.1207/S15324818AME1503_5)). Option curves are how the data check that rule. And in [Validity as causation](validity-causal.qmd), children who missed a word on a vocabulary task chose the semantically related picture (47% of wrong answers) more often than the unrelated one (22%).
+:::
+
+#### Try it: which is the key?
+
+These are the fitted option curves for one item of the residency exam in *With real data*, labelled as the exam printed them. Which option is keyed?
+
+```{ojs}
+//| echo: false
+viewof wk_pick = Inputs.radio(["A", "B", "C", "D"], {label: "The key is", value: null})
+```
+
+```{ojs}
+//| echo: false
+wk_a = [0.37, 0, 0.76, -1.74]
+wk_g = [1.42, 0, 1.33, -3.09]
+wk_names = ["A", "B", "C", "D"]
+Plot.plot({
+  width: 700, height: 300, x: {label: "θ", domain: [-3, 3]}, y: {label: "P(option chosen)", domain: [0, 1]},
+  color: {legend: true, domain: wk_names, range: [palette.main, palette.contrast, palette.ink, palette.guide]},
+  marks: [Plot.line(grid(-3, 3, 121).flatMap(t => nominalProbs(t, wk_a, wk_g).map((p, k) => ({theta: t, p, option: wk_names[k]}))),
+    {x: "theta", y: "p", stroke: "option", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`${wk_pick === null ? "Pick an option to see the answer." :
+  wk_pick === "A" ? "**Yes, A is keyed.** Nothing in the curves says so: A peaks near θ = −1 and then declines, while C rises across the whole range." :
+  wk_pick === "C" ? "**C is what the curves suggest, but the key is A.** C is the option stronger respondents choose; the keyed option, A, peaks near θ = −1 and declines." :
+  `**No, the key is A.** ${wk_pick === "D" ? "D falls: it draws the weakest respondents." : "B stays low everywhere."} A peaks near θ = −1; C, not the key, rises with θ.`}`
+```
+
+We return to this item below.
+
+### Distractors carry information, mostly at low θ
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Models for polytomous responses](polytomous.qmd): an item's information is $I(\theta) = \sum_k (P_k')^2/P_k$, which is $a^2 P(1-P)$ for a 0/1 item. Merging two categories never adds information, and loses none only where the two respond to $\theta$ identically. [Information, precision, and short forms](information.qmd) added it up over items.
+:::
+
+For the nominal model the formula gives something simple: an item's information is the variance of its option slopes, weighted by how likely each option is at $\theta$,
+$$I(\theta) = \sum_k P_k(\theta)\,\big(a_k - \bar a(\theta)\big)^2, \qquad \bar a(\theta) = \sum_k P_k(\theta)\,a_k.$$
+Scoring 0/1 merges the three distractors into one category. What does that cost? Split the variance into a part between "key" and "not key" and a part among the distractors:
+$$I(\theta) = \underbrace{P(1 - P)\,(a_{\text{key}} - \bar a_D)^2}_{\text{scored 0/1}} \;+\; (1 - P)\,\text{Var}_D(a \mid \theta),$$
+where $P$ is the key's probability, and $\bar a_D$ and $\text{Var}_D$ are the mean and variance of the slopes among the distractors, weighted by how often each is chosen at $\theta$. The first term is the information in the 0/1 score; the second is what the distractors add. It is weighted by $1 - P$, the chance of choosing a distractor at all, so it matters below the item's difficulty and fades above it. The Go deeper callout derives both lines.
+
+#### Try it: information with and without distractors
+
+The item from the option-curves widget: move its sliders and this plot follows.
+
+```{ojs}
+//| echo: false
+in_th = grid(-4, 4, 161)
+Plot.plot({
+  width: 700, height: 280, x: {label: "θ", domain: [-4, 4]}, y: {label: "Item information"},
+  color: {legend: true, domain: ["All four options (nominal)", "Scored 0/1"], range: [palette.main, palette.contrast]},
+  marks: [Plot.ruleY([0], {stroke: palette.rule}),
+    Plot.line(in_th.flatMap(t => [{theta: t, I: nominalInfo(t, oc_a, oc_g), s: "All four options (nominal)"},
+                                  {theta: t, I: keyedInfo(t, oc_a, oc_g, 0), s: "Scored 0/1"}]), {x: "theta", y: "I", stroke: "s", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Information at θ = −2, 0 and 2: all four options **${[-2, 0, 2].map(t => nominalInfo(t, oc_a, oc_g).toFixed(2)).join(", ")}**; scored 0/1, **${[-2, 0, 2].map(t => keyedInfo(t, oc_a, oc_g, 0).toFixed(2)).join(", ")}**. The key is chosen with probability ${[-2, 0, 2].map(t => nominalProbs(t, oc_a, oc_g)[0].toFixed(2)).join(", ")}.`
+```
+
+At the defaults the options give 0.22 at $\theta = -2$, where the 0/1 score gives 0.05, and 0.20 against 0.19 at $\theta = 2$, where 80% choose the key. Give all three distractors the same slope and the two curves coincide: distractors that don't differ in slope carry nothing beyond the 0/1 score.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An easy item: 90% of respondents choose the key. Its distractors have very different slopes. Where does keeping the options add most information?",
+  options: [
+    {text: "Among respondents well below the item's difficulty", correct: true, why: "The distractors' term is weighted by $1 - P$, the chance of choosing a distractor. On an easy item that is large only for the weakest respondents."},
+    {text: "Among the strongest respondents, since they are the majority", correct: false, why: "Nearly all of them choose the key, so which distractor they would have chosen hardly ever shows. The extra term is weighted by $1 - P$, near 0 for them."},
+    {text: "Evenly across the scale", correct: false, why: "Information is a curve. The distractors' share of it tracks how often distractors are chosen, which changes with θ."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: why distractor information sits below the item's difficulty
+
+**Assumptions:** one item with options $k = 1, \dots, K$ following Bock's nominal model with known $a_k$ and $\gamma_k$; one option is keyed, with probability $P = P_{\text{key}}$.
+
+**Nominal information.** $\log P_k = a_k\theta + \gamma_k - \log \sum_h \exp(a_h\theta + \gamma_h)$, so $\partial \log P_k/\partial\theta = a_k - \bar a(\theta)$. Fisher information is the variance of this score over the options, $I(\theta) = \sum_k P_k(a_k - \bar a)^2 = \text{Var}(a \mid \theta)$, as for the GPCM in [Models for polytomous responses](polytomous.qmd), where the slopes are $a \cdot k$.
+
+**The decomposition.** Let $D$ be the set of distractors, with total probability $1 - P$, mean slope $\bar a_D = \sum_{k \in D} P_k a_k / (1 - P)$ and variance $\text{Var}_D = \sum_{k \in D} P_k (a_k - \bar a_D)^2/(1 - P)$. The law of total variance, conditioning on "key or not", gives
+$$\text{Var}(a \mid \theta) = P(1 - P)(a_{\text{key}} - \bar a_D)^2 + (1 - P)\,\text{Var}_D.$$
+
+**The first term is the 0/1 information.** $P' = P(a_{\text{key}} - \bar a)$ and $\bar a = P a_{\text{key}} + (1 - P)\bar a_D$, so $P' = P(1 - P)(a_{\text{key}} - \bar a_D)$, and $(P')^2/\big(P(1 - P)\big) = P(1 - P)(a_{\text{key}} - \bar a_D)^2$: the information in the item scored 0/1, from the polytomous formula with two categories.
+
+**Where the second term lives.** $\text{Var}_D$ is at most a quarter of the squared range of the distractors' slopes, so $(1 - P)\text{Var}_D$ goes to 0 as $P \to 1$, above the item's difficulty. Below it, $1 - P$ is near 1 and the distractors add their spread of slopes. The term is zero only when the distractors chosen at $\theta$ share one slope, the equality case of the merging argument in [Models for polytomous responses](polytomous.qmd). On an easy test that puts the distractors' information with the respondents the 0/1 scores measure least precisely.
+:::
+
+### Guessing, again: the multiple-choice model
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Guessing and priors](guessing-priors.qmd): fixing the lower asymptote at $1/k$ assumes that a respondent who doesn't know the answer picks at random. On a two-button reading task, some items fell below chance, because not knowing pushed respondents toward one answer.
+:::
+
+What does the nominal model say about a respondent who knows nothing? As $\theta$ falls, the option with the smallest slope takes over, so the weakest respondents all choose one distractor rather than spreading over the options. [Thissen and Steinberg (1984)](https://doi.org/10.1007/bf02302588) add a latent "don't know" category, 0, with its own slope and intercept, and share its respondents among the options in proportions $\delta_k$ that sum to 1:
+$$\Pr(x = k \mid \theta) = \frac{\exp(a_k\theta + \gamma_k) + \delta_k\exp(a_0\theta + \gamma_0)}{\sum_{h=0}^{K} \exp(a_h\theta + \gamma_h)}.$$
+With $a_0$ the smallest slope, "don't know" takes over at the bottom, and every option's probability heads for its $\delta_k$. The key's floor is $\delta_{\text{key}}$, estimated rather than assumed to be $1/k$, and each distractor gets a floor too. Guessing here is a state a respondent is in, with its own account of which options guessers choose.
+
+#### Try it: a "don't know" category
+
+A four-option item under the multiple-choice model. Choose the share of "don't know" respondents who pick the key, and how unevenly the rest spread over the three distractors.
+
+```{ojs}
+//| echo: false
+viewof mc_dk = Inputs.range([0, 0.6], {value: 0.25, step: 0.01, label: "Share of don't-knows choosing the key"})
+viewof mc_skew = Inputs.range([0, 1], {value: 0, step: 0.05, label: "Unevenness among distractors (0 = even)"})
+```
+
+```{ojs}
+//| echo: false
+mc_a = [1.5, -0.5, 0, 0.5]
+mc_g = [0.5, 0, 0, -0.5]
+mc_rest = 1 - mc_dk
+mc_d = [mc_dk, mc_rest * (1 / 3 + (2 / 3) * mc_skew), mc_rest * (1 / 3) * (1 - mc_skew), mc_rest * (1 / 3) * (1 - mc_skew)]
+mc_names = ["Key", "B", "C", "D"]
+mc_th = grid(-4, 3, 141)
+Plot.plot({
+  width: 700, height: 300, x: {label: "θ", domain: [-4, 3]}, y: {label: "P(option chosen)", domain: [0, 1]},
+  color: {legend: true, domain: mc_names, range: [palette.main, palette.contrast, palette.ink, palette.guide]},
+  marks: [Plot.ruleY([0.25], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.line(mc_th.flatMap(t => mcProbs(t, mc_a, mc_g, -2.5, -1, mc_d).map((p, k) => ({theta: t, p, option: mc_names[k]}))),
+      {x: "theta", y: "p", stroke: "option", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+mc_key = mc_th.map(t => mcProbs(t, mc_a, mc_g, -2.5, -1, mc_d)[0])
+mc_min = Math.min(...mc_key)
+md`At θ = −4 the options are chosen with probabilities **${mcProbs(-4, mc_a, mc_g, -2.5, -1, mc_d).map(p => p.toFixed(2)).join(", ")}** (key, B, C, D), close to the don't-know shares. The key's curve reaches its lowest point, ${mc_min.toFixed(2)}, at θ = ${mc_th[mc_key.indexOf(mc_min)].toFixed(1)}. The dashed line is 1/4, where a 3PL with c fixed at chance would put the key's floor.`
+```
+
+At the defaults every curve starts at 0.25. The key's curve then dips to 0.19 near $\theta = -1$ before it rises: respondents just above "don't know" are drawn to distractor B, and choose the key less often than guessers do. A 3PL curve can't dip. Lower the key's share to 0.1 and its floor falls below chance, like the items below chance in [Guessing and priors](guessing-priors.qmd).
+
+The multiple-choice model isn't in `mirt`. `mirt` does fit the **nested logit model** of [Suh and Bolt (2010)](https://doi.org/10.1007/s11336-010-9163-7), which splits a response in two: whether the respondent chose the key, from a 2PL (or a 3PL, with a floor), and, if not, which distractor, from a nominal model. The key's curve is then a 2PL, rising everywhere, and the distractors add their information below it. The nested logit suits scores that should stay on a 2PL or 3PL scale; Bock's model suits a first look at items, since it assumes nothing about the key; the multiple-choice model suits tests on which many respondents sit near chance.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under Thissen and Steinberg's multiple-choice model, what is the probability of choosing the key for a respondent far below every item?",
+  options: [
+    {text: "$\\delta_{\\text{key}}$, the share of don't-knows who choose it, which is estimated", correct: true, why: "At the bottom the don't-know category takes over, and its respondents are spread over the options in proportions $\\delta_k$. Nothing forces $\\delta_{\\text{key}} = 1/4$."},
+    {text: "$1/4$ on a four-option item", correct: false, why: "That is the assumption behind a floor fixed at chance. The multiple-choice model estimates the share, and it can be above or below 1/4."},
+    {text: "0, because the option with the smallest slope takes over", correct: false, why: "That is Bock's nominal model. The don't-know category is what the multiple-choice model adds to change this."}
+  ]
+})
+```
+
+### Nominal and ordinal are two ends of one range
+
+Bock's model assumes no order. Give option $k$ the slope $a \cdot k$ and it becomes the GPCM, with the categories ordered in advance (problem 1; [Thissen & Steinberg, 1986](https://doi.org/10.1007/BF02295596)). Between the two ends, the fitted slopes of a nominal model say how ordered the categories are: a Likert item whose slopes come out in the order of its categories behaves as ordinal, and one whose neighbouring categories share a slope is using fewer categories than it offers. [Nalbandyan, Gilbert, Franco and Domingue (2024)](https://doi.org/10.31234/osf.io/zbv8f), a preprint, use nominal fits this way to ask how ordered the categories of rating scales are. The order of categories, like the order of options, is something the data can check.
+
+## Simulate
+
+The code below simulates 1,000 respondents answering 20 four-option items from the nominal model. On each item two distractors fall with $\theta$, one is flat (it draws respondents with partial knowledge), and the key rises. It fits the 2PL to the 0/1 scores and the nominal model to the options chosen, and compares both with the true $\theta$, overall and in the bottom and top thirds. The first run takes 20–30 seconds while R and `mirt` load.
+
+With the seed as written, the nominal model recovers $\theta$ a little better overall (correlations of 0.946 against 0.929) and more clearly in the bottom third (0.778 against 0.677), while in the top third the RMSEs are close (0.331 against 0.346). Set `partial <- -1`, so that every distractor falls alike, and the advantage vanishes (0.670 against 0.664 in the bottom third). Try `np <- 300` to see how noisy the option slopes become.
+
+```{webr}
+{{< include code/nominal-sim.R >}}
+```
+
+[Download this code](code/nominal-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/nominal-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### The RMET's wrong words
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd): the data say little about $c$ when few respondents sit near chance. On the RMET, 84 of 17,680 respondents (0.48%) answered 9 or fewer of the 36 items correctly, and the 3PL's median lower asymptote was 0.01 although chance is 0.25.
+:::
+
+Our main example is [wilmer-rmet-normative-data-set-2022](https://itemresponsewarehouse.org/tables/wilmer-rmet-normative-data-set-2022/), the normative sample of the Reading the Mind in the Eyes Test released by [Kim et al. (2024)](https://doi.org/10.3758/s13428-023-02323-x), used again on purpose: [From the 1PL to the 4PL](1pl-to-4pl.qmd) scored it 0/1, and here we ask which wrong word each respondent chose. Each item shows a photograph of the eyes of a face and offers four words for what the person is thinking or feeling ([Baron-Cohen et al., 2001](https://doi.org/10.1111/1469-7610.00715)); the IRW has the word chosen, not the photographs. For item 14 they are *accusing* (keyed), *irritated*, *disappointed* and *depressed*, the four listed for that item in Baron-Cohen et al.'s Appendix A ([2001, p. 248](https://doi.org/10.1111/1469-7610.00715)). Its job is to show what the distractors add on an easy test with almost nobody near chance. [Download the code](code/nominal-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
+
+```{r fetch-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+All 17,680 respondents chose a word on every item. The key comes last in each item's words, which sets the direction of $\theta$ in `mirt`'s nominal model.
+
+```{r fit-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The nominal model's $\theta$ correlates 0.96 with the number correct. Of the 108 distractors, 70 fall across the whole range from $\theta = -3$ to 3, 38 peak inside it, and none rises to the top. Item 14's *irritated* is the typical peak: it draws 20% at $\theta = -3$, peaks near $-2.2$ and falls to 2% at $\theta = 3$, while *depressed* and *disappointed* draw 31% each at the bottom and almost nobody at the top. Item 25 is the exception. Its keyed word is *interested*, and *incredulous* draws 17% at $\theta = -3$, 22% at 0 and 23% at 3, peaking at 2.35. Among the ablest respondents, almost a quarter read that face as incredulous.
+
+```{r curves-rmet}
+#| echo: true
+#| code-fold: show
+#| fig-width: 8
+#| fig-height: 3.8
+```
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The nominal model knows which wrong word each respondent chose; the 2PL knows only right or wrong. For whom will the nominal model's test information be higher?",
+  choices: ["Respondents above average (θ > 0)", "Respondents below average (θ < 0)", "Everyone, by about the same amount"],
+  answer: "Respondents below average (θ < 0)",
+  reveal: "At θ = −2 the nominal model gives 7.2 and the 2PL 4.1; at θ = 0, 3.5 against 3.3; above that the two are within 0.1. The wrong words are informative about the respondents who choose them. Check the output below."
+})
+```
+
+```{r info-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+Below the middle the options add a lot: 7.2 against 4.1 at $\theta = -2$, and 6.9 against 3.1 at $-3$. From $\theta = 0$ up the two are within 0.2 (each fit sets its own scale, so the comparison is close rather than exact). On a test this easy the wrong words inform only about the minority who choose them.
+
+Do the respondents near chance choose at random?
+
+```{r floor-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+Not quite. For the 84 respondents at or below chance, the median item's key draws 20% of them, its most popular distractor 33% and its least popular 18%, where random choice would give 25% each. Among all wrong answers, the most popular distractor takes a median of 54% (37% to 71% across items), against a third if wrong answers were random. The low lower asymptotes of [From the 1PL to the 4PL](1pl-to-4pl.qmd) don't mean that nobody guesses. They mean that almost nobody sits near chance, and that those who miss an item seldom miss it at random.
+
+```{r nrm-rmet}
+#| echo: true
+#| code-fold: show
+```
+
+The nested logit model has the same number of parameters (216) and fits slightly worse by AIC (242,884 against 242,847): the keyed curves gain little from being free to bend. Its keyed curves stay within 0.014 of the 2PL fitted to the 0/1 scores, and its test information sits between the two, 5.7 at $\theta = -2$.
+
+### A residency exam
+
+For contrast, [borges_brazil_residency_2024_pbt](https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_pbt/): 100 four-option items (A–D) from the paper-based version of a medical residency exam at a hospital in Brazil, taken by 1,994 applicants ([Borges et al., 2024](https://doi.org/10.3352/jeehp.2024.21.32); the data are released under CC0). Its job is to show a harder test, on which a few keyed answers behave unlike the rest. The `text` column holds the option marked, and we take the key from `resp`.
+
+```{r fetch-borges}
+#| echo: true
+#| code-fold: show
+```
+
+There are 133 responses recorded as `_` or `X` rather than an option, from 80 applicants; we keep the 1,914 with an option on every item. Nineteen items have item-rest correlations below 0.1 and four below 0, item 21 lowest at $-0.061$.
+
+```{r fit-borges}
+#| echo: true
+#| code-fold: show
+```
+
+On this test the options add more below the middle: 19.9 against 9.1 at $\theta = -2$, and 16.9 against 11.1 at $-1$. The two meet near $\theta = 1$ (6.1 against 5.7).
+
+```{r item21-borges}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+Ten distractors rise by at least 0.2 from $\theta = -3$ to 3, and the four items with negative item-rest correlations (21, 32, 78 and 95) are all among them. Item 21 is the widget's item. Its key, A, was marked by 841 applicants and C by 798; C's curve climbs from 0.03 to 0.73 while A's peaks and falls. The 0/1 analysis shows a slightly negative item-rest correlation; the option curves say which answer the strongest applicants chose instead. Whether C is a defensible second answer, or the key needs checking, is a question for the exam's authors, who know the item; the data can raise it but not settle it. These are four items out of 100.
+
+So what would I do with a multiple-choice test? Keep the option chosen, fit the nominal model, and read the option curves before scoring anything 0/1. On the RMET they show that wrong answers are rarely random and add information where the 0/1 scores have least; on the residency exam they turn four items with low slopes into four questions about specific options. For reported scores I'd still usually fit a 2PL, or the nested logit if the low end matters, because the gain from the distractors sits with the weakest respondents.
 
 ## Problems
 
+1. **The GPCM inside the nominal model.** Show that Bock's nominal model with option slopes $a_k = a \cdot k$ ($k = 0, \dots, K$) and suitably chosen intercepts is the GPCM, and find the intercepts in terms of the step difficulties $b_v$. What does it mean if a fitted nominal model's slopes are not in the order of the categories?
+2. **Real data with a twist: are Likert categories ordered?** Fit the nominal model to the ten five-category items of `bfi_goldberg_1992_conscientiousness` (reverse-key first). Are the estimated slopes in the order of the categories? Where two neighbouring categories share a slope, what would merging them cost?
+3. **Judgment.** On RMET item 25, *incredulous* draws almost a quarter of the ablest respondents. You maintain the test. Would you rewrite the item, keep it, or give credit for *incredulous*? What evidence would change your mind?
+4. **Design.** You are writing four-option items on which each distractor diagnoses a different misconception. What would the option curves look like if the design worked, and how would you check it in pilot data?
+5. **Real data: paper and computer.** The same hospital's computer-based exam is `borges_brazil_residency_2024_cbt` (120 items; the option is in `resp_raw`). Fit the nominal model and repeat this lesson's analysis. Do rising distractors show up there too, and do the two tests' distractors add information in the same place?
+6. **Challenge (open): credit for a good wrong answer.** The nominal model can give a respondent who chose a partial-knowledge distractor a higher $\theta$ than one who chose a falling distractor. Should a reported score do that? Think about what the test promises, about blanks (dropped here), and about distractors that behave differently across groups ([Suh & Bolt, 2011](https://doi.org/10.1111/j.1745-3984.2011.00139.x)). I don't know of a general answer.
+
+```{r}
+#| output: asis
+ask_claude("nominal", "It covers Bock's nominal response model for multiple-choice options, reading option characteristic curves (keys, falling distractors, partial-knowledge distractors, rising distractors), the information distractors add below an item's difficulty, Thissen and Steinberg's multiple-choice model with a latent don't-know category, Suh and Bolt's nested logit model, and the nominal-ordinal continuum, with mirt analyses of the Reading the Mind in the Eyes Test and a Brazilian medical residency exam.")
+```
+
 ## Going further
 
+- Bock, R. D. (1972). Estimating item parameters and latent ability when responses are scored in two or more nominal categories. *Psychometrika*, 37(1), 29–51. <https://doi.org/10.1007/bf02291411>. The nominal response model.
+- Thissen, D., & Steinberg, L. (1984). A response model for multiple choice items. *Psychometrika*, 49(4), 501–519. <https://doi.org/10.1007/bf02302588>. The multiple-choice model and its "don't know" category.
+- Thissen, D., Steinberg, L., & Fitzpatrick, A. R. (1989). Multiple-choice models: The distractors are also part of the item. *Journal of Educational Measurement*, 26(2), 161–176. <https://doi.org/10.1111/j.1745-3984.1989.tb00326.x>. Reading option curves to understand items.
+- Thissen, D., Cai, L., & Bock, R. D. (2010). The nominal categories item response model. In M. L. Nering & R. Ostini (Eds.), *Handbook of polytomous item response theory models*. Routledge. <https://doi.org/10.4324/9780203861264.ch3>. The model's parameterizations, and its relation to the ordinal models.
 - Thissen, D., & Cai, L. (2016). Nominal categories models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 51–73). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the nominal categories model.
+- Suh, Y., & Bolt, D. M. (2010). Nested logit models for multiple-choice item response data. *Psychometrika*, 75(3), 454–473. <https://doi.org/10.1007/s11336-010-9163-7>. The nested logit model that `mirt` fits as `2PLNRM`.
+- Suh, Y., & Bolt, D. M. (2011). A nested logit approach for investigating distractors as causes of differential item functioning. *Journal of Educational Measurement*, 48(2), 188–205. <https://doi.org/10.1111/j.1745-3984.2011.00139.x>. Distractors and DIF (problem 6).
+- Thissen, D., & Steinberg, L. (1986). A taxonomy of item response models. *Psychometrika*, 51(4), 567–577. <https://doi.org/10.1007/BF02295596>. Where the nominal and ordinal models sit relative to one another.
+- Gierl, M. J., Bulut, O., Guo, Q., & Zhang, X. (2017). Developing, analyzing, and using distractors for multiple-choice tests in education: A comprehensive review. *Review of Educational Research*, 87(6), 1082–1116. <https://doi.org/10.3102/0034654317726529>. Writing and analysing distractors.
+- Nalbandyan, R., Gilbert, J. B., Franco, V. R., & Domingue, B. W. (2024). Signposts on the path from nominal to ordinal scales. PsyArXiv. <https://doi.org/10.31234/osf.io/zbv8f>. How ordered rating-scale categories are, from nominal model fits (a preprint).
+- Baron-Cohen, S., Wheelwright, S., Hill, J., Raste, Y., & Plumb, I. (2001). The "Reading the Mind in the Eyes" Test revised version: A study with normal adults, and adults with Asperger syndrome or high-functioning autism. *Journal of Child Psychology and Psychiatry*, 42(2), 241–251. <https://doi.org/10.1111/1469-7610.00715>. The RMET; Appendix A lists every item's four words.
+- Kim, H. A., Kaduthodil, J., Strong, R. W., Germine, L. T., Cohan, S., & Wilmer, J. B. (2024). Multiracial Reading the Mind in the Eyes Test (MRMET): An inclusive version of an influential measure. *Behavior Research Methods*, 56(6), 5900–5917. <https://doi.org/10.3758/s13428-023-02323-x>. The source of the RMET normative data.
+- Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro, P. S., Fonseca, P. C., et al. (2024). Increased accessibility of computer-based testing for residency application to a hospital in Brazil with item characteristics comparable to paper-based testing: A psychometric study. *Journal of Educational Evaluation for Health Professions*, 21, 32. <https://doi.org/10.3352/jeehp.2024.21.32>. The source of the residency exam data, paper and computer.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package, with the `nominal` and `2PLNRM` item types.
 
 ```{r}
 #| output: asis
@@ -31,3 +421,8 @@ data_sources("nominal")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 9 (slides c9, 15–16) and the code in `ben-domingue/252`: `c9/nominal.R`. No problem set covers the lesson.
+- **Timing:** the core ideas and widgets take about 50 minutes; the real-data section works as a 30-minute lab. Locally, the RMET fits take seconds and the residency exam's nominal fit about a minute.
+- **Changed from 252:** `c9/nominal.R` fits the nominal model to `preference_inventory`, which has no tokenless CSV; the lesson uses the RMET (reused from [From the 1PL to the 4PL](1pl-to-4pl.qmd), recorded in `lessons.yml`) and the residency exam, both of which keep the option chosen in the standard IRW table. The multiple-choice model isn't in `mirt`, so it is taught with a widget, and `mirt`'s nested logit model is the software example. RMET items are photographs, which the IRW doesn't hold; the lesson names the words (Baron-Cohen et al., 2001, Appendix A) and shows no images.
+- **Held back:** distractor-level DIF (a pointer in problem 6); reporting scores from the nominal model, and whether wrong answers should earn credit (problem 6); the ordinal–nominal continuum across the IRW, a deep-dive candidate (#4).
+- **Solutions:** held back in `solutions/nominal.qmd` (not published).
