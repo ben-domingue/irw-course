@@ -44,8 +44,8 @@ By the end of this lesson you should be able to:
 :::
 
 Times are positive, and a few are very long (someone rereads a passage, or looks away), so their distribution has a long right tail, which taking logs removes (see the widget). The **lognormal model** ([van der Linden, 2006](https://doi.org/10.3102/10769986031002181)) writes
-$$\log t_{ij} = \beta_i - \tau_j + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim N(0, \sigma^2),$$
-where $\beta_i$ is item $i$'s **time intensity** (how long it takes, in log seconds) and $\tau_j$ is respondent $j$'s **speed**. (In [Explanatory item response models](explanatory-irt.qmd) $\beta_i$ was an easiness; we keep van der Linden's notation, and accuracy keeps $b_i$.) Van der Linden gives each item its own residual SD, but reports that making them equal cost little fit, so we use one $\sigma$. With items and respondents random, this is a linear mixed model, one line in `lme4` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)):
+$$\log t_{ij} = \kappa_i - \tau_j + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim N(0, \sigma^2),$$
+where $\kappa_i$ is item $i$'s **time intensity** (how long it takes, in log seconds) and $\tau_j$ is respondent $j$'s **speed**. (Van der Linden writes this parameter as $\beta_i$. We use $\kappa_i$ because $\beta$ means a regression coefficient in this course, such as the easiness in [Explanatory item response models](explanatory-irt.qmd).) Van der Linden gives each item its own residual SD, but reports that making them equal cost little fit, so we use one $\sigma$. With items and respondents random, this is a linear mixed model, one line in `lme4` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)):
 
 ```r
 lmer(log(rt) ~ 1 + (1 | id) + (1 | item), data = long_table)
@@ -101,7 +101,7 @@ quiz({
 
 Now join the halves. Accuracy gets an item response model, here the Rasch model,
 $$\text{logit}\Pr(x_{ij} = 1) = \theta_j - b_i,$$
-and time gets the lognormal model. At a second level, each respondent's $(\theta_j, \tau_j)$ is drawn from a bivariate normal distribution with correlation $\rho$, and each item's $(b_i, \beta_i)$ from another. This is the **hierarchical model** for speed and accuracy ([van der Linden, 2007](https://doi.org/10.1007/s11336-006-1478-z); [Klein Entink, Fox & van der Linden, 2009](https://doi.org/10.1007/s11336-008-9075-y)), which the R package `LNIRT` fits jointly ([Fox, Klotzke & Simsek, 2023](https://doi.org/10.7717/peerj-cs.1232)).
+and time gets the lognormal model. At a second level, each respondent's $(\theta_j, \tau_j)$ is drawn from a bivariate normal distribution with correlation $\rho$, and each item's $(b_i, \kappa_i)$ from another. This is the **hierarchical model** for speed and accuracy ([van der Linden, 2007](https://doi.org/10.1007/s11336-006-1478-z); [Klein Entink, Fox & van der Linden, 2009](https://doi.org/10.1007/s11336-008-9075-y)), which the R package `LNIRT` fits jointly ([Fox, Klotzke & Simsek, 2023](https://doi.org/10.7717/peerj-cs.1232)).
 
 What does it buy? Estimates of $\rho$ (are abler respondents faster?) and of how difficulty and time intensity go together; and, through $\rho$, times that sharpen the estimate of $\theta$. Both rest on two assumptions, which we take as questions for the data:
 
@@ -118,7 +118,7 @@ Push people to go faster and they make more errors: the **speed–accuracy trade
 **Recall** from [Item response data and the IRW](irw-data.qmd): in the brightness experiment of `rr98_accuracy`, errors were slower than correct responses (median 0.65 s against 0.56 s), but within a brightness level by only about 0.02 s, because errors crowd into the hard levels, which are slow for every response.
 :::
 
-The pooled comparison mixed a difference *between items* (hard conditions are slow and error-prone) with one *within* them. In the hierarchical model the item-level part is the correlation of $b$ and $\beta$, and the person-level part is $\rho$. Neither is the tradeoff.
+The pooled comparison mixed a difference *between items* (hard conditions are slow and error-prone) with one *within* them. In the hierarchical model the item-level part is the correlation of $b$ and $\kappa$, and the person-level part is $\rho$. Neither is the tradeoff.
 
 #### Try it: between people and within them
 
@@ -164,12 +164,12 @@ quiz({
 ::: {.callout-note collapse="true"}
 ## Go deeper: what the pooled slope estimates under the hierarchical model
 
-**Assumptions:** the hierarchical model with conditional independence: $\text{logit}\Pr(x_{ij} = 1) = \theta_j - b_i$ and $\log t_{ij} = \beta_i - \tau_j + \varepsilon_{ij}$, with $\varepsilon_{ij} \sim N(0, \sigma^2)$ independent of everything else; $(\theta_j, \tau_j)$ bivariate normal with correlation $\rho$ and SDs $\sigma_\theta, \sigma_\tau$; $(b_i, \beta_i)$ bivariate normal with correlation $\rho_I$ and SDs $\sigma_b, \sigma_\beta$; persons and items independent.
+**Assumptions:** the hierarchical model with conditional independence: $\text{logit}\Pr(x_{ij} = 1) = \theta_j - b_i$ and $\log t_{ij} = \kappa_i - \tau_j + \varepsilon_{ij}$, with $\varepsilon_{ij} \sim N(0, \sigma^2)$ independent of everything else; $(\theta_j, \tau_j)$ bivariate normal with correlation $\rho$ and SDs $\sigma_\theta, \sigma_\tau$; $(b_i, \kappa_i)$ bivariate normal with correlation $\rho_I$ and SDs $\sigma_b, \sigma_\kappa$; persons and items independent.
 
 Condition on respondent $j$ and item $i$. Then $\log t_{ij}$ varies only through $\varepsilon_{ij}$, and $\Pr(x_{ij} = 1 \mid \varepsilon_{ij}, j, i) = \text{logistic}(\theta_j - b_i)$ doesn't involve $\varepsilon_{ij}$. So a regression of $x$ on the residual $\varepsilon$ with person and item effects has slope zero. The within-person slope is identified, and conditional independence says it is 0.
 
 Now pool. Across all responses, log time and the logit of accuracy covary through the random effects:
-$$\text{Cov}(\log t_{ij},\ \theta_j - b_i) = \text{Cov}(-\tau_j, \theta_j) + \text{Cov}(\beta_i, -b_i) = -\rho\,\sigma_\tau\sigma_\theta - \rho_I\,\sigma_\beta\sigma_b.$$
+$$\text{Cov}(\log t_{ij},\ \theta_j - b_i) = \text{Cov}(-\tau_j, \theta_j) + \text{Cov}(\kappa_i, -b_i) = -\rho\,\sigma_\tau\sigma_\theta - \rho_I\,\sigma_\kappa\sigma_b.$$
 A pooled regression of accuracy on log time therefore has a slope whose sign depends on $\rho$ and $\rho_I$, even though no one's accuracy depends on their time. With $\rho > 0$ (abler respondents faster) and $\rho_I > 0$ (harder items slower), both terms are negative and slow responses look less accurate; with $\rho < 0$ the two terms pull in opposite directions. The Simulate section shows a pooled slope of −0.55 when the within-person slope is zero.
 
 What $\rho$ is not: the effect of speed on accuracy. It describes a population of respondents. A within-person tradeoff concerns one respondent at two speeds, which experiments produce by instruction or deadline ([Heitz, 2014](https://doi.org/10.3389/fnins.2014.00150)). Neither quantity constrains the other, as the widget shows.
@@ -177,7 +177,7 @@ What $\rho$ is not: the effect of speed on accuracy. It describes a population o
 
 ### Does conditional independence hold? The conditional accuracy function
 
-To see the within-person relation, keep the lognormal model's residual, $\hat\varepsilon_{ij} = \log t_{ij} - \hat\beta_i + \hat\tau_j$: how much slower (positive) or faster (negative) than expected this respondent was on this item. Plot accuracy against it, by deciles. This is a **conditional accuracy function** ([Heitz, 2014](https://doi.org/10.3389/fnins.2014.00150)). Under conditional independence it is flat. [Domingue et al. (2022)](https://doi.org/10.3102/10769986221099906) asked the question of 29 datasets from cognitive tasks and found no single shape: a respondent's marginal increases in time went with higher accuracy in some and lower in others. They also found time a weak predictor of accuracy.
+To see the within-person relation, keep the lognormal model's residual, $\hat\varepsilon_{ij} = \log t_{ij} - \hat\kappa_i + \hat\tau_j$: how much slower (positive) or faster (negative) than expected this respondent was on this item. Plot accuracy against it, by deciles. This is a **conditional accuracy function** ([Heitz, 2014](https://doi.org/10.3389/fnins.2014.00150)). Under conditional independence it is flat. [Domingue et al. (2022)](https://doi.org/10.3102/10769986221099906) asked the question of 29 datasets from cognitive tasks and found no single shape: a respondent's marginal increases in time went with higher accuracy in some and lower in others. They also found time a weak predictor of accuracy.
 
 #### Try it: shapes of the conditional accuracy function
 
@@ -395,7 +395,7 @@ So in a typical table response time adds to prediction about half what the 2PL d
 
 ## Problems
 
-1. **Medians and means.** Under the lognormal model, show that the median of $t_{ij}$ is $\exp(\beta_i - \tau_j)$ and that the mean is larger by the factor $\exp(\sigma^2/2)$. With $\sigma = 0.5$, how much larger? Why do response-time summaries report medians?
+1. **Medians and means.** Under the lognormal model, show that the median of $t_{ij}$ is $\exp(\kappa_i - \tau_j)$ and that the mean is larger by the factor $\exp(\sigma^2/2)$. With $\sigma = 0.5$, how much larger? Why do response-time summaries report medians?
 2. **Which slope? (PS9#1)** On `roar_lexical`, fit `glmer(resp ~ lrt + (1 | item) + (1 | id))` with `lrt` the raw log time. Then replace `lrt` with log time centred within person and item. Which slope answers the speed–accuracy question? Add a squared term: what does it show?
 3. **Flagged respondents.** `credentialform_lnirt` marks 46 respondents whom the test vendor suspected of inappropriate behaviour (`Flagged`). Compare their accuracy and speed with everyone else's. What would preknowledge of some items leave in the data that averages can't show, and how would you look for it?
 4. **A speed score?** Should a program report estimated speed $\hat\tau_j$ beside $\hat\theta_j$? Argue both sides from the four tables. What would the score mean on the licensure exam, and on Raven's matrices?
@@ -422,7 +422,7 @@ if (!is.null(dd)) {
   s <- dd$summary[order(dd$summary$r_theta_speed), ]
   print(data.frame(table = s$table, respondents = s$n_resp, items = s$n_items,
                    median_s = signif(s$median_rt, 2), r_theta_speed = round(s$r_theta_speed, 2),
-                   r_b_beta = round(s$r_b_beta, 2), caf_fastest = round(s$caf_fastest, 2),
+                   r_b_kappa = round(s$r_b_kappa, 2), caf_fastest = round(s$caf_fastest, 2),
                    caf_slowest = round(s$caf_slowest, 2), caf_slope = round(s$caf_slope, 2),
                    imv_linear = round(s$imv_linear, 4), imv_spline = round(s$imv_spline, 4)),
         row.names = FALSE)

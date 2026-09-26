@@ -34,7 +34,7 @@ hist(cf$lrt, breaks = 60, col = "#2780e3", border = NA, main = "",
 par(op)
 
 ## ---- time-cf
-# The lognormal model with crossed random effects: log t = beta_i - tau_j + e.
+# The lognormal model with crossed random effects: log t = kappa_i - tau_j + e.
 # lme4 writes it as an intercept plus an item effect (time intensity) and a
 # respondent effect (minus speed).
 m_time <- lmer(lrt ~ 1 + (1 | id) + (1 | item), cf)
@@ -52,12 +52,12 @@ m_acc <- glmer(resp ~ 1 + (1 | id) + (1 | item), cf, binomial, nAGQ = 0)
 person_item <- function(m_time, m_acc) {
   tau <- setNames(-ranef(m_time)$id[, 1], rownames(ranef(m_time)$id))
   theta <- setNames(ranef(m_acc)$id[, 1], rownames(ranef(m_acc)$id))
-  beta <- setNames(ranef(m_time)$item[, 1], rownames(ranef(m_time)$item))
+  kappa <- setNames(ranef(m_time)$item[, 1], rownames(ranef(m_time)$item))
   b <- setNames(-ranef(m_acc)$item[, 1], rownames(ranef(m_acc)$item))
-  list(tau = tau[names(theta)], theta = theta, beta = beta[names(b)], b = b)
+  list(tau = tau[names(theta)], theta = theta, kappa = kappa[names(b)], b = b)
 }
 pi_cf <- person_item(m_time, m_acc)
-round(c(r_theta_speed = cor(pi_cf$theta, pi_cf$tau), r_b_beta = cor(pi_cf$b, pi_cf$beta)), 2)
+round(c(r_theta_speed = cor(pi_cf$theta, pi_cf$tau), r_b_kappa = cor(pi_cf$b, pi_cf$kappa)), 2)
 
 ## ---- caf-cf
 # The conditional accuracy function. The residual of the time model is how much
@@ -99,7 +99,7 @@ round(c(respondents = length(unique(roar$id)), items = length(unique(roar$item))
 t_roar <- lmer(lrt ~ 1 + (1 | id) + (1 | item), roar)
 a_roar <- glmer(resp ~ 1 + (1 | id) + (1 | item), roar, binomial, nAGQ = 0)
 pi_roar <- person_item(t_roar, a_roar)
-round(c(r_theta_speed = cor(pi_roar$theta, pi_roar$tau), r_b_beta = cor(pi_roar$b, pi_roar$beta)), 2)
+round(c(r_theta_speed = cor(pi_roar$theta, pi_roar$tau), r_b_kappa = cor(pi_roar$b, pi_roar$kappa)), 2)
 caf_roar <- caf(roar, t_roar)
 caf_roar
 # One speed for real words and made-up words?
@@ -140,7 +140,7 @@ fits <- lapply(list(timed = timed, untimed = untimed), function(d) {
   mt <- lmer(lrt ~ 1 + (1 | id) + (1 | item), d)
   ma <- glmer(resp ~ 1 + (1 | id) + (1 | item), d, binomial, nAGQ = 0)
   p <- person_item(mt, ma)
-  list(r = round(c(r_theta_speed = cor(p$theta, p$tau), r_b_beta = cor(p$b, p$beta)), 2),
+  list(r = round(c(r_theta_speed = cor(p$theta, p$tau), r_b_kappa = cor(p$b, p$kappa)), 2),
        caf = caf(d, mt))
 })
 fits

@@ -9,10 +9,10 @@
 # For each table, the lesson's own analysis (lme4; Bates, Maechler, Bolker & Walker,
 # 2015):
 #   - log time:  lmer(log(rt) ~ 1 + (1 | id) + (1 | item)); person speed tau is minus
-#     the respondent effect, item time intensity beta the item effect;
+#     the respondent effect, item time intensity kappa the item effect;
 #   - accuracy:  glmer(resp ~ 1 + (1 | id) + (1 | item), binomial); theta is the
 #     respondent effect, difficulty b minus the item effect;
-#   - the correlations of the estimates: theta with tau, b with beta;
+#   - the correlations of the estimates: theta with tau, b with kappa;
 #   - the conditional accuracy function: accuracy by decile of residual log time
 #     (log time minus the person and item effects), and the slope of accuracy on
 #     that residual with person and item effects in the model;
@@ -46,7 +46,7 @@ candidate_tables <- suppressMessages(irw_filter(
 n_all_candidates <- length(candidate_tables)
 
 # Known-good tables for the pilot: the lesson's main table, whose answers the lesson
-# shows (theta-speed r = 0.30, b-beta r = 0.48, accuracy falling from 0.83 to 0.56
+# shows (theta-speed r = 0.30, b-kappa r = 0.48, accuracy falling from 0.83 to 0.56
 # across deciles of residual time), and the chess test from earlier lessons.
 known_good <- c("credentialform_lnirt", "chess_lnirt")
 if (PILOT) {
@@ -99,7 +99,7 @@ fit_table <- function(tab) {
   m_a <- glmer(resp ~ 1 + (1 | id) + (1 | item), d, binomial, nAGQ = 0)
   tau <- -ranef(m_t)$id[, 1]; names(tau) <- rownames(ranef(m_t)$id)
   th <- ranef(m_a)$id[, 1]; names(th) <- rownames(ranef(m_a)$id)
-  beta <- ranef(m_t)$item[, 1]; names(beta) <- rownames(ranef(m_t)$item)
+  kappa <- ranef(m_t)$item[, 1]; names(kappa) <- rownames(ranef(m_t)$item)
   b <- -ranef(m_a)$item[, 1]; names(b) <- rownames(ranef(m_a)$item)
   d$res <- residuals(m_t)
   dec <- cut(d$res, quantile(d$res, 0:10 / 10), include.lowest = TRUE, labels = FALSE)
@@ -118,7 +118,7 @@ fit_table <- function(tab) {
   out <- list(
     table = tab, n_resp = nlevels(d$id), n_items = nlevels(d$item), n_obs = nrow(d),
     median_rt = median(d$rt), accuracy = mean(d$resp),
-    r_theta_speed = cor(th, tau[names(th)]), r_b_beta = cor(b, beta[names(b)]),
+    r_theta_speed = cor(th, tau[names(th)]), r_b_kappa = cor(b, kappa[names(b)]),
     sd_speed = attr(VarCorr(m_t)$id, "stddev"), sd_theta = attr(VarCorr(m_a)$id, "stddev"),
     caf = as.numeric(tapply(d$resp, dec, mean)),
     caf_slope = unname(fixef(m_c)["res"]),
@@ -147,7 +147,7 @@ for (tab in run_tables) {
 summary <- do.call(rbind, lapply(fits, function(f) data.frame(
   table = f$table, n_resp = f$n_resp, n_items = f$n_items, n_obs = f$n_obs,
   median_rt = f$median_rt, accuracy = f$accuracy,
-  r_theta_speed = f$r_theta_speed, r_b_beta = f$r_b_beta,
+  r_theta_speed = f$r_theta_speed, r_b_kappa = f$r_b_kappa,
   caf_fastest = f$caf[1], caf_middle = mean(f$caf[5:6]), caf_slowest = f$caf[10],
   caf_slope = f$caf_slope, imv_linear = f$imv_linear, imv_spline = f$imv_spline,
   seconds = f$seconds)))
