@@ -312,7 +312,7 @@ lessons:
     origin: {slides: [c9], ps: [], code: [c9/nominal.R]}
     tables: [wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
     reuses: [wilmer-rmet-normative-data-set-2022]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: response-time
