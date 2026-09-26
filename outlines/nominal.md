@@ -2,7 +2,17 @@
 
 # Nominal response and multiple-choice models (`nominal`)
 
-Module: beyond · Prereqs: polytomous, guessing-priors · Extension · Status: outline
+Module: beyond · Prereqs: polytomous, guessing-priors · Extension · Status: draft (#80)
+
+
+**Drafted 09-25 (#80). What changed from this outline:**
+- Numbers recomputed on the pinned tables (RMET v22, the version `1pl-to-4pl` uses; Borges v60). RMET, 4,000 respondents: test information at θ = −2 is 7.2 (nominal) vs 4.1 (2PL), within 0.2 from 0 up; 38 of 108 distractors peak inside (−3, 3), 70 fall, none rises to the top. Item 14's *irritated* falls with θ (0.20 → 0.02, peak at −2.2), not rises as outlined; the rising RMET distractor is item 25's *incredulous* (0.17 → 0.23, peak 2.35). The 3PL median $c$ is 0.01 (as `1pl-to-4pl` and `guessing-priors` say), not 0.05.
+- Added: respondents at or below chance don't choose at random (median key 0.20, top distractor 0.33, bottom 0.18); the most popular distractor takes a median 54% of wrong answers. Pays `lower-asymptote-identification` and the proposed `chance-floor` thread.
+- Borges numbers match the outline (information 19.9 vs 9.1 at θ = −2; 19 items with item-rest r < 0.1; item 21's C 0.03 → 0.73). New: the four items with negative item-rest r (21, 32, 78, 95) are all among the ten with a rising distractor. The "align the sign" step is not needed: with the key coded last, the nominal θ correlates 0.96 with the sum score.
+- Intercept written $\gamma_k$ (notation.md has $c$ for the lower asymptote); proposed for notation.md in the PR.
+- Widgets: option curves; which is the key (Borges item 21); information with/without distractors (driven by the first widget's item); the MC model's don't-know category. Predict-then-check as planned.
+- Simulate as planned (seed 80): bottom-third correlation 0.778 (nominal) vs 0.677 (2PL).
+- Problem tables: `himmelstein-berlin_numeracy-2025` dropped (option-level data not checked); problem 4 shortened.
 
 ## Core ideas
 
