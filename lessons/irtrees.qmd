@@ -8,19 +8,390 @@ source("_course.R")
 lesson_header("irtrees")
 ```
 
+```{webr}
+#| context: setup
+webr::install("lme4", quiet = TRUE)
+suppressPackageStartupMessages(library(lme4))
+options(mc.cores = 1)
+```
+
+```{ojs}
+//| echo: false
+import {grid, palette} from "./widgets/irt.js"
+import {trees, catProbsTree, expected15, treeLayout} from "./widgets/irtrees.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+What does a 3 mean on a scale from 1 (disagree) to 5 (agree)? The graded response model reads it as a little more of the trait than a 2. But a respondent may choose the middle because they have no view, or prefer not to commit, and a 5 may say as much about a taste for the ends of a scale as about the trait. An **IRTree** writes the response as a sequence of decisions (take a side? which side? how far?) and gives each its own item response model and, if we want, its own $\theta$. [Models for polytomous responses](polytomous.qmd) split a response into binary questions fixed by the model; a tree chooses the questions to match a process we have in mind, and fitting it is a recoding followed by a `glmer()` fit from [What is an item?](explanatory-irt.qmd). On ten conscientiousness items, leaving the middle and going to the ends turn out to be largely one tendency, which barely tracks conscientiousness.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write a rating as a path through a tree of binary nodes, and its probability as a product along the path;
+- choose a tree's shape (linear or nested) and its abilities (one $\theta$, or one per node), and say which choice gives the sequential model;
+- recode long response data into pseudo-items and fit a tree with `glmer()`;
+- separate content from midpoint and extreme responding, and say what the separation assumes;
+- use a first node for speed or skipping, and say what it protects the content estimate from.
+
 ## Core ideas
 
-## Worked example
+### A response as a sequence of decisions
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Models for polytomous responses](polytomous.qmd): ordinal models split a response into binary questions. The sequential model ([Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)) asks "having reached category $k-1$, does the respondent go on to $k$?", and a response answers only the questions it reaches.
+:::
+
+Nothing requires the questions to follow the order of the categories. [Böckenholt (2012)](https://doi.org/10.1037/a0028111) proposed a tree for a five-point rating that asks three different questions. Does the respondent take a side or choose the middle? Which side? And do they go to its end? Each question is a **node**, and each node gets an item response model. With a Rasch model at every node,
+$$p^{(n)}_{ij} = \Pr(\text{node } n = 1) = \frac{\exp\big(\theta^{(n)}_j - b^{(n)}_i\big)}{1 + \exp\big(\theta^{(n)}_j - b^{(n)}_i\big)}, \qquad n \in \{\text{side}, \text{direction}, \text{extreme}\},$$
+and the probability of a response is the product of the node probabilities along its path. A 4 takes a side, the agree side, and stops short of the end:
+$$\Pr(x_{ij} = 4) = p^{(\text{side})}_{ij}\; p^{(\text{direction})}_{ij}\,\big(1 - p^{(\text{extreme})}_{ij}\big), \qquad \Pr(x_{ij} = 3) = 1 - p^{(\text{side})}_{ij}.$$
+Each response becomes one binary **pseudo-item** per node it reaches; a node it doesn't reach is absent, not a 0 ([De Boeck & Partchev, 2012](https://doi.org/10.18637/jss.v048.c01)).
+
+#### Try it: build a tree
+
+Pick a response and a tree; the highlighted path is the one it takes.
+
+```{ojs}
+//| echo: false
+viewof tb_x = Inputs.radio([1, 2, 3, 4, 5], {value: 4, label: "Response x"})
+viewof tb_kind = Inputs.radio(["Nested (side, direction, extreme)", "Linear (sequential)"], {value: "Nested (side, direction, extreme)", label: "Tree"})
+```
+
+```{ojs}
+//| echo: false
+tb_k = tb_kind.startsWith("Nested") ? "nested" : "linear"
+tb_lay = treeLayout(tb_k, tb_x)
+Plot.plot({
+  width: 700, height: 400, margin: 30,
+  x: {domain: [-0.05, 1.05], axis: null}, y: {domain: [1.05, -0.02], axis: null},
+  marks: [
+    Plot.link(tb_lay.edges, {x1: "x1", y1: "y1", x2: "x2", y2: "y2", stroke: d => d.on ? palette.contrast : palette.rule, strokeWidth: d => d.on ? 3.5 : 1.5}),
+    Plot.text(tb_lay.edges, {x: d => (d.x1 + d.x2) / 2, y: d => (d.y1 + d.y2) / 2, text: "lab", fill: palette.guide, dx: 14, fontSize: 11}),
+    Plot.dot(tb_lay.nodes, {x: "x", y: "y", r: 32, fill: palette.white, stroke: d => d.on ? palette.contrast : palette.main, strokeWidth: 2}),
+    Plot.text(tb_lay.nodes, {x: "x", y: "y", text: "text", fontSize: 10, fill: palette.ink}),
+    Plot.dot(tb_lay.leaves, {x: "x", y: "y", r: 13, fill: d => d.on ? palette.contrast : palette.light}),
+    Plot.text(tb_lay.leaves, {x: "x", y: "y", text: "text", fontSize: 13, fontWeight: "bold", fill: d => d.on ? palette.white : palette.ink})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+tb_rows = trees[tb_k].map(n => ({label: n.label, code: n.code(tb_x)})).filter(n => n.code !== null)
+md`A response of ${tb_x} becomes **${tb_rows.length}** pseudo-item${tb_rows.length > 1 ? "s" : ""}: ${tb_rows.map(n => `"${n.label}" = ${n.code}`).join("; ")}. Its probability is the product of ${tb_rows.length > 1 ? `these ${tb_rows.length} node probabilities, each` : "one node probability,"} taken as P(1) where the code is 1 and 1 − P(1) where it is 0.`
+```
+
+Under the nested tree a 3 is one pseudo-item and every other response three; under the linear tree a 1 is one and a 4 or 5 four. Each response follows exactly one path, so the five probabilities sum to one (problem 1).
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under the nested tree, a respondent answers 2. Which pseudo-items does that response produce?",
+  options: [
+    {text: "Side = 1, direction = 0, extreme = 0", correct: true, why: "A 2 takes a side (not 3), the disagree side, and stops short of the end (not 1)."},
+    {text: "Side = 1, direction = 0", correct: false, why: "Every response that takes a side reaches both the direction and the extreme node; the extreme node is how the tree tells a 2 from a 1."},
+    {text: "Side = 0, direction = 0, extreme = 0", correct: false, why: "Side = 0 means the respondent chose 3, and then the response stops: it never reaches the other two nodes."}
+  ]
+})
+```
+
+### Tree shape and node abilities are choices
+
+Two choices define a tree. Its **shape**: a *linear* tree asks its questions in a chain, as the sequential model does; a *nested* tree branches, so that different responses pass through different nodes, as Böckenholt's does ([De Boeck & Partchev, 2012](https://doi.org/10.18637/jss.v048.c01)). And its **abilities**: one $\theta$ shared by every node, or a correlated $\theta$ per node. A linear tree with one $\theta$ and Rasch steps is Tutz's sequential model. [Jeon and De Boeck (2016)](https://doi.org/10.3758/s13428-015-0631-y) extend trees further, with slopes at each node and more flexible links between nodes and dimensions.
+
+#### Try it: node abilities and the category curves
+
+Ten items have node difficulties $b^{(\text{side})} = -1.2$, $b^{(\text{direction})} = -0.9$ and $b^{(\text{extreme})} = 0.5$, close to the averages of the conscientiousness items below. The horizontal axis is the content $\theta$, the one at the direction node. Set the other two, or tie all three together.
+
+```{ojs}
+//| echo: false
+viewof nc_mode = Inputs.radio(["A θ per node", "One θ for all nodes"], {value: "A θ per node", label: "Abilities"})
+viewof nc_side = Inputs.range([-3, 3], {value: 0, step: 0.1, label: "θ at the side node"})
+viewof nc_ext = Inputs.range([-3, 3], {value: 0, step: 0.1, label: "θ at the extreme node"})
+```
+
+```{ojs}
+//| echo: false
+nc_b = ({side: -1.2, direction: -0.9, extreme: 0.5})
+nc_th = t => nc_mode === "One θ for all nodes" ? {side: t, direction: t, extreme: t} : {side: nc_side, direction: t, extreme: nc_ext}
+nc_cols = [palette.contrast, palette.light, palette.guide, palette.main, palette.ink]
+nc_rows = grid(-4, 4, 161).flatMap(t => catProbsTree(nc_th(t), nc_b).map((p, k) => ({theta: t, p, cat: `x = ${k + 1}`})))
+Plot.plot({
+  width: 700, height: 300, x: {label: "Content θ (direction node)"}, y: {label: "P(x = k)", domain: [0, 1]},
+  color: {legend: true, domain: ["x = 1", "x = 2", "x = 3", "x = 4", "x = 5"], range: nc_cols},
+  marks: [Plot.line(nc_rows, {x: "theta", y: "p", stroke: "cat", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+nc_at = t => catProbsTree(nc_th(t), nc_b)
+md`P(x = 3) at content θ = −2, 0 and 2: **${[-2, 0, 2].map(t => nc_at(t)[2].toFixed(2)).join(", ")}**. P(x = 1 or 5) at the same points: **${[-2, 0, 2].map(t => (nc_at(t)[0] + nc_at(t)[4]).toFixed(2)).join(", ")}**.${nc_mode === "One θ for all nodes" ? " (The side and extreme sliders are ignored: every node uses the content θ.)" : ""}`
+```
+
+With a $\theta$ per node, the curve for 3 is flat (0.23 at the defaults): choosing the middle depends only on the side node. Lower that $\theta$ and the curve rises everywhere; raise the extreme node's and the 1s and 5s take over from the 2s and 4s. Now tie the nodes together: the respondents lowest on the trait choose 3 most (0.69 at $\theta = -2$), because the $\theta$ that pushes them toward disagreeing also keeps them from taking a side. A shared $\theta$ suits a linear tree, whose steps all move up the scale; in a nested tree it forces different questions onto one dimension.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A linear tree for a 1–5 rating has four nodes, one per step, with a Rasch model at each and one $\\theta$ shared by all four. Which model is it?",
+  options: [
+    {text: "The sequential model", correct: true, why: "Each node asks whether a respondent who reached category $k-1$ goes on to $k$, with $\\theta$ and a step difficulty: Tutz's sequential model with slopes of 1."},
+    {text: "The partial credit model", correct: false, why: "The PCM's binary questions compare adjacent categories ($k$ rather than $k-1$), among respondents in one of the two. The tree's questions condition on having reached $k-1$, which includes everyone above it."},
+    {text: "The graded response model", correct: false, why: "The GRM's questions are cumulative ($x \\ge k$?) and every response answers all of them. In a tree, a response answers only the nodes on its path."}
+  ]
+})
+```
+
+### Fitting a tree is recoding, then a mixed model
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is an item?](explanatory-irt.qmd): the Rasch model is a mixed logistic regression, `glmer(resp ~ 0 + item + (1 | id), family = binomial)`, with one intercept per item (its easiness, $-b_i$) and a random intercept per respondent ($\theta_j$). Item features and respondent covariates are changes to that formula.
+:::
+
+A tree is one of those regressions. Stack the pseudo-items long, one row per respondent, item and node reached, with a `node` column. Then
+```r
+glmer(resp ~ 0 + item:node + (0 + node | id), family = binomial, data = pseudo_items)
+```
+gives every item an easiness at every node (`item:node`) and every respondent a $\theta$ at every node, with their SDs and correlations estimated (`(0 + node | id)`). The node is an item predictor, and it has to be a factor: stored as a number, `glmer` would treat it as one slope. One $\theta$ for all nodes is `(1 | id)`. Any software for binary item response models can fit a tree, because the likelihood factors into one piece per node (Go deeper, below); `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)) takes the pseudo-items as columns, missing where a response doesn't reach a node.
+
+::: {.callout-note collapse="true"}
+## Go deeper: the tree likelihood factorizes over nodes
+
+**Assumptions:** a tree with nodes $n = 1, \dots, N$; each response category corresponds to exactly one path; at each node, the probability of a 1 depends only on the respondent's node ability and the item's node parameters; given the node abilities, the node outcomes are independent, within and across items.
+
+**One response.** Write $y_{ijn} \in \{0, 1\}$ for the pseudo-item of respondent $j$, item $i$ and node $n$, and $r_{ijn} = 1$ if the response reaches node $n$ (0 otherwise). The path of $x_{ij}$ fixes both, so
+$$\Pr(x_{ij} \mid \boldsymbol\theta_j) = \prod_{n} \Big[\big(p^{(n)}_{ij}\big)^{y_{ijn}} \big(1 - p^{(n)}_{ij}\big)^{1 - y_{ijn}}\Big]^{r_{ijn}},$$
+where a node the response doesn't reach contributes a factor of 1.
+
+**All responses.** Multiplying over items and respondents,
+$$L = \prod_j \int \prod_n \prod_{i:\, r_{ijn} = 1} \big(p^{(n)}_{ij}\big)^{y_{ijn}} \big(1 - p^{(n)}_{ij}\big)^{1 - y_{ijn}}\; \phi(\boldsymbol\theta_j; \mathbf 0, \boldsymbol\Sigma)\, d\boldsymbol\theta_j.$$
+Given $\boldsymbol\theta_j$, this is the likelihood of an ordinary binary item response model for a data set with one column per item and node, and missing entries where $r_{ijn} = 0$. Whether a node is reached is fixed by the outcomes of earlier nodes, which are observed, so the missing pseudo-items are missing at random in the sense of [Rubin (1976)](https://doi.org/10.1093/biomet/63.3.581), and leaving them out loses nothing. That is why recoding followed by `glmer()` or `mirt` fits the tree, with no special software.
+
+**Two consequences.** If $\boldsymbol\Sigma$ is diagonal (node abilities uncorrelated), the integral splits and the tree is $N$ separate item response models, one per node. And if all nodes share one $\theta$ and the tree is linear with Rasch nodes, the product is the sequential model of [Models for polytomous responses](polytomous.qmd), whose steps [Tutz (1990)](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x) fits the same way.
+:::
+
+### Response styles
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [From construct map to items](instrument-building.qmd): acquiescence, agreeing whatever the statement, is one reason scales include reversed items. Once the reversed items are keyed, acquiescence pulls the two halves of the sum in opposite directions and largely cancels.
+:::
+
+Acquiescence is one **response style**, a tendency in how a respondent uses the scale. Two others are **midpoint responding**, choosing the middle, and **extreme responding**, choosing the ends ([Baumgartner & Steenkamp, 2001](https://doi.org/10.1509/jmkr.38.2.143.18840)). Reversed items don't balance these two, since reversing maps 5 to 1 and 3 to 3. In Böckenholt's tree they have their own nodes. The $\theta$ at the side node is a respondent's tendency to leave the middle; the $\theta$ at the extreme node is their tendency to go to the ends; and the content $\theta$, at the direction node, is estimated net of both ([Böckenholt, 2017](https://doi.org/10.1037/met0000106)). [Khorramdel and von Davier (2014)](https://doi.org/10.1080/00273171.2013.866536) fit style dimensions shared across all five Big Five scales.
+
+The separation rests on assumptions. The tree takes a 3 to carry no information about direction, and takes the side and extreme decisions to be related to content only through the correlations of the $\theta$s. [Plieninger and Meiser (2014)](https://doi.org/10.1177/0013164413514998) checked the style dimensions against external measures of response style and found that they behaved as style; [Meiser, Plieninger and Henninger (2019)](https://doi.org/10.1111/bmsp.12158) relax the first assumption with nodes that are themselves ordinal. 
+
+#### Try it: same conscientiousness, different styles
+
+Two respondents with the same content $\theta$ answer the ten items above. A leaves the middle and goes to the ends; B does neither. The lines are their expected sum scores.
+
+```{ojs}
+//| echo: false
+viewof ts_c = Inputs.range([-3, 3], {value: 1.5, step: 0.1, label: "Content θ (both)"})
+viewof ts_as = Inputs.range([-3, 3], {value: 1, step: 0.1, label: "A: θ at the side node"})
+viewof ts_ae = Inputs.range([-3, 3], {value: 1.5, step: 0.1, label: "A: θ at the extreme node"})
+viewof ts_bs = Inputs.range([-3, 3], {value: -1, step: 0.1, label: "B: θ at the side node"})
+viewof ts_be = Inputs.range([-3, 3], {value: -1.5, step: 0.1, label: "B: θ at the extreme node"})
+```
+
+```{ojs}
+//| echo: false
+ts_b = ({side: -1.2, direction: -0.9, extreme: 0.5})
+ts_sum = (c, s, e) => 10 * expected15(catProbsTree({side: s, direction: c, extreme: e}, ts_b))
+ts_rows = grid(-4, 4, 161).flatMap(c => [
+  {c, r: ts_sum(c, ts_as, ts_ae), who: "A"}, {c, r: ts_sum(c, ts_bs, ts_be), who: "B"}])
+Plot.plot({
+  width: 700, height: 300, x: {label: "Content θ"}, y: {label: "Expected sum score (10 to 50)", domain: [10, 50]},
+  color: {legend: true, domain: ["A", "B"], range: [palette.contrast, palette.main]},
+  marks: [Plot.ruleY([30], {stroke: palette.rule}), Plot.ruleX([ts_c], {stroke: palette.guide, strokeDasharray: "4,3"}),
+          Plot.line(ts_rows, {x: "c", y: "r", stroke: "who", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`At content θ = ${ts_c.toFixed(1)}: expected sum **${ts_sum(ts_c, ts_as, ts_ae).toFixed(1)}** for A and **${ts_sum(ts_c, ts_bs, ts_be).toFixed(1)}** for B, a gap of ${(ts_sum(ts_c, ts_as, ts_ae) - ts_sum(ts_c, ts_bs, ts_be)).toFixed(1)} points from style alone.`
+```
+
+At the defaults A expects 43.0 and B 35.1, from the same conscientiousness. The lines cross at $-0.9$, the direction node's difficulty, and below it A scores *lower* than B. Extreme responding stretches sums away from the middle in whichever direction the content points, so no constant can correct for it.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Respondents C and D have the same content $\\theta$, well below the middle of the scale. C has a high $\\theta$ at the extreme node, D a low one. Whose sum score do you expect to be higher?",
+  options: [
+    {text: "D's", correct: true, why: "Below the middle, both lean to the disagree side. C turns 2s into 1s, which lowers the sum; D stays at 2."},
+    {text: "C's", correct: false, why: "That holds above the middle, where going to the end turns 4s into 5s. Below it, going to the end turns 2s into 1s."},
+    {text: "The same: the style doesn't change the sum", correct: false, why: "It doesn't change the content $\\theta$, but it changes the categories chosen and so the sum. Try it in the widget with the content θ below −0.9."}
+  ]
+})
+```
+
+### Trees for what the response hides: speed and skips
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Guessing and priors](guessing-priors.qmd): in a timed lexical decision task, responses under 0.3 seconds were correct at about chance, and a few respondents gave most of them. Rapid guessing there looked like a property of respondents, not items. Skipped responses were left for this lesson.
+:::
+
+A first node can record what the response doesn't show. A node for "answered in under $t$ seconds" gives every respondent a speed $\theta$, correlated with the content $\theta$, and the content node can then be fitted to slow responses only, or given separate item parameters for fast and slow ones ([Partchev & De Boeck, 2012](https://doi.org/10.1016/j.intell.2011.11.002); [DiTrapani, Jeon, De Boeck & Partchev, 2016](https://doi.org/10.1016/j.intell.2016.02.012)). Time as a continuous variable is the subject of [Response time and the speed-accuracy tradeoff](response-time.qmd).
+
+A skip is usually scored as wrong or left missing, both reasonable when skipping has nothing to do with ability. When lower-ability respondents skip more, skipping carries information about $\theta$, and the missing responses are *not ignorable* ([Holman & Glas, 2005](https://doi.org/10.1348/000711005X47168); [Glas & Pimentel, 2008](https://doi.org/10.1177/0013164408315262)). A tree whose first node is "answered?" and second "correct, given answered?" puts that information into the model: the correlation between the two node $\theta$s carries it to the content estimate ([Debeer, Janssen & De Boeck, 2017](https://doi.org/10.1111/jedm.12147)). None of the IRW tables with a tokenless download has enough skips to show this, so the simulation below does.
+
+## Simulate
+
+Part 1 generates 1–5 ratings from Böckenholt's tree (400 respondents, 10 items, correlated node $\theta$s), fits one $\theta$ and a $\theta$ per node, and compares both with the truth. Part 2 simulates a 15-item right–wrong test on which lower-ability respondents skip more, and scores the skips as wrong, as missing, and with a skip node. The first run takes one to two minutes, most of it installing and loading `lme4`; `nAGQ = 0` keeps each fit to seconds.
+
+With the seed as written, AIC prefers a $\theta$ per node (11,234 against 11,679), and the node SDs and correlations come back within about 0.13 of the truth. The content estimates from the per-node tree correlate 0.88 with the true content $\theta$, against 0.69 from the one-$\theta$ tree, which mixes content with style. In part 2, the 77 respondents who skipped most skipped about half the items. Scored as wrong, their abilities come out 0.24 too low on average; left missing, 0.41 too high, since the model pulls respondents with few answers toward the mean, and these respondents are below it. With the skip node the error is 0.02. Try `R` with every correlation set to 0, a skip rate that doesn't depend on ability (`skipper <- rnorm(np2)`), or `np <- 2000` locally.
+
+```{webr}
+{{< include code/irtrees-sim.R >}}
+```
+
+[Download this code](code/irtrees-sim.R) to run it as large as you like in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/irtrees-irw.R")
+```
+
+### Conscientiousness and response styles
+
+The main example is [bfi_goldberg_1992_conscientiousness](https://itemresponsewarehouse.org/tables/bfi_goldberg_1992_conscientiousness/): the ten conscientiousness items of the IPIP Big-Five factor markers ([Goldberg, 1992](https://doi.org/10.1037/1040-3590.4.1.26); [Goldberg et al., 2006](https://doi.org/10.1016/j.jrp.2005.08.007)), answered online around 2012 through the [Open-Source Psychometrics Project](https://openpsychometrics.org/_rawdata/). Its job is to be a five-point scale on which response styles could be at work. The IRW's [item-text check](https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_261/provenance.csv) confirmed that these are the IPIP markers rather than the Big Five Inventory. IPIP items are in the public domain, so we can quote them: C1 is "I am always prepared" and C2 "I leave my belongings around" ([Goldberg et al., 2006](https://doi.org/10.1016/j.jrp.2005.08.007); [IPIP key](https://ipip.ori.org/newBigFive5broadKey.htm)). Responses run from 1 (disagree) through 3 (neutral) to 5 (agree), with 2 and 4 unlabelled. [Download the code](code/irtrees-irw.R) to run every chunk yourself.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): items worded against the construct have to be reverse-keyed before they are combined, and the key should come from the documentation and be checked in the data, since neither is enough alone.
+:::
+
+In a tree, keying decides what the direction node means: keyed, it measures conscientiousness on every item; unkeyed, it asks "agree?", which mixes conscientiousness with acquiescence. The side and extreme nodes don't change. The IPIP key reverses C2, C4, C6 and C8, and the data agree:
+
+```{r fetch-csn}
+#| echo: true
+#| code-fold: show
+```
+
+Before keying, the four reversed items correlate from $-0.26$ to $-0.35$ with C1; after, every item correlates positively with it (0.26 to 0.43). All 19,718 respondents answered all ten items. We take a random 3,000, whose responses lean to the agree side: 21.8% of responses are 5 and 9.5% are 1. Now the recoding:
+
+```{r recode}
+#| echo: true
+#| code-fold: show
+```
+
+Respondent 1's 3 on C1 becomes one row; their keyed 5 on C2 (a raw 1) becomes three. All 30,000 responses reach the side node, and the 22,762 that took a side reach the other two. Now the two trees:
+
+```{r fit-trees}
+#| echo: true
+#| code-fold: show
+```
+
+A $\theta$ per node improves the AIC by more than 3,000 points (82,598 against 85,738, for five more parameters). The three decisions are not one dimension. Are they three unrelated ones?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Across respondents, does the tendency to take a side (avoid 3) go with the tendency to choose 1 or 5? And does either track conscientiousness (the direction node)?",
+  choices: ["All three correlate about 0.6", "Side and extreme correlate strongly; each correlates weakly with conscientiousness", "All three are nearly uncorrelated"],
+  answer: "Side and extreme correlate strongly; each correlates weakly with conscientiousness",
+  reveal: "Side and extreme correlate 0.68; with conscientiousness, 0.33 and 0.24. Leaving the middle and going to the ends are largely one habit, and it has little to do with how conscientious a respondent is. Check the output below."
+})
+```
+
+```{r node-cor}
+#| echo: true
+#| code-fold: show
+```
+
+The side and extreme $\theta$s correlate 0.68: respondents who leave the middle also go to the ends. With conscientiousness they correlate only 0.33 and 0.24. The content $\theta$ varies most (SD 1.75, against 0.78 and 1.24).
+
+::: {.callout-note collapse="true"}
+## What the styles do to sum scores
+
+```{r sums}
+#| echo: true
+#| code-fold: show
+```
+
+The sum score and the content $\theta$ correlate 0.95, so the sum orders respondents much as the content $\theta$ does. But among the 825 respondents whose content $\theta$ is above 1, the sum correlates 0.88 with the extreme $\theta$, and among the 785 below $-1$, $-0.55$. As in the widget, extreme responding stretches the sum away from the middle: conscientious respondents who like the ends score higher than those who don't, and unconscientious ones lower. (These are estimates of each respondent's $\theta$s, shrunk toward the mean, so treat the correlations as descriptive.)
+:::
+
+Can the tree's AIC be compared with the graded response model's? Only when both are computed the same way from the same responses. `glmer` with `nAGQ = 0` approximates the marginal likelihood and `mirt` integrates it by quadrature, so the same tree gets a different log likelihood from each; and a tree that drops categories, as the speed tree below drops the content of fast responses, describes different data. Böckenholt's tree describes all five categories, so we fit it and the GRM in `mirt`:
+
+```{r aic-mirt}
+#| echo: true
+#| code-fold: show
+```
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): AIC compares models fitted to the same data by the same likelihood; it says which model is preferred, not how much better it predicts. The IMV puts that on a common scale.
+:::
+
+The per-node tree's log likelihood is $-41{,}263$ from `glmer` and $-41{,}144$ from `mirt`: 119 apart from the approximation alone. Within `mirt`, that tree beats the GRM (AIC 82,361 against 83,242, with 36 parameters against 50), and the tree with one $\theta$ falls far behind both (85,699). The tree wins because it has style dimensions the GRM lacks (problem 3 gives a rival the same advantage).
+
+So when would I fit a tree? The case rests on an assumption about the response process: that choosing the middle, a side and the end are separate decisions. When I have such a process in mind (midpoint avoidance, extreme responding, speed, skipping), I'd fit the tree, because it gives the process a parameter and estimates the content net of it. As a general replacement for the graded response model, with one $\theta$, I wouldn't: here it is the worst of the three. 
+
+### Extraversion and fast responses
+
+For contrast, [introversion_extroversion](https://itemresponsewarehouse.org/tables/introversion_extroversion/): 91 statements from the development of the Multidimensional Introversion-Extraversion Scales, answered online around 2012 through the same project ([MIES development data and codebook](http://openpsychometrics.org/_rawdata/MIES_Dev_Data.zip)), with the time spent on each. Its job is to ask whether fast responding says anything about the trait. Items 81–85 and 89–91 are eight of the ten IPIP extraversion markers ([Goldberg, 1992](https://doi.org/10.1037/1040-3590.4.1.26)), the same family as the conscientiousness items, and we use those. Responses run from 1 (disagree) to 5 (agree). Five of the eight are worded toward introversion ("I keep in the background", for one; [MIES codebook](http://openpsychometrics.org/_rawdata/MIES_Dev_Data.zip)), so we key them, higher meaning more extraverted.
+
+```{r fetch-ie}
+#| echo: true
+#| code-fold: show
+```
+
+The median response took 3.2 seconds across all 91 items and 2.77 on our eight, where 21% came in under 2 seconds; fast responses chose the middle less often (8.2% against 15.7%). A two-node tree on a random 1,500 respondents asks: was the response fast? If not, was it on the extraverted side?
+
+```{r speed-tree}
+#| echo: true
+#| code-fold: show
+```
+
+Respondents differ in speed (SD 1.49 at the fast node), but the speed and extraversion $\theta$s correlate $-0.075$: how quickly someone answers these items says next to nothing about how extraverted they are. Are fast responses careless, then?
+
+```{r fast-consistent}
+#| echo: true
+#| code-fold: show
+```
+
+No. For the 4,668 respondents with both fast and slow responses, the mean keyed response on the fast items correlates 0.73 with the mean on the slow ones. Rapid responses in [Guessing and priors](guessing-priors.qmd) were at chance; here a response under 2 seconds looks like a respondent who knew their answer.
 
 ## Problems
 
+1. **The tree's probabilities.** For Böckenholt's tree, write $\Pr(x = k)$ for $k = 1, \dots, 5$ in terms of the three node probabilities, and show that they sum to 1. Then show that a linear tree with Rasch nodes and one $\theta$ is the sequential model, and explain why it is not the partial credit model, although both have one parameter per category boundary.
+2. **The other four traits.** Fit Böckenholt's tree to the other four `bfi_goldberg_1992_*` tables (key each from the [IPIP key](https://ipip.ori.org/newBigFive5broadKey.htm), checked in the data). Are the side and extreme $\theta$s as strongly correlated for every trait? Do one respondent's style $\theta$s from different traits correlate, as a style should? (The five tables share respondent ids.)
+3. **Comparing the tree with the GRM.** When can you compare the tree's AIC with the GRM's? Then give a rival without a tree the same advantage: in `mirt`, a multidimensional GPCM whose second dimension scores categories 1 and 5 as 1 and the others as 0 (the `gpcm_mats` argument) has an extreme-response dimension of its own. Compare it with the tree. What does the comparison say about the tree's advantage over the GRM?
+4. **Two countries.** A survey is given in two countries whose respondents differ in how often they choose the ends of a scale. What can Böckenholt's tree correct for when you compare the countries' means, and what can't it? Would you change the instrument as well as the model?
+5. **The 2-second cut.** Refit the speed tree with cuts at 1, 1.5 and 3 seconds. How does the share of fast responses change, and the correlation between speed and extraversion? Is there a cut below which fast responses stop tracking the trait? (PS8#4)
+6. **Challenge (open): the skip $\theta$.** On a low-stakes test, a skip node gives every respondent a second $\theta$, their tendency to answer. Does it belong in the reported score? Consider what the score is for and whether a respondent could raise it by skipping less. I don't have a general answer.
+
+```{r}
+#| output: asis
+ask_claude("irtrees", "It covers IRTree models: writing a polytomous response as a sequence of binary decisions (nodes) and its probability as a product along a path; linear and nested trees; one ability for all nodes or one per node, and the sequential model as a linear tree; fitting a tree by recoding responses into pseudo-items and using lme4's glmer or mirt; separating content from midpoint and extreme response styles with Böckenholt's tree; and nodes for fast responses and skipped items, with IPIP conscientiousness and extraversion items from the Open-Source Psychometrics Project as examples.")
+```
+
 ## Going further
+
+- De Boeck, P., & Partchev, I. (2012). IRTrees: Tree-based item response models of the GLMM family. *Journal of Statistical Software*, 48(Code Snippet 1). <https://doi.org/10.18637/jss.v048.c01>. The recoding into pseudo-items and the `glmer` fit, with linear and nested trees.
+- Böckenholt, U. (2012). Modeling multiple response processes in judgment and choice. *Psychological Methods*, 17(4), 665–678. <https://doi.org/10.1037/a0028111>. The side, direction and extreme tree for rating scales.
+- Böckenholt, U. (2017). Measuring response styles in Likert items. *Psychological Methods*, 22(1), 69–83. <https://doi.org/10.1037/met0000106>. Trees for response styles, set beside other approaches.
+- Jeon, M., & De Boeck, P. (2016). A generalized item response tree model for psychological assessments. *Behavior Research Methods*, 48(3), 1070–1085. <https://doi.org/10.3758/s13428-015-0631-y>. Trees with slopes and more flexible links between nodes and dimensions.
+- Plieninger, H., & Meiser, T. (2014). Validity of multiprocess IRT models for separating content and response styles. *Educational and Psychological Measurement*, 74(5), 875–899. <https://doi.org/10.1177/0013164413514998>. Whether the style nodes measure style.
+- Meiser, T., Plieninger, H., & Henninger, M. (2019). IRTree models with ordinal and multidimensional decision nodes for response styles and trait-based rating responses. *British Journal of Mathematical and Statistical Psychology*, 72(3), 501–516. <https://doi.org/10.1111/bmsp.12158>. Ordinal nodes, relaxing the assumption that a midpoint says nothing about direction.
+- Khorramdel, L., & von Davier, M. (2014). Measuring response styles across the Big Five: A multiscale extension of an approach using multinomial processing trees. *Multivariate Behavioral Research*, 49(2), 161–177. <https://doi.org/10.1080/00273171.2013.866536>. Style dimensions shared across personality scales (problem 2).
+- Baumgartner, H., & Steenkamp, J.-B. E. M. (2001). Response styles in marketing research: A cross-national investigation. *Journal of Marketing Research*, 38(2), 143–156. <https://doi.org/10.1509/jmkr.38.2.143.18840>. Response styles across countries, and what they do to means and correlations (problem 4).
+- Debeer, D., Janssen, R., & De Boeck, P. (2017). Modeling skipped and not-reached items using IRTrees. *Journal of Educational Measurement*, 54(3), 333–363. <https://doi.org/10.1111/jedm.12147>. Skip and not-reached nodes in achievement tests.
+- Holman, R., & Glas, C. A. W. (2005). Modelling non-ignorable missing-data mechanisms with item response theory models. *British Journal of Mathematical and Statistical Psychology*, 58(1), 1–17. <https://doi.org/10.1348/000711005X47168>. Missingness as a second latent dimension, the idea behind a skip node.
+- Glas, C. A. W., & Pimentel, J. L. (2008). Modeling nonignorable missing data in speeded tests. *Educational and Psychological Measurement*, 68(6), 907–922. <https://doi.org/10.1177/0013164408315262>. The same idea for items not reached.
+- Partchev, I., & De Boeck, P. (2012). Can fast and slow intelligence be differentiated? *Intelligence*, 40(1), 23–32. <https://doi.org/10.1016/j.intell.2011.11.002>. Fast and slow responses as branches of a tree.
+- DiTrapani, J., Jeon, M., De Boeck, P., & Partchev, I. (2016). Attempting to differentiate fast and slow intelligence: Using generalized item response trees to examine the role of speed on intelligence tests. *Intelligence*, 56, 82–92. <https://doi.org/10.1016/j.intell.2016.02.012>. A speed node with its own dimension.
+- Tutz, G. (1990). Sequential item response models with an ordered response. *British Journal of Mathematical and Statistical Psychology*, 43(1), 39–55. <https://doi.org/10.1111/j.2044-8317.1990.tb00925.x>. The sequential model, a linear tree.
+- Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3), 581–592. <https://doi.org/10.1093/biomet/63.3.581>. Missing at random, and when missingness can be ignored.
+- Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software*, 67(1). <https://doi.org/10.18637/jss.v067.i01>. The package for the tree fits.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package for the tree and GRM fits compared by AIC.
+- Goldberg, L. R., Johnson, J. A., Eber, H. W., Hogan, R., Ashton, M. C., Cloninger, C. R., & Gough, H. G. (2006). The International Personality Item Pool and the future of public-domain personality measures. *Journal of Research in Personality*, 40(1), 84–96. <https://doi.org/10.1016/j.jrp.2005.08.007>. The public-domain item pool behind both examples.
 
 ```{r}
 #| output: asis
@@ -29,3 +400,8 @@ data_sources("irtrees")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 8 (slides c8, 31–42), problem set 8 (#4, fast responding), and the code in `ben-domingue/252`: `c8/irtree.R`, `c8/irtree2.R`, `c8/irtree_sim.R` and `ps8/fast.R`.
+- **Timing:** the core ideas and widgets take about 45 minutes; the conscientiousness analysis is a 20-minute lab and the speed tree another 10. The real-data code takes about three minutes in local R, most of it the `mirt` fit of the tree, so run it before class.
+- **Changed from 252:** the slides and PS8#4 use `ffm_CSN`, which has no tokenless download. The response-style analysis moves to `bfi_goldberg_1992_conscientiousness` (IPIP markers, like the ffm items) and the fast-responding analysis to eight IPIP extraversion markers in `introversion_extroversion`, which records response times. As in `c8/irtree2.R`, the fits use a random subsample. The keying uses the published IPIP key, checked in the data, rather than the sign of GRM slopes. The skipped-response example is simulated, since no tokenless IRW table has enough skips. The AIC comparison with the GRM is made in `mirt`, where both likelihoods are computed the same way.
+- **Held back:** response time as a continuous variable ([Response time and the speed-accuracy tradeoff](response-time.qmd)); whether style dimensions threaten a validity argument (not taken up in [Gathering validity evidence](validity-evidence.qmd), which comes earlier); choosing among trees for the same categories beyond AIC, for which the IMV is the tool.
+- **Solutions:** held back in `solutions/irtrees.qmd` (not published). Problem 6 is open.
