@@ -332,7 +332,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#2"], code: [c9/mrot.R, ps9/shots.R]}
     tables: [rr98_accuracy, mentalrotation_wolf_2024, enkavi_2019_stroop]
     reuses: [rr98_accuracy]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: ai-psychometrics

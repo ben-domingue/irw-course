@@ -2,7 +2,7 @@
 
 # Trials as items: tasks, shots, and rotations (`trials`)
 
-Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: drafted (#54)
 
 ## Core ideas
 
@@ -66,3 +66,16 @@ Table citations come from IRW biblio. Passed over: `motion` (in `rt-process-mode
 ## Open questions
 
 - The verdict above is Claude's reading of the Stroop and rr98 results (voice rule A). *Default:* use it unless you'd put it differently.
+
+## Drafting notes (#54, 09-25)
+
+What the draft changed from this outline, after recomputing on IRW v434 (item_response_warehouse v60.0; enkavi in item_response_warehouse_3 v8.0):
+
+- `rr98_accuracy`: as planned. Line in distance: AIC 12,948; one per distance 12,928; one per level 12,925; line explains 90% of the level easinesses; out of sample the line (IMV 0.0772 over the mean) predicts as well as 33 levels (0.0759). Session SD 0.05, observer SD 0; observers 0.715–0.726. The widget shows the middle of the task fits better at 15.5 than 16.
+- `mentalrotation_wolf_2024`: new finding. Each respondent meets each sheet × shape × angle item twice, once as a same pair and once as a different pair; pair type is recoverable from `resp` and `resp_raw`. Angle costs 0.60 logits per 50° on same pairs and nothing on different pairs; angle × pair earns IMV 0.0313 over respondents only, against 0.0021 for angle (0.0030 random item, −0.0002 per angle, 0.0002 adding shape). "Shapes matter more than angle" did not hold up.
+- `enkavi_2019_stroop`: 522 at wave 1, 150 retested. Effect 0.123 s, t = 46, positive for 520 of 522. Person SD of the effect 0.049 s, of speed 0.098 s, trial SD 0.167; reliability with 47 trials 0.67 (effect) vs 0.97 (mean RT); 207 trials for 0.9. Retest: effect 0.44, mean RT 0.61 (outline had 0.43/0.61). Two-wave model: latent retest 0.79 (effect), 0.59 (speed).
+- Widget 2 is a variance-share bar chart, not a retest-by-trials scatter, since `validity-causal` already has that widget. Problem 1 asks for the trials needed for a target reliability instead of the difference-score derivation, which is `validity-causal` problem 1.
+- The shots widget uses expected counts, not a random sample, so the bias isn't confused with noise.
+- Simulate: angle cost retests at 0.20 even with no slope variance (ceiling on the probability scale); kept as a point in the text.
+- The Go deeper callout derives the reliability of an effect from trials (with Spearman–Brown in trials), not the Cronbach–Furby difference formula.
+- Retest interval for Enkavi et al. is not stated (full text not reachable in open access); the lesson says "long-term", as their abstract does.
