@@ -27,6 +27,7 @@ here first, in the same PR.
   The 1PL/Rasch has $a = 1$, $c = 0$, $u = 1$.
 - No $D$ in formulas. $D \approx 1.7$ appears only in the Camilli aside (`rasch`) and the
   factor-analysis ↔ IRT conversion (`fa-confirmatory`).
+- Multidimensional (compensatory) items, as in `dimensionality`: $\Pr(x_{ij}=1) = \text{logistic}\big(\sum_k a_{ik}\theta_{jk} - A_i b_i\big)$ with $A_i = \sqrt{\sum_k a_{ik}^2}$ (the item's multidimensional discrimination) and $b_i$ its multidimensional difficulty; $\theta_{jk}$ is respondent $j$'s ability on dimension $k$. In vector form $\mathbf{a}_i^\top\boldsymbol\theta_j + d_i$ appears only where the code or a derivation needs it (09-25, from `dimensionality`).
 - `mirt`'s intercept form $a\theta + d$ appears only in code. Wherever code converts,
   state $b = -d/a$ (for the Rasch model, $b = -d$).
 

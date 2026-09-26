@@ -540,6 +540,7 @@ threads:
       - {lesson: dif, how: makes the Mantel-Haenszel null exact when matching on the total}
       - {lesson: cdm, how: contrasts attribute counts with sum scores}
       - {lesson: scale-properties, how: asks what it licenses about the scale}
+      - {lesson: rater-models, how: keeps it in the many-facet Rasch model}
   - id: specific-objectivity
     idea: Item comparisons don't depend on who took the items
     introduced: rasch
@@ -573,6 +574,7 @@ threads:
       - {lesson: dimensionality, how: shows passages and testlets breaking it}
       - {lesson: explanatory-irt, how: models the dependence with random effects}
       - {lesson: unfolding, how: keeps it but drops the monotone curve the Rasch model pairs with it}
+      - {lesson: rater-models, how: keeps it across raters in the hierarchical rater model}
 
   # Pass 2 (09-24 night): proposed by the wave-0 drafts (#123-#126); returns kept only
   # where they are descendants of the introducing lesson (E2).
@@ -694,6 +696,7 @@ threads:
     introduced: ability-estimation
     returns:
       - {lesson: item-banks-cat, how: starts a CAT without an estimate}
+      - {lesson: item-estimation, how: meets perfect patterns in joint estimation}
   - id: wording-direction
     idea: "Wording direction can act as a second dimension"
     introduced: instrument-building
@@ -724,3 +727,28 @@ threads:
     introduced: dif
     returns:
       - {lesson: invariance-experience, how: models item-level treatment effects}
+
+  # Pass 6 (09-25): proposed by extension wave 0 (#160-#172); returns kept only
+  # where they are descendants of the introducing lesson (E2).
+  - id: what-is-an-item
+    idea: "Items are a sample from a population of possible items, describable by their features"
+    introduced: explanatory-irt
+    returns:
+      - {lesson: trials, how: treats conditions and trials as items}
+      - {lesson: ai-psychometrics, how: describes items by their text}
+      - {lesson: cdm, how: describes items by the attributes they require}
+  - id: item-residual
+    idea: "Item features predict difficulty, but not all of it"
+    introduced: explanatory-irt
+    returns:
+      - {lesson: ai-psychometrics, how: predicts difficulty from text and asks what is left over}
+  - id: chance-floor
+    idea: "Where chance sets the floor, not knowing means guessing"
+    introduced: guessing-priors
+    returns:
+      - {lesson: nominal, how: looks at which distractors attract guesses}
+  - id: raters-exchangeable
+    idea: "Raters are treated as exchangeable draws from a universe of raters"
+    introduced: g-theory
+    returns:
+      - {lesson: rater-models, how: models each rater's severity instead}
