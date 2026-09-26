@@ -1,4 +1,4 @@
-<!-- Outlined 2026-09-24. Not in EDUC 252; added after the landscape analysis (CFA in 6 of 11 syllabi; omega and ordinal CFA as the bridge to IRT). Multigroup CFA invariance moved here from dif on 09-24 (Ben, E1). -->
+<!-- Outlined 2026-09-24. Not in EDUC 252; added after the landscape analysis (CFA in 6 of 11 syllabi; omega and ordinal CFA as the bridge to IRT). Multigroup CFA invariance moved here from dif on 09-24 (Ben, E1), and out again to its own lesson, measurement-invariance, on 09-25 (Ben, #58), when the estimator section was added. -->
 
 # Factor analysis II: confirmatory models, omega, and IRT as factor analysis (`fa-confirmatory`)
 
@@ -10,11 +10,13 @@ Module: fa · Prereqs: fa-exploratory, 1pl-to-4pl · Core · Status: draft (09-2
 2. **Fit indices, and what they can't tell you.** χ², CFI, TLI, RMSEA, SRMR; the Hu–Bentler cutoffs as conventions, not laws; comparing nested models. *(major)* Sources: Hu & Bentler (1999), doi:10.1080/10705519909540118; Zhang, Rahal, Kanopka, Ulitzsch, Zhang & Domingue (2026), *Multivariate Behavioral Research*, doi:10.1080/00273171.2026.2645212 (predictive performance of CFA with binary outcomes via the IMV).
 3. **Omega.** Model-based reliability; equals alpha under tau-equivalence; omega hierarchical for a general factor in a bifactor model, which answers "one construct or three?" for the DASS here (E3: not handed on to `validity-evidence`). Sources: McDonald (1999), *Test theory: A unified treatment*, doi:10.4324/9781410601087; Revelle & Zinbarg (2009), doi:10.1007/s11336-008-9102-z; Reise (2012), doi:10.1080/00273171.2012.715555.
 4. **IRT as factor analysis.** Ordinal CFA on polychorics is the normal-ogive graded response model: $a = \lambda/\sqrt{1-\lambda^2}$ (times 1.702 for the logistic metric), thresholds ↔ intercepts. One paragraph on when treating Likert items as continuous is safe enough (five or more categories, roughly symmetric: Rhemtulla, Brosseau-Liard & Savalei, 2012, doi:10.1037/a0029315). *(major)* Sources: Takane & de Leeuw (1987), doi:10.1007/bf02294363; Kamata & Bauer (2008), doi:10.1080/10705510701758406; Chalmers (2012), doi:10.18637/jss.v048.i06.
-5. **Measurement invariance with multigroup CFA.** Does the same model hold in two groups? Configural (same pattern), metric (equal loadings), scalar (equal intercepts or thresholds): comparing latent means needs scalar invariance; partial invariance frees the offending parameters. ΔCFI conventions and their limits; ordinal indicators need care with identification. Unequal loadings are non-uniform DIF and unequal intercepts uniform DIF, which is how `dif` recalls this section. Sources: Meredith (1993), doi:10.1007/BF02294825; Vandenberg & Lance (2000), doi:10.1177/109442810031002; Millsap (2011), doi:10.4324/9780203821961; Chen (2007), doi:10.1080/10705510701301834; Wu & Estabrook (2016), doi:10.1007/s11336-016-9506-0; Putnick & Bornstein (2016), doi:10.1016/j.dr.2016.06.004.
+5. **Choosing an estimator.** ML, MLR (robust standard errors and scaled χ²), WLSMV (thresholds and polychorics), and FIML for missing responses; a guide by number of categories, their distribution, non-normality, sample size and missingness; walked through for grit (MLR, checked with FIML and WLSMV) and the DASS (WLSMV; MLR for omega). *(major; added 09-25, #58)* Sources: Rhemtulla, Brosseau-Liard & Savalei (2012), doi:10.1037/a0029315; Li (2016), doi:10.3758/s13428-015-0619-7; Beauducel & Herzberg (2006), doi:10.1207/s15328007sem1302_2; Yuan & Bentler (2000), doi:10.1111/0081-1750.00078; Savalei (2014), doi:10.1080/10705511.2013.824793; Enders & Bandalos (2001), doi:10.1207/S15328007SEM0803_5; Rubin (1976), doi:10.1093/biomet/63.3.581; Bock & Aitkin (1981), doi:10.1007/BF02293801; the lavaan tutorial pages on estimators and categorical data.
 
-All references above were checked on Crossref (09-24).
+Multigroup CFA and measurement invariance moved to `measurement-invariance` (09-25, #58).
 
-`lavaan` syntax is introduced here, not in `sem` (C9). The lesson follows `1pl-to-4pl` although it sits in the FA module, because idea 4 needs the 2PL (C10). To fit one session, idea 2 stays short and idea 5 is one worked comparison.
+All references above were checked on Crossref (09-24; the estimator sources 09-25, with each finding checked against the abstract).
+
+`lavaan` syntax is introduced here, not in `sem` (C9). The lesson follows `1pl-to-4pl` although it sits in the FA module, because idea 4 needs the 2PL (C10). To fit one session, idea 2 stays short.
 
 ## Picks up
 
@@ -29,16 +31,16 @@ All references above were checked on Crossref (09-24).
 - SEM: structural paths between latent variables; multigroup SEM → `sem` (extension).
 - Multidimensional IRT = multidimensional ordinal FA → `dimensionality`.
 - Graded response model in its own right → `polytomous`.
-- Invariance item by item, with a matching variable instead of a factor model → `dif` (which recalls idea 5 as "if you've done `fa-confirmatory`", E2), `invariance-experience`.
 - Omega as the reliability of a reported score → `score-meaning` (an "if you've done" Recall there).
-- Multigroup CFA and the invariance ladder, recalled for whole-scale fairness → `fairness` (an "if you've done" Recall there, E2).
+- Multigroup CFA and the invariance ladder → `measurement-invariance` (split out 09-25, #58).
+- Choosing an estimator, again for multigroup fits → `measurement-invariance` (thread estimator-choice).
 
 ## Tables
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
 | `grit` | main example | Grit-O (Duckworth et al., 2007), 12 items, 1–5, 3,103 complete cases. One factor fits poorly (CFI 0.80, RMSEA 0.16); the two designed facets fit better (CFI 0.91, RMSEA 0.11, SRMR 0.07) but not well; the facets correlate 0.62. An EFA puts every item on its intended facet. Ordinal CFA loadings convert to slopes that match `mirt`'s graded model (loading 0.78 → 2.1; `mirt` 2.2). | — |
-| `neurodegenerative_huizinga_2019_dass` | contrast; invariance example | DASS-21 (Dutch), 1,246 complete cases. The three designed scales correlate 0.84–0.87, and one factor fits nearly as well (CFI 0.95 vs. 0.97); a bifactor model fits best (0.99). Omega hierarchical 0.86 vs. omega total 0.97: most reliable variance is general distress. **Invariance by `cov_sex`** (577 in group 1, 669 in group 2; which is women to confirm from the paper), three-factor model, MLR with items treated as continuous: configural CFI 0.93, RMSEA 0.062; metric Δχ² 13.5 on 18 df (p = 0.76); scalar Δχ² 24.6 on 18 df (p = 0.14); robust CFI 0.93 at every step. No constraint stands out (largest scaled score test: item 16's intercept, 6.9 on 1 df, among 39). With scalar invariance, group 2 sits about 0.17 SD higher on anxiety and stress and 0.09 on depression. A measure that passes. | — |
+| `neurodegenerative_huizinga_2019_dass` | contrast (the invariance part moved to `measurement-invariance`, 09-25) | DASS-21 (Dutch), 1,246 complete cases. The three designed scales correlate 0.84–0.87, and one factor fits nearly as well (CFI 0.95 vs. 0.97); a bifactor model fits best (0.99). Omega hierarchical 0.86 vs. omega total 0.97: most reliable variance is general distress. **Invariance by `cov_sex`** (577 in group 1, 669 in group 2; which is women to confirm from the paper), three-factor model, MLR with items treated as continuous: configural CFI 0.93, RMSEA 0.062; metric Δχ² 13.5 on 18 df (p = 0.76); scalar Δχ² 24.6 on 18 df (p = 0.14); robust CFI 0.93 at every step. No constraint stands out (largest scaled score test: item 16's intercept, 6.9 on 1 df, among 39). With scalar invariance, group 2 sits about 0.17 SD higher on anxiety and stress and 0.09 on depression. A measure that passes. | — |
 
 Invariance numbers computed 09-24 (`lavaan::cfa`, MLR, `group.equal`, Satorra–Bentler differences; latent means in group 1's factor SDs). The draft should repeat them with ordinal estimation (WLSMV).
 
@@ -52,7 +54,7 @@ Grit sources: Duckworth, Peterson, Matthews & Kelly (2007), doi:10.1037/0022-351
 - Paths to a correlation matrix: draw a two-factor model; the implied matrix and residuals update (ideas 1, 2).
 - Fit index sandbox: add misfit (a cross-loading, a correlated error) and watch CFI, RMSEA and SRMR respond, each differently (idea 2).
 - Loading ↔ slope: a loading slider with the implied ICC, next to the 2PL curve with $a = 1.702\lambda/\sqrt{1-\lambda^2}$ (idea 4).
-- Invariance ladder (from `dif`): a two-group one-factor model with loading and intercept controls for one item; configural, metric and scalar fit light up as constraints fail, and the latent mean difference moves (idea 5).
+- (The invariance widget moved to `measurement-invariance`, 09-25.)
 
 **Predict-then-check:** the DASS-21 is scored as three scales. How strongly will the three factors correlate? Answered by the CFA (0.84–0.87).
 
@@ -62,8 +64,8 @@ Grit sources: Duckworth, Peterson, Matthews & Kelly (2007), doi:10.1037/0022-351
 1. Derivation: show that under a one-factor model with equal loadings, omega equals alpha.
 2. Derivation: the probit link between an ordinal CFA loading and a normal-ogive slope.
 3. Real data with a twist: fit Grit with a correlated error between two similarly worded items; how much does fit improve, and is that a finding or a patch?
-4. Judgment: DASS-21. Report three subscale scores or one? Use omega hierarchical and the factor correlations.
-5. Design: you want to compare DASS-21 scores across education levels (`cov_education`). Which level of invariance do you need to compare means, and which to compare the factor correlations? What would you do if one item's intercept failed?
+4. Real data: the DASS three-factor model by MLR against WLSMV (09-25, #58).
+5. Design: choose an estimator and a treatment of missing responses for a planned three-category scale (09-25, #58; the education design problem moved to `measurement-invariance`).
 6. Challenge (open): fit indices reward some misfit and punish others. Credé et al. (2017) argue grit is mostly conscientiousness. What model would test that, and what data would you need?
 
 ## Go deeper
@@ -88,3 +90,11 @@ What changed from this outline while drafting:
 - **Go deeper:** one (ordinal FA = graded model). The omega/alpha derivation is problem 1 instead of a second callout.
 - **Verdict** (for Ben): DASS-21 in a community sample: report the total, with the depression and anxiety scores only alongside it.
 - The `instrument-building` Recall became a sentence in the keying paragraph and problem 3 (facet and wording direction coincide on the Grit-O), to fit the length.
+
+## Split and estimator section (09-25, #58)
+
+- A colleague's suggestion, relayed and approved by Ben on #58: split the lesson (CFA, omega and IRT equivalence here; measurement invariance in `measurement-invariance`) and add a subsection on choosing an estimator, walked through in the real-data section.
+- Moved out: idea 5, the invariance widget, the DASS-by-sex subsection, problems 4 (CES-D) and 5 (DASS by education).
+- Added: *Choosing an estimator* (a guide table and a quick check), a `grit-conditions` chunk (category shares 11.8–26.4%, skewness −0.91 to 0.26, 55 of 3,158 respondents incomplete) and a `grit-estimators` chunk (ML, MLR and MLR with FIML agree: robust CFI 0.898, RMSEA 0.084; FIML moves no loading by more than 0.01). Grit is now fitted with MLR: one factor robust CFI 0.758, RMSEA 0.127; two factors 0.898, 0.084, SRMR 0.066. DASS: four categories, skewness 1.24 to 3.38, no partial missingness (215 skipped all 21 items), so WLSMV, with MLR for omega.
+- New problems 4 (DASS by MLR against WLSMV) and 5 (design: estimator for a planned three-category scale).
+- Length: about 3,000 words by the usual counter (Going further and For instructors excluded).

@@ -20,7 +20,7 @@ Crossref-checked 09-24 unless marked.
 - Treatment indicators and waves in IRW tables (from `irw-data`).
 - Interpretation depends on the use; the same scores for evaluating an intervention vs. measuring the construct (from `validity-argument`).
 - The construct suggests an intervention; here we see which items it moves (from `constructs`).
-- Multigroup CFA and invariance (from `fa-confirmatory`, not an ancestor: an "if you've done" Recall, E2).
+- Multigroup CFA and invariance (from `measurement-invariance`, not an ancestor: an "if you've done" Recall, E2).
 - Occasions as a facet (from `g-theory`, not an ancestor: E2) and response formats as an experiment (from `fa-exploratory`, not an ancestor: a Recall of its finding, no table reuse, E4).
 - Group differences that remain after linking (from `parameter-invariance`, extension: E2).
 - Multigroup SEM (from `sem`, extension: E2).

@@ -1,0 +1,395 @@
+---
+title: "Measurement invariance: comparing groups with multigroup CFA"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("measurement-invariance")
+```
+
+```{webr}
+#| context: setup
+suppressWarnings(webr::install("lavaan", quiet = TRUE))
+options(mc.cores = 1)
+# webR can't count CPU cores (detectCores() is NA), and lavaan's option checks then
+# never finish; report one core. Not needed in local R.
+local({
+  ns <- asNamespace("parallel")
+  unlockBinding("detectCores", ns)
+  assign("detectCores", function(...) 1L, envir = ns)
+  lockBinding("detectCores", ns)
+})
+```
+
+```{ojs}
+//| echo: false
+import {grid, palette} from "./widgets/irt.js"
+import {scalarStep} from "./widgets/measurement-invariance.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
+## What this is for
+
+In a Dutch community sample, women report a little more anxiety than men on the DASS-21 (0.16 SD, as we'll see). Is that a difference in anxiety, or a difference in how the items work for women and men? The scores alone can't say. [Factor analysis II](fa-confirmatory.qmd) fitted a factor model to one sample. This lesson fits it to two groups at once and asks, one constraint at a time, whether the same model holds in both: **measurement invariance**. Where it holds, the groups' factor means can be compared. Where an item breaks it, we find the item and decide what to do about it. We start with a scale where invariance holds, the DASS-21 across women and men, and then turn to one where a single item doesn't: crying on the CES-D.
+
+## Goals
+
+By the end of this lesson you should be able to:
+
+- fit a multigroup CFA in `lavaan` and say how the two groups are put on one scale;
+- climb the ladder (configural, metric, scalar) with scaled difference tests and changes in CFI, and say which comparison each step supports;
+- find the constraint that fails with score tests, and fit and report a partial invariance model;
+- say what one unequal intercept does to a comparison of sum scores and of factor means;
+- choose an estimator for a multigroup fit, and say what ordered categories change.
+
+## Core ideas
+
+### One model, two groups
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Factor analysis II](fa-confirmatory.qmd): a confirmatory model fixes most loadings at zero before seeing the data, and it is identified once each factor's scale is set, by fixing one loading or the factor's variance. Nested models are compared by a (scaled) difference in χ².
+:::
+
+A **multigroup** CFA fits the model in several groups at once, with any parameter free in each group or held equal across them ([Jöreskog, 1971](https://doi.org/10.1007/BF02291366)). With intercepts, the model for item $i$ in group $g$ is $x_i = \nu_{ig} + \lambda_{ig}\eta + \varepsilon_i$. **Measurement invariance** means that responses depend on the factor and not on the group ([Meredith, 1993](https://doi.org/10.1007/BF02294825)). It is tested in steps, each adding constraints to the one before ([Vandenberg & Lance, 2000](https://doi.org/10.1177/109442810031002); [Millsap, 2011](https://doi.org/10.4324/9780203821961); [Putnick & Bornstein, 2016](https://doi.org/10.1016/j.dr.2016.06.004)):
+
+- **configural**: the same items load on the same factors in every group, every parameter free;
+- **metric**: the loadings $\lambda_i$ are equal, so a unit of the factor means the same in each group;
+- **scalar**: the intercepts $\nu_i$ (for ordered items, the thresholds) are equal too, so respondents at the same factor level have the same expected response.
+
+Meredith adds a fourth step, **strict** invariance, with equal unique variances as well.
+
+Why these comparisons at these steps? A factor has no unit and no origin of its own. In the configural model each group's factor is scaled separately, so nothing links them. Once the loadings are equal, the items carry one unit across groups, and group B's factor variance, and its correlations and regressions, can be estimated relative to group A's. Once the intercepts are equal too, the items carry one origin, and group B's factor mean can be estimated relative to A's; `lavaan` frees it at that step. Comparing correlations or regressions needs metric invariance; comparing means needs scalar.
+
+In item response language, an unequal loading is non-uniform differential item functioning and an unequal intercept is uniform DIF; [Differential item functioning](dif.qmd) takes up the same question item by item, matching on an observed score instead of a factor.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A study compares women and men on the correlation between depression and anxiety factors, and on the mean of the anxiety factor. Which level of invariance does each comparison need?",
+  options: [
+    {text: "Metric for the correlation, scalar for the mean", correct: true, why: "Equal loadings give the factors one unit in both groups, which is what variances, covariances and correlations need. A mean also needs one origin, which the equal intercepts supply."},
+    {text: "Scalar for both", correct: false, why: "Scalar invariance would do, but the correlation doesn't need the intercepts: it involves no means. Metric is enough."},
+    {text: "Configural for the correlation, metric for the mean", correct: false, why: "In the configural model each group's factors are scaled separately, so nothing ties group B's unit to group A's; and a mean needs a common origin, which only equal intercepts give."}
+  ]
+})
+```
+
+### What an unequal intercept does
+
+#### Try it: one item that works differently
+
+Four items measure one factor in groups A and B (loadings 0.7, intercepts 0, factor SD 1). Item 4 can behave differently in group B.
+
+```{ojs}
+//| echo: false
+viewof inv_k = Inputs.range([-1, 1], {value: 0.5, step: 0.05, label: "True factor mean, B minus A (SDs)"})
+viewof inv_nu = Inputs.range([-0.5, 0.5], {value: 0, step: 0.05, label: "Item 4's intercept, B minus A"})
+viewof inv_l = Inputs.range([-0.4, 0.4], {value: 0, step: 0.05, label: "Item 4's loading, B minus A"})
+```
+
+```{ojs}
+//| echo: false
+inv = {
+  const sdA = Math.sqrt((4 * 0.7) ** 2 + 4 * (1 - 0.49));
+  return {gap: (inv_nu + (3 * 0.7 + 0.7 + inv_l) * inv_k) / sdA, fair: (4 * 0.7 * inv_k) / sdA,
+          level: Math.abs(inv_l) > 1e-9 ? "metric invariance fails (non-uniform DIF), and so does scalar" :
+                 Math.abs(inv_nu) > 1e-9 ? "metric invariance holds, but scalar fails (uniform DIF)" : "scalar invariance holds"};
+}
+Plot.plot({
+  width: 700, height: 290, x: {label: "Factor η", domain: [-3, 3]}, y: {label: "Expected response to item 4"},
+  color: {legend: true, domain: ["Group A", "Group B"], range: [palette.main, palette.contrast]},
+  marks: [Plot.ruleX([0], {stroke: palette.main, strokeDasharray: "4,3"}), Plot.ruleX([inv_k], {stroke: palette.contrast, strokeDasharray: "4,3"}),
+          Plot.line(grid(-3, 3, 61).flatMap(e => [{e, y: 0.7 * e, g: "Group A"}, {e, y: inv_nu + (0.7 + inv_l) * e, g: "Group B"}]),
+            {x: "e", y: "y", stroke: "g", strokeWidth: 2.5})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Here ${inv.level}. Sum-score gap, B minus A: **${inv.gap.toFixed(2)}** SDs of group A's sum score; if item 4 were invariant it would be **${inv.fair.toFixed(2)}**. (Dashed lines: each group's factor mean.)`
+```
+
+With both item-4 controls at 0 the lines coincide, and the sum-score gap (0.45 SD) is the latent 0.5 SD shrunk by unreliability. Set the true gap to 0 and item 4's intercept to 0.3: the sum scores differ by 0.10 SD between groups that don't differ at all. A loading difference makes the lines cross, so the item favours one group at low factor levels and the other at high ones.
+
+What does the factor model make of the same item? If we impose scalar invariance anyway, the model has to explain item 4's higher mean in group B with the one thing it has left free, group B's factor mean. The shift is spread over every item, and the factor mean absorbs part of it. The remedy is **partial invariance** ([Byrne, Shavelson & Muthén, 1989](https://doi.org/10.1037/0033-2909.105.3.456)): free the offending item's intercept and keep the others equal, so that the comparison of means rests on the items that do work alike.
+
+#### Try it: what the scalar constraint does to the factor mean
+
+Now $k$ items load 0.7 in both groups, and the last item's intercept is higher in group B by the amount you set. The widget computes the large-sample answer: group B's estimated factor mean under full and under partial scalar invariance, and how often the test of the scalar step (on $k - 1$ degrees of freedom) would catch the shifted item.
+
+```{ojs}
+//| echo: false
+viewof ss_k = Inputs.range([4, 12], {value: 4, step: 1, label: "Number of items k"})
+viewof ss_d = Inputs.range([-0.5, 0.5], {value: 0.3, step: 0.05, label: "Last item's intercept, B minus A"})
+viewof ss_kap = Inputs.range([-1, 1], {value: 0, step: 0.05, label: "True factor mean, B minus A (SDs)"})
+viewof ss_n = Inputs.range([50, 2000], {value: 300, step: 50, label: "Respondents per group"})
+```
+
+```{ojs}
+//| echo: false
+ss = scalarStep({k: ss_k, kappa: ss_kap, delta: ss_d, n: ss_n})
+ss_bars = [{m: "Truth", v: ss_kap}, {m: "Full scalar invariance", v: ss.kappaHat}, {m: "Partial (last item free)", v: ss.kappaPartial}]
+Plot.plot({
+  width: 700, height: 150, marginLeft: 180, x: {domain: [-1.4, 1.4], label: "Group B's factor mean, minus group A's (SDs)"}, y: {label: null, domain: ss_bars.map(d => d.m)},
+  marks: [Plot.ruleX([0], {stroke: palette.rule}),
+          Plot.dot(ss_bars, {x: "v", y: "m", r: 7, fill: d => d.m === "Full scalar invariance" ? palette.contrast : palette.main}),
+          Plot.text(ss_bars, {x: "v", y: "m", text: d => d.v.toFixed(3), dy: -14})]
+})
+```
+
+```{ojs}
+//| echo: false
+ss_pow = grid(50, 2000, 79).map(n => ({n, p: ss.powerAt(n)}))
+Plot.plot({
+  width: 700, height: 240, x: {label: "Respondents per group"}, y: {label: "Chance the scalar step fails (5% level)", domain: [0, 1]},
+  marks: [Plot.ruleY([0.05], {stroke: palette.guide, strokeDasharray: "4,3"}),
+          Plot.line(ss_pow, {x: "n", y: "p", stroke: palette.main, strokeWidth: 2.5}),
+          Plot.dot([{n: ss_n, p: ss.power}], {x: "n", y: "p", r: 6, fill: palette.contrast})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Full scalar model: group B's mean is off by **${(ss.kappaHat - ss_kap).toFixed(3)}** SD. Expected χ² difference at the scalar step **${(ss.ncp + ss.df).toFixed(1)}** on ${ss.df} df (5% critical value ${ss.crit.toFixed(1)}); chance it fails: **${ss.power.toFixed(2)}**. (Dashed line: 5%, the chance with no shifted item.)`
+```
+
+At the start, the groups don't differ, yet the scalar model puts group B 0.107 SD above A. With equal loadings the error is the shift divided by $k\lambda$ (problem 1), here $0.3/(4 \times 0.7)$. The partial model recovers the truth. With 300 respondents per group, the scalar step fails 97% of the time; halve the shift and the error halves while the chance of catching it falls to 44%. Raise $k$ to 12 and the error falls to 0.036: more invariant items dilute one shifted one. Move the true mean: the error stays the same size, whatever the groups' real difference.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Eight items load 0.7 in both groups. One item's intercept is 0.4 higher in group B, and a scalar model puts group B's factor mean 0.2 SD above group A's. Roughly what would a partial model, with that intercept free, give?",
+  options: [
+    {text: "About 0.13", correct: true, why: "The error is the shift over $k\\lambda$: $0.4/(8 \\times 0.7) \\approx 0.07$. Take it off: $0.2 - 0.07 \\approx 0.13$."},
+    {text: "About −0.2", correct: false, why: "Freeing one intercept removes that item's shift from the comparison; it doesn't reverse the difference. The item accounts for only about 0.07 of it."},
+    {text: "About 0.2: one item out of eight can't matter", correct: false, why: "It can, a little: the scalar model spreads the item's 0.4 over the factor mean, about $0.4/(8 \\times 0.7) \\approx 0.07$ SD."}
+  ]
+})
+```
+
+### Testing the steps
+
+Each step is nested in the one before, so a χ² difference tests it, scaled when the estimator is robust ([Satorra & Bentler, 2001](https://doi.org/10.1007/BF02296192)). As with any χ² test, a large enough sample rejects a step for differences too small to matter. So changes in fit indices are read alongside: [Cheung and Rensvold (2002)](https://doi.org/10.1207/s15328007sem0902_5) proposed treating a drop in CFI of more than 0.01 as a failed step, and [Chen (2007)](https://doi.org/10.1080/10705510701301834) paired it with changes in RMSEA and SRMR; [Putnick and Bornstein (2016)](https://doi.org/10.1016/j.dr.2016.06.004) survey how these criteria are used and questioned.
+
+When a step fails, which constraint is responsible? A **score test** (`lavTestScore()` in `lavaan`) says, for each equality constraint, how much the χ² would fall if that constraint alone were released. The largest is the first suspect. But a scalar model with many items holds dozens of constraints, and a few small $p$-values turn up by chance.
+
+#### Try it: how many flags by chance?
+
+```{ojs}
+//| echo: false
+viewof fl_m = Inputs.range([1, 60], {value: 39, step: 1, label: "Equality constraints tested"})
+viewof fl_a = Inputs.select([0.05, 0.01, 0.001], {value: 0.01, label: "Level α for each test"})
+```
+
+```{ojs}
+//| echo: false
+fl = Array.from({length: 60}, (_, i) => ({m: i + 1, p: 1 - (1 - fl_a) ** (i + 1)}))
+Plot.plot({
+  width: 700, height: 240, x: {label: "Constraints tested"}, y: {label: "Chance at least one p < α", domain: [0, 1]},
+  marks: [Plot.line(fl, {x: "m", y: "p", stroke: palette.main, strokeWidth: 2.5}),
+          Plot.dot([fl[fl_m - 1]], {x: "m", y: "p", r: 6, fill: palette.contrast})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`If every one of ${fl_m} constraints were true and the tests were independent, at least one would fall below ${fl_a} with probability **${fl[fl_m - 1].p.toFixed(2)}**. A Bonferroni threshold would be ${fl_a} / ${fl_m} = **${(fl_a / fl_m).toPrecision(2)}**.`
+```
+
+At 39 constraints and α = 0.01, a flag turns up by chance about a third of the time (0.32); at α = 0.05, 86% of the time. Score tests on one model aren't independent, so these are rough guides, but they set the baseline for reading the largest test.
+
+### Choosing an estimator for multigroup fits
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Factor analysis II](fa-confirmatory.qmd): choose the estimator from the data. ML for continuous, roughly normal items; MLR for skewed items or five or more categories used fairly evenly; WLSMV, on thresholds and polychorics, for fewer than five categories or responses piled at one end; FIML, or the graded model, when responses are missing.
+:::
+
+In a multigroup fit the guide applies group by group, and three things change. With ordered items each group gets its own thresholds, so every category of every item needs responses in each group; a category that is nearly empty in one group is a problem even when it isn't in the pooled data ([Rutkowski, Svetina & Liaw, 2019](https://doi.org/10.1080/10705511.2018.1547640), who also show that collapsing categories changes fit). Which parameters must be fixed at each step to keep ordinal models identified and nested is subtler than with continuous items ([Wu & Estabrook, 2016](https://doi.org/10.1007/s11336-016-9506-0)). And the difference tests behave differently across estimators: in simulations by [Sass, Schmitt and Marsh (2014)](https://doi.org/10.1080/10705511.2014.882658), their Type I error rates varied across ML, MLR and WLSMV, and changes in fit indices under WLSMV needed caution in misspecified models. With missing ordinal responses, WLSMV with pairwise deletion was the one method in the simulations of [Chen, Wu, Garnier-Villarreal, Kite and Jia (2020)](https://doi.org/10.1080/00273171.2019.1608799) whose difference tests did not reasonably control their Type I error rate; the full-information ordinal models recovered loadings best.
+
+So a reasonable plan with sparse categories is MLR for the ladder, items as numbers, with an ordinal fit as the check, on collapsed categories if need be.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A four-category item has 40 responses in its top category among men and none among women. You want to test scalar invariance with WLSMV. What happens?",
+  options: [
+    {text: "Nothing changes: WLSMV handles skewed items", correct: false, why: "Skew is fine; an empty category isn't. With ordered items each group gets thresholds, and no top-category threshold can be estimated for women, so the two groups' thresholds can't even be set equal as they stand."},
+    {text: "The top threshold can't be estimated for women, so you collapse the top two categories (in both groups), or treat the items as numbers", correct: true, why: "Collapsing keeps the ordinal model but changes the item, and it can change fit (Rutkowski et al., 2019); MLR sidesteps thresholds altogether. Either way, say which you did."},
+    {text: "Use MLR with FIML, because the missing category is missing data", correct: false, why: "No response is missing: every woman answered the item. An empty category is a fact about the responses, not a missing value."}
+  ]
+})
+```
+
+## Simulate
+
+The code simulates 500 respondents in each of two groups answering six items that measure one factor, with group B's factor mean 0.3 SD higher and item 6's intercept 0.4 higher. It climbs the ladder with `lavaan`, runs the score tests on the scalar model, frees the item with the largest one, and compares group B's estimated factor mean with the truth. The first run installs `lavaan`, which takes a little while; after that, each run takes a few seconds.
+
+With the seed as written, configural to metric passes ($p = 0.31$) and the scalar step fails (Δχ² = 42.3 on 5 df); item 6's intercept has by far the largest score test (40.5); and group B's mean comes out at 0.377 under full scalar invariance and 0.319 with item 6 free (truth 0.3). Set `shift <- 0` and the scalar step should pass; set `n <- 150` and see how often the test still finds item 6 across a few seeds.
+
+```{webr}
+{{< include code/measurement-invariance-sim.R >}}
+```
+
+[Download this code](code/measurement-invariance-sim.R).
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/measurement-invariance-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### The DASS-21: women and men
+
+Our main example returns to [neurodegenerative_huizinga_2019_dass](https://itemresponsewarehouse.org/tables/neurodegenerative_huizinga_2019_dass/), the Dutch DASS-21 answered by a community sample recruited by [Huizinga et al. (2020)](https://doi.org/10.1371/journal.pone.0232232), with the three-factor model of [Factor analysis II](fa-confirmatory.qmd) ([Lovibond & Lovibond, 1995](https://doi.org/10.1016/0005-7967(94)00075-u)). Its job is to show the ladder where it holds. [Download the code](code/measurement-invariance-irw.R) to run every chunk.
+
+```{r fetch-dass}
+#| echo: true
+#| code-fold: show
+```
+
+The table's `cov_sex` codes are unlabelled in the processing script. The paper reports 785 women among its 1,461 participants (its Table 1), and code 2 holds exactly 785 of the table's 1,461 respondents, so we read 2 as women: a match of counts, not a codebook.
+
+Which estimator? For the single-group structure the guide pointed to WLSMV: four categories, piled at zero. Group by group, the top category is thin.
+
+```{r dass-categories}
+#| echo: true
+#| code-fold: show
+```
+
+Every item's top category holds between 1 and 12 responses in each group, and five items (four among men, one among women) hold a single one. Thresholds resting on one response per group are fragile, so we climb the ladder with MLR, items as numbers, and fit WLSMV as the check.
+
+```{r dass-invariance}
+#| echo: true
+#| code-fold: show
+```
+
+Equal loadings cost almost nothing (a scaled Δχ² of 13.5 on 18 df, $p = 0.76$), and neither do equal intercepts (24.6 on 18 df, $p = 0.14$). Robust CFI is 0.931 or 0.932 at every step, far inside the 0.01 criterion. The configural fit is modest, but the question at each step is whether the constraints make it worse, and they don't.
+
+```{r dass-constraints}
+#| echo: true
+#| code-fold: show
+```
+
+The constraint under most strain is item 16's intercept ("I was unable to become enthusiastic about anything", in the wording of the [English DASS-21](https://www2.psy.unsw.edu.au/dass/Download%20files/Dass21.pdf); Lovibond & Lovibond, 1995), with a score test of 6.9 on 1 df. Its $p$-value is 0.009, and among 39 tests one that small turns up by chance about three times in ten ($1 - 0.991^{39} \approx 0.30$, the widget's baseline).
+
+```{r dass-means}
+#| echo: true
+#| code-fold: show
+```
+
+With scalar invariance the factor means can be compared: women sit 0.16 SD above men on anxiety, 0.18 SD on stress, and 0.09 SD on depression.
+
+```{r dass-ordinal-check}
+#| echo: true
+#| code-fold: show
+#| warning: false
+```
+
+As ordered categories, every step fits well (CFI 0.978 to 0.987, RMSEA at most 0.050). We read only the indices. `lavaan`'s default ordinal scalar model frees 21 scale factors and 3 factor means that its metric model fixes, so the two aren't nested and their difference isn't a test of the thresholds alone (problem 5). The DASS-21 passes.
+
+### The CES-D: where one item breaks
+
+Our failure case is [alexandrowicz_2018_cesd](https://itemresponsewarehouse.org/tables/alexandrowicz_2018_cesd/): the 20-item CES-D ([Radloff, 1977](https://doi.org/10.1177/014662167700100306)), answered 0 to 3 by a sample of Austrian adults ([Alexandrowicz, Jahn & Wancata, 2018](https://doi.org/10.1371/journal.pone.0197908)). Its job is to show the ladder failing and what to do next.
+
+```{r fetch-cesd}
+#| echo: true
+#| code-fold: show
+```
+
+The paper reports 264 women among 518 respondents; the table has 263 respondents coded 2 of 514, so 2 is probably women, though nothing documents it. The four positively worded items arrive reversed: no inter-item correlation is below −0.02. Six respondents skipped an item or two, so listwise deletion costs about 1%. The model has two factors: the 16 symptom items, and the four items of Radloff's positive-affect subscale, as Alexandrowicz et al. list them (their Table 1). The estimator: the top categories are sparser than the DASS's (seven items among men and five among women have at most one response at 3), so MLR again, with an ordinal check.
+
+```{r cesd-ladder}
+#| echo: true
+#| code-fold: show
+```
+
+The configural model fits modestly by the conventional cutoffs (robust CFI 0.902, below 0.95; RMSEA 0.056, under 0.06). Equal loadings don't: a scaled Δχ² of 51.3 on 18 df ($p < .001$), and CFI drops by 0.029, three times the 0.01 criterion. The scalar step fails as well (39.1 on 18 df).
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The metric step fails. Which item's loading will the score tests single out?",
+  choices: ["Crying spells (item 17)", "Feeling happy (item 12)", "Restless sleep (item 11)", "Talking less than usual (item 13)"],
+  answer: "Crying spells (item 17)",
+  reveal: "Crying, by a wide margin: its score test is 11.7, twice the next (item 5, 5.8). At the same level of depressive symptoms, crying is tied to the factor differently in the two groups."
+})
+```
+
+```{r cesd-constraints}
+#| echo: true
+#| code-fold: show
+```
+
+The crying item's loading has the largest score test, 11.7 on 1 df among 18, twice the next. [Alexandrowicz et al. (2018)](https://doi.org/10.1371/journal.pone.0197908) found DIF by gender on the same item with a Rasch model, which is some reassurance that it isn't an accident of this model. We free it, then look at the intercepts.
+
+```{r cesd-partial}
+#| echo: true
+#| code-fold: show
+```
+
+With the crying loading free, the metric step is borderline (28.1 on 17 df, $p = 0.04$; CFI 0.892, a drop of 0.010). At the scalar step the crying intercept is again first (7.6). Freed as well, the partial scalar model holds against the partial metric one (25.5 on 17 df, $p = 0.08$).
+
+```{r cesd-means}
+#| echo: true
+#| code-fold: show
+```
+
+Does freeing the item change the comparison? Under full scalar invariance group 2 sits 0.21 SD above group 1 on the symptom factor; with the crying item free, 0.18 SD. Positive affect is 0.10 SD lower in group 2 either way. The crying item's loading is 0.33 in group 1 and 1.28 in group 2 (in units of the first item's loading), and its intercept 0.085 and 0.183: in group 2, crying goes with the other symptoms far more closely, and at the factor's zero point it is reported more often.
+
+```{r cesd-ordinal-check}
+#| echo: true
+#| code-fold: show
+#| warning: false
+```
+
+As a check with an ordinal estimator, on items scored as any symptom against none, the crying loading again has the largest score test (33.7).
+
+So what should a report say? One view drops the crying item, so that the scale is invariant as it stands. Another keeps it and frees its parameters, so that the comparison rests on the other 19 items while the item still counts toward each respondent's score. A third ignores the failure because it is one item in twenty. The first changes the instrument, and its scores no longer match published norms; the third lets one item push the comparison, by 0.03 SD here; the second needs enough invariant items to carry the comparison. My practice is to free the item, report the comparison both ways, and say which item and why. Here the two give 0.21 and 0.18 SD, and the conclusion doesn't change.
+
+## Problems
+
+1. **The size of the error.** Four items with equal loadings $\lambda$ and unique variances $\psi$ measure one factor in two groups, with item 4's intercept higher by $\delta$ in group B. (a) Show that the gap between the groups' expected sum scores is $4\lambda\kappa + \delta$, and express it in SDs of group A's sum score, as the first widget does. (b) With $k$ items, show that the scalar model's population estimate of group B's mean is $\kappa + \delta/(k\lambda)$. (Hint: with the covariances fitted exactly, the scalar model's mean part is a generalized least-squares regression of the item mean differences on $\lambda$.)
+2. **A different grouping.** Split the CES-D respondents at the median of `cov_age` and climb the ladder with the same two-factor model. Does the crying item stand out again? Which constraints do, and what would you do about them?
+3. **Significant but small.** A scale is compared across two groups of 10,000 respondents each. The scalar step gives a scaled Δχ² of 180 on 20 df ($p < .001$) and a drop in CFI of 0.003. Is the scale invariant enough to compare means? What would you look at before deciding, and what would you report?
+4. **Design.** You want to compare DASS-21 scores across the education levels in `cov_education`. Which level of invariance do you need to compare means, and which to compare the depression–anxiety correlation? Check the group sizes first: which estimator would you use, and what would you do if one item's intercept failed in one group?
+5. **Nested or not?** Using the code's ordinal DASS fits, list what each of the three models fixes and frees (thresholds, scale factors, factor means and variances). Why is the default metric-to-scalar difference not a test of equal thresholds? Build a nested sequence as [Wu and Estabrook (2016)](https://doi.org/10.1007/s11336-016-9506-0) propose (the `semTools` function `measEq.syntax()` writes the syntax), test it, and compare the verdict with the MLR ladder.
+6. **Challenge (open).** With thirty countries, [Asparouhov and Muthén (2014)](https://doi.org/10.1080/10705511.2014.919210) note, the scalar model tends to fit poorly and to throw up many large modification indices. They propose **alignment**, which estimates the countries' factor means without requiring exact invariance. What does alignment assume in place of invariance, and how would you decide whether the means it gives are trustworthy enough to rank the countries? I don't know of a settled answer.
+
+```{r}
+#| output: asis
+ask_claude("measurement-invariance", "It covers measurement invariance with multigroup confirmatory factor analysis in lavaan: the configural, metric, scalar (and strict) steps and which comparisons each supports, how the groups are put on one scale, what a non-invariant intercept does to sum-score and factor-mean comparisons, partial invariance, scaled chi-square difference tests, changes in CFI, score tests and multiple testing, and choosing an estimator (MLR or WLSMV) for multigroup fits with sparse ordered categories, with the DASS-21 (invariance holds across women and men) and the CES-D (the crying item is not invariant) as examples.")
+```
+
+## Going further
+
+- Meredith, W. (1993). Measurement invariance, factor analysis and factorial invariance. *Psychometrika*, 58(4), 525–543. <https://doi.org/10.1007/BF02294825>. The definitions, from weak to strict.
+- Jöreskog, K. G. (1971). Simultaneous factor analysis in several populations. *Psychometrika*, 36(4), 409–426. <https://doi.org/10.1007/BF02291366>. The multigroup model and its tests.
+- Vandenberg, R. J., & Lance, C. E. (2000). A review and synthesis of the measurement invariance literature. *Organizational Research Methods*, 3(1), 4–70. <https://doi.org/10.1177/109442810031002>. The ladder, step by step.
+- Putnick, D. L., & Bornstein, M. H. (2016). Measurement invariance conventions and reporting: The state of the art and future directions for psychological research. *Developmental Review*, 41, 71–90. <https://doi.org/10.1016/j.dr.2016.06.004>. How invariance is tested and reported in practice, with the criteria for changes in fit.
+- Byrne, B. M., Shavelson, R. J., & Muthén, B. (1989). Testing for the equivalence of factor covariance and mean structures: The issue of partial measurement invariance. *Psychological Bulletin*, 105(3), 456–466. <https://doi.org/10.1037/0033-2909.105.3.456>. Partial invariance.
+- Cheung, G. W., & Rensvold, R. B. (2002). Evaluating goodness-of-fit indexes for testing measurement invariance. *Structural Equation Modeling*, 9(2), 233–255. <https://doi.org/10.1207/s15328007sem0902_5>. Where the change-in-CFI criterion comes from.
+- Chen, F. F. (2007). Sensitivity of goodness of fit indexes to lack of measurement invariance. *Structural Equation Modeling*, 14(3), 464–504. <https://doi.org/10.1080/10705510701301834>. Which index notices which kind of non-invariance.
+- Wu, H., & Estabrook, R. (2016). Identification of confirmatory factor analysis models of different levels of invariance for ordered categorical outcomes. *Psychometrika*, 81(4), 1014–1045. <https://doi.org/10.1007/s11336-016-9506-0>. Invariance with ordinal items, identified and nested (problem 5).
+- Svetina, D., Rutkowski, L., & Rutkowski, D. (2020). Multiple-group invariance with categorical outcomes using updated guidelines: An illustration using M*plus* and the lavaan/semTools packages. *Structural Equation Modeling*, 27(1), 111–130. <https://doi.org/10.1080/10705511.2019.1602776>. A worked tutorial for the ordinal ladder in R.
+- Sass, D. A., Schmitt, T. A., & Marsh, H. W. (2014). Evaluating model fit with ordered categorical data within a measurement invariance framework: A comparison of estimators. *Structural Equation Modeling*, 21(2), 167–180. <https://doi.org/10.1080/10705511.2014.882658>. ML, MLR and WLSMV at each step.
+- Chen, P.-Y., Wu, W., Garnier-Villarreal, M., Kite, B. A., & Jia, F. (2020). Testing measurement invariance with ordinal missing data: A comparison of estimators and missing data techniques. *Multivariate Behavioral Research*, 55(1), 87–101. <https://doi.org/10.1080/00273171.2019.1608799>. Missing ordinal responses in the ladder.
+- Nye, C. D., & Drasgow, F. (2011). Effect size indices for analyses of measurement equivalence: Understanding the practical importance of differences between groups. *Journal of Applied Psychology*, 96(5), 966–980. <https://doi.org/10.1037/a0022955>. An effect size for non-invariance, for when "significant" isn't the question (problem 3).
+- Millsap, R. E. (2011). *Statistical approaches to measurement invariance*. Routledge. <https://doi.org/10.4324/9780203821961>. The full treatment, factor models and IRT together.
+- The lavaan tutorial on [multiple groups](https://lavaan.ugent.be/tutorial/groups.html): `group.equal`, `group.partial` and the tests.
+
+```{r}
+#| output: asis
+data_sources("measurement-invariance")
+```
+
+## For instructors
+
+- **Source:** new material. Split from [Factor analysis II](fa-confirmatory.qmd) on 09-25 (Ben, #58), at a colleague's suggestion that the factor-analysis lesson was too long; multigroup invariance had moved into that lesson from [Differential item functioning](dif.qmd) on 09-24. The DASS example, the CES-D failure case and the first widget come from it; the estimator section is new.
+- **Timing:** about 45 minutes for the core ideas and widgets; the real-data section is a 30-minute lab (the whole script runs in about a minute locally).
+- **Placement:** after [Factor analysis II](fa-confirmatory.qmd), and before [Fairness in testing](fairness.qmd) and [Differential item functioning](dif.qmd) in the first course, which return to invariance with item response models and observed-score matching. [Structural equation modeling with lavaan](sem.qmd) uses it for multigroup SEM.
+- **Held back:** invariance item by item ([Differential item functioning](dif.qmd)); occasions and treatments as groupings ([Measurement invariance under treatment and life events](invariance-experience.qmd)); many groups and alignment (problem 6 only); the effect-size view of non-invariance (in *Going further*).
+- **Data:** the DASS is in the public domain ([DASS FAQ, no. 3](https://www2.psy.unsw.edu.au/dass/DASSFAQ.htm)), so one item is quoted; CES-D items are named by their content, not quoted. Which `cov_sex` code is women rests on counts matching each paper, not on a codebook. The CES-D's positive-affect items are identified from Alexandrowicz et al. (2018, Table 1). The ladders are fitted with MLR, items as numbers, because some top categories hold one response or none in a group; the ordinal fits are checks.
+- **Solutions:** held back in `solutions/measurement-invariance.qmd` (not published).

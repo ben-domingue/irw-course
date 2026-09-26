@@ -380,6 +380,18 @@ lessons:
     status: draft
     tranche: core
 
+  # 2026-09-25: split from fa-confirmatory (Ben, #58, on a colleague's suggestion):
+  # multigroup CFA and the invariance ladder get a lesson of their own.
+  - id: measurement-invariance
+    title: "Measurement invariance: comparing groups with multigroup CFA"
+    module: fa
+    prereqs: [fa-confirmatory]
+    origin: {slides: [], ps: [], code: []}
+    tables: [neurodegenerative_huizinga_2019_dass, alexandrowicz_2018_cesd]
+    reuses: [neurodegenerative_huizinga_2019_dass, alexandrowicz_2018_cesd]  # the DASS from fa-confirmatory, now by sex (measurement-invariance thread); the CES-D, a problem in dif, here the worked case where the ladder fails
+    status: draft
+    tranche: core
+
   - id: validity-evidence
     title: Gathering validity evidence
     module: validity
@@ -402,7 +414,7 @@ lessons:
   - id: sem
     title: Structural equation modeling with lavaan
     module: fa
-    prereqs: [fa-confirmatory]
+    prereqs: [fa-confirmatory, measurement-invariance]
     origin: {slides: [], ps: [], code: []}
     tables: [florida_twins_grit, florida_twins_panas]
     reuses: [florida_twins_grit]
@@ -458,7 +470,7 @@ paths:
     title: "A first course (preliminary and core lessons)"
     lessons: [measurement, irw-data, likelihood, constructs, ctt-reliability, instrument-building,
               g-theory, ctt-limits, validity-argument, validity-evidence, fa-exploratory, rasch,
-              1pl-to-4pl, information, ability-estimation, fa-confirmatory, fit-prediction,
+              1pl-to-4pl, information, ability-estimation, fa-confirmatory, measurement-invariance, fit-prediction,
               polytomous, fairness, dif, score-meaning, equating]
 
   - id: educ252
@@ -667,7 +679,7 @@ threads:
       - {lesson: guessing-priors, how: asks whether c helps out of sample}
   - id: measurement-invariance
     idea: "Comparing group means needs scalar invariance"
-    introduced: fa-confirmatory
+    introduced: measurement-invariance
     returns:
       - {lesson: sem, how: fits it in multigroup SEM}
   - id: omega
@@ -680,6 +692,12 @@ threads:
     introduced: fa-confirmatory
     returns:
       - {lesson: dimensionality, how: fits multidimensional IRT as factor analysis}
+  # 09-25 (#58): the estimator section added when fa-confirmatory was split.
+  - id: estimator-choice
+    idea: "Choose the estimator from the data: categories, shape, missingness"
+    introduced: fa-confirmatory
+    returns:
+      - {lesson: measurement-invariance, how: chooses again for multigroup fits}
 
   # Pass 4 (09-25): proposed by the wave-2 drafts (#135-#139); returns kept only
   # where they are descendants of the introducing lesson (E2).
