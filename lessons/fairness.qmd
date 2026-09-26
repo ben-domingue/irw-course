@@ -139,7 +139,7 @@ In practice invariance is checked by fitting a model to both groups at once and 
 When one or two items fail, **partial invariance** frees their parameters and keeps the rest equal.
 
 ::: {.callout-tip appearance="simple"}
-**If you've done** [Factor analysis II](fa-confirmatory.qmd): this is the multigroup ladder you fitted with `lavaan` to the DASS-21, where equal loadings and equal intercepts cost almost nothing across women and men, so their factor means could be compared. Here the same ladder is fitted with an item response model.
+**If you've done** [Measurement invariance](measurement-invariance.qmd): this is the multigroup ladder you fitted with `lavaan` to the DASS-21, where equal loadings and equal intercepts cost almost nothing across women and men, so their factor means could be compared. Here the same ladder is fitted with an item response model.
 :::
 
 These checks have a limit. The model places the two groups on one scale using the items themselves, since the attribute is never observed. If every item were harder for the focal group by the same amount, its respondents would answer exactly as if they were that much lower on the attribute.
@@ -397,5 +397,5 @@ data_sources("fairness")
 - **Source:** EDUC 252 class 5 (slides c5, 1–16: fairness as error associated with other characteristics, reference and focal groups, impact and bias with the heights example, the rule on comparing people who start in similar situations, sources of bias, culture-level differences). The vocabulary-checklist analysis, the three widgets and the simulation are new.
 - **Added 09-25 (Ben):** this lesson was added while reviewing [Differential item functioning](dif.qmd), as a broader preliminary to it. Impact versus bias moved here from `dif`, which now lists this lesson as a prerequisite.
 - **Timing:** about 45 minutes for the core ideas and widgets; the real-data section works as a 25-minute lab (the model fits take about a minute locally). Problems 3 and 6 work as small-group discussions.
-- **Held back:** DIF methods (in [Differential item functioning](dif.qmd)); multigroup factor analysis (in [Factor analysis II](fa-confirmatory.qmd)); treatment as a grouping variable (in [Measurement invariance under treatment and life events](invariance-experience.qmd)); accommodations, accessibility and universal design (the *Standards*' third view) are named only.
+- **Held back:** DIF methods (in [Differential item functioning](dif.qmd)); multigroup factor analysis (in [Measurement invariance](measurement-invariance.qmd)); treatment as a grouping variable (in [Measurement invariance under treatment and life events](invariance-experience.qmd)); accommodations, accessibility and universal design (the *Standards*' third view) are named only.
 - **Solutions:** held back in `solutions/fairness.qmd` (not published). Problem 6 is open.

@@ -45,8 +45,13 @@ for (t in tabs) {
 # landing page alone is a mention, not a use: it needs no `tables` entry
 # (check_links.R confirms the page exists). 09-24: irw-data's tour of the IRW.
 for (l in course$lessons) {
-  files <- c(file.path("lessons", paste0(l$id, ".qmd")),
-             Sys.glob(file.path("lessons", "code", paste0(l$id, "*.R"))))
+  code <- Sys.glob(file.path("lessons", "code", paste0(l$id, "-*.R")))
+  # A longer lesson id can start with this one (measurement, measurement-invariance):
+  # its code files belong to it, not to this lesson.
+  longer <- setdiff(vapply(course$lessons, `[[`, "", "id"), l$id)
+  longer <- longer[startsWith(longer, paste0(l$id, "-"))]
+  code <- code[!vapply(basename(code), function(f) any(startsWith(f, paste0(longer, "-"))), TRUE)]
+  files <- c(file.path("lessons", paste0(l$id, ".qmd")), code)
   txt <- unlist(lapply(files[file.exists(files)], readLines, warn = FALSE))
   hits <- c(unlist(regmatches(txt, gregexpr("irw_csv(_url)?\\(\"[^\"]+\"", txt))),
             unlist(regmatches(txt, gregexpr("item_response_warehouse:v[0-9_]+\\.[A-Za-z0-9_.-]+", txt))))
