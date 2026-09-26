@@ -8,21 +8,406 @@ source("_course.R")
 lesson_header("trials")
 ```
 
+```{webr}
+#| context: setup
+webr::install("lme4", quiet = TRUE)
+suppressPackageStartupMessages(library(lme4))
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {RR98, psychFit, varianceParts, shotWorld} from "./widgets/trials.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+A test gives each respondent many items once. An experimental task gives each respondent a few conditions many times: a bright or dark patch, a shape rotated by 50 or 150 degrees, a colour word printed in the wrong ink. What is the item then: the condition, or the trial? Can a stimulus feature stand in for a difficulty? And is the question even about the respondents? It may be about the stimulus: does changing it change performance for everyone? A task can answer that emphatically and say almost nothing about how people differ. This lesson brings the explanatory models of [What is an item?](explanatory-irt.qmd) to data of this kind, and ends on what the reliability paradox means for anyone who wants to use a task to measure people.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write a model for repeated trials in which the condition is the item, and say what it assumes about the trials;
+- replace per-condition difficulties with a function of a stimulus feature, and compare the two in and out of sample;
+- decompose a task's variance into a stimulus effect, person differences in that effect, and trial noise, and compute the reliability of a person's effect from it;
+- explain why a large, universal experimental effect can come with unreliable individual differences;
+- say why ability estimates are biased when respondents choose their own trials, and what adjusting for trial features does about it.
+
 ## Core ideas
 
-## Worked example
+### In a task, the item is a condition met many times
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): in `rr98_accuracy` each observer's session meets each brightness level a median of 12 times, and the reshape to one row per respondent needed a rule for repeated responses: keep one attempt, average them, or redefine the respondent or the item.
+:::
+
+Here the rule is to keep every trial and let the condition be the item. With trial $t$ of respondent $j$ falling in condition $i(t)$,
+$$\text{logit}\Pr(x_{jt} = 1) = \theta_j + \beta_{i(t)}, \qquad \theta_j \sim N(0, \sigma^2_\theta).$$
+This is the Rasch model of [What is an item?](explanatory-irt.qmd) with many rows per respondent–item pair, and `glmer()` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)) fits it as before. It assumes that a respondent's twelfth meeting with a condition is the same item as the first: no practice, fatigue or memory of the trial before ([De Boeck & Wilson, 2004](https://doi.org/10.1007/978-1-4757-3990-9)). The alternative, averaging trials within respondent and condition and comparing the averages, sets both the respondent and the item aside; [Rouder and Haaf (2019)](https://doi.org/10.3758/s13423-018-1558-y) show that this aggregation can shrink effect sizes and correlations alike.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is an item?](explanatory-irt.qmd): in hearts and flowers, a flower after a heart cost 0.59 logits against a flower after a flower, more than the whole spread among the four shape × side items. The item was the stimulus in its context.
+:::
+
+Hearts-and-flowers-style tasks have a handful of discrete conditions. Other tasks vary a physical feature almost continuously (brightness, the angle between two shapes, the coherence of moving dots), and then the natural step is to replace the conditions' difficulties with a function of the feature.
+
+### Replace condition parameters with a stimulus feature
+
+The LLTM wrote each item's easiness as a weighted sum of its features ([Fischer, 1973](https://doi.org/10.1016/0001-6918(73)90003-6)). With a continuous feature $s$ it is a curve,
+$$\beta_{i} = \beta_0 + \beta_1\, g(s_i),$$
+and in psychophysics that curve, probability correct against stimulus strength, is the **psychometric function** ([Wichmann & Hill, 2001](https://doi.org/10.3758/BF03194544)). In [Ratcliff and Rouder's (1998)](https://doi.org/10.1111/1467-9280.00067) brightness task, the bright and dark distributions overlap most at the middle level, 16, so accuracy should depend on the distance from it, $g(s) = |s - 16|$: two parameters in place of 33.
+
+#### Try it: 33 levels or two parameters
+
+Each dot is one brightness level in `rr98_accuracy`, pooled over the 30 sessions and sized by its number of trials. Choose an account of the levels and where the middle of the task sits.
+
+```{ojs}
+//| echo: false
+viewof pf_model = Inputs.radio(["A line in distance from the middle", "One value per distance from the middle", "One value per level"],
+  {value: "A line in distance from the middle", label: "Account of the levels"})
+viewof pf_mid = Inputs.range([14, 18], {value: 16, step: 0.5, label: "Middle of the task (level)"})
+```
+
+```{ojs}
+//| echo: false
+pf_key = pf_model.startsWith("A line") ? "line" : pf_model.startsWith("One value per distance") ? "dist" : "level"
+pf = psychFit(pf_key, pf_mid)
+pf_full = psychFit("level")
+pf_pts = RR98.n.map((n, i) => ({level: i, p: RR98.k[i] / n, n, fit: pf.p[i]}))
+Plot.plot({
+  width: 700, height: 300, x: {label: "Brightness level (0 = all black, 32 = all white)"}, y: {label: "Proportion correct", domain: [0.4, 1]},
+  r: {range: [2, 8]},
+  marks: [
+    Plot.ruleY([0.5], {stroke: palette.guide, strokeDasharray: "4 3"}),
+    Plot.ruleX([pf_mid], {stroke: palette.rule}),
+    Plot.dot(pf_pts, {x: "level", y: "p", r: "n", fill: palette.main, fillOpacity: 0.7}),
+    Plot.line(pf_pts, {x: "level", y: "fit", stroke: palette.contrast, strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`**${pf.npar} parameters**, log likelihood **${pf.ll.toFixed(1)}**, AIC **${pf.aic.toFixed(0)}**. One value per level (33 parameters) reaches ${pf_full.ll.toFixed(1)}, AIC ${pf_full.aic.toFixed(0)}. (Trials pooled, no session effects.)`
+```
+
+With the middle at 16, the line gives up about 43 units of log likelihood to the 33-parameter account, and the AIC prefers the 33. Move the middle to 15.5: both distance accounts improve, and one value per distance now has the lowest AIC of the three. The data put the point of greatest confusion a little below the design's middle; a feature model has to be told this.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A line in distance for 33 brightness levels fits worse than one easiness per level by a likelihood-ratio test, yet predicts held-out trials about as well. How can both be true?",
+  options: [
+    {text: "With thousands of trials the test detects small departures from the line, and 31 extra parameters buy little in new data", correct: true, why: "As with the LLTM in *What is an item?*, precise estimates make small misfits significant; out of sample, the noise in the extra parameters offsets most of what they add."},
+    {text: "The likelihood-ratio test is invalid for mixed models", correct: false, why: "The test is approximate for a variance on the boundary of its range, but these are fixed effects, and the test is fine."},
+    {text: "Out-of-sample prediction always favours the smaller model", correct: false, why: "Not always: when the extra parameters capture real structure and there are data to estimate them, the larger model predicts better, as the pair type does in the mental rotation data below."}
+  ]
+})
+```
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): the IMV is the expected return of betting on held-out responses with one model's predictions against someone holding another's ([Domingue et al., 2024](https://doi.org/10.1007/s11336-024-09977-2)). This lesson uses it to compare accounts of the conditions.
+:::
+
+### The question may be about the stimulus
+
+In an experiment the parameter of interest can be a condition effect: how much slower people are when word and ink disagree ([Stroop, 1935](https://doi.org/10.1037/h0054651)), or how much accuracy falls per 50 degrees of rotation ([Shepard & Metzler, 1971](https://doi.org/10.1126/science.171.3972.701)). Give each respondent their own effect and the model for a response time becomes
+$$\text{RT}_{jt} = \mu + \theta_j + (\delta + \gamma_j)\,c_t + \varepsilon_{jt}, \qquad \theta_j \sim N(0, \tau^2_\theta),\ \gamma_j \sim N(0, \tau^2_\gamma),\ \varepsilon_{jt} \sim N(0, \sigma^2),$$
+where $c_t$ is 1 on an incongruent trial. There are now two questions. Does the manipulation work: is $\delta$ far from 0? And do people differ in it: is $\tau_\gamma$ large enough to rank them?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): reliability is a property of scores in a population, the share of observed-score variance that is true-score variance.
+:::
+
+With $L$ trials per condition, a respondent's observed effect (mean incongruent RT minus mean congruent RT) has variance $\tau^2_\gamma + 2\sigma^2/L$ across respondents, so its reliability is
+$$\rho_\gamma = \frac{\tau^2_\gamma}{\tau^2_\gamma + 2\sigma^2/L}.$$
+The group test of $\delta$ divides it by $\sqrt{(\tau^2_\gamma + 2\sigma^2/L)/N}$. The between-person variance $\tau^2_\gamma$ is in the numerator of the one and the denominator of the other. [Hedge, Powell and Sumner (2018)](https://doi.org/10.3758/s13428-017-0935-1) draw the consequence: an effect becomes established, and its task popular, when people differ little in it, and that is what leaves the effect unreliable as a measure of individuals. This is the **reliability paradox**.
+
+#### Try it: where the variance lives
+
+The trial SD (0.17 s) and the SD of respondents' mean speed (0.10 s) are about what the Stroop table below shows; there are 150 respondents.
+
+```{ojs}
+//| echo: false
+viewof vp_delta = Inputs.range([0, 0.3], {value: 0.12, step: 0.01, label: "Average effect δ (s)"})
+viewof vp_tau = Inputs.range([0, 0.15], {value: 0.05, step: 0.005, label: "Person SD of the effect (s)"})
+viewof vp_L = Inputs.range([10, 400], {value: 47, step: 1, label: "Trials per condition"})
+```
+
+```{ojs}
+//| echo: false
+vp = varianceParts({delta: vp_delta, tauEffect: vp_tau, L: vp_L})
+vp_bars = [
+  {score: "Each respondent's effect", part: "True differences", share: vp.relEffect},
+  {score: "Each respondent's effect", part: "Trial noise", share: 1 - vp.relEffect},
+  {score: "Each respondent's mean RT", part: "True differences", share: vp.relMean},
+  {score: "Each respondent's mean RT", part: "Trial noise", share: 1 - vp.relMean}]
+Plot.plot({
+  width: 700, height: 170, marginLeft: 170, x: {label: "Share of the variance in the observed score", domain: [0, 1]}, y: {label: null},
+  color: {legend: true, domain: ["True differences", "Trial noise"], range: [palette.main, palette.light]},
+  marks: [Plot.barX(vp_bars, Plot.stackX({y: "score", x: "share", fill: "part"}))]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Reliability of each respondent's effect: **${vp.relEffect.toFixed(2)}**; of their mean RT: **${vp.relMean.toFixed(2)}**. Group test of the effect: **t = ${vp.t.toFixed(1)}**.`
+```
+
+Shrink the person SD toward 0. The t statistic *rises*, from 24 to 42, as the reliability of the effect falls to 0: the less people differ, the clearer the manipulation and the emptier the ranking. More trials help slowly, because a difference carries the noise of two means: at a person SD of 0.05 s it takes about 200 trials per condition to reach 0.9. The mean RT stays near 0.97.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Validity as causation](validity-causal.qmd): a timed Stroop there had an effect retest correlation of 0.17, against 0.73 for congruent RT. The variance ratio here says why trials help as they do.
+:::
+
+::: {.callout-note collapse="true"}
+## Go deeper: the reliability of an effect estimated from trials
+
+**Assumptions:** the RT model above; trials are independent given $\theta_j$ and $\gamma_j$, with the same noise variance $\sigma^2$ in both conditions; each respondent has $L$ trials in each condition; $\theta$, $\gamma$ and $\varepsilon$ are mutually independent.
+
+A respondent's condition means are $\bar y_{j0} = \mu + \theta_j + \bar\varepsilon_{j0}$ and $\bar y_{j1} = \mu + \theta_j + \delta + \gamma_j + \bar\varepsilon_{j1}$, with $\text{var}(\bar\varepsilon) = \sigma^2/L$. Their difference is $d_j = \delta + \gamma_j + (\bar\varepsilon_{j1} - \bar\varepsilon_{j0})$: $\theta_j$ cancels, and the two error means add, so $\text{var}(d_j) = \tau^2_\gamma + 2\sigma^2/L$. The true score is $\delta + \gamma_j$, whose variance is $\tau^2_\gamma$, so the reliability is $\tau^2_\gamma / (\tau^2_\gamma + 2\sigma^2/L)$. The respondent's mean over both conditions is $\mu + \theta_j + (\delta + \gamma_j)/2 + (\bar\varepsilon_{j0} + \bar\varepsilon_{j1})/2$, whose error variance is $\sigma^2/(2L)$, a quarter of the difference's.
+
+Solve for the number of trials that gives a target reliability $R$:
+$$L = \frac{2\sigma^2}{\tau^2_\gamma}\cdot\frac{R}{1 - R},$$
+the Spearman–Brown formula ([Spearman, 1910](https://doi.org/10.1111/j.2044-8295.1910.tb00206.x); [Brown, 1910](https://doi.org/10.1111/j.2044-8295.1910.tb00207.x)) in the currency of trials. It depends on the ratio $\sigma/\tau_\gamma$ and on nothing else; the average effect $\delta$ doesn't appear. Two routes follow. One is more trials. The other is to leave the observed effects alone and estimate $\tau_\gamma$, and the correlation of $\gamma$ with anything else, inside the model, where trial noise is a separate term ([Rouder & Haaf, 2019](https://doi.org/10.3758/s13423-018-1558-y)). That estimate is only as good as the model's assumptions about the trial noise, and it doesn't make any single respondent's effect more precise.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two Stroop-like tasks have the same trial noise and number of trials. Task A's average effect is twice task B's; the person SD of the effect is the same in both. Which task's effect is more reliable as a measure of individuals?",
+  options: [
+    {text: "Neither: the reliability depends on the person SD and the trial noise, not the average effect", correct: true, why: "The average $\\delta$ shifts every respondent's true effect by the same amount and drops out of the variance ratio. Task A gives the larger t statistic, not the better ranking."},
+    {text: "Task A, because its effect is larger", correct: false, why: "A larger average effect makes the group test more powerful. Reliability is about differences among respondents, which the average doesn't touch."},
+    {text: "Task B, because a smaller effect has less noise", correct: false, why: "The noise comes from the trials, $2\\sigma^2/L$, and is the same in both tasks."}
+  ]
+})
+```
+
+### When respondents choose their trials
+
+In a laboratory the experimenter assigns the trials. Elsewhere respondents choose them. A basketball player's three-point attempts are trials, each a make or a miss, but no two shots are the same and the player picks which to take. Whether a shooter's chance changes from shot to shot is an old question ([Gilovich, Vallone & Tversky, 1985](https://doi.org/10.1016/0010-0285(85)90010-6)); ours is simpler. A shooting percentage mixes skill with selection.
+
+#### Try it: choosing shots
+
+Two shooters take 2,000 threes each. A contested three is 0.8 logits harder than an open one, and shooter A makes 40% of open threes. The numbers are invented, at roughly the scale of professional three-point shooting.
+
+```{ojs}
+//| echo: false
+viewof sh_hardA = Inputs.range([0, 1], {value: 0.3, step: 0.05, label: "Shooter A: share of contested threes"})
+viewof sh_hardB = Inputs.range([0, 1], {value: 0.7, step: 0.05, label: "Shooter B: share of contested threes"})
+viewof sh_gap = Inputs.range([-0.5, 0.5], {value: 0, step: 0.05, label: "B's true skill minus A's (logits)"})
+```
+
+```{ojs}
+//| echo: false
+sh = shotWorld({hardA: sh_hardA, hardB: sh_hardB, skillGap: sh_gap})
+sh_pts = [{who: "Shooter A", pct: sh.pctA}, {who: "Shooter B", pct: sh.pctB}]
+Plot.plot({
+  width: 700, height: 150, marginLeft: 90, x: {label: "Three-point percentage", domain: [0, 0.6]}, y: {label: null},
+  color: {domain: ["Shooter A", "Shooter B"], range: [palette.main, palette.contrast]},
+  marks: [Plot.barX(sh_pts, {y: "who", x: "pct", fill: "who"}),
+          Plot.text(sh_pts, {y: "who", x: "pct", text: (d) => (100 * d.pct).toFixed(1) + "%", dx: 22})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Skill gap, B minus A, from the percentages alone: **${sh.rawGap.toFixed(2)}** logits (SE ${sh.rawSE.toFixed(2)}). Adjusting for shot type: **${sh.adjGap.toFixed(2)}** (SE ${sh.adjSE.toFixed(2)}). True gap: ${sh_gap.toFixed(2)}.`
+```
+
+With equal skill and the default mixes, B shoots 28.1% to A's 34.9% and looks 0.31 logits worse; with shot type in the model, the tie is restored. Give B a true edge of 0.3 logits and the percentages come out nearly equal, while the adjusted gap finds the edge. The adjustment works because the widget knows the one feature that makes shots differ. When choices also depend on things the data don't record, no adjustment for recorded features is complete.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In the widget, two equally skilled shooters have different percentages. What removes the gap?",
+  options: [
+    {text: "Putting shot type in the model as a trial feature, so each shooter's skill is compared on the same kind of shot", correct: true, why: "Shot type is an item feature, as in the LLTM. With it in the model, each shooter's parameter is their skill at a given kind of shot."},
+    {text: "More shots", correct: false, why: "More shots shrink the standard error around the wrong answer: the raw gap comes from the mix of shots, not from noise."},
+    {text: "Nothing: the percentage is the skill", correct: false, why: "A percentage is skill averaged over the shots a player chose. Two players who choose differently are averaged over different items."}
+  ]
+})
+```
+
+## Simulate
+
+The code simulates a mental rotation task: 50 respondents meet four angles ten times in each of two sessions. Accuracy falls by 0.4 logits per 50 degrees on average, and respondents' slopes vary with SD `slope_sd`. It fits one parameter per angle, a line in angle, and a line with random slopes to session 1, scores their predictions of session 2 with the IMV, and retests each respondent's angle cost (accuracy at the two small angles minus the two large). The first run takes 30 to 45 seconds, mostly loading `lme4`.
+
+With the seed as written (`slope_sd <- 0.3`), the angle effect is −0.41 (z = −8.7), the line predicts as well as one parameter per angle (IMV 0.023 against 0.022), random slopes add a little (0.026), and the angle cost retests at 0.41 against 0.91 for accuracy. Set `slope_sd <- 0`: the group effect is as clear (z = −9.5), yet the cost still retests at 0.20, because on the probability scale a constant logit cost is smaller near the ceiling, so the cost partly re-measures accuracy. At `slope_sd <- 1` the random slopes' IMV rises to 0.050 and the cost retests at 0.83.
+
+```{webr}
+{{< include code/trials-sim.R >}}
+```
+
+[Download this code](code/trials-sim.R) to run it with more respondents, trials or sessions in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/trials-irw.R")
+```
+
+```{r helpers}
+#| echo: true
+#| code-fold: true
+```
+
+[rr98_accuracy](https://itemresponsewarehouse.org/tables/rr98_accuracy/) is the main example: 33 conditions and a feature that should explain them. [mentalrotation_wolf_2024](https://itemresponsewarehouse.org/tables/mentalrotation_wolf_2024/) is the contrast, where the feature explains less than how trials are grouped into items. [enkavi_2019_stroop](https://itemresponsewarehouse.org/tables/enkavi_2019_stroop/) is the failure case for individual differences: an effect nearly everyone shows, retested. [Download the code](code/trials-irw.R); it needs `lme4`. Keying: in all three tables 1 is a correct response.
+
+### Brightness: 33 conditions, one feature
+
+[Ratcliff and Rouder (1998)](https://doi.org/10.1111/1467-9280.00067) had three observers judge whether a patch of pixels came from a bright or a dark distribution, over about ten sessions each. The IRW keeps the blocks with accuracy instructions, and its `id` is an observer's session ([processing script](https://github.com/ben-domingue/irw/blob/main/data/rr98.R)).
+
+```{r rr98-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+```{r rr98-levels}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 3.5
+```
+
+Accuracy is 0.95 at both ends and 0.50 at level 15. Now three accounts of the levels, each with random effects for observer and session:
+
+```{r rr98-models}
+#| echo: true
+#| code-fold: show
+```
+
+Each step of distance from the middle adds 0.24 logits. The line accounts for 90% of the variance in the 33 level easinesses, yet the likelihood-ratio tests reject it against one value per distance (χ² = 49.9 on 15 df), and that in turn against one per level (χ² = 35.6 on 16 df); the AICs are 12,948, 12,928 and 12,925. Out of sample:
+
+```{r rr98-imv}
+#| echo: true
+#| code-fold: show
+```
+
+Against the overall proportion correct, the line earns an IMV of 0.0772; one value per distance adds a thousandth, and one value per level loses one. Two parameters predict new trials as well as 33.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): in this table errors were slower than correct responses by 0.09 s pooled, but by only about 0.02 s within a brightness level, because errors crowd into the hard levels, which are slow for every response. Treating the levels as items makes the same separation for accuracy: the difficulty of a condition is kept apart from anything about the respondent.
+:::
+
+What about the respondents? There are three observers, 33 levels and over 12,000 trials.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "With the 33 levels in the model, how much do the three observers, and their 30 sessions, differ in accuracy?",
+  choices: ["A lot: observers differ by a logit or more", "Moderately: SDs of a few tenths of a logit", "Barely: SDs near zero"],
+  answer: "Barely: SDs near zero",
+  reveal: "The SD between observers is estimated at 0 and between sessions at 0.05 logits; the observers' accuracies run from 0.715 to 0.726. The conditions do nearly all the work."
+})
+```
+
+```{r rr98-people}
+#| echo: true
+#| code-fold: show
+```
+
+The SD between observers is 0, and between sessions 0.05 logits; the observers' accuracies run from 0.715 to 0.726, the sessions' from 0.68 to 0.77, partly because sessions drew different levels. For this task that is a success: psychophysics wants every observer to be a replicate, so that the psychometric function describes the visual system. There is no individual to measure, and the design didn't ask for one.
+
+### Mental rotation: a feature and a hidden design
+
+[Wolf and Larsen (2024)](https://doi.org/10.5334/jopd.99) had 37 undergraduates look at a 3-D printed shape made of cubes while feeling a second one they could not see, and say whether the two were the same; the shapes follow [Shepard and Metzler (1971)](https://doi.org/10.1126/science.171.3972.701). Each respondent met four shapes at four angles (0, 50, 100 and 150 degrees), each once as a same pair and once as a different, mirrored pair (Wolf & Larsen, 2024, §2.1): 32 trials. The IRW item is sheet × shape × angle ([processing script](https://github.com/ben-domingue/irw/blob/main/data/mentalrotation_wolf_2024.R)).
+
+```{r mrot-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+```{r mrot-angle}
+#| echo: true
+#| code-fold: show
+```
+
+Accuracy falls from 0.77 at 0 degrees to 0.70 at 150, 0.16 logits per 50 degrees (SE 0.06): a fairly small effect. But each item holds two different trials. The pair type isn't in the item label; the answer given (`resp_raw`) and its correctness reveal it:
+
+```{r mrot-pair}
+#| echo: true
+#| code-fold: show
+```
+
+On same pairs, accuracy falls from 0.94 to 0.72, a cost of 0.60 logits per 50 degrees; on different pairs it doesn't fall at all ($-0.60 + 0.71 = 0.10$ logits per 50 degrees, a slight rise). Which account predicts held-out trials best?
+
+```{r mrot-imv}
+#| echo: true
+#| code-fold: show
+```
+
+Against respondents alone, the line in angle earns an IMV of 0.0021; one parameter per angle, −0.0002; adding shape, 0.0002; a random effect for each of the 64 items, 0.0030. Angle × pair earns 0.0313, fifteen times the angle alone. What matters most is which kind of trial it was: for a different pair no rotation makes the shapes match, so the angle has less to act on.
+
+### Stroop: an effect nearly everyone shows
+
+[Enkavi et al. (2019)](https://doi.org/10.1073/pnas.1818430116) gave a large online sample a battery of self-regulation tasks and brought 150 back to estimate long-term retest reliability. In their Stroop task a colour word (red, green or blue) appears in one of the three inks, and the respondent names the ink. The IRW item is word × ink; `position` counts repetitions of an item, not the trial's place in the session ([processing script](https://github.com/ben-domingue/irw/blob/main/data/enkavi_2019_conflict_tasks.py)).
+
+```{r stroop-fetch}
+#| echo: true
+#| code-fold: show
+```
+
+Accuracy is high (0.97 congruent, 0.92 incongruent), so we use response times of correct trials, a median of 47 per condition and respondent.
+
+```{r stroop-effect}
+#| echo: true
+#| code-fold: show
+```
+
+Incongruent trials are slower by 0.123 s on average (t = 46.2), and 520 of the 522 respondents show the effect. The SD of the observed effects is 0.061 s. Where does that variance live?
+
+```{r stroop-model}
+#| echo: true
+#| code-fold: show
+```
+
+The person SD of the effect is 0.049 s, against 0.098 s for mean speed and 0.167 s for a single trial. With 47 trials per condition, the reliability of each respondent's effect is 0.67; of their mean RT, 0.97. A reliability of 0.9 for the effect would take about 207 correct trials per condition. And over time:
+
+```{r stroop-retest}
+#| echo: true
+#| code-fold: show
+```
+
+For the 150 respondents seen twice, the effect retests at 0.44 and mean RT at 0.61; 98% still show the effect. With 240 trials per condition and three weeks apart, [Hedge et al. (2018)](https://doi.org/10.3758/s13428-017-0935-1) found intraclass correlations of 0.60 and 0.66 for the Stroop RT cost in two studies, against 0.77 and 0.72 for congruent RT. How much of the distance from 1 is trial noise, and how much is people changing?
+
+```{r stroop-latent}
+#| echo: true
+#| code-fold: show
+```
+
+With trial noise set aside, the model puts the correlation of respondents' true effects across sessions at 0.79, and of their true speed at 0.59: much of what separates 0.44 from 1 is the 47 trials. The model assumes normal trial noise, which response times don't have, so I'd hold 0.79 loosely ([Rouder & Haaf, 2019](https://doi.org/10.3758/s13423-018-1558-y), make the case for such estimates). Put together: the effect is large relative to how much people differ in it (SD 0.049 s around 0.122 s), which is why 520 of 522 show it, and the same small SD is why 47 trials leave each person's effect with a reliability of 0.67. The paradox is not a failure of the task. The task was built to find an effect everyone has.
+
+So would I use a task's effect to rank people? It turns on two numbers the group analysis doesn't report: the person SD of the effect against the trial noise, and the trials per condition. If the question is whether a manipulation works, a small person SD is an asset. If it is who is more affected, I'd want the variance decomposition first, and I'd plan the trials from the Go deeper formula, not from the size of the group effect. A large, universal stimulus effect is evidence that the manipulation works, not that the task measures people.
 
 ## Problems
 
+1. **Trials for a target reliability.** Starting from the RT model in *The question may be about the stimulus*, derive the number of trials per condition needed for a reliability $R$ of each respondent's effect. With the Stroop estimates, how many correct trials per condition give 0.8? Show that the average effect $\delta$ doesn't enter, and say what changes if incongruent trials are noisier than congruent ones.
+2. **Angle², shape and pair.** In `mentalrotation_wolf_2024`, add a squared angle term (as `c9/mrot.R` did), then shape, then angle × pair. Which improves out-of-sample prediction, and by how much? Now give each respondent a random effect for pair type: what would such an effect mean psychologically?
+3. **Who is the respondent?** In `rr98_accuracy`, refit the level model with the observer as the only respondent, then with the session only. Which is right for a question about the visual system, and which for a question about practice across sessions? What does the zero observer SD imply for each?
+4. **Late-game threes (PS9#2).** Two shooters take the same number of threes in a season. One takes most of them in the last minutes of close games, the other early in quarters. Should their percentages be compared directly? What trial features would you want before ranking them, and which of those could the shooter's own choice depend on?
+5. **Design a rotation measure.** Design a 20-minute mental rotation measure of individual differences in the cost of rotation: angles, trials per angle, pair types, and whether to score accuracy, time or both. Check its retest correlation with the simulation, and say what the ceiling result in Simulate implies for scoring accuracy.
+6. **Challenge (open).** Write a model in which a shooter's choice of shot depends on their skill, or on their recent success. What would identify skill separately from choice? Selection models in economics ([Heckman, 1979](https://doi.org/10.2307/1912352)) are one starting point. I don't know of a satisfying answer for shot data, where the set of shots a player declined is never observed.
+
+```{r}
+#| output: asis
+ask_claude("trials", "It covers experimental tasks as item response data: a condition met many times as the item, with lme4's glmer; replacing per-condition difficulties with a stimulus feature (a psychometric function, the LLTM with a continuous feature) and comparing the accounts out of sample with the IMV; the decomposition of a task's variance into a stimulus effect, person differences in the effect and trial noise, the reliability of a person's effect, and the reliability paradox of Hedge, Powell and Sumner (2018); and the bias when respondents choose their own trials, with a brightness-discrimination experiment, a cross-modal mental rotation task and a Stroop task given twice as examples.")
+```
+
 ## Going further
 
+- Hedge, C., Powell, G., & Sumner, P. (2018). The reliability paradox: Why robust cognitive tasks do not produce reliable individual differences. *Behavior Research Methods*, 50(3), 1166–1186. <https://doi.org/10.3758/s13428-017-0935-1>. Retest reliability of seven classic tasks, and the argument that low between-person variance is what makes their effects replicable.
+- Rouder, J. N., & Haaf, J. M. (2019). A psychometrics of individual differences in experimental tasks. *Psychonomic Bulletin & Review*, 26(2), 452–467. <https://doi.org/10.3758/s13423-018-1558-y>. Hierarchical models that keep trial noise apart from person differences, applied to Hedge et al.'s data.
+- Enkavi, A. Z., Eisenberg, I. W., Bissett, P. G., Mazza, G. L., MacKinnon, D. P., Marsch, L. A., & Poldrack, R. A. (2019). Large-scale analysis of test–retest reliabilities of self-regulation measures. *Proceedings of the National Academy of Sciences*, 116(12), 5472–5477. <https://doi.org/10.1073/pnas.1818430116>. Survey and task measures retested side by side; the source of this lesson's Stroop data.
+- Wichmann, F. A., & Hill, N. J. (2001). The psychometric function: I. Fitting, sampling, and goodness of fit. *Perception & Psychophysics*, 63(8), 1293–1313. <https://doi.org/10.3758/BF03194544>. How psychophysics fits accuracy as a function of stimulus strength.
+- Baayen, R. H., Davidson, D. J., & Bates, D. M. (2008). Mixed-effects modeling with crossed random effects for subjects and items. *Journal of Memory and Language*, 59(4), 390–412. <https://doi.org/10.1016/j.jml.2007.12.005>. Crossed respondents and items in experimental psychology: the models of [What is an item?](explanatory-irt.qmd), seen from the other side.
+- De Boeck, P., & Wilson, M. (Eds.). (2004). *Explanatory item response models: A generalized linear and nonlinear approach*. Springer. <https://doi.org/10.1007/978-1-4757-3990-9>. Item and person features in one framework.
 - Jansen, M. G. H. (2016). Poisson and gamma models for reading speed and error. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 245–259). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on Poisson and gamma models for counts of errors and reading times.
+- From the IRW: the [reliability paradox](https://itemresponsewarehouse.org/vignettes/hf_reliability_paradox.html) vignette looks at the reliability of experimental tasks across IRW tables.
 
 ```{r}
 #| output: asis
@@ -31,3 +416,9 @@ data_sources("trials")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 9 (slides c9, 17–23: trials in psychology, limited versus continuous variation, mental rotation) and problem set 9 (#2, NBA field goals as trials), with the code in `ben-domingue/252`: `c9/mrot.R` and `ps9/shots.R`.
+- **Timing:** the core ideas and widgets take about 45 minutes; the three analyses are a 30-minute lab. The mental rotation cross-validation takes about half a minute and the Stroop models a few seconds each.
+- **Changed from 252:** the LEVANTE rotation data (slide 22) and the NBA shot data (Samangy, [GitHub](https://github.com/DomSamangy/NBA_Shots_04_23)) aren't in the IRW, so `mentalrotation_wolf_2024` stands in for the first, and a widget and problem 4 for the second. The pair-type finding in the rotation data, the brightness analysis and the Stroop variance decomposition are new.
+- **Data notes:** the rotation table's items don't record pair type; it is recovered from `resp` and `resp_raw`. In the Stroop table, `position` counts repetitions of an item, so trial order within a session isn't available and practice or fatigue can't be modelled from it.
+- **Held back:** learning across trials as change in $\theta$ (dynamic models) is left open; response times on the same trials are in [Response time and the speed-accuracy tradeoff](response-time.qmd) and [Process models for response time](rt-process-models.qmd); adaptive task batteries in [Item banks and adaptive testing](item-banks-cat.qmd). Repeated tasks such as hearts and flowers across blocks are not taken further here.
+- **Solutions:** held back in `solutions/trials.qmd` (not published). Problem 6 is open.
