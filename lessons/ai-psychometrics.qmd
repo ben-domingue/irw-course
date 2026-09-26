@@ -8,19 +8,476 @@ source("_course.R")
 lesson_header("ai-psychometrics")
 ```
 
+```{ojs}
+//| echo: false
+import {grid, palette} from "./widgets/irt.js"
+import {scoringWorld, worthInRespondents, simulatedRespondents, optionCurves, optionShares} from "./widgets/ai-psychometrics.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.*
+Language models now score essays, write items, predict item difficulty, and answer questionnaires in place of people. Each is a claim about measurement that the tools of this course can check. The lesson starts from the question [What is an item?](explanatory-irt.qmd) handed on: that lesson explained difficulty with features that people coded, so can an item's text alone predict it? My answer depends on the yardstick. I judge a difficulty prediction by how many respondents it is worth, and on the general-knowledge items below the best text features are worth about three.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- compute exact agreement, Cohen's kappa and quadratic weighted kappa from two raters' scores, and say what an automated scorer's agreement with human raters does and doesn't show;
+- add text features to the LLTM and report how much of the variation in difficulty they explain;
+- convert the error of a difficulty prediction into the number of respondents it is worth;
+- say why more simulated respondents don't fix a language model's own view of the items;
+- check machine-written items as you would any others: difficulty, distractors, keying, and whether each item goes with the construct it was written for.
+
 ## Core ideas
 
-## Worked example
+### Two intersections
+
+AI and psychometrics meet in two directions. One uses AI to measure people. The other uses psychometrics to measure AI: a benchmark is a set of items and a model is a respondent, and [Martínez-Plumed, Prudêncio, Martínez-Usó and Hernández-Orallo (2019)](https://doi.org/10.1016/j.artint.2018.09.004) fit item response models to machine-learning classifiers, one item per test instance. The IRW holds no table of models answering questions yet, so that direction gets problem 6; the rest of the lesson is about the first.
+
+### Automated scoring is an agreement problem
+
+An essay-scoring engine is trained to reproduce the scores human raters give; e-rater is a long-running example ([Attali & Burstein, 2006](https://ejournals.bc.edu/index.php/jtla/article/view/1650)). How do we know it works? The first evidence is agreement with human raters, read from the table that crosses the engine's scores with a human's. Three statistics summarize that table:
+
+- **exact agreement**, the share of responses on the diagonal;
+- **Cohen's kappa**, exact agreement corrected for the agreement two raters would reach by chance with the same margins, $\kappa = (p_o - p_e)/(1 - p_e)$;
+- **quadratic weighted kappa** (QWK; [Cohen, 1968](https://doi.org/10.1037/h0026256)), which charges each disagreement by its squared distance: with weights $w_{ik} = (i - k)^2$, observed counts $O_{ik}$ and the counts $E_{ik}$ expected from the margins,
+$$\text{QWK} = 1 - \frac{\sum_{i,k} w_{ik} O_{ik}}{\sum_{i,k} w_{ik} E_{ik}}.$$
+
+Agreement with what? The baseline is the agreement of two human raters scoring the same responses. [Williamson, Xi and Breyer (2012)](https://doi.org/10.1111/j.1745-3992.2011.00223.x) make human–machine agreement one strand of the evidence for an engine, beside its fit to the purpose, its relations with independent measures, its generalizability across tasks and forms, and its consequences for subgroups.
+
+#### Try it: agreement by hand
+
+Five hundred essays have a true quality. Two human raters score it on a scale from 1 to 4 with the same noise; an engine adds noise of its own, may shift, and may compress its scores toward the middle.
+
+```{ojs}
+//| echo: false
+viewof sc_noise = Inputs.range([0.05, 1.2], {value: 0.55, step: 0.05, label: "Engine's noise (humans: 0.55)"})
+viewof sc_shift = Inputs.range([-1, 1], {value: 0, step: 0.05, label: "Engine's shift (score points)"})
+viewof sc_comp = Inputs.range([0.3, 1.2], {value: 1, step: 0.05, label: "Engine's use of the scale (1 = like the humans)"})
+```
+
+```{ojs}
+//| echo: false
+sc = scoringWorld({machineNoise: sc_noise, shift: sc_shift, compress: sc_comp})
+sc_cells = sc.machine.table.flatMap((row, i) => row.map((n, k) => ({human: i + 1, engine: k + 1, n})))
+Plot.plot({
+  width: 380, height: 320, padding: 0.05, x: {label: "Engine's score", domain: [1, 2, 3, 4]}, y: {label: "Human 1's score", domain: [4, 3, 2, 1]},
+  color: {range: [palette.white, palette.main]},
+  marks: [
+    Plot.cell(sc_cells, {x: "engine", y: "human", fill: "n", stroke: palette.rule}),
+    Plot.text(sc_cells, {x: "engine", y: "human", text: "n", fill: d => d.n > 60 ? palette.white : palette.ink, fontSize: 13})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`| | Exact agreement | Kappa | QWK | Mean score |
+|---|---|---|---|---|
+| Human 1 with human 2 | ${sc.human.exact.toFixed(2)} | ${sc.human.kappa.toFixed(2)} | ${sc.human.qwk.toFixed(2)} | ${sc.human.meanY.toFixed(2)} |
+| Human 1 with the engine | ${sc.machine.exact.toFixed(2)} | ${sc.machine.kappa.toFixed(2)} | **${sc.machine.qwk.toFixed(2)}** | ${sc.machine.meanY.toFixed(2)} |`
+```
+
+As the widget loads, the engine agrees with human 1 about as well as human 2 does (QWK 0.70 against 0.65; the gap is sampling noise). Shift it up half a point: exact agreement falls from 0.54 to 0.47, QWK only to 0.65. Compress its scale to 0.6 and QWK drops to 0.55. Then cut its noise to 0.3 with the scale at 0.7: it matches the human baseline (0.66) while still hugging the middle. The same QWK can come from quite different engines.
+
+QWK depends on the margins of the table and the length of the scale ([Lewis & Casabianca, 2026](https://doi.org/10.1111/emip.70017)). The proportional reduction in mean squared error (PRMSE) judges an engine against the human raters' *true* scores, allowing for their unreliability, and can reach a different conclusion from QWK on the same data ([McCaffrey, Casabianca & Johnson, 2025](https://doi.org/10.1111/jedm.70011)). And agreement says nothing about what the engine responds to: in 240,000 admission essays, content and style correlated more strongly with household income than SAT scores did ([Alvero et al., 2021](https://doi.org/10.1126/sciadv.abi9031)). An engine could agree with human raters and carry that signal too; Williamson et al.'s subgroup evidence is how you would find out.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Rater models](rater-models.qmd): an engine is one more rater, with a severity of its own. [Casabianca, Donoghue, Shin, Chao and Choi (2023)](https://doi.org/10.1111/jedm.12360) found that two human ratings connected raters better than one human rating plus an engine's, and that engine scores alone did not connect raters adequately.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An engine gives every essay exactly one point more than rater A does (A never uses the top score). What are the exact agreement and the QWK?",
+  options: [
+    {text: "Exact agreement 0; QWK well above 0", correct: true, why: "No essay gets the same score, so exact agreement is 0. But the two sets of scores move together perfectly, and QWK charges a one-point gap only $1^2 = 1$ against the larger squared gaps chance would produce. With A's scores spread with variance 1, QWK is $2/(2 + 1) \\approx 0.67$ (Go deeper below)."},
+    {text: "Both 0", correct: false, why: "Kappa-type statistics compare the observed disagreement with what chance would give. Chance pairs essays scored far apart; this engine is never more than a point away."},
+    {text: "Exact agreement 0; QWK 1", correct: false, why: "QWK is 1 only when every essay gets the same score from both. The constant gap is charged: that is what separates agreement from correlation, which would be 1 here."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: QWK is a correlation that charges for differences in mean and spread
+
+**Assumptions:** two raters score the same $n$ responses on an integer scale; $p_{ik}$ is the observed share with scores $(i, k)$; the expected shares are the products of the margins, $p_{i\cdot}\,p_{\cdot k}$; weights are $(i - k)^2$; means, variances and the covariance are computed with divisor $n$.
+
+The numerator of the fraction in QWK is the mean squared difference between the two scores, $\sum_{i,k} (i-k)^2 p_{ik} = E[(X - Y)^2]$. The denominator is the same expectation for two *independent* raters with the same margins. Expanding the square,
+$$E[(X-Y)^2] = \sigma_X^2 + \sigma_Y^2 - 2\sigma_{XY} + (\mu_X - \mu_Y)^2,$$
+and under independence the covariance term is 0. So
+$$\text{QWK} = 1 - \frac{\sigma_X^2 + \sigma_Y^2 - 2\sigma_{XY} + (\mu_X - \mu_Y)^2}{\sigma_X^2 + \sigma_Y^2 + (\mu_X - \mu_Y)^2} = \frac{2\sigma_{XY}}{\sigma_X^2 + \sigma_Y^2 + (\mu_X - \mu_Y)^2}.$$
+This is exact, and it is [Lin's (1989)](https://doi.org/10.2307/2532051) concordance correlation coefficient. Three things follow. With equal means and variances, QWK is the Pearson correlation. A difference in means lowers it (the widget's shift), and so does a difference in spread even when the correlation is 1 (the widget's compression). And [Fleiss and Cohen (1973)](https://doi.org/10.1177/001316447303300309) showed that weighted kappa with these weights is, apart from terms of order $1/n$, the intraclass correlation that counts rater differences as error: the absolute-agreement coefficient of [Many sources of error](g-theory.qmd), if you've done it.
+:::
+
+### Can the text of an item predict its difficulty?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is an item?](explanatory-irt.qmd): the LLTM writes each item's easiness as a weighted sum of its features, and an item residual with SD $\sigma_\varepsilon$ gives a size to what the features leave out. For the verbal aggression items, features coded from the design explained 89% of the variance in easiness, and the residual SD was 0.34.
+:::
+
+Where do the features come from? Some are counts from the text, such as word count and sentence length, the stuff of readability measures like the Lexile framework ([Stenner, Burdick, Sanford & Burdick, 2006](https://pubmed.ncbi.nlm.nih.gov/16807496/)). Some are coded by experts from a model of how items are solved: for paragraph-comprehension items from the GRE, variables describing the decision among options accounted for difficulty and those describing the text did not ([Gorin & Embretson, 2006](https://doi.org/10.1177/0146621606288554)). And some are representations of the text from a language model ([Benedetto et al., 2023](https://doi.org/10.1145/3556538), survey the methods). [Kapoor, Truong, Haber, Ruiz-Primo and Domingue (2025)](https://arxiv.org/abs/2502.20663) predicted the difficulty of state reading items from annotated linguistic, test and context features: a correlation of 0.77 with the true difficulties, and a root mean squared error of 0.59 against 0.92 for predicting the mean. Embeddings from language models improved the prediction only marginally, and either kind of feature alone did about as well.
+
+Is a correlation of 0.77 good? Two yardsticks assume different uses. **Accuracy** (a correlation, an RMSE) assumes the prediction is the product, as when sorting a bank. **Respondents** assumes the point is to calibrate items with fewer people. A calibration on $n$ respondents estimates $b$ with a standard error of about $1/\sqrt{n\,E[p(1-p)]}$, since each respondent adds $p(1-p)$ to the information about the item's location (the curvature of [The likelihood and logistic regression](likelihood.qmd)). A prediction whose errors have SD $\sigma$ is therefore as precise as a calibration on
+$$n^* = \frac{1}{\sigma^2\,E[p(1-p)]}$$
+respondents.
+
+I use the second yardstick. The prize in predicting difficulty is skipping or shrinking the field test, so I want to know how many respondents a prediction is worth; accuracy statistics don't say.
+
+#### Try it: what a prediction is worth
+
+```{ojs}
+//| echo: false
+viewof wp_r = Inputs.range([0, 0.995], {value: 0.77, step: 0.005, label: "Correlation of predicted and true difficulty"})
+viewof wp_sdb = Inputs.range([0.3, 2], {value: 0.92, step: 0.01, label: "SD of the items' difficulties"})
+viewof wp_sdt = Inputs.range([0.3, 2], {value: 1, step: 0.05, label: "SD of respondents' θ"})
+```
+
+```{ojs}
+//| echo: false
+wp = worthInRespondents({r: wp_r, sdB: wp_sdb, sdTheta: wp_sdt})
+Plot.plot({
+  width: 700, height: 300, x: {type: "log", label: "Respondents in the field test", domain: [5, 1000]},
+  y: {label: "Standard error of the calibrated difficulty", domain: [0, 1]},
+  marks: [
+    Plot.line(wp.curve, {x: "n", y: "se", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.ruleY([wp.sigma], {stroke: palette.contrast, strokeDasharray: "4 3"}),
+    Plot.dot(Number.isFinite(wp.nStar) && wp.nStar >= 5 && wp.nStar <= 1000 ? [{n: wp.nStar, se: wp.sigma}] : [], {x: "n", y: "se", r: 6, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Prediction error SD: **${wp.sigma.toFixed(2)}** logits (dashed). It is worth a field test of about **${Number.isFinite(wp.nStar) ? Math.round(wp.nStar) : "∞"}** respondents.`
+```
+
+With Kapoor et al.'s correlation and spread of difficulties, the prediction is worth about 14 respondents, if their difficulties are logits on a scale where $\theta$ has SD 1 (an assumption here). A correlation of 0.9 is worth 30; 0.95 is worth 59; matching a 200-person field test needs about 0.986. [Liu, Bhandari and Pardos (2025)](https://doi.org/10.1111/bjet.13570) report their result on this yardstick: the item parameters from their language-model respondents were about as good as those from 50 undergraduates.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): the IMV put a predictive gain on a scale that compares across datasets. Respondents do the same job here, in the unit a test developer pays for.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A new text model halves the SD of the prediction errors. How many more respondents is its prediction worth?",
+  options: [
+    {text: "Four times as many", correct: true, why: "$n^* = 1/(\\sigma^2 E[p(1-p)])$ depends on $\\sigma^2$, so halving $\\sigma$ multiplies $n^*$ by 4."},
+    {text: "Twice as many", correct: false, why: "Standard errors shrink with the square root of $n$, so halving an error takes four times the respondents."},
+    {text: "It depends on the correlation, not the error SD", correct: false, why: "The correlation matters only through the error SD it implies, $\\sigma = \\text{SD}(b)\\sqrt{1 - r^2}$."}
+  ]
+})
+```
+
+### Language models as simulated respondents
+
+[Argyle et al. (2023)](https://doi.org/10.1017/pan.2023.2) conditioned GPT-3 on the backgrounds of real survey participants and found that it reproduced the response patterns of many subgroups. For items, [Liu et al. (2025)](https://doi.org/10.1111/bjet.13570) had six models answer college algebra items: each model's abilities were narrowly spread, an ensemble of models came closer to students, and the item parameters correlated above 0.8 with those from students for GPT-3.5. [Scarlatos, Fernandez, Ormerod, Lottridge and Lan (2025)](https://arxiv.org/abs/2507.05129) train a model so that simulated students at an instructed ability answer as an item response model says they should, and use the simulated answers to predict the difficulty of open-ended items.
+
+Does simulation beat the simpler route of the last section? A simulator is a difficulty predictor, so it answers to the same yardstick, and it has to get each item right: a model may find an item easy or hard for reasons of its own.
+
+#### Try it: simulated respondents
+
+Thirty items with known difficulties, answered by a model playing simulated students.
+
+```{ojs}
+//| echo: false
+viewof sr_n = Inputs.range([20, 2000], {value: 200, step: 10, label: "Simulated respondents"})
+viewof sr_spread = Inputs.range([0.1, 1.5], {value: 0.4, step: 0.05, label: "Spread of their abilities (people: 1)"})
+viewof sr_bias = Inputs.range([0, 1.5], {value: 0.5, step: 0.05, label: "Item-specific bias (SD, logits)"})
+```
+
+```{ojs}
+//| echo: false
+sr = simulatedRespondents({nSim: sr_n, spread: sr_spread, itemBias: sr_bias})
+sr_worth = worthInRespondents({sigma: sr.rmse})
+Plot.plot({
+  width: 700, height: 320, x: {label: "True difficulty", domain: [-3, 3]}, y: {label: "Difficulty implied by the simulation", domain: [-3.5, 3.5]},
+  marks: [
+    Plot.line([[-3, -3], [3, 3]], {stroke: palette.guide, strokeDasharray: "4 3"}),
+    Plot.dot(sr.items, {x: "truth", y: "implied", r: 5, fill: palette.main})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Correlation with the truth: **${sr.r.toFixed(2)}**; RMSE ${sr.rmse.toFixed(2)} logits, worth about **${Math.round(sr_worth.nStar)}** real respondents.`
+```
+
+At the defaults the correlation is 0.91 and the simulation is worth about 30 respondents. Raise the simulated respondents to 2,000 and the correlation stays at 0.91. Set the bias to 0 instead and it rises to 0.98, worth about 144 respondents. More simulated respondents remove sampling noise, not the model's own view of the items. (The widget rescales implied difficulties to the truth's spread, so the narrow spread matters little here.)
+
+### Automatic item generation, and checking what it makes
+
+Items have been generated by rule for decades. A cognitive design system builds in the features that make an item hard and calibrates the design principles rather than each item ([Embretson, 1999](https://doi.org/10.1007/BF02294564)); item models are templates with slots filled by rule ([Gierl & Haladyna, 2012](https://doi.org/10.4324/9780203803912); for medical multiple-choice items, [Gierl, Lai & Turner, 2012](https://doi.org/10.1111/j.1365-2923.2012.04289.x)). Language models write items without a template. AI-GENIE generates a pool with a language model and prunes it with network psychometrics before anyone answers ([Russell-Lasalandra, Christensen & Golino, 2024](https://doi.org/10.31234/osf.io/fgbj4)).
+
+Whoever writes the items, the questions are the same: does each measure its construct, how hard is it, do the wrong options draw anyone? Distractors that draw almost nobody are common in human-written tests too: [Haladyna and Downing (1993)](https://doi.org/10.1177/0013164493053004013) found that items seldom had more than three options that performed acceptably, and a meta-analysis of 80 years of studies supports three options ([Rodriguez, 2005](https://doi.org/10.1111/j.1745-3992.2005.00006.x)).
+
+#### Try it: distractors that work, and dead ones
+
+A four-option item. The key's pull rises with $\theta$; each distractor has a fixed pull of its own.
+
+```{ojs}
+//| echo: false
+viewof dd_key = Inputs.range([-1, 4], {value: 0.5, step: 0.1, label: "Key: how easy"})
+viewof dd_a = Inputs.range([-4, 1], {value: 0, step: 0.1, label: "Distractor A's pull"})
+viewof dd_b = Inputs.range([-4, 1], {value: -2.5, step: 0.1, label: "Distractor B's pull"})
+viewof dd_c = Inputs.range([-4, 1], {value: -2.5, step: 0.1, label: "Distractor C's pull"})
+```
+
+```{ojs}
+//| echo: false
+dd_pulls = [dd_a, dd_b, dd_c]
+Plot.plot({
+  width: 700, height: 300, x: {label: "Ability θ"}, y: {label: "P(choosing the option)", domain: [0, 1]},
+  color: {legend: true, domain: ["Key", "Distractor A", "Distractor B", "Distractor C"], range: [palette.main, palette.contrast, palette.light, palette.guide]},
+  marks: [
+    Plot.ruleY([0.25], {stroke: palette.rule, strokeDasharray: "4 3"}),
+    Plot.line(optionCurves(dd_pulls, dd_key, grid(-4, 4)), {x: "theta", y: "p", stroke: "option", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+dd_sh = optionShares(dd_pulls, dd_key)
+md`In a group with θ ~ N(0, 1): ${dd_sh.map(d => `${d.option} **${(100 * d.share).toFixed(0)}%**`).join(", ")}. Distractors chosen by fewer than 5%: **${dd_sh.slice(1).filter(d => d.share < 0.05).length}** of 3.`
+```
+
+At the defaults distractor A draws 38% of the group and B and C draw 3% each: two dead distractors. Respondents far below the item choose A, so the key's curve falls below chance (dashed). Make the key easier (2.5) and even A falls to 13%. On an easy item, dead distractors alone don't show that they were badly written.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd): with four options, chance is 0.25, yet the 3PL's lower asymptotes for the RMET were mostly near 0, because almost nobody sat near chance. A working distractor is one more reason the floor needn't be at chance.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A language model writes a four-option item. Of 190 students, 93% choose the key and the distractors draw 3%, 2% and 2%. What does this show?",
+  options: [
+    {text: "The item is easy for this group, and these data say little about its distractors", correct: true, why: "With only 7% choosing any distractor, there are too few wrong answers to tell a dead distractor from a working one. In a weaker group the same distractors might draw many."},
+    {text: "The distractors are badly written", correct: false, why: "They may be, but an easy item leaves little for any distractor to draw, as the widget's easy key showed. Try the item on a group for whom it is harder, or look at who chooses each option."},
+    {text: "The key is ambiguous", correct: false, why: "An ambiguous key would split strong respondents between the key and a distractor. Here nearly everyone agrees on the key."}
+  ]
+})
+```
+
+## Simulate
+
+The code simulates 200 items whose difficulties follow two text features plus a residual with SD `sd_resid`, fits the feature model on 150, predicts the other 50, converts the error to respondents, and compares a field test of the 50 with `n_field` respondents. Base R; a second.
+
+With the seed as written, the prediction correlates 0.68 with the new difficulties (RMSE 0.57), worth about 16 respondents; a 25-person field test does better (RMSE 0.43). Set `n_field <- 16` and the field test's RMSE is 0.58, matching the prediction. Try `sd_resid <- 0.2` (worth about 142) and `sd_resid <- 1` (about 6).
+
+```{webr}
+{{< include code/ai-psychometrics-sim.R >}}
+```
+
+[Download this code](code/ai-psychometrics-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/ai-psychometrics-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Our main example is [himmelstein-impossible_question-2025](https://itemresponsewarehouse.org/tables/himmelstein-impossible_question-2025/): its job is the deep dive in miniature, testing whether item text predicts difficulty. The two contrasts are items written by language models: [gpt4mcq_young_2025](https://itemresponsewarehouse.org/tables/gpt4mcq_young_2025/), multiple-choice items written by GPT-4, and [genpsych_russell_2024_gpt4o](https://itemresponsewarehouse.org/tables/genpsych_russell_2024_gpt4o/), personality items written by GPT-4o. Both are openly licensed, so their items are shown in full (citing the authors and naming the model). [Download the code](code/ai-psychometrics-irw.R); it needs `lme4`, `mirt` and `haven`.
+
+### Impossible questions: does the text predict difficulty?
+
+The Forecasting Proficiency Test ([Himmelstein et al., 2025](https://doi.org/10.31234/osf.io/a7kdx_v8); materials and data at [forecastingresearch/fpt](https://github.com/forecastingresearch/fpt)) includes an impossible-question task adapted from [Bennett and Steyvers (2022)](https://doi.org/10.1037/dec0000165). Each question offers two answers and an opt-out. Most have a right answer; some ask about things that don't exist, and the right response is to opt out. Two examples from the study's [data file](https://github.com/forecastingresearch/fpt/blob/main/data_cognitive_tasks/task_datasets/data_impossible_question.csv) are "Not all metals are attracted to magnets" (true or false) and "What's the habitat of a Rojixon bird?" (deserts or tropical rainforests). Keying: 1 is the keyed answer, or an opt-out on an impossible question. A gentle note from the IRW's item-text notes: the instructions said opt-outs weren't scored, but on answerable questions they count as wrong.
+
+```{r fetch-iq}
+#| echo: true
+#| code-fold: show
+```
+
+```{r items-iq}
+#| echo: true
+#| code-fold: show
+```
+
+Each respondent took the 30-item anchor form in one wave and one of two generated forms in the other, and no one answered an item twice, so we pool the waves. The hardest items are impossible questions, answered correctly (by opting out) by as few as 19%.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Longer questions might be harder to read, or easier because they give more context. Across the 72 answerable questions, how strongly does word count track difficulty?",
+  choices: ["Strongly (|r| above 0.6)", "Moderately (|r| about 0.3)", "Barely (|r| below 0.1)"],
+  answer: "Moderately (|r| about 0.3)",
+  reveal: "The correlation of word count with the logit of proportion correct is −0.26 among the answerable questions, and −0.11 across all 90. Whether a question is impossible matters far more. Check below."
+})
+```
+
+```{r words}
+#| echo: true
+#| code-fold: show
+```
+
+Longer answerable questions are somewhat harder (r = −0.26). Across all 90 the correlation is −0.11, because the impossible questions are both shorter (7.5 words against 11.4) and much harder (0.34 correct against 0.70), which pulls the other way. What the text *says* matters more than its length: the flag for an impossible question explains 23% of the variance in logit proportion correct, word count 1%. Now the LLTM with an item residual, the text features as item predictors:
+
+```{r lltm-iq}
+#| echo: true
+#| code-fold: show
+```
+
+Items differ far more than respondents (SD 1.71 against 0.47 for $\theta$). Word count explains 1.4% of the item variance; adding the impossible flag, 31%, leaving a residual SD of 1.42. What is that worth?
+
+```{r worth-iq}
+#| echo: true
+#| code-fold: show
+```
+
+Knowing only that an item belongs to this test is worth about 1.7 respondents: that is the prior. Word count adds nothing; with the impossible flag, the prediction is worth 2.7. By my yardstick, what the text says about these items is worth about one respondent. Questions of the same kind still differ by 1.42 logits for reasons these features don't see.
+
+The table holds one more check. Twelve of the impossible questions, on the two generated forms, were written by ChatGPT for this study; the six on the anchor form come from the original bank ([Himmelstein et al., 2025](https://doi.org/10.31234/osf.io/a7kdx_v8)).
+
+```{r chatgpt-iq}
+#| echo: true
+#| code-fold: show
+```
+
+ChatGPT's impossible questions are opted out of 34% of the time, the originals 32%, with similar lengths: the generated items behave like the ones they were written to match, the anchor-form check the study used for exchangeability.
+
+### GPT-4's multiple-choice items
+
+[Young, Courtney, Kah, Wilkerson and Chen (2025)](https://doi.org/10.1177/00986283241311220) gave GPT-4 a textbook chapter on love, friendship and social support and asked for 20 multiple-choice items, which 190 undergraduates answered after reading it. The items (CC BY 4.0) come from the [OSF deposit](https://osf.io/zq4eg/). Keying: `resp` is the option chosen, and option 1 is the key on every item, which the IRW confirmed against the published proportions correct.
+
+```{r fetch-mcq}
+#| echo: true
+#| code-fold: show
+```
+
+```{r items-mcq}
+#| echo: true
+#| code-fold: true
+```
+
+The items are easy for students who had just read the chapter: the median proportion correct is 0.92. The key is the longest option in 12 of the 20 items, a cue that item-writing guidelines advise against ([Haladyna, Downing & Rodriguez, 2002](https://doi.org/10.1207/S15324818AME1503_5)).
+
+```{r distractors-mcq}
+#| echo: true
+#| code-fold: show
+```
+
+Of the 60 distractors, 48 are chosen by fewer than 5% of students and 2 by nobody, as in the widget's easy item. The exception is AIQ19, on received social support: 45% chose "Received social support has universally positive effects on individuals", a distractor that works.
+
+```{r scores-mcq}
+#| echo: true
+#| code-fold: show
+```
+
+Alpha is 0.89, yet 59 of the 190 students answered every item correctly. The alpha comes largely from the few who missed many items, and the 2PL difficulties (median −1.64) sit well below the average student. The test separates students who struggled with the chapter from the rest, which suits a check on reading, the use the authors recommend.
+
+### GPT-4o's personality items
+
+[Russell-Lasalandra, Christensen and Golino (2024)](https://doi.org/10.31234/osf.io/fgbj4) generated Big Five items with GPT-4o through AI-GENIE and gave the 35 that survived to a nationally representative US sample; items and traits come from their [OSF deposit](https://osf.io/zcytb/) (CC0). Keying: 1 is strongly disagree and 5 strongly agree, and every item is worded toward its trait.
+
+```{r fetch-big5}
+#| echo: true
+#| code-fold: show
+```
+
+We keep the 897 respondents who answered every item. Does each item go with its trait? Each item's correlation with the sum of the *other* items of each trait:
+
+```{r itemrest-big5}
+#| echo: true
+#| code-fold: show
+```
+
+All 35 items correlate most with their own trait (median 0.60, against 0.21 for the closest other trait). The narrowest margin is "I love experimenting with new recipes and cooking techniques", written for openness: 0.34 with openness, 0.31 with agreeableness.
+
+```{r alpha-big5}
+#| echo: true
+#| code-fold: show
+```
+
+The eight neuroticism items reach alpha 0.93 with a mean correlation of 0.61, and read almost as rewordings of each other. High homogeneity can mean items that repeat one another rather than a broad construct measured well ([Boyle, 1991](https://doi.org/10.1016/0191-8869(91)90115-R)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): items worded against the construct have to be reverse-keyed. Here no item is: keying is easy, and a respondent's tendency to agree is mixed into every trait score. **If you've done** [From construct map to items](instrument-building.qmd), that is the all-forward scale whose alpha rose with acquiescence.
+:::
+
+Each set of machine-written items needed the usual checks, and each turned something up. A machine-written item is still an item.
 
 ## Problems
 
+1. **QWK from a table.** Show that QWK $= 1 - \sum w_{ik}O_{ik}/\sum w_{ik}E_{ik}$ with weights $(i-k)^2$ equals $2\sigma_{XY}/(\sigma_X^2 + \sigma_Y^2 + (\mu_X - \mu_Y)^2)$. With two categories, show that it equals Cohen's kappa.
+2. **Without the impossible questions.** Drop the 18 impossible questions and refit the LLTM with word count and mean word length. What do they explain, and what is the prediction worth? Code a feature of your own from the text (true–false or not, say) and test it.
+3. **A 2PL for GPT-4's items.** Plot the 2PL test information for `gpt4mcq_young_2025`. Where is it informative? Which three items would you ask the writer to make harder, and how?
+4. **Judgment.** A vendor's engine agrees with human raters at QWK 0.80 on your essays; two humans agree at 0.72. What else do you need before it replaces the second rater?
+5. **Design.** Design a study of whether difficulties predicted by a language model could replace a state's field test of new reading items. What result would convince you?
+6. **Challenge (open): models as respondents.** A hundred language models answer a thousand benchmark questions. What would "ability" mean for a model, and which assumption is likeliest to fail: local independence (models trained on overlapping data), one dimension, or something else? I don't know the answer.
+
+```{r}
+#| output: asis
+ask_claude("ai-psychometrics", "It covers how AI and psychometrics meet: judging automated scoring engines by their agreement with human raters (exact agreement, Cohen's kappa, quadratic weighted kappa and what agreement can't show); predicting item difficulty from item text with the linear logistic test model and converting a prediction's error into the number of respondents it is worth; language models as simulated respondents; and checking items written by language models (difficulty, distractors, keying, whether items go with their construct), with general-knowledge and impossible questions, GPT-4-written multiple-choice items and GPT-4o-written Big Five items as examples.")
+```
+
+## Across the IRW
+
+Can item text predict difficulty across the IRW? [`compute.R`](https://github.com/ben-domingue/irw-course/blob/main/deepdives/ai-psychometrics/compute.R) takes each English dichotomous cognitive table with at least 200 respondents and item text in the IRW, and correlates word count and mean word length with the logit of proportion correct *within* the table. Pooling items across tables would confound an item's length with the test it came from. No feature from a language model is used yet.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Constructs and construct maps](constructs.qmd): of the nine number-series items, NS_2 was solved by 84% of those who answered it and NS_6, whose key accepts 165 where tripling the steps gives 120, by 1.5%. The corpus run includes that table to check its own pipeline.
+:::
+
+```{r across}
+#| echo: true
+#| code-fold: true
+dd_path <- file.path("..", "deepdives", "ai-psychometrics", "results.rds")
+dd <- if (file.exists(dd_path)) readRDS(dd_path) else NULL
+if (!is.null(dd)) {
+  ns <- dd$items[dd$items$table == "himmelstein-number_series-2025", ]
+  print(round(setNames(ns$p, ns$item)[c("NS_2", "NS_6")], 3))   # the pipeline check
+  s <- dd$summary[order(dd$summary$r_word_count), ]
+  print(data.frame(table = s$table, items = s$n_items, median_p = round(s$median_p, 2),
+                   r_word_count = round(s$r_word_count, 2), r_word_length = round(s$r_word_length, 2)),
+        row.names = FALSE)
+}
+```
+
+```{r}
+#| output: asis
+#| echo: false
+if (is.null(dd)) {
+  cat("::: {.callout-warning}\n## Results not computed\n\nThe corpus results (`deepdives/ai-psychometrics/results.rds`) haven't been computed yet. Run `compute.R` to produce them.\n:::\n")
+} else {
+  if (isTRUE(dd$pilot))
+    cat(sprintf("::: {.callout-warning}\n## Partial run: %d of %d tables\n\nThis is a pilot run of `compute.R`, on three tables whose answers are known (the number series, this lesson's impossible questions, and `preschool_sel_box`, the IRW vignette's strongest case) and %d drawn at random, to check the pipeline. The full run replaces it.\n:::\n",
+                nrow(dd$summary), dd$n_all_candidates, length(dd$run_tables) - length(dd$known_good)))
+  cat(sprintf("\nRun on %s: %d tables summarised, %d failed (%s). Within-table correlations of word count with logit proportion correct run from %.2f to %.2f (median %.2f).\n",
+              format(dd$date_run, "%d %B %Y"), nrow(dd$summary), nrow(dd$failed),
+              if (nrow(dd$failed)) paste0("`", dd$failed$table, "`: ", dd$failed$error, collapse = "; ") else "none",
+              min(dd$summary$r_word_count, na.rm = TRUE), max(dd$summary$r_word_count, na.rm = TRUE),
+              median(dd$summary$r_word_count, na.rm = TRUE)))
+}
+```
+
+The pipeline reproduces the number-series proportions. In this pilot the correlations for word count are small, except for the preschool task at −0.62; the full run will show how they spread across all the candidate tables. The IRW's [item language and difficulty](https://itemresponsewarehouse.org/vignettes/item_text_difficulty.html) vignette runs the same analysis with a plot for each table.
+
 ## Going further
+
+- Kapoor, R., Truong, S. T., Haber, N., Ruiz-Primo, M. A., & Domingue, B. W. (2025). Prediction of item difficulty for reading comprehension items by creation of annotated item repository. arXiv:2502.20663. <https://arxiv.org/abs/2502.20663>. Difficulty predicted from annotated features and language-model embeddings, for state reading items.
+- Benedetto, L., Cremonesi, P., Caines, A., Buttery, P., Cappelli, A., Giussani, A., & Turrin, R. (2023). A survey on recent approaches to question difficulty estimation from text. *ACM Computing Surveys*, 55(9), 1–37. <https://doi.org/10.1145/3556538>. The methods for predicting difficulty from text, sorted by the kind of question.
+- Gorin, J. S., & Embretson, S. E. (2006). Item difficulty modeling of paragraph comprehension items. *Applied Psychological Measurement*, 30(5), 394–411. <https://doi.org/10.1177/0146621606288554>. Difficulty explained by a cognitive model of the items.
+- Stenner, A. J., Burdick, H., Sanford, E. E., & Burdick, D. S. (2006). How accurate are Lexile text measures? *Journal of Applied Measurement*, 7(3), 307–322. <https://pubmed.ncbi.nlm.nih.gov/16807496/>. How precisely a readability framework measures texts.
+- Liu, Y., Bhandari, S., & Pardos, Z. A. (2025). Leveraging LLM respondents for item evaluation: A psychometric analysis. *British Journal of Educational Technology*, 56(3), 1028–1052. <https://doi.org/10.1111/bjet.13570>. Language models as respondents, judged against students.
+- Argyle, L. P., Busby, E. C., Fulda, N., Gubler, J. R., Rytting, C., & Wingate, D. (2023). Out of one, many: Using language models to simulate human samples. *Political Analysis*, 31(3), 337–351. <https://doi.org/10.1017/pan.2023.2>. Simulated survey respondents conditioned on real backgrounds.
+- Scarlatos, A., Fernandez, N., Ormerod, C., Lottridge, S., & Lan, A. (2025). SMART: Simulated students aligned with item response theory for question difficulty prediction. arXiv:2507.05129. <https://arxiv.org/abs/2507.05129>. Simulated students trained to follow an item response model.
+- Williamson, D. M., Xi, X., & Breyer, F. J. (2012). A framework for evaluation and use of automated scoring. *Educational Measurement: Issues and Practice*, 31(1), 2–13. <https://doi.org/10.1111/j.1745-3992.2011.00223.x>. The kinds of evidence an automated scorer needs.
+- Lewis, J., & Casabianca, J. M. (2026). Limitations of QWK in evaluating automated and human scoring systems. *Educational Measurement: Issues and Practice*, 45(1). <https://doi.org/10.1111/emip.70017>. How QWK depends on the margins and the length of the scale.
+- McCaffrey, D. F., Casabianca, J. M., & Johnson, M. S. (2025). Measuring the accuracy of true score predictions for AI scoring evaluation. *Journal of Educational Measurement*, 62(4), 763–786. <https://doi.org/10.1111/jedm.70011>. PRMSE as an alternative to QWK.
+- Alvero, A. J., Giebel, S., Gebre-Medhin, B., Antonio, A. L., Stevens, M. L., & Domingue, B. W. (2021). Essay content and style are strongly related to household income and SAT scores: Evidence from 60,000 undergraduate applications. *Science Advances*, 7(42), eabi9031. <https://doi.org/10.1126/sciadv.abi9031>. What essays carry besides writing quality.
+- Attali, Y., & Burstein, J. (2006). Automated essay scoring with e-rater V.2. *Journal of Technology, Learning, and Assessment*, 4(3). <https://ejournals.bc.edu/index.php/jtla/article/view/1650>. An automated essay scorer, described by its developers.
+- Embretson, S. E. (1999). Generating items during testing: Psychometric issues and models. *Psychometrika*, 64(4), 407–433. <https://doi.org/10.1007/BF02294564>. Items generated from a cognitive design, and models that calibrate the design.
+- Gierl, M. J., & Haladyna, T. M. (Eds.). (2012). *Automatic item generation: Theory and practice*. Routledge. <https://doi.org/10.4324/9780203803912>. Item models and templates.
+- Russell-Lasalandra, L. L., Christensen, A. P., & Golino, H. (2024). Generative psychometrics via AI-GENIE: Automatic item generation with network-integrated evaluation. PsyArXiv. <https://doi.org/10.31234/osf.io/fgbj4>. Items from language models, pruned by network psychometrics.
+- Haladyna, T. M., & Downing, S. M. (1993). How many options is enough for a multiple-choice test item? *Educational and Psychological Measurement*, 53(4), 999–1010. <https://doi.org/10.1177/0013164493053004013>. How often distractors perform.
+- Martínez-Plumed, F., Prudêncio, R. B. C., Martínez-Usó, A., & Hernández-Orallo, J. (2019). Item response theory in AI: Analysing machine learning classifiers at the instance level. *Artificial Intelligence*, 271, 18–42. <https://doi.org/10.1016/j.artint.2018.09.004>. Psychometrics turned on AI systems.
+- From the IRW: the [item language and difficulty](https://itemresponsewarehouse.org/vignettes/item_text_difficulty.html) vignette, which this lesson's deep dive follows.
 
 ```{r}
 #| output: asis
@@ -29,3 +486,9 @@ data_sources("ai-psychometrics")
 
 ## For instructors
 
+- **Source:** EDUC 252 class 10 (slides c10, 1–41: the two intersections, automated scoring and QWK, simulated respondents, item difficulty modelling, automatic item generation) and `c10/model.R` in `ben-domingue/252`.
+- **Timing:** the core ideas and widgets take about 50 minutes; the real-data section is a 30-minute lab. The three `glmer` fits take about a minute in local R.
+- **Changed from 252:** the slides' automated-scoring evidence is a widget, since no IRW table pairs human and engine scores. The slides' remark on prediction metrics is worked out as the respondents yardstick and applied to the impossible questions. The meta-analysis QWK of about 0.8 (slides 7 and 16) and the human–human QWK of 0.60 (slide 17) are left out until their sources are verified. The slides' state reading-item project is cited (Kapoor et al., 2025); their ENEM project and AI-generated reading-efficiency forms (slides 37–41) are left out.
+- **Held back:** rater effects for human and machine raters ([Rater models](rater-models.qmd)); distractor analysis with the nominal model ([Nominal response and multiple-choice models](nominal.qmd)); predicted difficulties for new items in a bank ([Item banks and adaptive testing](item-banks-cat.qmd)); differential functioning of machine scores. Models as respondents is problem 6.
+- **Across the IRW:** `deepdives/ai-psychometrics/compute.R` is run by hand (it needs a Redivis token); the page reads its `results.rds`. The pilot took under a minute for six tables.
+- **Solutions:** held back in `solutions/ai-psychometrics.qmd` (not published). Problem 6 is open.

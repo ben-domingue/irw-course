@@ -341,7 +341,7 @@ lessons:
     prereqs: [1pl-to-4pl, explanatory-irt]
     origin: {slides: [c10], ps: [], code: [c10/model.R]}
     tables: [himmelstein-impossible_question-2025, gpt4mcq_young_2025, genpsych_russell_2024_gpt4o]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: instrument-building

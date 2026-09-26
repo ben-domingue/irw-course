@@ -2,7 +2,7 @@
 
 # AI and psychometrics (`ai-psychometrics`)
 
-Module: beyond · Prereqs: 1pl-to-4pl, explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: 1pl-to-4pl, explanatory-irt · Extension · Status: draft (09-25, #55)
 
 ## Core ideas
 
@@ -70,3 +70,13 @@ Table citations come from IRW biblio. All three main tables are CC BY 4.0 or CC0
 ## Open questions
 
 None. (Verdict, item display, data gaps and prerequisites are settled: slides 35–36, E7, E5 and F13, E1.)
+
+## Drafting notes (09-25, #55)
+
+- **Numbers recomputed** on the current IRW pins: 1,194 respondents (not 1,188); word count r = −0.11 (all 90), −0.26 among the 72 answerable (outline: −0.28); the impossible flag explains 23% of logit-p variance by OLS and, with word count, 31% of the item variance in the LLTM with an item residual (outline: 27%). GPT-4o: all 35 items correlate most with their own trait's rest score (median 0.60 vs 0.21); the cooking item is the narrowest margin (0.34 vs 0.31 agreeableness).
+- **Found while drafting:** 12 of the 18 impossible questions (the two generated forms) were written by ChatGPT (Himmelstein et al., 2025); their opt-out rate (0.34) matches the originals (0.32). Used as an AIG check. The general-knowledge questions come from Bennett & Steyvers (2022)'s bank (digest D check done); only two items quoted.
+- **Waves:** each respondent took the anchor form in one wave and a generated form in the other, each item once, so the waves are pooled.
+- **Verdict** applied to real data: the text features are worth 2.7 respondents against 1.7 for the prior alone.
+- **Dropped:** the IEEE meta-analysis ("about 0.8") and the human–human 0.60 — still unverified, so left out; slide 25's Embretson & Daniel r = 0.62 not used. Stenner et al. (2006) verified on PubMed (cited for the Lexile framework, not for its features).
+- **EFA replaced** by own-trait vs other-trait rest-score correlations (factor analysis is not an ancestor).
+- **Deep dive #25:** PILOT only (5 of 33 tables, 1 failed: `polca_cheating`, 4 items). The number series reproduces NS_2 0.839 and NS_6 0.015.
