@@ -2,7 +2,7 @@
 
 # Response time and the speed–accuracy tradeoff (`response-time`)
 
-Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: draft
 
 ## Core ideas
 
@@ -70,3 +70,17 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 ## Open questions
 
 - The verdict above (when to model response time) is proposed for the lesson in place of the slide-29 aside, per E8b. *Default:* use it unless you'd put it differently.
+
+## Drafted (09-25, #53)
+
+What the draft does differently from this outline, and why:
+
+- **Numbers recomputed.** Licensure: 105 responses at 0 s are set aside (109 counted the pilot items); median 54 s, accuracy 0.73; variance shares 65% residual, 28% item, 7% person; θ–speed r = 0.30, b–β r = 0.48 (not 0.51); deciles 0.83 → 0.56, slope −1.03. Lexical: deciles 0.63 / 0.86 (middle) / 0.70, linear slope 0.09. Raven's: the timed curve rises over the fastest deciles and then falls (0.49, 0.68, …, 0.39; slope −0.64), not a plain fall; untimed is nearly flat (slope −0.04) apart from its fastest decile (0.52 against 0.68). Untimed has 608 respondents at wave 1 (the outline's 567 may have dropped the 41 with missing times). θ–speed untimed −0.45.
+- **The finding** is "conditional independence fails in all four tables, in different shapes, least in the untimed Raven's" (the untimed fast dip is a departure too).
+- **Constant speed.** None of the four tables records presentation order, so idea 5 rests on the cited acceleration result (verified in the preprint, osf.io/r54ec) plus a weaker check the tables allow: one speed across item halves (licensure, r = 1 to two decimals) and across real and made-up words (lexical, 0.98).
+- **Correlations** are of estimates from separate `lmer`/`glmer` fits; a Recall of Spearman's attenuation (ctt-reliability, problem 2) says why they understate ρ. Not in the lesson: `LNIRT` joint fits give ρ = 0.40 (licensure) and −0.53 (timed Raven's), same signs.
+- **Verdict** as proposed, with the IMV numbers verified from the vignette (0.0054, 78%; 0.0091, 94%; 18 tables). The pilot deep dive finds a larger IMV on the licensure exam (0.020), so the lesson says the verdict is about the typical table.
+- **Go deeper** reframed as "what the pooled slope estimates under the hierarchical model" (the covariance decomposition; within-person slope zero; ρ not causal).
+- **rr98_accuracy** is not reloaded: the aggregation point is a Recall of `irw-data`'s numbers, extended to the person and item levels.
+- **Problem 3** states no numbers (the flagged/unflagged means are in the solutions).
+- **Deep dive #24:** pilot on `credentialform_lnirt`, `chess_lnirt` + 2 random (`himmelstein-impossible_question-2025`, `knight_2026_crt`). Per table: θ–speed and b–β correlations, deciles, within slope, linear and spline IMV (5 folds, log time centred within item, as the vignette).
