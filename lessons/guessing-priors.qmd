@@ -23,7 +23,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-On the Reading the Mind in the Eyes Test, where chance is one in four, the 3PL's median lower asymptote was 0.01; on a reading test, the 3PL predicted new responses no better than the 2PL. Yet respondents do guess. So what should we do about it? On tests like the ones in this lesson, I wouldn't estimate $c$ from the data alone. Where the chance rate is known, I'd fix it; where it isn't, I'd fit the 2PL; either way I'd let held-out responses decide whether the choice earned its place. This lesson makes the case: it asks what the lower asymptote learns from, fixes it at chance on a two-button reading task, finds the guessing there concentrated in a few respondents, and uses priors to keep a small-sample 3PL in bounds.
+On the Reading the Mind in the Eyes Test, where chance is one in four, the 3PL's median lower asymptote was 0.01. Yet respondents do guess. So what should we do about it? On tests like the ones in this lesson, I wouldn't estimate $c$ from the data alone. Where the chance rate is known, I'd fix it; where it isn't, I'd fit the 2PL; either way I'd let held-out responses decide whether the choice earned its place. This lesson makes the case on a two-button reading task and a vocabulary test.
 
 ## Goals
 
@@ -43,7 +43,7 @@ By the end of this lesson you should be able to:
 **Recall** from [From the 1PL to the 4PL](1pl-to-4pl.qmd): the lower asymptote $c$ describes respondents far below an item. On the RMET only 84 of 17,680 respondents (0.48%) scored at or below chance, and the 3PL's median $c$ was 0.01 although chance is 0.25.
 :::
 
-Why so little? A response carries information about $c$ only where $c$ matters to its probability: where the logistic part of the curve is near zero. A respondent well above an item answers it correctly whatever $c$ is. So the precision of $\hat c$ is set by how many respondents find the item too hard, not by how many respondents there are.
+Why so little? A response carries information about $c$ only where the logistic part of the curve is near zero; a respondent well above an item answers it correctly whatever $c$ is. So the precision of $\hat c$ is set by how many respondents find the item too hard, not by how many there are.
 
 #### Try it: where the lower asymptote is learned
 
@@ -78,13 +78,13 @@ Plot.plot({
 md`${(100 * lc_share).toFixed(1)}% of respondents sit where the item's logistic part is below 0.1, so that their correct answers are mostly chance. The standard error of ĉ is **${lc_now.c.toFixed(3)}**, so a 95% interval runs from ${Math.max(0, lc_c - 1.96 * lc_now.c).toFixed(2)} to ${Math.min(1, lc_c + 1.96 * lc_now.c).toFixed(2)}. For comparison, the slope's standard error is ${lc_now.a.toFixed(2)}.`
 ```
 
-As the widget loads, the item sits 1.5 below the mean ability, as many RMET items did, and almost nobody is near the floor: with 1,000 respondents the standard error of $\hat c$ is 0.27, and the interval runs from 0 to well past chance. Slide the mean down to −1 and a fifth of the respondents are near the floor; the standard error falls to 0.05. Back at 1.5, even 20,000 respondents leave it at about 0.06. The slope's standard error barely moves with the mean.
+The opening setting, 1.5, is an easy test like the RMET: almost nobody is near the floor, and with 1,000 respondents the standard error of $\hat c$ is 0.27. At −1 the test is hard for its takers, like the two hardest ENEM forms in the IRW's [guessing vignette](https://itemresponsewarehouse.org/vignettes/guessing.html), where about two-fifths of the items are answered correctly less often than chance; a fifth of the respondents are near the floor and the standard error falls to 0.05. Back at 1.5, even 20,000 respondents leave it at 0.06.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Model fit and out-of-sample prediction](fit-prediction.qmd): the IMV turns two sets of predictions of held-out responses into the expected return on a fair bet, which makes predictive gains comparable across datasets. On a reading comprehension test, the 3PL's IMV over the 2PL was 0.0001 out of sample and 0.0035 in-sample.
 :::
 
-[Domingue et al. (2024, §3)](https://doi.org/10.1007/s11336-024-09977-2) asked the question by simulation. They generated responses from a 3PL with lower asymptotes drawn between 0 and 0.3, fitted the 1PL, 2PL and 3PL, and computed IMVs on held-out responses. The average IMV of the 3PL over the 2PL never exceeded 0.001, including when the 3PL generated the data, while the 2PL gained 0.01 or more over the 1PL when slopes varied substantially. They relate this to known difficulties in identifying the 3PL's parameters ([Maris & Bechger, 2009](https://doi.org/10.1080/15366360903070385); [Haberman, 2005](https://doi.org/10.1002/j.2333-8504.2005.tb02001.x); [von Davier, 2009](https://doi.org/10.1080/15366360903117079)). The widget suggests why: a curve that differs from a 2PL only where few respondents are changes few predictions. The data can't see guessing, which isn't the same as no one guessing. The 3PL remains a reasonable choice for multiple-choice tests with many respondents near chance, and in large calibration samples.
+[Domingue et al. (2024, §3)](https://doi.org/10.1007/s11336-024-09977-2) asked the question by simulation. With data generated from a 3PL whose lower asymptotes ran up to 0.3, the average IMV of the 3PL over the 2PL on held-out responses never exceeded 0.001, while the 2PL gained 0.01 or more over the 1PL when slopes varied substantially. They relate this to difficulties in identifying the 3PL ([Maris & Bechger, 2009](https://doi.org/10.1080/15366360903070385); [Haberman, 2005](https://doi.org/10.1002/j.2333-8504.2005.tb02001.x); [von Davier, 2009](https://doi.org/10.1080/15366360903117079)). The widget suggests why: a curve that differs from a 2PL only where few respondents are changes few predictions. The 3PL remains a reasonable choice when many respondents sit near chance, and in large calibration samples.
 
 ```{ojs}
 //| echo: false
@@ -100,15 +100,15 @@ quiz({
 
 ### Fix guessing from the item's structure
 
-If we know where the floor should be, why not put it there? When an item offers $k$ equally attractive options, a respondent choosing at random is right with probability $1/k$. The simplest model with guessing sets every lower asymptote to that value and estimates nothing new:
+If we know where the floor should be, why not put it there? With $k$ equally attractive options, random choice is right with probability $1/k$, and the simplest model with guessing fixes every lower asymptote there:
 $$\Pr(x_{ij} = 1) = \frac{1}{k} + \Big(1 - \frac{1}{k}\Big)\frac{\exp(\theta_j - b_i)}{1 + \exp(\theta_j - b_i)}.$$
-It is the Rasch model with a fixed floor, with exactly the Rasch model's parameters. It is the first of three ways to add guessing that [San Martín, del Pino and De Boeck (2006)](https://doi.org/10.1177/0146621605282773) list; the others estimate one floor for all items, or one per item, as the 3PL does. [Han (2012)](https://doi.org/10.7275/f0gz-kc87) reports that fixing $c = 1/k$ gave more stable item estimates than a free 3PL without a loss of fit, on simulated and real multiple-choice data.
+It is the Rasch model with a fixed floor, the first of three ways to add guessing that [San Martín, del Pino and De Boeck (2006)](https://doi.org/10.1177/0146621605282773) list (the others estimate one floor for all items, or one per item). [Han (2012)](https://doi.org/10.7275/f0gz-kc87) reports that fixing $c = 1/k$ gave more stable item estimates than a free 3PL without a loss of fit, on simulated and real multiple-choice data.
 
-What does fixing the floor assume? That a respondent who doesn't know the answer picks at random. That doesn't hold if some wrong options attract more than others, if respondents can rule some out (San Martín et al. let the chance of a correct guess rise with ability for this reason), or if not knowing pushes respondents toward one answer, as in the real data below.
+What does fixing the floor assume? That a respondent who doesn't know the answer picks at random. That doesn't hold if some wrong options attract more than others, if respondents can rule some out (San Martín et al. let the chance of a correct guess rise with ability), or if not knowing pushes respondents toward one answer.
 
 #### Try it: what a correct answer is worth
 
-The same item ($b = 0$) under the Rasch model and with its floor fixed at chance. Choose the chance rate, and how far below the item a respondent sits.
+The same item ($b = 0$) under the Rasch model and with its floor fixed at chance. Choose the chance rate (four options for a typical multiple-choice test, two for the lexical decision task below) and how far below the item a respondent sits.
 
 ```{ojs}
 //| echo: false
@@ -138,7 +138,7 @@ fg_r1 = p4pl(0, 0, 1, fg_c) / p4pl(-fg_gap, 0, 1, fg_c)
 md`A correct answer is **${fg_r0.toFixed(1)}** times as likely at θ = 0 as at θ = −${fg_gap.toFixed(1)} under the Rasch model, but only **${fg_r1.toFixed(2)}** times as likely with the floor at ${fg_c}. That likelihood ratio is how strongly one correct answer favours the higher ability.`
 ```
 
-With two options and a gap of 3, one correct answer favours the higher ability by a factor of 10.5 under the Rasch model and by 1.43 with the floor at 0.5. A coin would give that answer half the time. With a floor of 0.25 its worth falls less (a factor of 2.2). Wrong answers lose nothing: the floor multiplies the probability of a wrong answer by the same $1 - c$ at every ability, so the ratio between two abilities is unchanged. Problem 1 asks you to show it.
+With two options and a gap of 3, one correct answer favours the higher ability by a factor of 10.5 under the Rasch model and by 1.43 with the floor at 0.5. With a floor of 0.25 its worth falls less (a factor of 2.2). Wrong answers lose nothing: the floor multiplies their probability by the same $1 - c$ at every ability (problem 1).
 
 ```{ojs}
 //| echo: false
@@ -154,7 +154,7 @@ quiz({
 
 ### Guessing may belong to respondents
 
-The 3PL and the fixed floor both give guessing to items: every respondent far below an item has the same chance of a lucky answer. But a respondent who has stopped trying, or is racing a clock, may answer items they could solve, quickly and at chance. [Schnipke and Scrams (1997)](https://doi.org/10.1111/j.1745-3984.1997.tb00516.x) modelled response times as a mixture of rapid guesses and slower solution behaviour; [Wise and Kong (2005)](https://doi.org/10.1207/s15324818ame1802_2) measured engagement by how many of a respondent's responses come too quickly to reflect reading the item; and [Wise (2017)](https://doi.org/10.1111/emip.12165) reviews how rapid guesses are identified and argues that they shouldn't count toward the score.
+The 3PL and the fixed floor both give guessing to items. But a respondent who has stopped trying, or is racing a clock, may answer items they could solve, quickly and at chance. Response times can find them: [Schnipke and Scrams (1997)](https://doi.org/10.1111/j.1745-3984.1997.tb00516.x) modelled times as a mixture of rapid guesses and slower solution behaviour, [Wise and Kong (2005)](https://doi.org/10.1207/s15324818ame1802_2) measured engagement by the share of responses too fast to reflect reading, and [Wise (2017)](https://doi.org/10.1111/emip.12165) reviews the methods.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Item response data and the IRW](irw-data.qmd): when a table records response times, they sit in an `rt` column, in seconds, beside `resp`.
@@ -168,11 +168,11 @@ If guessing belongs to respondents, an item's lower asymptote spreads a few resp
 **Recall** from [Estimating abilities](ability-estimation.qmd): with a prior $g(\theta)$, the posterior is proportional to the likelihood times the prior. The EAP estimate, the posterior mean, is pulled toward the prior's mean (shrinkage), most where the likelihood is flattest: at the ends of the scale and on short tests.
 :::
 
-Nothing in that argument needs $\theta$ to be an ability. An item parameter can have a prior too, and its posterior is again likelihood times prior ([Mislevy, 1986](https://doi.org/10.1007/bf02293979); [Swaminathan & Gifford, 1986](https://doi.org/10.1007/BF02295598); [Harwell & Baker, 1991](https://doi.org/10.1177/014662169101500409)). The usual choices respect each parameter's range. A slope is positive, so $\log a$ gets a normal prior: a **lognormal** on $a$. A lower asymptote lies between 0 and 1, so it gets a **beta** prior; beta($\alpha$, $\beta$) has mean $\alpha/(\alpha + \beta)$ and counts for roughly $\alpha + \beta$ responses, so beta(2, 18) says "about 0.1, worth about 20 responses". Domingue et al. (2024) used a lognormal(0, 1) and a beta(2, 17) to keep their small-sample fits converging. Where data are plentiful the prior hardly matters; where they are thin, which for $c$ is nearly always, the estimate sits near the prior. That makes priors a reasonable choice whenever a sample is small for the number of item parameters. `mirt` finds the posterior mode; a full Bayesian treatment is in [Johnson and Sinharay (2017)](https://doi.org/10.1201/b19166-13).
+Nothing in that argument needs $\theta$ to be an ability. An item parameter can have a prior too, and its posterior is again likelihood times prior ([Mislevy, 1986](https://doi.org/10.1007/bf02293979); [Swaminathan & Gifford, 1986](https://doi.org/10.1007/BF02295598); [Harwell & Baker, 1991](https://doi.org/10.1177/014662169101500409)). A slope is positive, so $\log a$ gets a normal prior (a **lognormal** on $a$); a lower asymptote lies between 0 and 1, so it gets a **beta** prior; beta($\alpha$, $\beta$) has mean $\alpha/(\alpha + \beta)$, mode $(\alpha - 1)/(\alpha + \beta - 2)$, and counts for roughly $\alpha + \beta$ responses, so beta(2, 18) says "about 0.1, worth about 20 responses". Since `mirt` finds the posterior mode, a lower asymptote the data say little about settles near the prior's mode, 0.056 for beta(2, 18). Where data are thin, which for $c$ is nearly always, the estimate sits near the prior; priors are a reasonable choice whenever a sample is small for the number of item parameters. A full Bayesian treatment is in [Johnson and Sinharay (2017)](https://doi.org/10.1201/b19166-13).
 
 #### Try it: prior × likelihood = posterior for a slope
 
-One item ($b = 0$, no floor), answered by $n$ respondents with known abilities, from a fixed sample of 2,000. The prior is lognormal: $\log a$ is normal with mean 0 and the SD you choose. Each curve is scaled to a peak of 1.
+One item ($b = 0$, no floor), answered by $n$ respondents with known abilities, from a fixed sample of 2,000. Twenty respondents is a small pilot; 300 is the size of the vocabulary subsamples below. The prior on $\log a$ is normal with mean 0 and the SD you choose.
 
 ```{ojs}
 //| echo: false
@@ -201,7 +201,7 @@ Plot.plot({
 md`With ${sp_n} respondents: MLE **${Number.isFinite(sp.mle) ? sp.mle.toFixed(2) : "none (the likelihood keeps rising)"}**, posterior mode ${sp.map.toFixed(2)}, posterior mean **${sp.eap.toFixed(2)}**; the true slope is ${sp_a.toFixed(1)} (grey line).`
 ```
 
-With 20 respondents the maximum-likelihood slope is 3.17, more than twice the truth, and the posterior mode is 2.16: the prior pulls the estimate back toward 1. With 5 respondents the likelihood never turns down, as for a perfect response pattern, and the posterior still has a peak (1.23). With 300, the three estimates agree within a few hundredths. Tighten the prior's SD to 0.25 and at 20 respondents the prior wins: the posterior mode is 1.15, now below the truth. Loosen it to 2 and the mode moves most of the way back toward the MLE (2.47). A prior is an assumption, and a tight one in the wrong place pulls every estimate toward the wrong place. This is shrinkage again, now for items.
+With 20 respondents the maximum-likelihood slope is 3.17, more than twice the truth, and the posterior mode is 2.16, pulled back toward 1. With 300 they agree within a few hundredths. Tighten the prior's SD to 0.25 and at 20 respondents the prior wins: the mode is 1.15, now below the truth. This is shrinkage again, now for items, and a tight prior in the wrong place pulls every estimate toward the wrong place.
 
 ```{ojs}
 //| echo: false
@@ -221,9 +221,9 @@ Fixing $c$ and adding priors are both assumptions, which the model's own fit sta
 
 ## Simulate
 
-The code below simulates a five-option test from the 3PL (20 items, every $c = 0.2$) for 300 respondents, then fits the 2PL, the 3PL without priors, and the 3PL with a lognormal(0, 1) prior on the slopes and a beta(4, 16) prior on the lower asymptotes (mean 0.2, the chance rate). It reports each model's error (RMSE) against the truth. The first run takes 20–30 seconds while R and `mirt` load, and the fits up to a minute more.
+The code below simulates a five-option test from the 3PL (20 items, every $c = 0.2$) for 300 respondents, then fits the 2PL, the 3PL without priors, and the 3PL with a lognormal(0, 1) prior on the slopes and a beta(4, 16) prior on the lower asymptotes (mean 0.2, the chance rate; mode 0.17). The first run takes 20–30 seconds while R and `mirt` load, and the fits up to a minute more.
 
-With the seed as written, the 3PL without priors has a slope as large as 6.8 (the true slopes are around 1), a slope error of 1.74 and a median $c$ of 0.29. With the priors, the slope error is 0.31, the difficulty error falls from 1.04 to 0.51, and the median $c$ is 0.17. The 2PL's difficulties are off by 1.28. All three give abilities that correlate 0.76 to 0.78 with the truth. With `np <- 3000` (in your own R session) the 3PL's slope error falls to 0.32 on its own, the priors still help (0.22), and the abilities (0.82 for all three) still hardly notice the model. These priors are centred on the true $c$, which flatters them; try `expbeta, 2, 18` (mean 0.1) to see what a prior in the wrong place costs.
+With the seed as written, the 3PL without priors has a slope as large as 6.8 (the true slopes are around 1), a slope error of 1.74 and a median $c$ of 0.29. With the priors, the slope error is 0.31, the difficulty error falls from 1.04 to 0.51, and the median $c$ is 0.17. All three give abilities that correlate 0.76 to 0.78 with the truth. With `np <- 3000` (in your own R session) the 3PL's slope error falls to 0.32 on its own and the priors still help (0.22). Try `expbeta, 2, 18` (mean 0.1) to see what a prior in the wrong place costs.
 
 ```{webr}
 {{< include code/guessing-priors-sim.R >}}
@@ -241,7 +241,7 @@ options(digits = 7)  # R's default, so the page prints what a fresh R session pr
 
 ### A two-button reading task
 
-Our main example is [roar_lexical](https://itemresponsewarehouse.org/tables/roar_lexical/), from the lexical decision task of the Rapid Online Assessment of Reading ([Yeatman et al., 2021](https://doi.org/10.1038/s41598-021-85907-x)): children and adolescents saw a string of letters and pressed one of two buttons to say whether it was a real word, under a time limit. Its job is to be a test whose chance rate is known exactly: 0.5. A response is 1 when the string was classified correctly, and every response has a time. [Download the code](code/guessing-priors-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
+Our main example is [roar_lexical](https://itemresponsewarehouse.org/tables/roar_lexical/), from the lexical decision task of the Rapid Online Assessment of Reading ([Yeatman et al., 2021](https://doi.org/10.1038/s41598-021-85907-x)): children and adolescents saw a string of letters and pressed one of two buttons to say whether it was a real word, under a time limit. Its job is to be a test whose chance rate is known exactly: 0.5. Every response has a time. [Download the code](code/guessing-priors-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
 
 ```{r fetch-roar}
 #| echo: true
@@ -265,7 +265,7 @@ predict({
 #| code-fold: show
 ```
 
-The two models rank respondents almost identically (the abilities correlate 0.97), and the fixed floor fits better, with a log likelihood of −25,380 against −25,579 for the same number of parameters. The scale spreads out: the SD of ability goes from 0.92 to 1.67, and of difficulty from 0.8 to 2.0, since the logistic part now explains only the correct answers above 0.5.
+The two models rank respondents almost identically (the abilities correlate 0.97), and the fixed floor fits better, with a log likelihood of −25,380 against −25,579 for the same number of parameters. The scale spreads out: the SD of ability goes from 0.92 to 1.67, and of difficulty from 0.8 to 2.0.
 
 ```{r items-roar}
 #| echo: true
@@ -274,41 +274,57 @@ The two models rank respondents almost identically (the abilities correlate 0.97
 #| fig-height: 4
 ```
 
-The hardest items show where the spread comes from. Seventeen strings, 11 real words and 6 made-up ones, are classified correctly by fewer than half the respondents, below what random pressing would give; the real word *napery* by 14%. A respondent who doesn't know a word doesn't press at random: they say it isn't a word, and a made-up string that looks like a word gets called one. A floor at 0.5 can't describe an item below chance, so the fixed-floor model sends the five hardest to difficulties between 5.4 and 14.4. That is the model's assumption, that not knowing means choosing at random, meeting items for which it doesn't hold.
+The hardest items show where the spread comes from. Seventeen strings, 11 real words and 6 made-up ones, are classified correctly by fewer than half the respondents, below what random pressing would give; the real word *napery* by 14%. A respondent who doesn't know a word says it isn't one, and a word-like made-up string gets called a word. A floor at 0.5 can't describe an item below chance, so the fixed floor sends the five hardest to difficulties of 5.4 to 14.4: its assumption, that not knowing means choosing at random, doesn't hold for these items.
 
 ```{r cv-roar}
 #| echo: true
 #| code-fold: show
 ```
 
-Out of sample, the fixed floor beats the Rasch model in all five folds, by an IMV of 0.0023 on average: a fifth of the 0.01 benchmark for the 2PL over the Rasch model, with no extra parameters. Among held-out responses from the quarter of respondents with the lowest accuracy, the IMV is 0.057; among everyone else it is slightly negative (−0.0017). It helps with a few respondents and costs a little with the rest.
+Out of sample, the fixed floor beats the Rasch model in all five folds, by an IMV of 0.0023 on average: a fifth of the 0.01 benchmark for the 2PL over the Rasch model, with no extra parameters. Among held-out responses from the quarter of respondents with the lowest accuracy, the IMV is 0.057; among everyone else it is slightly negative (−0.0017).
 
 ```{r rt-roar}
 #| echo: true
 #| code-fold: show
 ```
 
-The response times say who those respondents are. Of all responses, 3.1% came in under 0.3 seconds, with an accuracy of 0.51 against 0.81 for the rest. They aren't spread evenly: 11 of the 123 respondents gave more than 10% of their responses that fast, and the four with the most gave 40–47%, with overall accuracies of 0.50 to 0.55. Across respondents, the share of rapid responses and accuracy have a rank correlation of −0.66. On this task, guessing looks more like something a handful of respondents did than something every item invites.
+The response times say who those respondents are. Of all responses, 3.1% came in under 0.3 seconds, at an accuracy of 0.51 against 0.81 for the rest. Eleven of the 123 respondents gave more than 10% of their responses that fast; the four with the most gave 40–47%, at overall accuracies of 0.50 to 0.55. On this task, guessing looks more like something a handful of respondents did than something every item invites.
 
-So for a test like this one, with a known chance rate, I'd fix the floor rather than estimate it: it costs no parameters and predicts new responses better. But I'd read it as a rough description of a few respondents, check the items that fall below chance, and look at response times before trusting it. Problem 2 asks what changes when the rapid responses are set aside.
+Can the responses alone find those respondents? [Xiao, Ulitzsch, Zhang, Frank and Domingue (2026)](https://doi.org/10.31234/osf.io/7gtwd_v1) study a two-class mixture: each respondent either follows the Rasch model (with probability $\pi$) or answers every item correctly with the chance probability. As $\hat\pi$ approaches 1 it becomes the Rasch model, the "safety valve" of their title. They leave two-option tasks out of scope, since at a chance rate of 0.5 a guessing class is hard to tell from engaged respondents on hard items. The code below fits it anyway, from responses alone.
+
+```{r mixture-roar}
+#| echo: true
+#| code-fold: true
+```
+
+On `roar_lexical` the classes separate: $\hat\pi$ is 0.87, 9 of the 11 heavy rapid responders land in the guessing class, and the 16 respondents there have accuracies of 0.49 to 0.63. The mixture's log likelihood is 298 above the Rasch model's, against 199 for the fixed floor, for one extra parameter. That is in-sample; the wide spread of difficulties here may be what lets the classes come apart.
+
+So for a test like this one, with a known chance rate, I'd fix the floor rather than estimate it: it costs no parameters and predicts new responses better. But I'd read it as a rough description of a few respondents, fit the mixture beside it, and look at response times before trusting either. Problem 6 asks whether the mixture holds up on held-out responses.
 
 ### Priors when the sample is small
 
-Our contrast table is [vocabulary_iq](https://itemresponsewarehouse.org/tables/vocabulary_iq/), the Vocabulary IQ Test from Open Psychometrics ([Open Psychometrics, 2018](http://openpsychometrics.org/_rawdata/)). Each of its 45 items lists five words, and the respondent picks the two with the same meaning, so a random pair is right one time in ten. According to the test's codebook, respondents were told not to guess, that a wrong answer cost 0.35 points, and that they could answer "don't know". Its job is to show what priors do for a 3PL fitted to a small sample. We drop items 46–75, a personality survey collected alongside the test. A response is 1 for the correct pair; "don't know" is missing, and we keep the respondents who never chose it.
+Our contrast table is [vocabulary_iq](https://itemresponsewarehouse.org/tables/vocabulary_iq/), the Vocabulary IQ Test from Open Psychometrics ([Open Psychometrics, 2018](http://openpsychometrics.org/_rawdata/)). Each of its 45 items lists five words, and the respondent picks the two with the same meaning, so a random pair is right one time in ten. Its codebook says respondents were told not to guess, that a wrong answer cost 0.35 points, and that they could answer "don't know". Its job is to show what priors do for a 3PL fitted to a small sample. We drop items 46–75, a personality survey, and keep the respondents who never chose "don't know" (missing in the table).
 
 ```{r fetch-viqt}
 #| echo: true
 #| code-fold: show
 ```
 
-"Don't know" accounts for 13% of responses, and 2,802 of the 12,173 respondents never chose it. For them the items are easy: the median item is answered correctly by 90%, and the hardest by half.
+Of the 12,173 respondents, 2,802 never chose "don't know". Of these, 48 score 0 of 45 and 30 more score 1 to 4, where choosing pairs at random would average 4.5. The source file records a question left unanswered as 0, apart from "don't know", and the IRW table scores it as a wrong pair: 36 of the 48 zeros left every item blank, and 74 of the 78 low scorers left at least one. These scores mostly record questions not answered, so we set the 78 aside, as the [guessing vignette](https://itemresponsewarehouse.org/vignettes/guessing.html) does for scored absences on ENEM. For the 2,724 who remain the items are easy: the median item is answered correctly by 92%.
 
 ```{r full-viqt}
 #| echo: true
 #| code-fold: show
 ```
 
-Fitted to all 2,802, the 3PL puts every $c$ between 0 and 0.09, with a median of 0.000: on an easy test that discouraged guessing, almost nobody is where a floor would show. With the priors (lognormal(0, 1) on the slopes, beta(2, 18) on $c$, centred on the chance rate of 0.1), every $c$ lands between 0.045 and 0.066. Even with 2,802 respondents, the lower asymptotes are mostly the prior.
+Fitted to the 2,724, the 3PL puts the lower asymptotes between 0.001 and 0.47 (median 0.036). With the 78 left in, all were between 0 and 0.09 (median 0.000), and the median slope was 2.61 rather than 1.85: respondents who answered nothing look to the model like the bottom of the ability range, never lucky. With the priors (lognormal(0, 1) on the slopes, beta(2, 18) on $c$), every $c$ lands between 0.052 and 0.076, around the prior's mode: on an easy test that discouraged guessing, few respondents are where a floor would show.
+
+```{r beta-viqt}
+#| echo: true
+#| code-fold: show
+```
+
+A warning about syntax: `mirt` estimates $c$ on the logit scale, and `expbeta` applies the beta prior to the probability. A plain `beta` applies it to the logit, which it then confines between 0 and 1, so every $c$ is pushed to at least 0.5: here, 0.50 to 0.51.
 
 ```{r sub-viqt}
 #| echo: true
@@ -317,23 +333,23 @@ Fitted to all 2,802, the 3PL puts every $c$ between 0 and 0.09, with a median of
 #| fig-height: 4.5
 ```
 
-Fitted to 300 respondents without priors, the slopes have an SD of 2.07 and three exceed 5, while the full-sample slopes run from 0.44 to 4.74. With the priors, the SD is 0.79 and none exceeds 5, and the slopes' error against the full-sample 3PL drops from 1.75 to 0.94. The difficulties go the other way (0.37 to 0.69), shifting to match $c$s that the prior moved from about 0 to about 0.05.
+Fitted to 300 respondents without priors, the slopes have an SD of 4.15 and four exceed 5, while the full-sample slopes run from 0.28 to 4.16. With the priors, the SD is 0.75 and none exceeds 5, and the slopes' error against the full-sample 3PL drops from 3.98 to 0.61. In this subsample the difficulties go the other way (0.80 to 1.12).
 
 ```{r repeat-viqt}
 #| echo: true
 #| code-fold: show
 ```
 
-Over five more subsamples the pattern holds (medians above): the priors tame the slopes and cost something on the difficulties. The reference is itself a 3PL without priors, so "error" means distance from what 2,802 respondents give, not from the truth.
+Over five more subsamples (medians above) the priors again tame the slopes (error 2.11 against 0.76), and the difficulties improve too (5.62 against 2.84; on items nearly everyone gets right, a difficulty from 300 respondents can land almost anywhere). "Error" here is distance from the full-sample 3PL, not from the truth.
 
 ## Problems
 
-1. **What an answer is worth.** Under the Rasch model with $c$ fixed at $1/k$, write the log likelihood for $\theta$ from one correct response and from one incorrect response, and differentiate each. Show that a correct response's derivative is smaller than under the Rasch model at every $\theta$ and an incorrect one's is unchanged. What does that mean for a respondent who gets most items wrong?
-2. **Real data with a twist.** In `roar_lexical`, set responses faster than 0.3 seconds to missing and refit the Rasch model and the fixed-floor model. How do the difficulty SDs and the out-of-sample IMV change, and does the fixed floor still help the lowest-accuracy quarter?
-3. **Real data: the items below chance.** Refit both models without the 17 `roar_lexical` items answered correctly by fewer than half the respondents and compare the out-of-sample IMV with the lesson's. What would a lower asymptote below 0.5 mean for those items? (PS4#3.)
-4. **Judgment.** A four-option test gives 3PL lower asymptotes between 0.00 and 0.05. A colleague concludes that nobody guesses on it. What would you check before agreeing?
-5. **Design.** You must fit a 3PL to 200 respondents on a 30-item, four-option test. Choose priors for the slopes and lower asymptotes, defend them, and check them by simulation. How would you know if your prior on $c$ were in the wrong place? (PS4#4.)
-6. **Challenge (open): guessing as a respondent trait.** Write down a model with two classes of respondent: engaged (the Rasch model) and rapid-guessing (correct with probability $1/k$). What data would identify the classes: responses, response times, or both? I don't know of a single answer; [Response time and the speed-accuracy tradeoff](response-time.qmd) and [Nominal response and multiple-choice models](nominal.qmd) have pieces of one.
+1. **What an answer is worth.** With $c$ fixed at $1/k$, differentiate the log likelihood for $\theta$ from one correct and from one incorrect response. Show that the first is smaller than under the Rasch model at every $\theta$ and the second unchanged. What does that mean for a respondent who gets most items wrong?
+2. **Real data with a twist.** In `roar_lexical`, set responses faster than 0.3 seconds to missing and refit the Rasch model and the fixed-floor model. How does the out-of-sample IMV change?
+3. **Real data: the items below chance.** Refit both models without the 17 `roar_lexical` items answered correctly by fewer than half the respondents. What would a lower asymptote below 0.5 mean for those items? (PS4#3.)
+4. **Judgment (a live case).** Fitted to all 2,802 `vocabulary_iq` respondents who never chose "don't know", the 78 low scorers included, the 3PL puts every lower asymptote between 0.000 and 0.093, with a median of 0.000 (the output above). A colleague concludes that nobody guesses on this test. What would you check before agreeing?
+5. **Design.** You must fit a 3PL to 200 respondents on a 30-item, four-option test. Choose priors, defend them, and check them by simulation. How would you know if your prior on $c$ were in the wrong place? (PS4#4.)
+6. **Challenge (open): guessing as a respondent trait.** Compare the Rasch model, the fixed floor and the mixture on held-out `roar_lexical` responses, by the IMV. Does the mixture's in-sample gain survive? What would response times add? I don't know of a single answer; [Response time and the speed-accuracy tradeoff](response-time.qmd) and [Nominal response and multiple-choice models](nominal.qmd) have pieces of one.
 
 ```{r}
 #| output: asis
@@ -348,6 +364,7 @@ ask_claude("guessing-priors", "It covers the lower asymptote (guessing parameter
 - Haberman, S. J. (2005). Identifiability of parameters in item response models with unconstrained ability distributions. *ETS Research Report Series*, 2005(2), i–22. <https://doi.org/10.1002/j.2333-8504.2005.tb02001.x>. Identification in general form.
 - Han, K. T. (2012). Fixing the c parameter in the three-parameter logistic model. *Practical Assessment, Research, and Evaluation*, 17, Article 1. <https://doi.org/10.7275/f0gz-kc87>. Fixing $c = 1/k$, on simulated and real multiple-choice data.
 - San Martín, E., del Pino, G., & De Boeck, P. (2006). IRT models for ability-based guessing. *Applied Psychological Measurement*, 30(3), 183–203. <https://doi.org/10.1177/0146621605282773>. Ways to add guessing to the 1PL, and a model in which the chance of a correct guess rises with ability.
+- Xiao, X., Ulitzsch, E., Zhang, L., Frank, M. C., & Domingue, B. W. (2026). The safety valve: A mixture IRT approach to modeling guessing behavior. PsyArXiv preprint. <https://doi.org/10.31234/osf.io/7gtwd_v1>. The two-class mixture fitted to `roar_lexical`, compared with the Rasch model and fixed floors by the IMV.
 - Schnipke, D. L., & Scrams, D. J. (1997). Modeling item response times with a two-state mixture model: A new method of measuring speededness. *Journal of Educational Measurement*, 34(3), 213–232. <https://doi.org/10.1111/j.1745-3984.1997.tb00516.x>. Rapid guesses and solution behaviour as two states.
 - Wise, S. L., & Kong, X. (2005). Response time effort: A new measure of examinee motivation in computer-based tests. *Applied Measurement in Education*, 18(2), 163–183. <https://doi.org/10.1207/s15324818ame1802_2>. Engagement measured from response times.
 - Wise, S. L. (2017). Rapid-guessing behavior: Its identification, interpretation, and implications. *Educational Measurement: Issues and Practice*, 36(4), 52–61. <https://doi.org/10.1111/emip.12165>. How rapid guesses are found, and what to do with them.
