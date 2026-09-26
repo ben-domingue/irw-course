@@ -7,13 +7,13 @@ const median = (x) => { const s = [...x].sort((a, b) => a - b), n = s.length;
   return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
 const mean = (x) => x.reduce((u, v) => u + v, 0) / x.length;
 
-// Response times from the lognormal model for one item: log t = beta - tau + e, with
+// Response times from the lognormal model for one item: log t = kappa - tau + e, with
 // tau ~ N(0, sdTau) across respondents and e ~ N(0, sigma). Returns the sample and
 // its median and mean in seconds.
-export function timeSample(beta, sdTau, sigma, n = 2000, seed = 53) {
+export function timeSample(kappa, sdTau, sigma, n = 2000, seed = 53) {
   const r = rng(seed), rows = [];
   for (let j = 0; j < n; j++) {
-    const lt = beta - sdTau * r.norm() + sigma * r.norm();
+    const lt = kappa - sdTau * r.norm() + sigma * r.norm();
     rows.push({t: Math.exp(lt), lt});
   }
   const t = rows.map(d => d.t);

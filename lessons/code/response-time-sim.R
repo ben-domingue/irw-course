@@ -20,14 +20,14 @@ delta <- 0     # within-person effect of taking longer than expected (log odds)
 z1 <- rnorm(np); z2 <- rnorm(np)
 theta <- z1
 tau <- 0.3 * (rho * z1 + sqrt(1 - rho^2) * z2)
-# Item parameters: difficulty b and time intensity beta (log seconds), correlated 0.5.
+# Item parameters: difficulty b and time intensity kappa (log seconds), correlated 0.5.
 w1 <- rnorm(ni); w2 <- rnorm(ni)
 b <- w1
-beta <- log(30) + 0.3 * (0.5 * w1 + sqrt(1 - 0.5^2) * w2)
+kappa <- log(30) + 0.3 * (0.5 * w1 + sqrt(1 - 0.5^2) * w2)
 
 d <- expand.grid(id = factor(1:np), item = factor(1:ni))
 e <- rnorm(nrow(d), 0, 0.5)                          # residual log time
-d$lrt <- beta[d$item] - tau[d$id] + e
+d$lrt <- kappa[d$item] - tau[d$id] + e
 d$resp <- rbinom(nrow(d), 1, plogis(theta[d$id] - b[d$item] + delta * e))
 
 m_time <- lmer(lrt ~ 1 + (1 | id) + (1 | item), d)
@@ -37,7 +37,7 @@ theta_hat <- ranef(m_acc)$id[, 1]
 cat(sprintf("Correlation of theta and speed: true %.2f, estimates %.2f\n",
             rho, cor(theta_hat, tau_hat)))
 cat(sprintf("Correlation of b and time intensity: in these items %.2f, estimates %.2f\n",
-            cor(b, beta), cor(-ranef(m_acc)$item[, 1], ranef(m_time)$item[, 1])))
+            cor(b, kappa), cor(-ranef(m_acc)$item[, 1], ranef(m_time)$item[, 1])))
 
 # Pooled: accuracy on raw log time, ignoring who and what.
 pooled <- glm(resp ~ lrt, binomial, d)
