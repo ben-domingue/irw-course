@@ -7,6 +7,24 @@
 # three-node tree takes one to two minutes.
 # Adapted from ben-domingue/252: c8/irtree.R, c8/irtree2.R and ps8/fast.R.
 
+## ---- recode-example
+# Three respondents from the sample drawn below (rows 1, 2 and 6) and their keyed
+# answers to C1 and C2.
+ex <- data.frame(id = c(1, 1, 2, 2, 6, 6), item = c("C1", "C2"), x = c(3, 5, 4, 4, 1, 2))
+# The tree as a map: one row per category, one column per node. Each row is that
+# category's path; NA marks a node the path doesn't reach.
+tree_map <- rbind("1" = c(side = 1, direction = 0,  extreme = 1),
+                  "2" = c(side = 1, direction = 0,  extreme = 0),
+                  "3" = c(side = 0, direction = NA, extreme = NA),
+                  "4" = c(side = 1, direction = 1,  extreme = 0),
+                  "5" = c(side = 1, direction = 1,  extreme = 1))
+# Recoding is looking each response up in the map: one pseudo-item per node.
+cbind(ex, tree_map[ex$x, ], row.names = NULL)
+# Long: one row per response and node, then drop the nodes a response doesn't reach.
+long_ex <- data.frame(ex[rep(seq_len(nrow(ex)), each = 3), c("id", "item")],
+                      node = colnames(tree_map), resp = c(t(tree_map[ex$x, ])), row.names = NULL)
+long_ex[!is.na(long_ex$resp), ]
+
 ## ---- fetch-csn
 library(lme4)
 options(digits = 7)  # R's default, in case a .Rprofile changes it
@@ -42,8 +60,9 @@ tree <- rbind(
   data.frame(sided, node = "extreme",   resp = as.integer(sided$x %in% c(1, 5))))
 tree$node <- factor(tree$node, levels = c("side", "direction", "extreme"))  # a factor, not text
 tree$item <- factor(tree$item, levels = colnames(x))
-# Respondent 1's answers to C1 and C2, and the pseudo-items they become:
-x[1, 1:2]
+# Rows 1, 2 and 6 of the sample: the answers in the recoding example.
+x[c(1, 2, 6), 1:2]
+# Respondent 1's pseudo-items for C1 and C2:
 tree[tree$id == 1 & tree$item %in% c("C1", "C2"), c("item", "x", "node", "resp")]
 table(tree$node)   # rows per node: every response reaches node 1
 

@@ -152,7 +152,55 @@ quiz({
 **Recall** from [What is an item?](explanatory-irt.qmd): the Rasch model is a mixed logistic regression, `glmer(resp ~ 0 + item + (1 | id), family = binomial)`, with one intercept per item (its easiness, $-b_i$) and a random intercept per respondent ($\theta_j$). Item features and respondent covariates are changes to that formula.
 :::
 
-A tree is one of those regressions. Stack the pseudo-items long, one row per respondent, item and node reached, with a `node` column. Then
+```{r}
+#| include: false
+knitr::read_chunk("code/irtrees-irw.R")
+```
+
+How does a rating become pseudo-items? Take three respondents from the conscientiousness data in [With real data](#with-real-data) and their answers to the first two items, C1 and C2. (C2 is worded against conscientiousness, so its responses are reversed first, and higher means more conscientious on both.) Böckenholt's tree can be written as a map with one row per category and one column per node. Each row is that category's path, with NA where the path doesn't reach a node, and recoding is looking each response up in the map:
+
+```{r recode-example}
+#| echo: true
+#| code-fold: show
+```
+
+Each response becomes one pseudo-item per node. Respondent 1's 3 on C1 is side = 0 and nothing else. Respondent 6's 1 and 2 differ only at the extreme node, and respondent 2's two 4s are coded alike. The long format, one row per response and node reached, drops the NAs: six responses become 16 rows (rows 2 and 3 were respondent 1's NAs). Those rows are the data the model is fitted to.
+
+#### Try it: recode one respondent
+
+Set one respondent's answers to three items; they start at respondent 1's keyed answers to C1, C2 and C3. The first table is the respondent's row with one column per node and item, the layout `mirt` takes; the second is the same codes stacked long, the layout `glmer` takes.
+
+```{ojs}
+//| echo: false
+viewof rc_x = Inputs.form({
+  C1: Inputs.radio([1, 2, 3, 4, 5], {value: 3, label: "C1"}),
+  C2: Inputs.radio([1, 2, 3, 4, 5], {value: 5, label: "C2"}),
+  C3: Inputs.radio([1, 2, 3, 4, 5], {value: 5, label: "C3"})
+})
+```
+
+```{ojs}
+//| echo: false
+rc_items = Object.keys(rc_x)
+rc_pre = ({side: "side", direction: "dir", extreme: "ext"})
+rc_wide = [Object.fromEntries(trees.nested.flatMap(n => rc_items.map(i => [`${rc_pre[n.node]}_${i}`, n.code(rc_x[i]) ?? "NA"])))]
+rc_long = rc_items.flatMap(i => trees.nested.map(n => ({id: 1, item: i, node: n.node, resp: n.code(rc_x[i])}))).filter(d => d.resp !== null)
+Inputs.table(rc_wide, {layout: "auto", select: false})
+```
+
+```{ojs}
+//| echo: false
+Inputs.table(rc_long, {layout: "auto", select: false, rows: 10})
+```
+
+```{ojs}
+//| echo: false
+md`Three answers become **${rc_long.length}** long rows; the wide row has **${9 - rc_long.length}** NA${9 - rc_long.length === 1 ? "" : "s"}.`
+```
+
+Each 3 puts two NAs in the wide row and takes two rows out of the long table; every other answer gives three rows. Changing a 4 to a 5 changes one code, at the extreme node, and changing a 2 to a 4 changes one, at the direction node.
+
+A tree is one of those regressions. With the long rows as the data (`pseudo_items`),
 ```r
 glmer(resp ~ 0 + item:node + (0 + node | id), family = binomial, data = pseudo_items)
 ```
@@ -253,11 +301,6 @@ With the seed as written, AIC prefers a $\theta$ per node (11,234 against 11,679
 [Download this code](code/irtrees-sim.R) to run it as large as you like in your own R session.
 
 ## With real data
-
-```{r}
-#| include: false
-knitr::read_chunk("code/irtrees-irw.R")
-```
 
 ### Conscientiousness and response styles
 
