@@ -513,7 +513,7 @@ beyond deep dives.
   figure; Lusardi & Mitchell (2014); Han (2012); Wright & Masters (1982); Wu & Adams
   (2013); Thurstone (1947).
 - Check: RSES item-text alignment against the original (`song_2023_rses`,
-  `bakker_2020_rses`); whether the Florida twins data carry a family id; whether
+  `bakker_2020_rses`); whether the Florida twins data carry a family id (**resolved 09-25:** no column; family is `id %/% 100`, 386 complete pairs plus 5 singletons, per `dimensionality`); whether
   `lme4` runs in webR fast enough (`g-theory`).
 - Add baselines: "wide spread of difficulty" (`rasch`, diffsim vignette) and
   "unusually clean" (`fa-exploratory`, dimensionality vignette).
