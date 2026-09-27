@@ -2,7 +2,7 @@
 
 # Latent classes and cognitive diagnosis (`cdm`)
 
-Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: drafted (09-25, #49)
 
 ## Core ideas
 
@@ -64,3 +64,16 @@ References checked on Crossref (09-24) unless marked.
 ## Open questions
 
 - **Verdict (F27, on hold with Ben).** Candidate: "a CDM earns its keep only when the Q-matrix was designed into the test, not retrofitted to it" (Claude's reading of PS7#2 and ECPE). *Default while on hold:* the draft carries the candidate in a hidden TODO, not on the page, and the lesson's first-person verdict waits for Ben.
+
+## Drafting notes (09-25, #49)
+
+What changed from this outline when the lesson was drafted (numbers recomputed from the IRW tables; they are what the page prints):
+
+- **frac20.** Attributes are classified by posterior probability above 0.5 (`personparm(..., "EAP")`), not by MAP, because `GDINA`'s MAP breaks ties at random (`max.col`). So 200 students (37.3%) master all eight (the outline's 201 was a MAP count), and attribute counts correlate 0.93 with Rasch θ and 0.95 with the sum score. PVAF (GDINA 2.13.1) flags 10 items from the DINA fit (DINA refit with them: AIC 9,527, worse than 9,395) and 8 from the G-DINA fit (G-DINA refit: 9,340, better than 9,422); the lesson shows both, which is the F28 caution shown rather than asserted. The sum-score thread is paid with the profiles within each sum score (at 10 correct, 16 students in 10 profiles).
+- **cdm_ecpe, unrestricted classes.** poLCA with 1–5 classes: BIC picks 3; classes are ordered up to 4; the five-class solution puts 15 items out of order, with one class that crosses on morphosyntactic vs cohesive items (following the Q-matrix), but BIC doesn't support it. The 2PL's BIC beats every class model. A four-profile chain G-DINA (`att.str`) was added: same AIC as the full G-DINA, better BIC, still behind the Rasch model and 2PL.
+- **Sanity.** Both IRW tables match the copies shipped in `GDINA` (`realdata_Tatsuoka1990`, `realdata_ECPE`), checked on the page; the DINA log likelihood (−4,402.3) matches `c7/3_cdm.R` on `c7/frac20.rds`.
+- **Widgets.** A continuum cut into classes (with a crossing class), the Q-matrix explorer on the frac20 Q, a higher-order DINA item curve between DINA's plateaus, and the profile-count plot. The Go deeper is the higher-order DINA item as a 4PL.
+- **Simulate** fits DINA and G-DINA and a misspecified Q in webR with `GDINA` (it installs and runs in the browser, ~30 s); the 2PL comparison is left to the real data, to avoid loading `mirt` as well.
+- **Verdict (F27):** not on the page; the candidate sits in a hidden TODO at the end of *With real data*.
+- **Balance-scale Recall** (`validity-causal`) dropped for length; `validity-causal` already points here.
+

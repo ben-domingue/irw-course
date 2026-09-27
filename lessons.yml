@@ -274,7 +274,7 @@ lessons:
     prereqs: [explanatory-irt]
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
     tables: [frac20, cdm_ecpe]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: polytomous
