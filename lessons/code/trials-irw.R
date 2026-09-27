@@ -168,3 +168,38 @@ ok2$w1 <- as.integer(ok2$wave == 1); ok2$w2 <- 1 - ok2$w1
 s12 <- lmer(rt ~ 0 + factor(wave) + inc:factor(wave) + (0 + w1 + w2 | id) +
               (0 + w1:inc + w2:inc | id), ok2, REML = FALSE)
 VarCorr(s12)
+
+## ---- shots-fetch
+# nbashots_sim is simulated, from the IRW's simsyn source: the shooters' true
+# skill is in cov_true_theta. The item is the shot zone; the trial_ columns give
+# the distance (feet), court location, a three-point flag, the game clock and
+# whether the shot came in the last two minutes of a quarter.
+sh <- read.csv("https://redivis.com/api/v1/tables/datapages.irw_simsyn:current.nbashots_sim/rows?format=csv")
+c(shots = nrow(sh), shooters = length(unique(sh$id)))
+round(cbind(share = prop.table(table(sh$item)), made = tapply(sh$resp, sh$item, mean)), 2)
+
+## ---- shots-raw
+# Each shooter's percentage against their true skill, and by role
+pl <- aggregate(cbind(pct = resp, dist = trial_dist) ~ id + cov_role + cov_true_theta, sh, mean)
+round(c(pct_vs_skill = cor(pl$pct, pl$cov_true_theta), dist_vs_skill = cor(pl$dist, pl$cov_true_theta)), 2)
+aggregate(cbind(pct, true_skill = cov_true_theta, dist) ~ cov_role, pl, function(v) round(mean(v), 2))
+
+## ---- shots-models
+# Skill from the makes alone, and with the shot in the model as trial features
+fit_fast <- function(f, d) glmer(f, d, binomial, nAGQ = 0)
+s0 <- fit_fast(resp ~ 1 + (1 | id), sh)
+s1 <- fit_fast(resp ~ item + trial_dist + trial_late + (1 | id), sh)
+pl$u0 <- ranef(s0)$id[as.character(pl$id), 1]
+pl$u1 <- ranef(s1)$id[as.character(pl$id), 1]
+round(c(makes_only = cor(pl$u0, pl$cov_true_theta), with_shot = cor(pl$u1, pl$cov_true_theta)), 2)
+aggregate(cbind(makes_only = u0, with_shot = u1) ~ cov_role, pl, function(v) round(mean(v), 2))
+round(c(sd_makes_only = attr(VarCorr(s0)$id, "stddev"), sd_with_shot = attr(VarCorr(s1)$id, "stddev"),
+        sd_true = sd(pl$cov_true_theta)), 2)
+
+## ---- shots-imv
+# Out of sample: what does each account of the item add over the shooters alone?
+cv_imv(sh, list(shooters = resp ~ 1 + (1 | id),
+                zone = resp ~ item + (1 | id),
+                zone_distance = resp ~ item + trial_dist + (1 | id),
+                zone_distance_late = resp ~ item + trial_dist + trial_late + (1 | id)),
+       fit_fast, k = 5)
