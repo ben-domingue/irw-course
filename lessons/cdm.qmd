@@ -112,39 +112,40 @@ quiz({
 
 ### Classes or a continuum?
 
-Suppose there are no types at all: every respondent sits somewhere on one Rasch continuum. Fit a latent class model with four classes anyway. What does it find?
+A latent class model has no $\theta$. All it has is a set of classes, each a share of respondents and a row of success rates, one per item, like the rows of the table in the last widget. So the question "types or a continuum?" has to be asked of those rows. What pattern in them would a continuum leave behind?
 
-Roughly, it groups respondents whose $\theta$ values are close: the bottom quarter, the next quarter, and so on. Each group then has everything a class needs, a share of the population (a quarter) and a success rate on each item (the item's Rasch curve averaged over the group's slice of $\theta$). So a continuum can always be described as classes. The question is what those classes look like, and whether classes that are really different types would look any different.
+Draw each class's row as a line across the items, easiest to hardest: a **profile**. If the classes are really types, respondents who differ in *which* items they find hard, the profiles cross: one class beats another on some items and loses on others. If the classes are levels of one thing, each class does better than the class below it on every item, and the profiles stack without crossing.
 
-#### Try it: a continuum cut into classes
+#### Try it: class profiles, stacked or crossing
 
-Ten Rasch items have difficulties from −1.5 to 1.5, and $\theta$ is normal. The widget cuts $\theta$ into equal slices (top panel) and plots each slice's success rate on each item (bottom panel, one line per class). The toggle adds a class that is not a slice: it finds the odd-numbered items easy and the even-numbered ones hard.
+The widget makes classes that are levels of one thing. The top panel shows where they come from, which the latent class model never sees: a normal $\theta$ split into equal-sized groups. The bottom panel shows what the model does see, each class's profile on ten Rasch items, in the same colour as its group. The toggle adds a class that is a type: it finds the odd-numbered items easy and the even-numbered ones hard.
 
 ```{ojs}
 //| echo: false
-viewof cc_K = Inputs.range([2, 7], {value: 4, step: 1, label: "Classes cut from the continuum"})
+viewof cc_K = Inputs.range([2, 7], {value: 4, step: 1, label: "Number of classes (levels)"})
 viewof cc_skill = Inputs.toggle({label: "Add a class that differs in which items it finds hard", value: false})
 ```
 
 ```{ojs}
 //| echo: false
 cc = cutClasses(cc_K, cc_skill)
+cc_names = Array.from({length: cc_K}, (_, k) => `Class ${k + 1}`)
+// light blue to dark blue, one shade per class (like R's colorRampPalette)
+cc_shades = d3.quantize(d3.interpolateRgb(palette.light, d3.interpolateRgb(palette.main, palette.ink)(0.5)), Math.max(cc_K, 2)).slice(0, cc_K)
 Plot.plot({
-  width: 700, height: 140, marginTop: 20, x: {label: "θ", domain: [-3, 3]}, y: {axis: null, domain: [0, 0.46]},
-  marks: [
-    Plot.areaY(cc.density.filter(d => Math.abs(d.theta) <= 3), {x: "theta", y: "d", fill: d => +d.cls.slice(6) % 2 ? palette.light : palette.main, z: "cls", fillOpacity: 0.7}),
-    Plot.text(cc.slices, {x: d => (Math.max(d.lo, -3) + Math.min(d.hi, 3)) / 2, y: 0.45, text: "cls", fontSize: 10, dy: -4})
-  ]
+  width: 700, height: 130, marginTop: 10, x: {label: "θ (where the classes came from; the model never sees it)", domain: [-3, 3]}, y: {axis: null},
+  color: {domain: cc_names, range: cc_shades},
+  marks: [Plot.areaY(cc.density, {x: "theta", y: "d", fill: "cls", z: "cls"})]
 })
 ```
 
 ```{ojs}
 //| echo: false
 Plot.plot({
-  width: 700, height: 300, x: {label: "Item (easiest to hardest)", ticks: 10}, y: {label: "P(correct) in the class", domain: [0, 1]},
+  width: 700, height: 300, color: {domain: [...cc_names, "Type"], range: [...cc_shades, palette.contrast]}, x: {label: "Item (easiest to hardest)", ticks: 10}, y: {label: "P(correct) in the class", domain: [0, 1]},
   marks: [
-    Plot.line(cc.rows, {x: "item", y: "p", z: "cls", stroke: d => d.kind === "skill" ? palette.contrast : palette.main, strokeWidth: d => d.kind === "skill" ? 3 : 2}),
-    Plot.dot(cc.rows, {x: "item", y: "p", fill: d => d.kind === "skill" ? palette.contrast : palette.main, r: 3}),
+    Plot.line(cc.rows, {x: "item", y: "p", z: "cls", stroke: "cls", strokeWidth: d => d.kind === "skill" ? 3 : 2.5}),
+    Plot.dot(cc.rows, {x: "item", y: "p", fill: "cls", r: 3}),
     Plot.text(cc.rows.filter(d => d.item === 10), {x: "item", y: "p", text: "cls", dx: 8, textAnchor: "start", fontSize: 10})
   ], marginRight: 80
 })
@@ -155,7 +156,7 @@ Plot.plot({
 md`Items on which a class does worse than the class below it (classes ordered by their average): **${cc.outOfOrder} of 10**.`
 ```
 
-Every item's curve rises with $\theta$, so a slice higher up the continuum does better on every item than the slice below it. Its line lies above the other line everywhere: however many classes you cut, the lines never cross, and 0 of 10 items are out of order. Add the other class and its line zigzags across the rest, putting all ten out of order. So a latent class model that finds ordered classes, each better than the last on every item, has found what a continuum would give it; it has not found evidence of types. The converse holds too: a Rasch model whose $\theta$ takes only a few values, ordered classes by another name, gives nearly the same item estimates as the Rasch model's conditional likelihood once it has at least $(I + 1)/2$ of them ([Lindsay, Clogg & Grego, 1991](https://doi.org/10.1080/01621459.1991.10475008)). Evidence for classes as something other than a continuum has to come from crossings, classes that differ in *which* items they find hard.
+However many levels you choose, the profiles stack: 0 of 10 items are out of order. Add the type and its profile zigzags across the rest, putting all ten out of order. So a latent class model that finds stacked profiles has found what a continuum would give it, a continuum cut into a few levels, not evidence of types. The converse holds too: a Rasch model whose $\theta$ takes only a few values, ordered classes by another name, gives nearly the same item estimates as the Rasch model's conditional likelihood once it has at least $(I + 1)/2$ of them ([Lindsay, Clogg & Grego, 1991](https://doi.org/10.1080/01621459.1991.10475008)). Evidence for classes as something other than a continuum has to come from crossings, classes that differ in *which* items they find hard.
 
 ### Cognitive diagnosis: classes built from attributes
 
@@ -364,14 +365,14 @@ Nothing is missing, and proportions correct run from 0.43 to 0.90. First, set th
 #| code-fold: show
 ```
 
-BIC chooses three classes (85,782); AIC keeps falling through five. But the 2PL has a lower BIC (85,540) than any class model, and with 56 parameters its log likelihood (−42,546.7) matches the three-class model's (−42,547.8) with 86. Are the classes ordered?
+BIC chooses three classes (85,782); AIC keeps falling through five. But the 2PL has a lower BIC (85,540) than any class model, and with 56 parameters its log likelihood (−42,546.7) matches the three-class model's (−42,547.8) with 86. Do the class profiles stack?
 
 ```{r lca-order}
 #| echo: true
 #| code-fold: show
 ```
 
-Up to four classes, yes, like the continuum in the first widget. The five-class solution puts 15 items out of order. Where do its classes cross?
+Up to four classes, yes, like the levels in the class-profiles widget. The five-class solution puts 15 items out of order. Where do its classes cross?
 
 ```{r lca-five}
 #| echo: true

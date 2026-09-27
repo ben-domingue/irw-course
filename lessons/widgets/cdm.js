@@ -49,7 +49,7 @@ export function cutClasses(K, skill = false) {
     classes.push({name: `Class ${k + 1}`, kind: "continuum",
       p: b.map(bi => idx.reduce((s, j) => s + w[j] * logistic(th[j] - bi), 0) / m)});
   }
-  if (skill) classes.push({name: "Skill class", kind: "skill",
+  if (skill) classes.push({name: "Type", kind: "skill",
     p: b.map((bi, i) => logistic((i % 2 === 0 ? 1 : -1) - bi))});
   const mean = c => c.p.reduce((s, v) => s + v, 0) / c.p.length;
   const sorted = [...classes].sort((x, y) => mean(x) - mean(y));
@@ -58,13 +58,10 @@ export function cutClasses(K, skill = false) {
     if (sorted.some((c, k) => k > 0 && c.p[i] < sorted[k - 1].p[i] - 1e-9)) outOfOrder++;
   }
   const rows = classes.flatMap(c => c.p.map((p, i) => ({item: i + 1, p, cls: c.name, kind: c.kind})));
-  // where each slice of theta starts and ends, for drawing the cuts
-  const slices = Array.from({length: K}, (_, k) => {
-    const idx = cls.map((c, j) => (c === k ? j : -1)).filter(j => j >= 0);
-    return {cls: `Class ${k + 1}`, lo: th[idx[0]], hi: th[idx[idx.length - 1]]};
-  });
-  const density = th.filter((_, j) => j % 10 === 0).map(t => ({theta: t, d: dnorm(t), cls: `Class ${cls[th.indexOf(t)] + 1}`}));
-  return {rows, outOfOrder, slices, density};
+  // each class's slice of theta, for drawing where the classes came from
+  const density = th.filter((_, j) => j % 5 === 0 && Math.abs(th[j]) <= 3)
+    .map(t => ({theta: t, d: dnorm(t), cls: `Class ${cls[th.indexOf(t)] + 1}`}));
+  return {rows, outOfOrder, density};
 }
 
 // Tatsuoka's fraction subtraction Q-matrix (20 items x 8 attributes), as in the IRW
