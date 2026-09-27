@@ -373,7 +373,8 @@ mturkddm_lexical:
   license: CC BY 4.0
   irw_version: IRW v418
 nbashots_sim:
-  reference: .na.character
+  reference: Domingue, B. W. (2026). NBA shots simulation [R script]. Item Response Warehouse.
+    https://github.com/ben-domingue/irw/blob/main/data/simsyn/nbashots_sim.R
   link: .na.character
   license: CC BY 4.0
   irw_version: IRW v439
