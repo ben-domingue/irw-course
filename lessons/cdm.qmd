@@ -18,7 +18,7 @@ suppressPackageStartupMessages(library(GDINA))
 ```{ojs}
 //| echo: false
 import {palette} from "./widgets/irt.js"
-import {cutClasses, fracQ, fracAttributes, dinaItems, hoCurve, classCounts} from "./widgets/cdm.js"
+import {lcClasses, mixtureParts, cutClasses, fracQ, fracAttributes, dinaItems, hoCurve, classCounts} from "./widgets/cdm.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -48,6 +48,46 @@ A latent class model says each respondent belongs to one of $C$ classes, class $
 $$\Pr(\mathbf{x}_j) = \sum_{c=1}^{C} \pi_c \prod_{i} p_{ic}^{\,x_{ij}}\,(1 - p_{ic})^{1 - x_{ij}}.$$
 The model comes from Lazarsfeld's latent structure analysis ([Lazarsfeld & Henry, 1968](https://openlibrary.org/works/OL3915958W)); [Goodman (1974)](https://doi.org/10.1093/biomet/61.2.215) took up its estimation and when its parameters are identified. With $I$ items it has $C - 1$ class shares and $C \times I$ item probabilities. It is fit by EM: from a guess at the item probabilities, compute each respondent's posterior probability of each class, re-estimate the item probabilities with responses weighted by those posteriors, and repeat. We use the `poLCA` package ([Linzer & Lewis, 2011](https://doi.org/10.18637/jss.v042.i10)).
 
+Read the formula from the inside out. Inside class $c$, each item contributes $p_{ic}$ if it was answered correctly and $1 - p_{ic}$ if not, and local independence lets us multiply those factors into the probability of the whole pattern *if the respondent were in class $c$*. We don't know the class, so each class's product is weighted by its share $\pi_c$ and the weighted products are added. Each term's part of the sum is the posterior probability that the respondent is in that class, which is how EM assigns respondents.
+
+#### Try it: building the probability of a response pattern
+
+Three classes answer four items. *Low* and *High* are ordered; *Uneven* finds items 1 and 2 easy and items 3 and 4 hard. Choose a response pattern and the classes' relative sizes.
+
+```{ojs}
+//| echo: false
+viewof mx_x = Inputs.checkbox(["Item 1", "Item 2", "Item 3", "Item 4"], {value: ["Item 1", "Item 2"], label: "Answered correctly"})
+viewof mx_w1 = Inputs.range([0, 10], {value: 3, step: 1, label: "Relative size: Low"})
+viewof mx_w2 = Inputs.range([0, 10], {value: 5, step: 1, label: "Relative size: High"})
+viewof mx_w3 = Inputs.range([0, 10], {value: 2, step: 1, label: "Relative size: Uneven"})
+```
+
+```{ojs}
+//| echo: false
+mx_pat = [1, 2, 3, 4].map(i => mx_x.includes(`Item ${i}`) ? 1 : 0)
+mx = mixtureParts(mx_pat, [mx_w1, mx_w2, mx_w3].every(w => w === 0) ? [1, 1, 1] : [mx_w1, mx_w2, mx_w3])
+mx_cell = "padding:0.2rem 0.6rem;border-bottom:1px solid " + palette.rule + ";text-align:right"
+htl.html`<table style="font-size:0.9rem;border-collapse:collapse">
+  <thead><tr><th style=${mx_cell + ";text-align:left"}>Class</th>
+    ${[1, 2, 3, 4].map(i => htl.html`<th style=${mx_cell}>Item ${i} (${mx_pat[i - 1] ? "p" : "1 − p"})</th>`)}
+    <th style=${mx_cell}>Product: P(pattern | class)</th><th style=${mx_cell}>× share π</th><th style=${mx_cell}>= contribution</th><th style=${mx_cell}>Posterior</th></tr></thead>
+  <tbody>${mx.rows.map(r => htl.html`<tr><td style=${mx_cell + ";text-align:left"}><b>${r.name}</b></td>
+    ${r.factors.map(f => htl.html`<td style=${mx_cell}>${f.toFixed(2)}</td>`)}
+    <td style=${mx_cell}>${r.within.toFixed(4)}</td><td style=${mx_cell}>${r.pi.toFixed(2)}</td><td style=${mx_cell}>${r.contrib.toFixed(4)}</td><td style=${mx_cell}>${r.post.toFixed(2)}</td></tr>`)}
+  <tr><td style=${mx_cell + ";text-align:left"} colspan="7"><b>Sum of the contributions: Pr(pattern)</b></td><td style=${mx_cell}><b>${mx.px.toFixed(4)}</b></td><td style=${mx_cell}>1.00</td></tr></tbody></table>`
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 700, height: 90, x: {label: "Pr(pattern), split by the class each part comes from", domain: [0, Math.max(0.3, mx.px)]},
+  color: {legend: true, domain: lcClasses.map(c => c.name), range: [palette.light, palette.main, palette.contrast]},
+  marks: [Plot.barX(mx.rows, Plot.stackX({x: "contrib", fill: "name"})), Plot.ruleX([0])]
+})
+```
+
+With the default pattern, items 1 and 2 right and 3 and 4 wrong, *Uneven* supplies most of the probability (a posterior of 0.63), though it is the smallest class. Now answer items 3 and 4 instead: the score is still 2, but the pattern is about thirty times less likely and *Low* takes 0.70 of the posterior. A latent class model reads which items were answered, not only how many. Setting a class's size to 0 removes its term from the sum.
+
 ::: {.callout-tip appearance="simple"}
 **If you've done** [Estimating item parameters](item-estimation.qmd): the two biased coins that introduced EM were a two-class latent class model, with the ten tosses in a set as its items.
 :::
@@ -72,11 +112,13 @@ quiz({
 
 ### Classes or a continuum?
 
-What does a continuum look like to a latent class model? Cut it into slices, and each slice is a class.
+Suppose there are no types at all: every respondent sits somewhere on one Rasch continuum. Fit a latent class model with four classes anyway. What does it find?
+
+Roughly, it groups respondents whose $\theta$ values are close: the bottom quarter, the next quarter, and so on. Each group then has everything a class needs, a share of the population (a quarter) and a success rate on each item (the item's Rasch curve averaged over the group's slice of $\theta$). So a continuum can always be described as classes. The question is what those classes look like, and whether classes that are really different types would look any different.
 
 #### Try it: a continuum cut into classes
 
-Ten Rasch items have difficulties from −1.5 to 1.5; $\theta$ is normal. The widget cuts $\theta$ into equal classes and shows each class's probability of success on each item. The toggle adds a class that finds the odd-numbered items easy and the even-numbered ones hard.
+Ten Rasch items have difficulties from −1.5 to 1.5, and $\theta$ is normal. The widget cuts $\theta$ into equal slices (top panel) and plots each slice's success rate on each item (bottom panel, one line per class). The toggle adds a class that is not a slice: it finds the odd-numbered items easy and the even-numbered ones hard.
 
 ```{ojs}
 //| echo: false
@@ -88,11 +130,23 @@ viewof cc_skill = Inputs.toggle({label: "Add a class that differs in which items
 //| echo: false
 cc = cutClasses(cc_K, cc_skill)
 Plot.plot({
+  width: 700, height: 140, marginTop: 20, x: {label: "θ", domain: [-3, 3]}, y: {axis: null, domain: [0, 0.46]},
+  marks: [
+    Plot.areaY(cc.density.filter(d => Math.abs(d.theta) <= 3), {x: "theta", y: "d", fill: d => +d.cls.slice(6) % 2 ? palette.light : palette.main, z: "cls", fillOpacity: 0.7}),
+    Plot.text(cc.slices, {x: d => (Math.max(d.lo, -3) + Math.min(d.hi, 3)) / 2, y: 0.45, text: "cls", fontSize: 10, dy: -4})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
   width: 700, height: 300, x: {label: "Item (easiest to hardest)", ticks: 10}, y: {label: "P(correct) in the class", domain: [0, 1]},
   marks: [
     Plot.line(cc.rows, {x: "item", y: "p", z: "cls", stroke: d => d.kind === "skill" ? palette.contrast : palette.main, strokeWidth: d => d.kind === "skill" ? 3 : 2}),
-    Plot.dot(cc.rows, {x: "item", y: "p", fill: d => d.kind === "skill" ? palette.contrast : palette.main, r: 3})
-  ]
+    Plot.dot(cc.rows, {x: "item", y: "p", fill: d => d.kind === "skill" ? palette.contrast : palette.main, r: 3}),
+    Plot.text(cc.rows.filter(d => d.item === 10), {x: "item", y: "p", text: "cls", dx: 8, textAnchor: "start", fontSize: 10})
+  ], marginRight: 80
 })
 ```
 
@@ -101,7 +155,7 @@ Plot.plot({
 md`Items on which a class does worse than the class below it (classes ordered by their average): **${cc.outOfOrder} of 10**.`
 ```
 
-However many classes you cut, the lines never cross: 0 of 10 items are out of order. Add the other class and its line zigzags across the rest, putting all ten out of order. Ordered classes are what a continuum produces. The converse holds too: a Rasch model whose $\theta$ takes only a few values, ordered classes by another name, gives nearly the same item estimates as the Rasch model's conditional likelihood once it has at least $(I + 1)/2$ of them ([Lindsay, Clogg & Grego, 1991](https://doi.org/10.1080/01621459.1991.10475008)). Evidence for classes as something other than a continuum has to come from crossings, classes that differ in *which* items they find hard.
+Every item's curve rises with $\theta$, so a slice higher up the continuum does better on every item than the slice below it. Its line lies above the other line everywhere: however many classes you cut, the lines never cross, and 0 of 10 items are out of order. Add the other class and its line zigzags across the rest, putting all ten out of order. So a latent class model that finds ordered classes, each better than the last on every item, has found what a continuum would give it; it has not found evidence of types. The converse holds too: a Rasch model whose $\theta$ takes only a few values, ordered classes by another name, gives nearly the same item estimates as the Rasch model's conditional likelihood once it has at least $(I + 1)/2$ of them ([Lindsay, Clogg & Grego, 1991](https://doi.org/10.1080/01621459.1991.10475008)). Evidence for classes as something other than a continuum has to come from crossings, classes that differ in *which* items they find hard.
 
 ### Cognitive diagnosis: classes built from attributes
 
@@ -161,9 +215,29 @@ The **slip** $s_i$ is the chance that a respondent with everything the item need
 
 Other models relax the rule. In DINO, any one required attribute is enough ([Templin & Henson, 2006](https://doi.org/10.1037/1082-989X.11.3.287)), which suits a symptom that several conditions can produce. G-DINA ([de la Torre, 2011](https://doi.org/10.1007/s11336-011-9207-7)) gives each combination of an item's $K_i$ required attributes its own probability, $2^{K_i}$ of them, and contains DINA and DINO; the log-linear CDM ([Henson, Templin & Willse, 2009](https://doi.org/10.1007/s11336-008-9089-5)) is an equivalent family written as a logistic regression on the attributes and their interactions. DINA is a reasonable choice when an item is solved by a chain of steps that must all succeed, as fraction subtraction is, and when there are too few respondents for G-DINA's extra parameters; G-DINA, when there are enough to let the data say how partial mastery counts.
 
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under DINA, an item needs attributes A2 and A5 and has $g = 0.2$, $s = 0.1$. What is P(correct) for a student with A2, A3 and A7 but not A5?",
+  options: [
+    {text: "0.2", correct: true, why: "The student lacks A5, so $\\eta = 0$ and the probability is the guess, $g$. Having A2 earns nothing under DINA."},
+    {text: "0.55", correct: false, why: "That is halfway between $g$ and $1 - s$, as if having one of the two attributes earned half the credit. G-DINA could say that; DINA can't."},
+    {text: "0.9", correct: false, why: "That is $1 - s$, for students with *every* required attribute. A3 and A7 aren't needed by this item, so they don't make up for A5."}
+  ]
+})
+```
+
+### Tying the attributes to a continuum: the higher-order model
+
+DINA says how an item depends on a profile, but not how profiles are spread among respondents. Left free, that spread is a share $\pi$ for every one of the $2^K$ profiles, with nothing linking them. Do respondents who have one attribute tend to have the others? The **higher-order** model ([de la Torre & Douglas, 2004](https://doi.org/10.1007/bf02295640)) answers yes, through one continuous trait. Each respondent has a $\theta_j$, normally distributed, and given $\theta_j$ the attributes are independent, with
+$$\Pr(\alpha_{jk} = 1 \mid \theta_j) = \frac{\exp(\lambda(\theta_j - \delta_k))}{1 + \exp(\lambda(\theta_j - \delta_k))}.$$
+Each attribute has a threshold $\delta_k$, the point on $\theta$ where it is as likely mastered as not, and $\lambda$ says how sharply mastery rises around it. This is a Rasch-type model with the attributes in place of the items, except that the attributes are never observed. The share of a profile is the product of these probabilities, averaged over $\theta$, so the $2^K - 1$ free shares become $K$ thresholds (and $\lambda$). With $\lambda$ fixed at 1, as `GDINA` does by default, that is one parameter per attribute.
+
+What does an item look like against $\theta$ now? Below the attributes' thresholds a respondent probably lacks something the item needs and sits near the guess; above them they probably have it all and sit near $1 - s$.
+
 #### Try it: two plateaus, and a curve between them
 
-DINA has no $\theta$. But suppose, as the higher-order model below does, that attribute $k$ is mastered with probability $\text{logistic}(\lambda(\theta - \delta_k))$, with thresholds $\delta_k$ spread from −1 to 1. Averaging DINA over the attributes gives an item curve against $\theta$.
+Take one item and a respondent with a given $\theta$. With thresholds $\delta_k$ spread from −1 to 1, the widget computes the chance that they have every attribute the item needs, $\prod_k \Pr(\alpha_{jk} = 1 \mid \theta_j)$ over those attributes, and mixes the plateaus in that proportion: $\Pr(x_{ij} = 1 \mid \theta_j) = g + (1 - s - g)\prod_k \Pr(\alpha_{jk} = 1 \mid \theta_j)$.
 
 ```{ojs}
 //| echo: false
@@ -192,21 +266,9 @@ md`At θ = 0 the chance of having all ${ho_m} required attribute${ho_m > 1 ? "s"
 
 The dashed lines are the plateaus, $g$ and $1 - s$, where respondents lacking an attribute and those with all of them sit. Given only $\theta$ the attributes are uncertain, so the curve runs between. With one attribute it is a 4PL curve (see the Go deeper callout). Require more and the curve moves right and loses its symmetry, since every threshold must be passed. Raise $\lambda$ and the curve steepens toward a step.
 
-```{ojs}
-//| echo: false
-quiz({
-  q: "Under DINA, an item needs attributes A2 and A5 and has $g = 0.2$, $s = 0.1$. What is P(correct) for a student with A2, A3 and A7 but not A5?",
-  options: [
-    {text: "0.2", correct: true, why: "The student lacks A5, so $\\eta = 0$ and the probability is the guess, $g$. Having A2 earns nothing under DINA."},
-    {text: "0.55", correct: false, why: "That is halfway between $g$ and $1 - s$, as if having one of the two attributes earned half the credit. G-DINA could say that; DINA can't."},
-    {text: "0.9", correct: false, why: "That is $1 - s$, for students with *every* required attribute. A3 and A7 aren't needed by this item, so they don't make up for A5."}
-  ]
-})
-```
-
 ### How many classes, which Q-matrix, and why not IRT?
 
-Eight attributes give 256 profiles, so an unrestricted distribution over them has 255 parameters, to be estimated from 536 students in the fraction data. Two restrictions shrink that. A **higher-order** model lets one continuous $\theta$ drive the attributes, as in the last widget ([de la Torre & Douglas, 2004](https://doi.org/10.1007/bf02295640)); with the slope fixed at 1, as `GDINA` does by default, that is one parameter per attribute. An **attribute hierarchy** allows only profiles consistent with an order of learning, ruling out an advanced skill without its prerequisite ([Templin & Bradshaw, 2014](https://doi.org/10.1007/s11336-013-9362-0)). Both move a CDM toward a continuum.
+Eight attributes give 256 profiles, so an unrestricted distribution over them has 255 parameters, to be estimated from 536 students in the fraction data. Two restrictions shrink that. The higher-order model above needs 8, one per attribute. An **attribute hierarchy** allows only profiles consistent with an order of learning, ruling out an advanced skill without its prerequisite ([Templin & Bradshaw, 2014](https://doi.org/10.1007/s11336-013-9362-0)). Both move a CDM toward a continuum.
 
 #### Try it: the cost of a profile
 
@@ -235,7 +297,7 @@ md`With ${pc_K} attribute${pc_K > 1 ? "s" : ""}: **${2 ** pc_K}** profiles and *
 
 At eight attributes and 536 respondents, an even spread leaves about two students per profile. Each attribute doubles the unrestricted count and adds one to the higher-order count.
 
-The Q-matrix usually comes from content experts, and may be wrong. **Empirical Q-matrix validation** looks for better entries. The PVAF method ([de la Torre & Chiu, 2016](https://doi.org/10.1007/s11336-015-9467-8)) asks, item by item, for the smallest set of attributes whose G-DINA success probabilities carry at least a set share (by default 95%) of the variation that the item's full set of attributes would give. It is a reasonable way to find items whose coding deserves a second look; a suggestion is a hypothesis about the item, to be checked against what the item asks and by refitting. Is a CDM better than IRT? The models aren't nested, so we compare them by AIC and BIC, or by predicting held-out responses (problem 3).
+The Q-matrix usually comes from content experts, and may be wrong. **Empirical Q-matrix validation** looks for better entries. The PVAF method ([de la Torre & Chiu, 2016](https://doi.org/10.1007/s11336-015-9467-8)) asks, item by item, for the smallest set of attributes whose G-DINA success probabilities carry at least a set share (by default 95%) of the variation that the item's full set of attributes would give. It is a reasonable way to find items whose coding deserves a second look; a suggestion is a hypothesis about the item, to be checked against what the item asks and by refitting. Is a CDM better than IRT? The models aren't nested, so we compare them by AIC and BIC, or by predicting held-out responses (problem 3). [Ma, Liu, Kanopka, Ma and Domingue (2026)](https://doi.org/10.1037/met0000860) did the latter, with the IMV, on 11 datasets previously analysed with CDMs, including the ECPE and the fraction data used below. When each respondent was assigned their most probable profile, the 2PL predicted held-out responses better than DINA and G-DINA in every dataset. When predictions used each respondent's probability of mastering each attribute, a CDM did better in 6 of the 11, by small margins (an IMV under 0.02). G-DINA in particular fit the data it was estimated on much better than it predicted new responses. Why might a CDM lose on data it was built for? The IMV site has an [interactive version of the simulation side](https://intermodelvigorish.github.io/shinysite/cdm_irt.html): data come from DINA with correlated skills, and as the correlation rises the profiles collapse toward one dimension and the 2PL closes the gap.
 
 ```{ojs}
 //| echo: false
@@ -404,7 +466,7 @@ The chain matches the full G-DINA's AIC (85,639) with 13 fewer parameters, so it
 
 1. **The DINA likelihood.** Write the likelihood of one respondent's responses under DINA as a latent class model over the $2^K$ profiles. Show that with a single attribute ($K = 1$), DINA is a two-class latent class model whose item probabilities are $g_i$ in one class and $1 - s_i$ in the other. How many parameters does each model have, and are they the same model?
 2. **The Q-matrix in an LLTM.** Fit `resp ~ 0 + Qmatrix__1 + ... + Qmatrix__8 + (1 | id)` to `frac20` with `glmer`, as in [What is an item?](explanatory-irt.qmd) (PS7#2 B). Do items with the same Q row have similar Rasch difficulties? What does the LLTM assume about attributes that DINA doesn't, and the reverse?
-3. **Held out.** Hold out a random 20% of `frac20` responses (set them to missing), fit the Rasch model, the 2PL, DINA and the higher-order DINA to the rest, and compute each model's IMV over the Rasch model on the held-out responses ([Model fit and out-of-sample prediction](fit-prediction.qmd)). Does the ranking agree with AIC? Then run the full PVAF analysis: which suggested changes make sense for the items as written? (PS7#2 D.)
+3. **Held out.** Hold out a random 20% of `frac20` responses (set them to missing), fit the Rasch model, the 2PL, DINA and the higher-order DINA to the rest, and compute each model's IMV over the Rasch model on the held-out responses ([Model fit and out-of-sample prediction](fit-prediction.qmd)). Does the ranking agree with AIC, and with what [Ma et al. (2026)](https://doi.org/10.1037/met0000860) found for these data? The IRW vignette [Calculating IMV values](https://itemresponsewarehouse.org/vignettes/imv.html) has the cross-validation code. Then run the full PVAF analysis: which suggested changes make sense for the items as written? (PS7#2 D.)
 4. **Skill reports from a state test.** A district wants attribute-level reports for each student from a state mathematics test built from a blueprint of content strands, not a Q-matrix. Advise them. What would you want to see before any report goes home?
 5. **Design a Q-matrix.** Write a Q-matrix for eight items on three attributes in which each attribute has an item that needs it alone. Why does that matter for telling the $2^3$ profiles apart under DINA? Try a Q-matrix without such items in the simulation.
 6. **Challenge (open).** When attributes form a hierarchy, as the ECPE's appear to, is a CDM a new kind of model or a unidimensional model with cut points? Set out what each reading predicts about data you could collect, such as items needing a later attribute but not an earlier one. What would convince you?
@@ -425,6 +487,8 @@ ask_claude("cdm", "It covers latent class analysis (the model, EM, choosing the 
 - Templin, J., & Bradshaw, L. (2014). Hierarchical diagnostic classification models: A family of models for estimating and testing attribute hierarchies. *Psychometrika*, 79(2), 317–339. <https://doi.org/10.1007/s11336-013-9362-0>. Testing an attribute hierarchy, with a grammar test as the example.
 - Templin, J., & Bradshaw, L. (2013). Measuring the reliability of diagnostic classification model examinee estimates. *Journal of Classification*, 30(2), 251–275. <https://doi.org/10.1007/s00357-013-9129-4>. How consistently a CDM classifies respondents, a question this lesson leaves open.
 - Zhou, W., Liu, Y., Tang, R., & Wilson, M. (2026). Aligning LLM-simulated and human examinees for psychometric calibration: A cognitive diagnostic profiling approach. arXiv. <https://arxiv.org/abs/2607.26317>. Attribute profiles written as student descriptions, used to prompt language models to answer the fraction items (a preprint).
+- Ma, W. A., Liu, Y., Kanopka, K., Ma, W., & Domingue, B. W. (2026). A comparison of the predictive performance of continuous and class-based latent trait models. *Psychological Methods*. Advance online publication. <https://doi.org/10.1037/met0000860>. CDMs against the 2PL on held-out responses, in simulations and 11 datasets.
+- The InterModel Vigorish: [IRT versus cognitive diagnostic models](https://intermodelvigorish.github.io/shinysite/cdm_irt.html), an interactive simulation of when a CDM predicts better than the 2PL.
 - Rost, J. (1990). Rasch models in latent classes: An integration of two approaches to item analysis. *Applied Psychological Measurement*, 14(3), 271–282. <https://doi.org/10.1177/014662169001400305>. Mixture IRT: a continuum within each class.
 - von Davier, M., & Rost, J. (2016). Logistic mixture-distribution response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 393–406). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on mixture item response models.
 - Wang, C., & Chang, H.-H. (2017). Cognitive diagnostic assessment. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (pp. 329–348). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on cognitive diagnostic assessment.

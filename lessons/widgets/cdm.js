@@ -1,7 +1,32 @@
 // Widget helpers for the lesson "Latent classes and cognitive diagnosis".
 // Pure functions only; colours come from irt.js. Import with:
-//   import {cutClasses, fracQ, fracAttributes, dinaItems, hoCurve, classCounts} from "./widgets/cdm.js"
+//   import {lcClasses, mixtureParts, cutClasses, fracQ, fracAttributes, dinaItems, hoCurve, classCounts} from "./widgets/cdm.js"
 import {logistic, grid, dnorm} from "./irt.js";
+
+// A small latent class model for building Pr(x) by hand: three classes, four items.
+// Two classes are ordered (low, high); the third finds items 1-2 easy and 3-4 hard.
+export const lcClasses = [
+  {name: "Low", p: [0.6, 0.45, 0.3, 0.2]},
+  {name: "High", p: [0.95, 0.9, 0.85, 0.75]},
+  {name: "Uneven", p: [0.9, 0.85, 0.2, 0.15]}];
+
+// The latent class likelihood of one response pattern, piece by piece. `pattern` is
+// an array of 0/1; `weights` are relative class sizes, normalised to the shares pi_c.
+// For each class: the factor for each item (p if x = 1, 1 - p if x = 0), their product
+// (the pattern's probability within the class), pi_c times that product (the class's
+// contribution to Pr(x)), and the posterior share (contribution / Pr(x)).
+export function mixtureParts(pattern, weights, classes = lcClasses) {
+  const tot = weights.reduce((s, v) => s + v, 0);
+  const rows = classes.map((c, k) => {
+    const factors = c.p.map((p, i) => (pattern[i] ? p : 1 - p));
+    const within = factors.reduce((a, v) => a * v, 1);
+    const pi = weights[k] / tot;
+    return {name: c.name, pi, factors, within, contrib: pi * within};
+  });
+  const px = rows.reduce((s, r) => s + r.contrib, 0);
+  rows.forEach(r => { r.post = r.contrib / px; });
+  return {rows, px};
+}
 
 // A Rasch continuum cut into K classes of equal size. Ten items with difficulties
 // from -1.5 to 1.5; theta ~ N(0, 1). Each class's P(correct) on an item is the
@@ -33,7 +58,13 @@ export function cutClasses(K, skill = false) {
     if (sorted.some((c, k) => k > 0 && c.p[i] < sorted[k - 1].p[i] - 1e-9)) outOfOrder++;
   }
   const rows = classes.flatMap(c => c.p.map((p, i) => ({item: i + 1, p, cls: c.name, kind: c.kind})));
-  return {rows, outOfOrder};
+  // where each slice of theta starts and ends, for drawing the cuts
+  const slices = Array.from({length: K}, (_, k) => {
+    const idx = cls.map((c, j) => (c === k ? j : -1)).filter(j => j >= 0);
+    return {cls: `Class ${k + 1}`, lo: th[idx[0]], hi: th[idx[idx.length - 1]]};
+  });
+  const density = th.filter((_, j) => j % 10 === 0).map(t => ({theta: t, d: dnorm(t), cls: `Class ${cls[th.indexOf(t)] + 1}`}));
+  return {rows, outOfOrder, slices, density};
 }
 
 // Tatsuoka's fraction subtraction Q-matrix (20 items x 8 attributes), as in the IRW
