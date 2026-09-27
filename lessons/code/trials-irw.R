@@ -174,7 +174,7 @@ VarCorr(s12)
 # skill is in cov_true_theta. The item is the shot zone; the trial_ columns give
 # the distance (feet), court location, a three-point flag, the game clock and
 # whether the shot came in the last two minutes of a quarter.
-sh <- read.csv("https://redivis.com/api/v1/tables/datapages.irw_simsyn:current.nbashots_sim/rows?format=csv")
+sh <- read.csv("https://redivis.com/api/v1/tables/datapages.irw_simsyn:v1_2.nbashots_sim/rows?format=csv")
 c(shots = nrow(sh), shooters = length(unique(sh$id)))
 round(cbind(share = prop.table(table(sh$item)), made = tapply(sh$resp, sh$item, mean)), 2)
 

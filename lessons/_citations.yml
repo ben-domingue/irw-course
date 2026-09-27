@@ -372,6 +372,11 @@ mturkddm_lexical:
   link: https://doi.org/10.3758/s13428-021-01573-x
   license: CC BY 4.0
   irw_version: IRW v418
+nbashots_sim:
+  reference: .na.character
+  link: .na.character
+  license: CC BY 4.0
+  irw_version: IRW v439
 neurodegenerative_huizinga_2019_dass:
   reference: 'Huizinga, F., Heutink, J., de Haan, G. A., van der Lijn, I., van der
     Feen, F. E., Vrijling, A. C., ... & Koerts, J. (2020). The development of the
