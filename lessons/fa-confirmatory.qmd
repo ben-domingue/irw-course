@@ -407,7 +407,7 @@ The factors correlate 0.84 to 0.87. One factor fits a little worse (CFI 0.948 ag
 
 Omega total is 0.944 and omega hierarchical 0.879: one general factor accounts for almost all of the total score's reliable variance. Within each scale, the specific factor's share of the scale score is 0.24 for depression, 0.23 for anxiety and 0.002 for stress; the stress items carry almost nothing beyond general distress.
 
-Should a clinic report three DASS scores or one? The subscales add information only through their specific factors, which are small here, and the DASS authors describe the total as a sensible composite ([DASS FAQ, no. 26](https://www2.psy.unsw.edu.au/dass/DASSFAQ.htm)). For a community sample like this one, I would report the total, and the depression and anxiety scores only alongside it. A clinical sample could give a different answer. Would women and men with the same level of distress answer the DASS alike? [Measurement invariance](measurement-invariance.qmd) takes this table up there.
+Should a clinic report three DASS scores or one? The subscales add information only through their specific factors, which are small here, and the DASS authors describe the total as a sensible composite ([DASS FAQ, no. 26](https://www2.psy.unsw.edu.au/dass/DASSFAQ.htm)). In the case of a community sample like this one, the total may be sufficient for some purposes, with the depression and anxiety scores reported only alongside it. A clinical sample could give a different answer. Would women and men with the same level of distress answer the DASS alike? [Measurement invariance](measurement-invariance.qmd) takes this table up there.
 
 ## Problems
 

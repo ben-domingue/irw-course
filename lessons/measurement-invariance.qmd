@@ -347,7 +347,7 @@ Does freeing the item change the comparison? Under full scalar invariance group 
 
 As a check with an ordinal estimator, on items scored as any symptom against none, the crying loading again has the largest score test (33.7).
 
-So what should a report say? One view drops the crying item, so that the scale is invariant as it stands. Another keeps it and frees its parameters, so that the comparison rests on the other 19 items while the item still counts toward each respondent's score. A third ignores the failure because it is one item in twenty. The first changes the instrument, and its scores no longer match published norms; the third lets one item push the comparison, by 0.03 SD here; the second needs enough invariant items to carry the comparison. My practice is to free the item, report the comparison both ways, and say which item and why. Here the two give 0.21 and 0.18 SD, and the conclusion doesn't change.
+So what should a report say? One view drops the crying item, so that the scale is invariant as it stands. Another keeps it and frees its parameters, so that the comparison rests on the other 19 items while the item still counts toward each respondent's score. A third ignores the failure because it is one item in twenty. The first changes the instrument, and its scores no longer match published norms; the third lets one item push the comparison, by 0.03 SD here; the second needs enough invariant items to carry the comparison. When enough items hold, freeing the item and reporting the comparison both ways, with the item and the reason named, may be sufficient for some purposes: a reader can see how much rests on the one item. Here the two give 0.21 and 0.18 SD, and the conclusion doesn't change.
 
 ## Problems
 
