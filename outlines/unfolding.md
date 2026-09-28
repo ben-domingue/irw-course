@@ -80,7 +80,7 @@ What the draft changed or dropped, against the plan above:
 
 ## Rebuild with Duck-Mayr & Montgomery (2023) (09-25, Ben)
 
-- **Main example is now `duckmayr_2023_immigration`**: ten immigration statements, 2,621 respondents, 0–4. It's an interim local copy in `lessons/data/` until the IRW landing page is live, so it isn't in `tables:` yet. IMM_2 is single-peaked by self-placed ideology in the raw data (0.44 … 0.59 … 0.51) and correlates about 0 with the ends. In sample: GRM AIC 73,068, GGUM 72,774, mixed (GGUM for IMM_2/4/6/8, GRM for the rest) 72,500. On a 10% held-out split: GRM −1.3606, GGUM −1.3718, mixed −1.3487. The GGUM needs data-based starts in `mirt`.
+- **Main example is now `duckmayr_2023_immigration`**: ten immigration statements, 2,621 respondents, 0–4. Read from the IRW (v3_8; it was an interim local copy until the landing page went live, 2026-09-28). IMM_2 is single-peaked by self-placed ideology in the raw data (0.44 … 0.59 … 0.51) and correlates about 0 with the ends. In sample: GRM AIC 73,068, GGUM 72,774, mixed (GGUM for IMM_2/4/6/8, GRM for the rest) 72,500. On a 10% held-out split: GRM −1.3606, GGUM −1.3718, mixed −1.3487. The GGUM needs data-based starts in `mirt`.
 - **`andrich_mudfold` is cut to a short section**: correlations, runs, and AIC for Rasch, 2PL, ideal and GGUM. Dropped: the statement table (only WISHNOTNEC is quoted now), the MUDFOLD fit, the parameter and curve chunks, and the one-at-a-time mixed models.
 - **`eurpar2_mudfold`** is shortened.
 - **Verdict (F32)**: the hidden TODO candidate now has two halves, one for each data set.

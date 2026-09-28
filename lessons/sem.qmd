@@ -213,7 +213,7 @@ So which comes first? I fit and inspect the measurement model before I read a si
 
 ### What a path can't tell you
 
-An arrow in a path diagram is a regression coefficient. Whether it is a causal effect depends on assumptions the fit doesn't test: no omitted common causes, the right direction, and a design that supports both ([Bollen & Pearl, 2013](https://doi.org/10.1007/978-94-007-6094-3_15)). And for most models there are **equivalent models**, with different arrows, that imply exactly the same covariance matrix and so fit identically on any data ([MacCallum, Wegener, Uchino & Fabrigar, 1993](https://doi.org/10.1037/0033-2909.114.1.185)).
+An arrow in a path diagram is a regression coefficient. Whether it is a causal effect depends on assumptions the fit doesn't test: no omitted common causes, the right direction, and a design that supports both ([Bollen & Pearl, 2013](https://doi.org/10.1007/978-94-007-6094-3_15)). And for most models there are **equivalent models**, with different arrows, that imply exactly the same covariance matrix and so fit identically on any data ([MacCallum, Wegener, Uchino & Fabrigar, 1993](https://doi.org/10.1037/0033-2909.114.1.185)). Whether the constructs themselves cause their indicators is a further question, which [Validity as causation](validity-causal.qmd) takes up.
 
 #### Try it: reverse an arrow
 

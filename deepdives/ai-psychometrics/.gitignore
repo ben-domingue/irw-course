@@ -1,0 +1,2 @@
+# Per-table fits: a cache so an interrupted run resumes. Only results.rds is committed.
+fits/
