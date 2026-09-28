@@ -2,7 +2,7 @@
 
 # Competitions and paired comparisons: Bradley-Terry and Elo (`competitions`)
 
-Module: beyond · Prereqs: rasch · Extension · Status: outline
+Module: beyond · Prereqs: rasch · Extension · Status: drafted (09-28, #86)
 
 ## Core ideas
 
@@ -74,3 +74,16 @@ Data notes, to state gently in the lesson:
 - Direction of the Friedman scales: Claude checks each criterion's question wording in the source before drafting.
 
 Settled (digest C20, C21, defaults): the lesson sits in Beyond as an extension; NBA is the main example, with `lichess` only if A6 produces a subsample.
+
+## Drafting notes (09-28, #86)
+
+What changed from this outline while drafting, and why:
+
+- **Data access resolved.** The three tables now have IRW landing pages (`irw_competitions` v3.2) with tokenless CSVs; the lesson pins those URLs, and `check_tables.R` cites them. The A6 open question above is settled.
+- **NBA layout.** The table's home column is `hometeam` (the standard says `homefield`). It has 9,839 rows; removing exact duplicates leaves 7,379 games (2012-13 has 1,229). Recomputed after de-duplicating: home advantage 0.39 logits (home teams win 58.6%); predicting 2017-18 from the five earlier seasons, pooled Bradley-Terry −0.697 per game, the constant −0.681, Bradley-Terry on 2016-17 alone −0.658, and Elo −0.622 with K = 0.1 chosen on the training seasons. The outline's preliminary −0.69 / −0.68 / −0.60 are replaced by these. Top teams by season: MIA, SA, GS ×3, HOU.
+- **Win percentage vs Bradley-Terry in the NBA:** they correlate 0.995 (a near-balanced schedule), so the strength-of-schedule point is made by the widget and the simulation (a division schedule), and the NBA output is used to show the score equations (expected wins = actual wins).
+- **Friedman direction checked** against the replication codebook (Dataverse doi:10.7910/DVN/ZSJA25): harm = "selected as causing more harm last year"; disaster = "selected as having more disaster potential". `agent_a` is the chosen risk. The lesson fits with no intercept and flips sides at random (no order effect is estimable). Harm: 21,390 judgments, 1,194 raters; split-half 0.97; harm vs disaster 0.63, as outlined.
+- **Citations verified:** Ford (1957) doi:10.1080/00029890.1957.11989117; Davidson (1970) doi:10.1080/01621459.1970.10481082; Pelánek (2016). Added: Hunter (2004), Rao & Kupper (1967), Robbins & Monro (1951), Glickman & Stern (1998), Hvattum & Arntzen (2010), Pollitt (2012), Herbrich et al. (2006, TrueSkill), Glickman's Glicko-2 note, FIDE Rating Regulations (points ↔ logits, K values).
+- **Problem 1** is now the Elo update for the home advantage, since the Go deeper callout (Elo as stochastic gradient ascent, kept) derives the basic update. Problem 2 compares one h against season-specific h by likelihood ratio.
+- **Extra collapsible:** "Elo points and logits" (FIDE conversion), to keep the main text in length.
+- **Widgets:** four, as outlined (curve, strength of schedule, undefeated team, Elo tracker); helpers in `lessons/widgets/competitions.js`.
