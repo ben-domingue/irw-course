@@ -1,15 +1,15 @@
 <!-- Outlined 2026-09-24 from EDUC 252 c9 (slides 17–23), PS9#2, c9/mrot.R and ps9/shots.R. Tidied 09-24 (#62). -->
 
-# Trials as items: tasks, shots, and rotations (`trials`)
+# Trials as items: brightness, rotation, Stroop and shots (`trials`)
 
-Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: drafted (#54)
 
 ## Core ideas
 
 1. **In a task, the "item" is a condition met many times.** What counts as an item (stimulus, condition, trial) is a modelling choice, and task analyses often ignore person or item effects (slide 19). *(major)* Sources: De Boeck & Wilson (2004), doi:10.1007/978-1-4757-3990-9; Rouder & Haaf (2019), doi:10.3758/s13423-018-1558-y.
 2. **Replace item parameters with stimulus features.** When stimuli vary continuously (angle, brightness, coherence), difficulty is a function of the feature: the LLTM from `explanatory-irt` with one or two parameters. Check the shape and compare out of sample. *(major)* Sources: Fischer (1973), doi:10.1016/0001-6918(73)90003-6; Wichmann & Hill (2001), doi:10.3758/BF03194544; Shepard & Metzler (1971), doi:10.1126/science.171.3972.701; Domingue et al. (2024), the IMV, doi:10.1007/s11336-024-09977-2.
 3. **The question is often about the stimulus, not the person.** Slide 19: does changing the stimulus change performance for everyone? A task can have a large, universal effect and almost no individual differences to measure: the reliability paradox, in full here. *(major)* Sources: Hedge, Powell & Sumner (2018), doi:10.3758/s13428-017-0935-1; Stroop (1935), doi:10.1037/h0054651.
-4. **When respondents choose their trials, ability absorbs the choice.** Shooters pick their shots; raw accuracy mixes skill with selection (PS9#2). Taught with a widget and a problem: the shot data (Samangy, GitHub) aren't in the IRW, and no data are added for now (digest E5). Source: Gilovich, Vallone & Tversky (1985), doi:10.1016/0010-0285(85)90010-6.
+4. **When respondents choose their trials, ability absorbs the choice.** Shooters pick their shots; raw accuracy mixes skill with selection (PS9#2). Taught with a widget, a worked example on `nbashots_sim` (simulated, in the IRW's simsyn source, true skill included; irw PR #2450) and a problem that takes the same code to the real shot data (Samangy, GitHub; no licence, so readers download it themselves). The problem's question is how good a definition of the item the zone is (09-26, Ben). Source: Gilovich, Vallone & Tversky (1985), doi:10.1016/0010-0285(85)90010-6.
 
 Many trials also bring practice, fatigue and sequence effects, and a choice of scoring accuracy, time or both (slide 23); these go in problems. `lme4`: Bates et al. (2015), doi:10.18637/jss.v067.i01.
 
@@ -66,3 +66,16 @@ Table citations come from IRW biblio. Passed over: `motion` (in `rt-process-mode
 ## Open questions
 
 - The verdict above is Claude's reading of the Stroop and rr98 results (voice rule A). *Default:* use it unless you'd put it differently.
+
+## Drafting notes (#54, 09-25)
+
+What the draft changed from this outline, after recomputing on IRW v434 (item_response_warehouse v60.0; enkavi in item_response_warehouse_3 v8.0):
+
+- `rr98_accuracy`: as planned. Line in distance: AIC 12,948; one per distance 12,928; one per level 12,925; line explains 90% of the level easinesses; out of sample the line (IMV 0.0772 over the mean) predicts as well as 33 levels (0.0759). Session SD 0.05, observer SD 0; observers 0.715–0.726. The widget shows the middle of the task fits better at 15.5 than 16.
+- `mentalrotation_wolf_2024`: new finding. Each respondent meets each sheet × shape × angle item twice, once as a same pair and once as a different pair; pair type is recoverable from `resp` and `resp_raw`. Angle costs 0.60 logits per 50° on same pairs and nothing on different pairs; angle × pair earns IMV 0.0313 over respondents only, against 0.0021 for angle (0.0030 random item, −0.0002 per angle, 0.0002 adding shape). "Shapes matter more than angle" did not hold up.
+- `enkavi_2019_stroop`: 522 at wave 1, 150 retested. Effect 0.123 s, t = 46, positive for 520 of 522. Person SD of the effect 0.049 s, of speed 0.098 s, trial SD 0.167; reliability with 47 trials 0.67 (effect) vs 0.97 (mean RT); 207 trials for 0.9. Retest: effect 0.44, mean RT 0.61 (outline had 0.43/0.61). Two-wave model: latent retest 0.79 (effect), 0.59 (speed).
+- Widget 2 is a variance-share bar chart, not a retest-by-trials scatter, since `validity-causal` already has that widget. Problem 1 asks for the trials needed for a target reliability instead of the difference-score derivation, which is `validity-causal` problem 1.
+- The shots widget uses expected counts, not a random sample, so the bias isn't confused with noise.
+- Simulate: angle cost retests at 0.20 even with no slope variance (ceiling on the probability scale); kept as a point in the text.
+- The Go deeper callout derives the reliability of an effect from trials (with Spearman–Brown in trials), not the Cronbach–Furby difference formula.
+- Retest interval for Enkavi et al. is not stated (full text not reachable in open access); the lesson says "long-term", as their abstract does.

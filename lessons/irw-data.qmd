@@ -264,7 +264,7 @@ quiz({
 
 Many tables record more than `resp`. **Response time** is one: how long someone took is data too ([Response times](response-time.qmd)). Design columns (`treat`, `wave`, sometimes `cluster_id` for a school) say how data were collected ([Invariance and experience](invariance-experience.qmd)). Covariates (`cov_`) let us compare groups item by item ([Differential item functioning](dif.qmd)) or explain responses ([Explanatory item response models](explanatory-irt.qmd)). And many tables have [item text](https://itemresponsewarehouse.org/itemtext.html).
 
-Nor are items always questions. In a perception experiment the item is a condition, a stimulus of a given strength, met many times as trials ([Ratcliff & Rouder, 1998](https://doi.org/10.1111/1467-9280.00067)). The brightness experiment below is of that kind.
+Nor are items always questions. In a perception experiment an item can be a stimulus of a given strength, shown to each respondent many times; each showing is a trial ([Ratcliff & Rouder, 1998](https://doi.org/10.1111/1467-9280.00067)). The brightness experiment below is of that kind.
 
 ## Simulate
 
