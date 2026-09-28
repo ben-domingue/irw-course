@@ -122,10 +122,10 @@ c(respondents = length(unique(st$id)), retested = length(unique(st$id[st$wave ==
 round(tapply(st$resp, list(incongruent = st$inc, wave = st$wave), mean), 3)
 # Response times of correct trials with a recorded time
 ok <- st[st$resp == 1 & !is.na(st$rt), ]
-summary(as.vector(table(ok$id[ok$wave == 1], ok$inc[ok$wave == 1])))   # trials per condition
+summary(as.vector(table(ok$id[ok$wave == 1], ok$inc[ok$wave == 1])))   # trials of each kind
 
 ## ---- stroop-effect
-# Each respondent's mean RT per condition, and the effect (incongruent - congruent)
+# Each respondent's mean RT on congruent and incongruent trials, and the effect (incongruent - congruent)
 by_person <- function(d) {
   m <- tapply(d$rt, list(d$id, d$inc), mean)
   data.frame(id = rownames(m), congruent = m[, 1], incongruent = m[, 2],
@@ -143,11 +143,11 @@ s1 <- lmer(rt ~ inc + (1 + inc | id), ok[ok$wave == 1, ], REML = FALSE)
 round(fixef(s1), 3)
 VarCorr(s1)
 tau <- attr(VarCorr(s1)$id, "stddev"); sig <- sigma(s1); L <- 47
-# Reliability of each respondent's observed effect and mean RT with L trials per
-# condition (the Go deeper callout derives these)
+# Reliability of each respondent's observed effect and mean RT with L trials of
+# each kind (the Go deeper callout derives these)
 round(c(effect = tau[[2]]^2 / (tau[[2]]^2 + 2 * sig^2 / L),
         mean_rt = tau[[1]]^2 / (tau[[1]]^2 + sig^2 / (2 * L))), 2)
-# Trials per condition for a reliability of 0.9 in the effect
+# Trials of each kind for a reliability of 0.9 in the effect
 round(2 * sig^2 * 0.9 / (tau[[2]]^2 * (1 - 0.9)))
 
 ## ---- stroop-retest

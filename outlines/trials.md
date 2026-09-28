@@ -1,6 +1,6 @@
 <!-- Outlined 2026-09-24 from EDUC 252 c9 (slides 17–23), PS9#2, c9/mrot.R and ps9/shots.R. Tidied 09-24 (#62). -->
 
-# Trials as items: tasks, shots, and rotations (`trials`)
+# Trials as items: brightness, rotation, Stroop and shots (`trials`)
 
 Module: beyond · Prereqs: explanatory-irt · Extension · Status: drafted (#54)
 

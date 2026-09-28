@@ -326,7 +326,7 @@ lessons:
     tranche: extension
 
   - id: trials
-    title: "Trials as items: tasks, shots, and rotations"
+    title: "Trials as items: brightness, rotation, Stroop and shots"
     module: beyond
     prereqs: [explanatory-irt]
     origin: {slides: [c9], ps: ["PS9#2"], code: [c9/mrot.R, ps9/shots.R]}
@@ -643,7 +643,7 @@ threads:
     introduced: irw-data
     returns:
       - {lesson: rt-process-models, how: models slow errors}
-      - {lesson: trials, how: treats conditions as items}
+      - {lesson: trials, how: gives each brightness level its own difficulty}
   - id: lower-asymptote-identification
     idea: "The data say little about c when few respondents sit near chance"
     introduced: 1pl-to-4pl
