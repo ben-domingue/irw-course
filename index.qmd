@@ -20,7 +20,7 @@ map_link <- function(l) {
     This course is under construction and is not ready for teaching. Most lessons are
     still outlines or stubs, the few drafted ones will change, and nothing here has been
     checked by anyone but its authors. Please don't cite, assign, or circulate it yet.
-    Comments are very welcome: <a href="mailto:bdomingue@stanford.edu">bdomingue@stanford.edu</a>.
+    Comments are very welcome: please <a href="https://github.com/ben-domingue/irw-course/issues/new">open an issue on GitHub</a>, naming the lesson.
   </div>
 </div>
 ```
