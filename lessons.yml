@@ -274,7 +274,7 @@ lessons:
     prereqs: [explanatory-irt]
     origin: {slides: [c7], ps: ["PS7#2"], code: [c7/3_cdm.R, ps7/cdm.R]}
     tables: [frac20, cdm_ecpe]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: polytomous
@@ -292,7 +292,7 @@ lessons:
     prereqs: [polytomous, explanatory-irt]
     origin: {slides: [c8], ps: ["PS8#4"], code: [c8/irtree.R, c8/irtree2.R, c8/irtree_sim.R, ps8/fast.R]}
     tables: [bfi_goldberg_1992_conscientiousness, introversion_extroversion]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: unfolding
@@ -300,7 +300,7 @@ lessons:
     module: beyond
     prereqs: [polytomous]
     origin: {slides: [c9], ps: ["PS9#3"], code: [ps9/unfold.R]}
-    tables: [andrich_mudfold, eurpar2_mudfold]
+    tables: [andrich_mudfold, eurpar2_mudfold, rollcall_senate]
     reuses: [andrich_mudfold]
     status: draft
     tranche: extension
@@ -312,7 +312,7 @@ lessons:
     origin: {slides: [c9], ps: [], code: [c9/nominal.R]}
     tables: [wilmer-rmet-normative-data-set-2022, borges_brazil_residency_2024_pbt]
     reuses: [wilmer-rmet-normative-data-set-2022]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: response-time
@@ -341,7 +341,7 @@ lessons:
     prereqs: [1pl-to-4pl, explanatory-irt]
     origin: {slides: [c10], ps: [], code: [c10/model.R]}
     tables: [himmelstein-impossible_question-2025, gpt4mcq_young_2025, genpsych_russell_2024_gpt4o]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: instrument-building
@@ -426,7 +426,7 @@ lessons:
     prereqs: [measurement, rasch]
     origin: {slides: [], ps: [], code: []}
     tables: [project_kids_wj_lwid_wave]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-24: added at Ben's request (#86); module and optional status are a first guess.

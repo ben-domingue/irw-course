@@ -444,6 +444,11 @@ robison_2026_retesting_stroop:
   link: https://doi.org/10.3758/s13428-025-02897-8
   license: CC BY 4.0
   irw_version: IRW v418
+rollcall_senate:
+  reference: Secretary of the Senate, U.S. Senate. Roll call votes (LIS XML), https://www.senate.gov/legislative/votes_new.htm
+  link: https://www.senate.gov/legislative/votes_new.htm
+  license: CC0 1.0
+  irw_version: IRW v439
 rr98_accuracy:
   reference: Ratcliff, R., & Rouder, J. N. (1998). Modeling Response Times for Two-Choice
     Decisions. Psychological Science, 9(5), 347-356. http://doi.org/10.1111/1467-9280.00067

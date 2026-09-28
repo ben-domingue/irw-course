@@ -71,3 +71,22 @@ export function slopePosterior(n, aTrue, sdlog, seed = 11) {
   return {as, L, prior, post, mle: kMle === as.length - 1 ? Infinity : as[kMle],
           map: as[argmax(lpost)], eap};
 }
+
+// Item characteristic curves for four ways to add guessing to the Rasch model,
+// for one item of difficulty b and chance rate c:
+//   floor:  c + (1 - c) P, the Rasch model with a fixed floor (the 3PL with a = 1);
+//   ag:     P + (1 - P) logistic(alpha theta + logit c), ability-based guessing
+//           (San Martin, del Pino & De Boeck, 2006), where a respondent at theta = 0
+//           who doesn't know the answer guesses right with probability c;
+//   mix:    pi P + (1 - pi) c, a two-class mixture averaged over the classes
+//           (assuming the classes have the same abilities);
+// where P = logistic(theta - b) is the Rasch curve.
+export function guessCurves({b, c, alpha, pi}, thetas = grid(-4, 4, 161)) {
+  const lc = Math.log(c / (1 - c));
+  const at = (theta) => {
+    const p = logistic(theta - b);
+    return {theta, rasch: p, floor: c + (1 - c) * p,
+            ag: p + (1 - p) * logistic(alpha * theta + lc), mix: pi * p + (1 - pi) * c};
+  };
+  return {curves: thetas.map(at), at, ceiling: pi + (1 - pi) * c};
+}

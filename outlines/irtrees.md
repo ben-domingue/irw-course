@@ -2,7 +2,7 @@
 
 # IRTree models (`irtrees`)
 
-Module: beyond · Prereqs: polytomous, explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: polytomous, explanatory-irt · Extension · Status: drafted (09-25, #51)
 
 ## Core ideas
 
@@ -65,3 +65,11 @@ All references checked on Crossref (09-24).
 ## Open questions
 
 - The verdict above is Claude's reading (voice rule A). *Default:* use it unless you'd put it differently.
+
+## Drafting notes (09-25, #51)
+
+- **Tables as planned**, with one narrowing: `introversion_extroversion` uses only items 81–85 and 89–91, eight of the ten IPIP extraversion markers (the same family as the conscientiousness items, with a published key), rather than all 91 MIES items, which are multidimensional and unkeyed. Recomputed: tree with a θ per node beats one θ (AIC 85,738 → 82,598); side–extreme 0.68, with content 0.33 and 0.24; speed–trait −0.075 on 1,500 respondents; fast and slow responses of the same respondent agree (r = 0.73).
+- **Keying** uses the published IPIP key, checked in the data (not GRM slope signs as in `c8/irtree2.R`).
+- **AIC vs. the GRM** is shown in `mirt` (tree 82,361, GRM 83,242, one-θ tree 85,699), plus the glmer–mirt log-likelihood gap (119) on the same tree. The verdict is kept, reworded to rest on this output.
+- **Simulation**: part 1 (three-node tree, one θ vs per node), part 2 (θ-dependent skips scored wrong / missing / skip node: bias −0.24 / +0.41 / 0.02 for heavy skippers). The "trees recover item order from GRM data" check was dropped.
+- The sum-score analysis ("what the styles do to sum scores") is in a collapsible to keep the prose near 3,000 words.

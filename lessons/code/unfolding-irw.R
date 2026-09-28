@@ -1,9 +1,10 @@
 # Unfolding models with real data: ten immigration-policy statements put to 2,621 US
 # respondents (Duck-Mayr & Montgomery, 2023), Andrich's (1988) eight capital-punishment
-# statements (andrich_mudfold) and European party activists' pick-2-of-6 choices
-# (eurpar2_mudfold). Needs the mirt, GGUM and mudfold packages. No login or token
-# needed. The whole file takes about four minutes in local R, most of it the
-# held-out comparison and the GGUM fits. Adapted from ben-domingue/252: ps9/unfold.R.
+# statements (andrich_mudfold), European party activists' pick-2-of-6 choices
+# (eurpar2_mudfold) and roll calls in the 118th U.S. Senate (rollcall_senate). Needs
+# the mirt, GGUM and mudfold packages. No login or token needed. The whole file takes
+# about five minutes in local R, most of it the held-out comparison, the GGUM fits and
+# the Senate 2PL. Adapted from ben-domingue/252: ps9/unfold.R.
 
 ## ---- fetch-imm
 library(mirt)
@@ -179,3 +180,81 @@ sort(table(pairs), decreasing = TRUE)
 mf_eur <- summary(mudfold(eur))
 mf_eur$SCALE_STATS["H(scale)", ]
 mf_eur$ITEM_STATS[, c("items", "H(items)")]   # the parties in MUDFOLD's order
+
+## ---- fetch-senate
+# Every roll call in the 118th Senate (2023-24): 1 = yea, 0 = nay; present and not
+# voting are missing. Item ids are <congress>_<session>_<roll call>.
+sen_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse_6:v3_7.rollcall_senate/rows?format=csv"
+sen_long <- read.csv(sen_url)
+sen_long <- sen_long[startsWith(sen_long$item, "118_"), ]
+sen <- long2wide(sen_long)
+party <- tapply(sen_long$cov_party, sen_long$id, function(x) paste(unique(x), collapse = "/"))[rownames(sen)]
+c(senators = nrow(sen), roll_calls = ncol(sen))
+# Drop senators who cast fewer than 50 votes (two appointed in the last weeks) and
+# near-unanimous votes (under 2.5% on the losing side), which say little about
+# where anyone stands.
+minority <- sapply(sen, function(x) min(mean(x, na.rm = TRUE), 1 - mean(x, na.rm = TRUE)))
+sen <- sen[rowSums(!is.na(sen)) >= 50, minority >= 0.025]
+party <- party[rownames(sen)]
+c(senators = nrow(sen), roll_calls = ncol(sen), missing = round(mean(is.na(sen)), 3))
+table(party)   # D/I: changed from Democrat to independent during the Congress
+# The question for each vote, as the Senate recorded it (IRW item text).
+txt_url <- "https://redivis.com/api/v1/tables/datapages.irw_text_3:v1_2.rollcall_senate__items/rows?format=csv"
+txt <- read.csv(txt_url)
+txt <- txt[txt$resp == 1, ]
+question <- setNames(txt$item_text, txt$item)[names(sen)]
+
+## ---- fit-senate
+# A 2PL whose slopes may be negative. On a party-line vote the parties separate
+# perfectly and the slope can grow without bound, so normal priors keep the slopes
+# and intercepts finite (a Bayesian fit of the same model is Clinton, Jackman and
+# Rivers's). Takes about 40 seconds.
+J <- ncol(sen)
+spec <- mirt.model(sprintf("F = 1-%d\nPRIOR = (1-%d, a1, norm, 0, 2), (1-%d, d, norm, 0, 4)", J, J, J))
+fit_sen <- mirt(sen, spec, "2PL", quadpts = 31, verbose = FALSE)
+theta <- fscores(fit_sen)[, 1]
+slope <- coef(fit_sen, simplify = TRUE)$items[, "a1"]
+# The direction of theta is arbitrary; point it so that Republicans are positive.
+if (mean(theta[party == "R"]) < 0) { theta <- -theta; slope <- -slope }
+round(t(sapply(split(theta, party), range)), 2)
+# Nominations against everything else: which side is the yea on?
+kind <- ifelse(grepl("PN[0-9]", question), "nomination", "other")
+table(slope = ifelse(slope > 0, "yea to the right", "yea to the left"), kind)
+
+## ---- screen-senate
+# For each vote, a logistic regression on theta with and without a squared term,
+# as in "Where CTT breaks". A vote whose curve rises and falls gets a negative
+# squared term, a peak inside the range of theta, and a better AIC.
+screen <- t(sapply(sen, function(y) {
+  m1 <- suppressWarnings(glm(y ~ theta, binomial))
+  m2 <- suppressWarnings(glm(y ~ theta + I(theta^2), binomial))
+  b <- coef(m2)
+  c(AIC_gain = AIC(m1) - AIC(m2), squared = unname(b[3]), peak = unname(-b[2] / (2 * b[3])))
+}))
+peaked <- screen[, "AIC_gain"] > 10 & screen[, "squared"] < 0 &
+  screen[, "peak"] > min(theta) & screen[, "peak"] < max(theta)
+sum(peaked)
+top <- screen[peaked, ][order(-screen[peaked, "AIC_gain"]), ]
+data.frame(round(top, 2), question = substr(question[rownames(top)], 1, 70))
+
+## ---- plot-fisa
+# Final passage of the FISA reauthorization, 19 April 2024: each senator's vote
+# against theta, with the linear and squared logistic curves.
+fisa <- "118_2_00150"
+y <- sen[[fisa]]
+table(party, vote = c("nay", "yea")[y + 1], useNA = "ifany")
+# Median theta of each party's yeas and nays.
+round(tapply(theta, list(party, vote = c("nay", "yea")[y + 1]), median), 2)
+grid_th <- seq(min(theta), max(theta), length.out = 200)
+m1 <- glm(y ~ theta, binomial)
+m2 <- glm(y ~ theta + I(theta^2), binomial)
+op <- par(mar = c(4, 4, 1, 1))
+plot(theta, jitter(y, 0.15), pch = 19, las = 1, ylim = c(-0.1, 1.1),
+     col = ifelse(party == "R", "#c2410c", ifelse(party == "D", "#2780e3", "black")),
+     xlab = expression(theta ~ "(2PL, Republicans positive)"), ylab = "Voted yea")
+lines(grid_th, predict(m1, data.frame(theta = grid_th), type = "response"), lwd = 2, lty = 2)
+lines(grid_th, predict(m2, data.frame(theta = grid_th), type = "response"), lwd = 2)
+legend(-1.3, 0.5, c("Democrat", "Republican", "independent", "linear", "with squared term"),
+       col = c("#2780e3", "#c2410c", "black", "black", "black"), pch = c(19, 19, 19, NA, NA),
+       lty = c(NA, NA, NA, 2, 1), lwd = 2, bty = "n", cex = 0.85)
+par(op)
