@@ -2091,7 +2091,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <strong>Tranche:</strong> preliminary (sets up the course)<br>
 <strong>Before this:</strong> none<br>
 <strong>Builds toward:</strong> <a href="../lessons/likelihood.html">The likelihood and logistic regression</a> · <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a><br>
-<strong>Starts threads:</strong> IRW tables are long: one row per response (→ <a href="../lessons/likelihood.html">The likelihood and logistic regression</a> · <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>); Check keying in the documentation and in the data (→ <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>); Errors are slower than correct responses, partly because of where errors happen (→ <a href="../lessons/rt-process-models.html">Process models for response time: drift diffusion and race models</a> · <a href="../lessons/trials.html">Trials as items: tasks, shots, and rotations</a>)<br>
+<strong>Starts threads:</strong> IRW tables are long: one row per response (→ <a href="../lessons/likelihood.html">The likelihood and logistic regression</a> · <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>); Check keying in the documentation and in the data (→ <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>); Errors are slower than correct responses, partly because of where errors happen (→ <a href="../lessons/rt-process-models.html">Process models for response time: drift diffusion and race models</a> · <a href="../lessons/trials.html">Trials as items: brightness, rotation, Stroop and shots</a>)<br>
 <strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/verbagg/"><code>verbagg</code></a>, <a href="https://itemresponsewarehouse.org/tables/manolika_2021_mini_ipip/"><code>manolika_2021_mini_ipip</code></a>, <a href="https://itemresponsewarehouse.org/tables/rr98_accuracy/"><code>rr98_accuracy</code></a>, <a href="https://itemresponsewarehouse.org/tables/cdm_timss11/"><code>cdm_timss11</code></a>, <a href="https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/"><code>pirlsmissing_sirt</code></a><br>
 <strong>From EDUC 252:</strong> slides c1; problem sets PS1#3; code <a href="https://github.com/ben-domingue/252/blob/main/c1/irw_data_exploration.R"><code>c1/irw_data_exploration.R</code></a><br>
 <strong>Status:</strong> draft<br>
@@ -2529,7 +2529,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <section id="more-than-responses" class="level3">
 <h3 class="anchored" data-anchor-id="more-than-responses">More than responses</h3>
 <p>Many tables record more than <code>resp</code>. <strong>Response time</strong> is one: how long someone took is data too (<a href="../lessons/response-time.html">Response times</a>). Design columns (<code>treat</code>, <code>wave</code>, sometimes <code>cluster_id</code> for a school) say how data were collected (<a href="../lessons/invariance-experience.html">Invariance and experience</a>). Covariates (<code>cov_</code>) let us compare groups item by item (<a href="../lessons/dif.html">Differential item functioning</a>) or explain responses (<a href="../lessons/explanatory-irt.html">Explanatory item response models</a>). And many tables have <a href="https://itemresponsewarehouse.org/itemtext.html">item text</a>.</p>
-<p>Nor are items always questions. In a perception experiment the item is a condition, a stimulus of a given strength, met many times as trials (<a href="https://doi.org/10.1111/1467-9280.00067">Ratcliff &amp; Rouder, 1998</a>). The brightness experiment below is of that kind.</p>
+<p>Nor are items always questions. In a perception experiment an item can be a stimulus of a given strength, shown to each respondent many times; each showing is a trial (<a href="https://doi.org/10.1111/1467-9280.00067">Ratcliff &amp; Rouder, 1998</a>). The brightness experiment below is of that kind.</p>
 </section>
 </section>
 <section id="simulate" class="level2">
@@ -2581,7 +2581,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">irw_csv_url</span>(<span class="st">"verbagg"</span>)        <span class="co"># the version-pinned link on the landing page</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.verbagg/rows?format=csv"</code></pre>
+<pre><code>[1] "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v64_0.verbagg/rows?format=csv"</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
