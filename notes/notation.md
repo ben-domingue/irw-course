@@ -15,8 +15,10 @@ here first, in the same PR.
 | Upper asymptote (slipping) | $u$ | `mirt` calls it `u`; not $d$, to avoid `mirt`'s intercept |
 | Response | $x_{ij}$ | |
 | Sum score | $r$ (or $X$ in CTT lessons) | CTT keeps $X = T + E$ |
-| Regression coefficients | $\beta_0, \beta_1, \dots$ | never $b$, which is item difficulty (Ben, 09-24) |
+| Regression coefficients | $\beta_0, \beta_1, \dots$ | never $b$, which is item difficulty (Ben, 09-24). Includes the easiness $\beta_i = -b_i$ of explanatory models (`explanatory-irt`, `trials`), a coefficient on item indicators (Ben, 09-26) |
 | Factor loading | $\lambda$ | factor $\eta$ in CFA/SEM; $f$ in EFA |
+| Item time intensity | $\kappa_i$ | log-time scale; van der Linden writes $\beta_i$, and `response-time` says so once (Ben, 09-26) |
+| Respondent speed | $\tau_j$ | `response-time`; $\rho$ is the correlation of speed and ability across respondents, $\rho_I$ of time intensity and difficulty across items |
 | Information | $I(\theta)$ | test information is the sum of item information |
 | Standard error | $SE(\hat\theta) = 1/\sqrt{I(\theta)}$ | "conditional SEM" (CSEM) in prose |
 
@@ -41,3 +43,35 @@ here first, in the same PR.
 - **Keying:** responses are coded so that higher = more of the construct. Each lesson
   states its keying once, where the data are introduced.
 - **Logit** for the $\theta$ scale's unit when a unit is needed.
+
+## Lesson-local symbols
+
+Symbols used in one lesson (or a pair), recorded so that later lessons don't reuse them
+with another meaning. Where a symbol already means something else in the table above, the
+clash is noted; each lesson defines its symbols where they first appear.
+
+| Lesson | Symbol | Meaning | Clash |
+|---|---|---|---|
+| `nominal` | $a_{ik}$, $\gamma_{ik}$ | slope and intercept of option $k$ (Bock's nominal model) | |
+| `nominal` | $\delta_k$ | share of "don't know" respondents choosing option $k$ (Thissen–Steinberg multiple-choice model) | $\delta_k$ in `cdm` |
+| `cdm` | $\alpha_{jk}$, $q_{ik}$ | respondent $j$'s mastery of attribute $k$; Q-matrix entry | $\alpha$ in `rt-process-models`, `guessing-priors` |
+| `cdm` | $\eta_{ij}$ | DINA's ideal response (1 if every required attribute is mastered) | $\eta$ is the CFA factor |
+| `cdm` | $s_i$, $g_i$ | slip and guess | $g_i$ is $c$ elsewhere; DINA's own names kept |
+| `cdm` | $\pi_c$, $p_{ic}$ | class proportions; class-conditional item probabilities | |
+| `cdm` | $\lambda$, $\delta_k$ | higher-order model: slope and attribute threshold on $\theta$ | $\lambda$ is the loading; $\delta_k$ in `nominal` |
+| `explanatory-irt` | $\eta_k$ | LLTM weight of item feature $k$ | $\eta$ is the CFA factor |
+| `response-time` | $\sigma$ | residual SD of log time | |
+| `rt-process-models` | $\alpha$, $v$, $z$, $T_{er}$, $s$ | boundary separation, drift rate, starting point, non-decision time, within-trial noise | $\alpha$ in `cdm`, `guessing-priors` |
+| `rt-process-models` | $\eta$ | across-trial SD of the drift | $\eta$ is the CFA factor |
+| `trials` | $i(t)$ | the item that trial $t$ belongs to (a function from trials to items) | |
+| `trials` | $\delta$, $\gamma_j$, $c_t$ | average experimental effect, respondent $j$'s departure from it, indicator of an incongruent trial | |
+| `trials` | $\tau^2_\theta$, $\tau^2_\gamma$ | between-respondent variances in the RT model | $\tau_j$ is speed in `response-time` |
+| `guessing-priors` | $\alpha$, $\gamma_i$ | 1PL-AG: how guessing rises with ability; item guessing intercept | $\alpha$ also names beta-prior parameters there |
+| `guessing-priors` | $\pi$ | share of engaged respondents in the two-class mixture | |
+
+**Open (for Ben):** $\eta$ carries four meanings (CFA factor, DINA ideal response, LLTM
+weight, drift SD) and $\alpha$ three. Each is defined where used and none meet in one
+lesson, so the default is to leave them lesson-local. The one pair that could meet is
+`trials` ($\tau^2$ as variances) and `response-time` ($\tau_j$ as speed), which a reader
+may take in sequence.
+

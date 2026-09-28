@@ -15,8 +15,7 @@ options(mc.cores = 1)
 
 ```{ojs}
 //| echo: false
-import {grid, dnorm, rng, normalQuantiles, p2pl, palette} from "./widgets/irt.js"
-import {p4pl} from "./widgets/1pl-to-4pl.js"
+import {grid, dnorm, rng, normalQuantiles, p2pl, palette, p4pl} from "./widgets/irt.js"
 import {itemInfo, testInfo, raschLoglik, raschMle, combinations, flItems} from "./widgets/information.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```

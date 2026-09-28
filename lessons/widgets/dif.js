@@ -1,6 +1,6 @@
 // Widget helpers for the lesson "Differential item functioning". Pure functions only;
 // the plotting is in the lesson's OJS cells. Shared math comes from irt.js.
-import {logistic, rng, pnorm} from "./irt.js";
+import {logistic, rng, pnorm, scores, mhItem} from "./irt.js";
 
 // Simulate two groups answering nItems 2PL items. g = 0 is the reference group,
 // g = 1 the focal group, whose mean theta is -impact. dif is a list of
@@ -23,38 +23,6 @@ export function simGroups({seed = 1, nPer = 1000, nItems = 10, impact = 0, b = n
     }
   }
   return {X, g};
-}
-
-// Row sums over the columns in cols (all columns by default).
-export function scores(X, cols = null) {
-  return X.map(row => (cols ? cols.reduce((s, i) => s + row[i], 0) : row.reduce((s, v) => s + v, 0)));
-}
-
-// Mantel-Haenszel for one item: y the item's responses, g the groups (1 = focal),
-// s the matching scores. Returns delta = -2.35 ln(alpha_MH) (negative: harder for the
-// focal group at the same score), its standard error (Robins-Breslow-Greenland) and
-// the continuity-corrected chi-square p-value.
-export function mhItem(y, g, s) {
-  const K = Math.max(...s) + 1;
-  const A = Array(K).fill(0), B = Array(K).fill(0), C = Array(K).fill(0), D = Array(K).fill(0);
-  for (let j = 0; j < y.length; j++) {
-    const k = s[j];
-    if (g[j] === 0) { if (y[j]) A[k]++; else B[k]++; } else { if (y[j]) C[k]++; else D[k]++; }
-  }
-  let sR = 0, sS = 0, sPR = 0, sPSQR = 0, sQS = 0, sA = 0, sE = 0, sV = 0;
-  for (let k = 0; k < K; k++) {
-    const n = A[k] + B[k] + C[k] + D[k];
-    if (n < 2) continue;
-    const R = A[k] * D[k] / n, S = B[k] * C[k] / n, P = (A[k] + D[k]) / n, Q = (B[k] + C[k]) / n;
-    sR += R; sS += S; sPR += P * R; sPSQR += P * S + Q * R; sQS += Q * S;
-    const nR = A[k] + B[k], nF = C[k] + D[k], m1 = A[k] + C[k], m0 = B[k] + D[k];
-    sA += A[k]; sE += nR * m1 / n; sV += nR * nF * m1 * m0 / (n * n * (n - 1));
-  }
-  const alpha = sR / sS;
-  const varLog = sPR / (2 * sR * sR) + sPSQR / (2 * sR * sS) + sQS / (2 * sS * sS);
-  const chisq = Math.max(0, Math.abs(sA - sE) - 0.5) ** 2 / sV;
-  const p = 2 * (1 - pnorm(Math.sqrt(chisq)));
-  return {delta: -2.35 * Math.log(alpha), se: 2.35 * Math.sqrt(varLog), p};
 }
 
 // ETS category from delta, its SE and the MH p-value (Zwick, 2012).

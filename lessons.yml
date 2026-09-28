@@ -572,6 +572,7 @@ threads:
     returns:
       - {lesson: item-estimation, how: compares conditional, joint and marginal ML}
       - {lesson: fit-prediction, how: uses Andersen's likelihood-ratio test}
+      - {lesson: parameter-invariance, how: splits on the sum score, which bends the 2PL difficulties but leaves the Rasch ones intact}
   - id: overfit-underfit
     idea: Misfit as overfit or underfit (outfit and infit)
     introduced: rasch
@@ -770,3 +771,16 @@ threads:
     introduced: g-theory
     returns:
       - {lesson: rater-models, how: models each rater's severity instead}
+  - id: classes-vs-continuum
+    idea: "Ordered latent classes can look like a continuum cut into pieces"
+    introduced: constructs
+    returns:
+      - {lesson: cdm, how: fits both and looks for class profiles that cross}
+      - {lesson: validity-causal, how: reads the balance-scale rules as latent classes}
+  - id: population-dependence
+    idea: "Reliability, like any correlation, depends on how much the population varies"
+    introduced: ctt-reliability
+    returns:
+      - {lesson: validity-evidence, how: corrects a validity coefficient for selection on the predictor}
+      - {lesson: parameter-invariance, how: shows a narrow range of θ lowering item correlations}
+      - {lesson: trials, how: meets an effect too uniform across people to rank them}

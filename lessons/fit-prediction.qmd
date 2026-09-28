@@ -15,8 +15,7 @@ lesson_header("fit-prediction")
 
 ```{ojs}
 //| echo: false
-import {logistic, grid, dnorm, rng, palette} from "./widgets/irt.js"
-import {closest2pl} from "./widgets/1pl-to-4pl.js"
+import {logistic, grid, dnorm, rng, palette, closest2pl} from "./widgets/irt.js"
 import {outfitNull, polyLogitFit, polyLogitPredict, meanLogLik, imv, links} from "./widgets/fit-prediction.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```

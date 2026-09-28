@@ -1,8 +1,7 @@
 // Widget helpers for the lesson "Information, precision, and short forms". Pure
 // functions only; the plotting is in the lesson's OJS cells. Shared math comes from
 // irt.js, and the 4PL curve from the 1PL-to-4PL lesson's helpers.
-import {p2pl} from "./irt.js";
-import {p4pl} from "./1pl-to-4pl.js";
+import {p2pl, p4pl} from "./irt.js";
 
 // Item information under the 4PL family (Rasch: a = 1, c = 0, u = 1):
 //   I(theta) = a^2 (P - c)^2 (u - P)^2 / ((u - c)^2 P (1 - P)).
