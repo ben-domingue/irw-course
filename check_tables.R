@@ -49,7 +49,7 @@ for (l in course$lessons) {
              Sys.glob(file.path("lessons", "code", paste0(l$id, "*.R"))))
   txt <- unlist(lapply(files[file.exists(files)], readLines, warn = FALSE))
   hits <- c(unlist(regmatches(txt, gregexpr("irw_csv(_url)?\\(\"[^\"]+\"", txt))),
-            unlist(regmatches(txt, gregexpr("item_response_warehouse:v[0-9_]+\\.[A-Za-z0-9_.-]+", txt))))
+            unlist(regmatches(txt, gregexpr("item_response_warehouse(_[0-9]+)?:v[0-9_]+\\.[A-Za-z0-9_.-]+", txt))))
   seen <- unique(tolower(sub('.*(\\.|")', "", sub('"$', "", sub("/rows.*", "", hits)))))
   for (t in setdiff(seen, tolower(unlist(l$tables))))
     problems <- c(problems, sprintf("%s: page uses %s, not in its `tables`", l$id, t))
