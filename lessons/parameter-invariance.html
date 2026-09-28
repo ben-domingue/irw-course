@@ -2091,11 +2091,12 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <strong>Tranche:</strong> extension (beyond a first course)<br>
 <strong>Before this:</strong> <a href="../lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a><br>
 <strong>Builds toward:</strong> none<br>
-<strong>Picks up threads:</strong> Item comparisons don’t depend on who took the items (from <a href="../lessons/rasch.html">The Rasch model</a>)<br>
+<strong>Picks up threads:</strong> Item comparisons don’t depend on who took the items (from <a href="../lessons/rasch.html">The Rasch model</a>); Conditioning on the sum score removes θ (from <a href="../lessons/rasch.html">The Rasch model</a>); Reliability, like any correlation, depends on how much the population varies (from <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>)<br>
 <strong>IRW tables:</strong> <a href="https://itemresponsewarehouse.org/tables/wilmer-mrmet-normative-data-set-2022/"><code>wilmer-mrmet-normative-data-set-2022</code></a><br>
 <strong>From EDUC 252:</strong> slides c4<br>
 <strong>Status:</strong> draft<br>
-<strong>Authorship:</strong> Written largely by Claude (Anthropic), from Ben Domingue’s EDUC 252 materials and under Ben’s direction. Ben reviews each lesson before it is marked done.</p>
+<strong>Authorship:</strong> Written largely by Claude (Anthropic), from Ben Domingue’s EDUC 252 materials and under Ben’s direction. Ben reviews each lesson before it is marked done.<br>
+<strong>Comments:</strong> <a href="https://github.com/ben-domingue/irw-course/issues/new?title=Parameter%20invariance%3A%20">open an issue on GitHub</a> about this lesson.</p>
 </div>
 </div>
 </div>
@@ -2648,6 +2649,16 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
+<div class="callout callout-style-simple callout-tip no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Recall</strong> from <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a>: reliability is a property of scores in a population, the share of observed-score variance that is true-score variance.</p>
+</div>
+</div>
+</div>
 <p>Splitting on true ability lowers the correlations, because each half has a narrower range of <span class="math inline">\(\theta\)</span> (the previous section). Splitting on the sum score lowers them further, to about zero at the defaults. With four or five items it pushes them well below zero, since a fixed sum spread over a few items forces a trade-off between them. Raise the slope and every correlation rises, but the sum-score halves stay below the ability halves at every setting.</p>
 <p>What about the Rasch model? There the sum score is sufficient, and conditional maximum likelihood estimates the difficulties from the responses <em>given</em> the sum score. Selecting respondents by that sum score leaves the conditional likelihood unchanged.</p>
 <div class="callout callout-style-simple callout-tip no-icon">
@@ -2664,14 +2675,14 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb16" data-startfrom="256" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 255;"><span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a><span class="fu">quiz</span>({</span>
-<span id="cb16-257"><a href="#cb16-257" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"You split respondents at the median of their sum score on 20 items and fit a 2PL to the same 20 items in the top half. Most slopes come out near 0. What is the most likely explanation?"</span><span class="op">,</span></span>
-<span id="cb16-258"><a href="#cb16-258" aria-hidden="true" tabindex="-1"></a>  <span class="dt">options</span><span class="op">:</span> [</span>
-<span id="cb16-259"><a href="#cb16-259" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"Among strong respondents, the items don't measure the construct"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"It could happen, but it isn't needed. Selecting on the sum score by itself pushes the items' correlations toward zero, and the 2PL reads that as flat curves."</span>}<span class="op">,</span></span>
-<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The selection removed the correlations the 2PL relies on"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"Within a band of sum scores, a correct answer on one item makes others less likely. The items look unrelated, so the slopes shrink toward 0."</span>}<span class="op">,</span></span>
-<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The top half is too small to estimate slopes"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"Half of a large sample is still large. Small samples make slopes noisy, not systematically near zero."</span>}</span>
-<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a>  ]</span>
-<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb16" data-startfrom="260" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 259;"><span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a><span class="fu">quiz</span>({</span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"You split respondents at the median of their sum score on 20 items and fit a 2PL to the same 20 items in the top half. Most slopes come out near 0. What is the most likely explanation?"</span><span class="op">,</span></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a>  <span class="dt">options</span><span class="op">:</span> [</span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"Among strong respondents, the items don't measure the construct"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"It could happen, but it isn't needed. Selecting on the sum score by itself pushes the items' correlations toward zero, and the 2PL reads that as flat curves."</span>}<span class="op">,</span></span>
+<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The selection removed the correlations the 2PL relies on"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"Within a band of sum scores, a correct answer on one item makes others less likely. The items look unrelated, so the slopes shrink toward 0."</span>}<span class="op">,</span></span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>    {<span class="dt">text</span><span class="op">:</span> <span class="st">"The top half is too small to estimate slopes"</span><span class="op">,</span> <span class="dt">correct</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">why</span><span class="op">:</span> <span class="st">"Half of a large sample is still large. Small samples make slopes noisy, not systematically near zero."</span>}</span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-16" data-nodetype="expression">
@@ -2760,12 +2771,12 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb25" data-startfrom="305" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 304;"><span id="cb25-305"><a href="#cb25-305" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
-<span id="cb25-306"><a href="#cb25-306" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"Which pair of groups will give 2PL item difficulties that agree better: women and men, or high and low scorers on the test?"</span><span class="op">,</span></span>
-<span id="cb25-307"><a href="#cb25-307" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"Women and men"</span><span class="op">,</span> <span class="st">"High and low scorers"</span><span class="op">,</span> <span class="st">"About the same"</span>]<span class="op">,</span></span>
-<span id="cb25-308"><a href="#cb25-308" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"Women and men"</span><span class="op">,</span></span>
-<span id="cb25-309"><a href="#cb25-309" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Women and men: the 2PL difficulties correlate 0.96. Between high and low scorers they correlate −0.05, and the slopes in the high half have a median of −0.04. The table below has all four splits."</span></span>
-<span id="cb25-310"><a href="#cb25-310" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb25" data-startfrom="309" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 308;"><span id="cb25-309"><a href="#cb25-309" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>({</span>
+<span id="cb25-310"><a href="#cb25-310" aria-hidden="true" tabindex="-1"></a>  <span class="dt">q</span><span class="op">:</span> <span class="st">"Which pair of groups will give 2PL item difficulties that agree better: women and men, or high and low scorers on the test?"</span><span class="op">,</span></span>
+<span id="cb25-311"><a href="#cb25-311" aria-hidden="true" tabindex="-1"></a>  <span class="dt">choices</span><span class="op">:</span> [<span class="st">"Women and men"</span><span class="op">,</span> <span class="st">"High and low scorers"</span><span class="op">,</span> <span class="st">"About the same"</span>]<span class="op">,</span></span>
+<span id="cb25-312"><a href="#cb25-312" aria-hidden="true" tabindex="-1"></a>  <span class="dt">answer</span><span class="op">:</span> <span class="st">"Women and men"</span><span class="op">,</span></span>
+<span id="cb25-313"><a href="#cb25-313" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reveal</span><span class="op">:</span> <span class="st">"Women and men: the 2PL difficulties correlate 0.96. Between high and low scorers they correlate −0.05, and the slopes in the high half have a median of −0.04. The table below has all four splits."</span></span>
+<span id="cb25-314"><a href="#cb25-314" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-17" data-nodetype="expression">

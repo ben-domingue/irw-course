@@ -1,8 +1,7 @@
 // Widget helpers for the lesson "Measurement invariance under treatment and life
 // events". Pure functions only; the plotting is in the lesson's OJS cells. Shared
 // math comes from irt.js; the Mantel-Haenszel statistic from dif.js.
-import {logistic, rng, normalQuantiles} from "./irt.js";
-import {mhItem, scores} from "./dif.js";
+import {logistic, rng, normalQuantiles, mhItem, scores} from "./irt.js";
 
 // Item difficulties b_i (evenly spread normal quantiles, SD about 1) and item-specific
 // departures zeta_i with SD sigmaZeta and correlation rho with b_i, built exactly (so
