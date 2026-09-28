@@ -27,6 +27,7 @@ local({
 
 CODE_BASE  <- "https://github.com/ben-domingue/252/blob/main/"
 TABLE_BASE <- "https://itemresponsewarehouse.org/tables/"
+ISSUE_BASE <- "https://github.com/ben-domingue/irw-course/issues/new"
 
 # The tokenless CSV for an IRW table, as linked from its landing page. Lessons use
 # only tables that have one (no Redivis token needed). Redivis serves anonymous CSVs
@@ -242,7 +243,10 @@ lesson_header <- function(id) {
     "**Status:** ", l$status, "  \n",
     # Authorship note on every lesson (#70).
     "**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 ",
-    "materials and under Ben's direction. Ben reviews each lesson before it is marked done.\n",
+    "materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n",
+    # Comments go to GitHub issues, titled with the lesson.
+    "**Comments:** [open an issue on GitHub](", ISSUE_BASE, "?title=",
+    utils::URLencode(paste0(l$title, ": "), reserved = TRUE), ") about this lesson.\n",
     ":::\n\n", sep = ""
   )
 }

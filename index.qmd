@@ -17,9 +17,9 @@ map_link <- function(l) {
 <div style="border:3px solid #c2410c;border-radius:8px;background:#fff7ed;padding:1.2rem 1.5rem;margin:1.2rem 0 1.8rem 0">
   <div style="font-size:2.2rem;font-weight:800;letter-spacing:0.12em;color:#c2410c;line-height:1">DRAFT</div>
   <div style="margin-top:0.6rem;font-size:1.05rem">
-    This course is under construction and is not ready for teaching. Most lessons are
-    still outlines or stubs, the few drafted ones will change, and nothing here has been
-    checked by anyone but its authors. Please don't cite, assign, or circulate it yet.
+    This course is under construction and is not ready for teaching. Every lesson is a
+    draft and will change, and nothing here has been checked by anyone but its
+    authors. Please don't cite, assign, or circulate it yet.
     Comments are very welcome: please <a href="https://github.com/ben-domingue/irw-course/issues/new">open an issue on GitHub</a>, naming the lesson.
   </div>
 </div>
