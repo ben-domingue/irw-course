@@ -17,12 +17,8 @@ long2wide <- function(df) {
   wide <- tapply(df$resp, list(df$id, df$item), function(x) x[1])
   as.data.frame(wide)
 }
-# Interim copy: the table isn't public on the IRW yet, so the course keeps a copy
-# (see data/duckmayr_2023_immigration.md). Outside the course repo, read it from GitHub.
-imm_path <- "data/duckmayr_2023_immigration.csv"
-if (!file.exists(imm_path))
-  imm_path <- "https://raw.githubusercontent.com/ben-domingue/irw-course/main/lessons/data/duckmayr_2023_immigration.csv"
-imm_long <- read.csv(imm_path)
+imm_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse_6:v3_8.duckmayr_2023_immigration/rows?format=csv"
+imm_long <- read.csv(imm_url)
 imm <- long2wide(imm_long)[, paste0("IMM_", 1:10)]
 # 0 = strongly disagree ... 4 = strongly agree, the same way for every statement.
 # Nothing is reverse-keyed: which way a statement runs is the question.
