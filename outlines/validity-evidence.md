@@ -25,7 +25,7 @@ For *Going further* (verified): Lane (2014), doi:10.7334/psicothema2013.258 (con
 
 - Predictive bias (the Cleary model), named here → `dif` (an "if you've done it" Recall there; not a descendant, E2).
 - Internal structure in depth (factor models, bifactor, "one construct or three?"): points forward to `fa-exploratory` and `fa-confirmatory`, which answer it themselves (E3; no hook).
-- Invariance of structure across groups: multigroup CFA is in `fa-confirmatory` (E1; a pointer, no hook).
+- Invariance of structure across groups: multigroup CFA is in `measurement-invariance` (E1, and the 09-25 split, #58; a pointer, no hook).
 - Cut scores as decisions: a pointer to `score-meaning` (not a descendant; boundary agreed 09-24).
 - Consequences as evidence → unpaid.
 - Multitrait–multimethod as a CFA (trait and method factors) → unpaid.

@@ -2,7 +2,7 @@
 
 # Structural equation modeling with lavaan (`sem`)
 
-Module: fa · Prereqs: fa-confirmatory · Extension · Status: draft (09-25, #64)
+Module: fa · Prereqs: fa-confirmatory, measurement-invariance · Extension · Status: draft (09-25, #64)
 
 ## Core ideas
 
@@ -17,13 +17,14 @@ Crossref-checked 09-24 unless marked.
 ## Picks up
 
 - CFA, fit indices, ordinal estimation, `lavaan` syntax (from `fa-confirmatory`).
+- Multigroup CFA; comparing paths needs metric invariance (thread from `measurement-invariance`, a prerequisite since the 09-25 split, #58).
 - Attenuation (from `ctt-reliability`).
 - Multiple regression (assumed from a prior course).
 
 ## Promises / leaves open
 
 - Longitudinal SEM (the twins data have waves) → unpaid.
-- Multigroup SEM (structural paths compared across groups; the measurement side, multigroup CFA invariance, is taught in `fa-confirmatory` before this lesson, E1) → `invariance-experience` (not a descendant: an "if you've done `sem`" aside there, E2); otherwise unpaid.
+- Multigroup SEM (structural paths compared across groups; the measurement side, multigroup CFA invariance, is taught in `measurement-invariance` before this lesson, E1 and #58) → `invariance-experience` (not a descendant: an "if you've done `sem`" aside there, E2); otherwise unpaid.
 - Causal claims about constructs → `validity-causal` (not a descendant: an "if you've done `sem`" aside there, E2).
 - Latent regression of ability on covariates in IRT: a pointer to `explanatory-irt` (not a descendant, E2; no hook).
 

@@ -24,7 +24,7 @@ All references checked on Crossref (09-24, #11). Two claims were dropped rather 
 
 ## Promises / leaves open
 
-- Confirmatory models, fit indices, omega, multigroup invariance → `fa-confirmatory` (named in *What this is for* and problem 4).
+- Confirmatory models, fit indices, omega → `fa-confirmatory` (named in *What this is for*); multigroup invariance → `measurement-invariance` (problem 4 points there; split from `fa-confirmatory` 09-25, #58).
 - Ordered categories as a coarsened continuous variable (polychorics) → `fa-confirmatory` (ordinal FA ≡ GRM), `polytomous`.
 - Rotational indeterminacy → `fa-confirmatory` (identification), `dimensionality` (rotation in MIRT). The Go deeper callout also makes a brief "if you've done it" link to `rasch` (the scale has no origin), which isn't an ancestor, so it isn't a thread.
 - Dimensionality in IRT → `dimensionality`; deep dive #23 (how often unidimensionality holds) stays with `dimensionality` unless #4 says otherwise. This lesson uses the vignette only as a baseline.
@@ -59,7 +59,7 @@ All references checked on Crossref (09-24, #11). Two claims were dropped rather 
 1. Derivation: $\lambda_i\lambda_j$ and the tetrad constraints.
 2. Derivation / thread: the sum score's correlation with the factor; tau-equivalence in terms of loadings (links to the alpha proof).
 3. Design: plan a pilot's sample size so parallel analysis recovers three factors (was "when parallel analysis fails"; recast as design so the mix has one).
-4. Real data with a twist: formats; loadings by format (Zhang et al., 2025); hook to `fa-confirmatory` and `invariance-experience`.
+4. Real data with a twist: formats; loadings by format (Zhang et al., 2025); hook to `measurement-invariance` and `invariance-experience`.
 5. Judgment: the three lowest-communality items; drop them? (wording in Soto & John, 2017).
 6. Challenge: PCA vs. FA loadings; open part on when the difference stops mattering.
 

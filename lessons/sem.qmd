@@ -359,7 +359,7 @@ The negative-affect items are skewed (3,114 of the 6,180 responses are 1), so we
 ### Children and adolescents
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [Factor analysis II](fa-confirmatory.qmd): comparing factor correlations or regressions across groups needs metric invariance (equal loadings), and comparing means needs scalar invariance.
+**Recall** from [Measurement invariance](measurement-invariance.qmd): comparing factor correlations or regressions across groups needs metric invariance (equal loadings), and comparing means needs scalar invariance.
 :::
 
 Do the paths hold for children aged 9–13 and adolescents aged 14–18? A **multigroup SEM** fits the model in both groups at once and adds constraints: first on the loadings, then on the paths.
@@ -416,7 +416,7 @@ data_sources("sem")
 
 - **Source:** new material (Ben's suggestion, #64). EDUC 252 did not cover SEM; the IRW's lavaan CFA vignette was the starting point.
 - **Timing:** about 50 minutes for the core ideas and widgets; the real-data section is a 30-minute lab (each fit takes seconds locally, and the whole script about a minute).
-- **Placement:** an extension after [Factor analysis II](fa-confirmatory.qmd), which introduces `lavaan`, fit indices and multigroup invariance; this lesson adds `~`, `~~`, paths and the two-step approach.
+- **Placement:** an extension after [Factor analysis II](fa-confirmatory.qmd), which introduces `lavaan`, fit indices and the choice of estimator, and [Measurement invariance](measurement-invariance.qmd), which introduces multigroup invariance; this lesson adds `~`, `~~`, paths and the two-step approach.
 - **Held back:** longitudinal SEM (the Florida twins have three waves of PANAS; problem 6 points at it); twin models that use the pairs to separate genetic and environmental variance; mediation and indirect effects; latent interactions.
 - **Data:** grit and PANAS come from one study and count as one data source. Grit keying was checked against the IRW option text: the perseverance items are reversed and the consistency items are not, unlike the `grit` table in [Factor analysis II](fa-confirmatory.qmd). The family variable is inferred from the id pattern (ids in pairs ending 00 and 01), not from a codebook. The PANAS items are single adjectives from a published scale (Watson et al., 1988); the lesson names six of them. The grit items are described, not reproduced.
 - **Solutions:** held back in `solutions/sem.qmd` (not published).
