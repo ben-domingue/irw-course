@@ -23,13 +23,13 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-A test usually shows each respondent each item once. Many experiments show each respondent the same few stimuli many times: a patch of a given brightness, a shape rotated by 50 or 150 degrees, a colour word printed in the wrong ink. Each showing is a trial, and a table of trials raises questions a test doesn't. Which trials should share a difficulty parameter? Can a feature of the stimulus, such as its brightness, stand in for that parameter? And is the question even about the respondents? It may be about the stimulus: does changing it change performance for everyone? An experiment can answer that emphatically and say almost nothing about how people differ. This lesson brings the explanatory models of [What is an item?](explanatory-irt.qmd) to trial data, and ends on what the reliability paradox means for anyone who wants to use an experimental effect to measure people.
+A test usually shows each respondent each item once. Many experiments show each respondent the same few stimuli many times: a patch of a given brightness, a shape rotated by 50 or 150 degrees, a colour word printed in the wrong ink. Each showing is a "trial", and a table of trials raises questions a test doesn't. Which trials should be considered as representative of the same "item" (i.e., they should share a common difficulty parameter)? Can a feature of the stimulus, such as its brightness, stand in for that parameter? And is the question even about the respondents? It may be about the stimulus: does changing it change performance for everyone? An experiment can answer that emphatically and say almost nothing about how people differ. This lesson brings the explanatory models of [What is an item?](explanatory-irt.qmd) to trial data, and ends on what the reliability paradox means for anyone who wants to use an experimental effect to measure people.
 
 ## Goals
 
 By the end of this lesson you should be able to:
 
-- fit an item response model to repeated trials, one row per trial, and say what it assumes about trials of the same item;
+- fit an item response model to trial data, one row per trial, and say what it assumes about trials of the same item;
 - replace item difficulties with a function of a feature of the stimulus, and compare the two in and out of sample;
 - decompose the variance of trial responses into an average effect, person differences in that effect, and trial noise, and compute the reliability of a person's effect from it;
 - explain why a large, universal experimental effect can come with unreliable individual differences;
@@ -42,33 +42,37 @@ By the end of this lesson you should be able to:
 The lesson uses six terms throughout. The running example is [Ratcliff and Rouder's (1998)](https://doi.org/10.1111/1467-9280.00067) brightness experiment: on each trial an observer sees a patch of pixels at one of 33 brightness levels and says whether it came from a bright or a dark distribution.
 
 - **Respondent**: whatever the IRW's `id` indexes, written $j$. In the brightness data a respondent is one observer's session, not a person.
-- **Trial**: one showing of a stimulus and the response to it, written $t$. In the IRW a trial is one row.
-- **Item**: a set of trials that the model treats as interchangeable and gives one parameter for difficulty (below, an easiness $\beta_i$), written $i$; trial $t$ belongs to item $i(t)$. Which trials to pool is the analyst's choice, and the IRW's `item` column records one choice: the brightness level, the sheet × shape × angle in mental rotation, the word × ink in Stroop, the zone of a basketball shot.
-- **Repeated trials**: a respondent meets the same item more than once. In the brightness data each respondent meets each level a median of 12 times. This, not the kind of stimulus, is what separates these data from a test.
-- **Feature**: a property of an item that can explain its difficulty, as in the LLTM: brightness, the angle of rotation, whether word and ink agree, the distance of a shot.
+- **Stimulus**: what the respondent is shown on a trial and responds to: a patch of pixels, a pair of shapes, a colour word printed in an ink. For a basketball shot it is the situation the shooter shoots from: the spot on the court, the defence, the clock. A stimulus has more properties than any table records.
+- **Trial**: one showing of a stimulus to a respondent, and the response to it, written $t$. In the IRW a trial is one row.
+- **Feature**: a recorded property of the stimulus, such as its brightness, the angle of rotation, whether word and ink agree or the distance of a shot, or of the trial's context, such as what came before or the game clock. An item is usually defined by the values of some features; other features can then explain why items differ in difficulty, as in the LLTM. Properties that aren't recorded end up in the trial noise.
+- **Item**: a set of trials that the model treats as interchangeable and gives one parameter for difficulty (below, an easiness $\beta_i$), written $i$; trial $t$ belongs to item $i(t)$. Which trials to pool is the analyst's choice, usually made on the values of some features, and the IRW's `item` column records one choice: the brightness level, the sheet × shape × angle in mental rotation, the word × ink in Stroop, the zone of a basketball shot. Trials of one item need not show the same stimulus: in the mental rotation data, one IRW item holds both a same pair and a mirrored pair of shapes. A respondent usually has many trials of each item, a median of 12 per brightness level; a test usually has one per respondent and item.
 - **Effect**: the difference in performance between trials that differ in a feature, such as incongruent minus congruent in Stroop. It has an average over respondents and can differ from one respondent to the next.
 
 ### Many trials of one item
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [Item response data and the IRW](irw-data.qmd): in `rr98_accuracy` the reshape to one row per respondent needed a rule for repeated trials: keep one attempt, average them, or redefine the respondent or the item.
+**Recall** from [Item response data and the IRW](irw-data.qmd): in `rr98_accuracy` the reshape to one row per respondent needed a rule for a respondent with several trials of one item: keep one, average them, or redefine the respondent or the item.
 :::
 
-There is a fourth option: don't reshape. Keep one row per trial, give each brightness level its own easiness $\beta_i$, and fit the Rasch model to the trials themselves:
+A test gives each respondent–item pair one row. Here a pair has many: a median of 12 in the brightness data. The rules in the Recall reduce them to one. The common choice is to average each respondent's trials of an item, but that folds the trial-to-trial noise into the averages, where it can no longer be told apart from differences between respondents; [Rouder and Haaf (2019)](https://doi.org/10.3758/s13423-018-1558-y) show that this can shrink effect sizes and correlations alike.
+
+This lesson keeps every trial as its own row instead. Give each brightness level its own easiness $\beta_i$ and fit the Rasch model to the trials themselves:
 $$\text{logit}\Pr(x_{jt} = 1) = \theta_j + \beta_{i(t)}, \qquad \theta_j \sim N(0, \sigma^2_\theta).$$
-This is the Rasch model of [What is an item?](explanatory-irt.qmd) with many rows per respondent–item pair, and `glmer()` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)) fits it as before. It assumes that a respondent's twelfth trial of an item is interchangeable with the first: no practice, fatigue or memory of the trial before ([De Boeck & Wilson, 2004](https://doi.org/10.1007/978-1-4757-3990-9)). The common alternative is to average each respondent's trials of an item and analyse the averages, which folds the trial-to-trial noise into the averages, where it can no longer be told apart from differences between respondents; [Rouder and Haaf (2019)](https://doi.org/10.3758/s13423-018-1558-y) show that this can shrink effect sizes and correlations alike.
+This is the Rasch model of [What is an item?](explanatory-irt.qmd) with many rows per respondent–item pair, and `glmer()` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)) fits it as before. It assumes that a respondent's twelfth trial of an item is interchangeable with the first: no practice, fatigue or memory of the trial before ([De Boeck & Wilson, 2004](https://doi.org/10.1007/978-1-4757-3990-9)).
+
+The model is only as good as the choice of which trials make an item.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [What is an item?](explanatory-irt.qmd): in hearts and flowers, a flower after a heart cost 0.59 logits against a flower after a flower, more than the whole spread among the four shape × side items. Pooling trials by shape and side alone put different trials in one item; the better item was the stimulus in its context.
 :::
 
-Hearts and flowers has four items. Other experiments vary a feature almost continuously (brightness, the angle between two shapes, the coherence of moving dots), and then there can be dozens of items that differ only in that feature. The natural step is to replace their difficulties with a function of the feature.
+Hearts and flowers has four items, each with dozens of trials per respondent. The brightness experiment has 33, and other experiments vary a feature almost continuously (the angle between two shapes, the coherence of moving dots), so that there are dozens of items that differ only in that one feature. Then it is natural to replace their difficulties with a function of the feature.
 
 ### Replace item difficulties with a feature
 
-The LLTM wrote each item's easiness as a weighted sum of its features ([Fischer, 1973](https://doi.org/10.1016/0001-6918(73)90003-6)). With a continuous feature $s$ it is a curve,
+The LLTM wrote each item's easiness as a weighted sum of its features ([Fischer, 1973](https://doi.org/10.1016/0001-6918(73)90003-6)). With one continuous feature $s$ it is a regression on that feature,
 $$\beta_{i} = \beta_0 + \beta_1\, g(s_i),$$
-and in psychophysics that curve, probability correct against stimulus strength, is the **psychometric function** ([Wichmann & Hill, 2001](https://doi.org/10.3758/BF03194544)). In the brightness experiment the bright and dark distributions overlap most at the middle level, 16, so accuracy should depend on the distance from it, $g(s) = |s - 16|$. The Rasch model above has 33 easinesses, one per level. The line $\beta_0 + \beta_1 |s_i - 16|$ has two, an intercept and a slope, and says that every level the same distance from the middle is equally easy.
+for some function $g$. Plotted as probability correct against the strength of the stimulus, the result is what psychophysics calls the **psychometric function** ([Wichmann & Hill, 2001](https://doi.org/10.3758/BF03194544)). In the brightness experiment, brightness is the share of white pixels, in 33 levels from all black (0) to all white (32). Each patch was drawn from one of two overlapping distributions, a bright one and a dark one, and a response is correct if it names the right one. Near the middle level, 16, a patch could easily have come from either, so accuracy should be lowest there and rise with the distance from it: $g(s) = |s - 16|$. The Rasch model above has 33 easinesses, one per level. The line $\beta_0 + \beta_1 |s_i - 16|$ has two, an intercept and a slope, and says that every level the same distance from the middle is equally easy.
 
 #### Try it: one easiness per level, or a line through them
 
@@ -124,9 +128,9 @@ quiz({
 
 ### The question may be about the stimulus
 
-In an experiment the parameter of interest is often an effect: how much slower people are when word and ink disagree ([Stroop, 1935](https://doi.org/10.1037/h0054651)), or how much accuracy falls per 50 degrees of rotation ([Shepard & Metzler, 1971](https://doi.org/10.1126/science.171.3972.701)). Give each respondent their own effect and the model for a response time becomes
+In an experiment the parameter of interest is often an effect: how much slower people are when word and ink disagree ([Stroop, 1935](https://doi.org/10.1037/h0054651)), or how much accuracy falls per 50 degrees of rotation ([Shepard & Metzler, 1971](https://doi.org/10.1126/science.171.3972.701)). Such effects are often measured in response time, so the model is now a linear one for the time taken on trial $t$, with each respondent given their own effect:
 $$\text{RT}_{jt} = \mu + \theta_j + (\delta + \gamma_j)\,c_t + \varepsilon_{jt}, \qquad \theta_j \sim N(0, \tau^2_\theta),\ \gamma_j \sim N(0, \tau^2_\gamma),\ \varepsilon_{jt} \sim N(0, \sigma^2),$$
-where $c_t$ is 1 on an incongruent trial and 0 on a congruent one, $\delta$ is the average effect and $\gamma_j$ is respondent $j$'s departure from it. There are now two questions. Does the manipulation work: is $\delta$ far from 0? And do people differ in it: is $\tau_\gamma$ large enough to rank them?
+where $\theta_j$ is respondent $j$'s usual speed (higher is slower), $c_t$ is 1 on an incongruent trial and 0 on a congruent one, $\delta$ is the average effect and $\gamma_j$ is respondent $j$'s departure from it. There are now two questions. Does the manipulation work: is $\delta$ far from 0? And do people differ in it: is $\tau_\gamma$ large enough to rank them?
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Classical test theory and reliability](ctt-reliability.qmd): reliability is a property of scores in a population, the share of observed-score variance that is true-score variance.
@@ -134,11 +138,11 @@ where $c_t$ is 1 on an incongruent trial and 0 on a congruent one, $\delta$ is t
 
 With $L$ trials of each kind (congruent and incongruent), a respondent's observed effect (mean incongruent RT minus mean congruent RT) has variance $\tau^2_\gamma + 2\sigma^2/L$ across respondents, so its reliability is
 $$\rho_\gamma = \frac{\tau^2_\gamma}{\tau^2_\gamma + 2\sigma^2/L}.$$
-The group test of $\delta$ divides it by $\sqrt{(\tau^2_\gamma + 2\sigma^2/L)/N}$. The between-person variance $\tau^2_\gamma$ is in the numerator of the one and the denominator of the other. [Hedge, Powell and Sumner (2018)](https://doi.org/10.3758/s13428-017-0935-1) draw the consequence: an effect becomes established, and the experiment that shows it popular, when people differ little in it, and that is what leaves the effect unreliable as a measure of individuals. This is the **reliability paradox**.
+The group test of the average effect, over $N$ respondents, is $t = \hat\delta \big/ \sqrt{(\tau^2_\gamma + 2\sigma^2/L)/N}$. The between-person variance $\tau^2_\gamma$ is in the numerator of the reliability and the denominator of $t$: the less people differ, the larger $t$ and the lower the reliability. [Hedge, Powell and Sumner (2018)](https://doi.org/10.3758/s13428-017-0935-1) draw the consequence: an effect becomes established, and the experiment that shows it popular, when people differ little in it, and that is what leaves the effect unreliable as a measure of individuals. This is the **reliability paradox**.
 
 #### Try it: where the variance lives
 
-The trial SD (0.17 s) and the SD of respondents' mean speed (0.10 s) are about what the Stroop table below shows; there are 150 respondents.
+The trial SD (0.17 s) and the SD of respondents' mean speed (0.10 s) are about what the Stroop table below shows; the group test assumes 150 respondents.
 
 ```{ojs}
 //| echo: false
@@ -167,7 +171,7 @@ Plot.plot({
 md`Reliability of each respondent's effect: **${vp.relEffect.toFixed(2)}**; of their mean RT: **${vp.relMean.toFixed(2)}**. Group test of the effect: **t = ${vp.t.toFixed(1)}**.`
 ```
 
-Shrink the person SD toward 0. The t statistic *rises*, from 24 to 42, as the reliability of the effect falls to 0: the less people differ, the clearer the manipulation and the emptier the ranking. More trials help slowly, because a difference carries the noise of two means: at a person SD of 0.05 s it takes about 200 trials of each kind to reach 0.9. The mean RT stays near 0.97.
+Shrink the person SD toward 0. The t statistic *rises*, from 24 to 42, as the reliability of the effect falls to 0: the less people differ, the clearer the manipulation and the emptier the ranking. More trials help slowly, because a difference carries the noise of two means: at a person SD of 0.05 s it takes about 200 trials of each kind to reach 0.9. The reliability of mean RT stays near 0.97.
 
 ::: {.callout-tip appearance="simple"}
 **If you've done** [Validity as causation](validity-causal.qmd): a timed Stroop there had an effect retest correlation of 0.17, against 0.73 for congruent RT. The variance ratio here says why trials help as they do.
@@ -178,7 +182,7 @@ Shrink the person SD toward 0. The t statistic *rises*, from 24 to 42, as the re
 
 **Assumptions:** the RT model above; trials are independent given $\theta_j$ and $\gamma_j$, with the same noise variance $\sigma^2$ on congruent and incongruent trials; each respondent has $L$ trials of each kind; $\theta$, $\gamma$ and $\varepsilon$ are mutually independent.
 
-A respondent's mean RTs on congruent and incongruent trials are $\bar y_{j0} = \mu + \theta_j + \bar\varepsilon_{j0}$ and $\bar y_{j1} = \mu + \theta_j + \delta + \gamma_j + \bar\varepsilon_{j1}$, with $\text{var}(\bar\varepsilon) = \sigma^2/L$. Their difference is $d_j = \delta + \gamma_j + (\bar\varepsilon_{j1} - \bar\varepsilon_{j0})$: $\theta_j$ cancels, and the two error means add, so $\text{var}(d_j) = \tau^2_\gamma + 2\sigma^2/L$. The true score is $\delta + \gamma_j$, whose variance is $\tau^2_\gamma$, so the reliability is $\tau^2_\gamma / (\tau^2_\gamma + 2\sigma^2/L)$. The respondent's mean over both conditions is $\mu + \theta_j + (\delta + \gamma_j)/2 + (\bar\varepsilon_{j0} + \bar\varepsilon_{j1})/2$, whose error variance is $\sigma^2/(2L)$, a quarter of the difference's.
+A respondent's mean RTs on congruent and incongruent trials are $\bar y_{j0} = \mu + \theta_j + \bar\varepsilon_{j0}$ and $\bar y_{j1} = \mu + \theta_j + \delta + \gamma_j + \bar\varepsilon_{j1}$, with $\text{var}(\bar\varepsilon) = \sigma^2/L$. Their difference is $d_j = \delta + \gamma_j + (\bar\varepsilon_{j1} - \bar\varepsilon_{j0})$: $\theta_j$ cancels, and the two error means add, so $\text{var}(d_j) = \tau^2_\gamma + 2\sigma^2/L$. The true score is $\delta + \gamma_j$, whose variance is $\tau^2_\gamma$, so the reliability is $\tau^2_\gamma / (\tau^2_\gamma + 2\sigma^2/L)$. The respondent's mean over both kinds of trial is $\mu + \theta_j + (\delta + \gamma_j)/2 + (\bar\varepsilon_{j0} + \bar\varepsilon_{j1})/2$, whose error variance is $\sigma^2/(2L)$, a quarter of the difference's.
 
 Solve for the number of trials that gives a target reliability $R$:
 $$L = \frac{2\sigma^2}{\tau^2_\gamma}\cdot\frac{R}{1 - R},$$
@@ -199,7 +203,7 @@ quiz({
 
 ### When respondents choose their trials
 
-In a laboratory the experimenter assigns the trials. Elsewhere respondents choose them. A basketball player's shots are trials, each a make or a miss. The item might be the zone the shot is taken from, but no two shots from a zone are quite the same, and the player picks which to take. Whether a shooter's chance changes from shot to shot is an old question ([Gilovich, Vallone & Tversky, 1985](https://doi.org/10.1016/0010-0285(85)90010-6)); ours is simpler. A shooting percentage mixes skill with selection.
+In a laboratory the experimenter assigns the trials. Elsewhere respondents choose them. A basketball player's shots are trials, each a make or a miss. The item might be the zone the shot is taken from, but no two shots from a zone are the same stimulus, and the player picks which to take. Whether a shooter's chance changes from shot to shot is an old question ([Gilovich, Vallone & Tversky, 1985](https://doi.org/10.1016/0010-0285(85)90010-6)); ours is simpler. A shooting percentage mixes skill with selection.
 
 #### Try it: choosing shots
 
@@ -236,7 +240,7 @@ With equal skill and the default mixes, B shoots 28.1% to A's 34.9% and looks 0.
 quiz({
   q: "In the widget, two equally skilled shooters have different percentages. What removes the gap?",
   options: [
-    {text: "Putting shot type in the model as a feature, so each shooter's skill is compared on the same kind of shot", correct: true, why: "Shot type is an item feature, as in the LLTM. With it in the model, each shooter's parameter is their skill at a given kind of shot."},
+    {text: "Putting shot type in the model as a feature, so each shooter's skill is compared on the same kind of shot", correct: true, why: "Shot type is a feature, as in the LLTM. With it in the model, each shooter's parameter is their skill at a given kind of shot."},
     {text: "More shots", correct: false, why: "More shots shrink the standard error around the wrong answer: the raw gap comes from the mix of shots, not from noise."},
     {text: "Nothing: the percentage is the skill", correct: false, why: "A percentage is skill averaged over the shots a player chose. Two players who choose differently are averaged over different items."}
   ]
@@ -292,14 +296,14 @@ Accuracy is 0.95 at both ends and 0.50 at level 15. Now three models of the leve
 #| code-fold: show
 ```
 
-Each step of distance from the middle adds 0.24 logits. The line accounts for 90% of the variance in the 33 level easinesses, yet the likelihood-ratio tests reject it against one value per distance (χ² = 49.9 on 15 df), and that in turn against one per level (χ² = 35.6 on 16 df); the AICs are 12,948, 12,928 and 12,925. Out of sample:
+Each step of distance from the middle adds 0.24 logits. The line accounts for 90% of the variance in the 33 level easinesses, yet the likelihood-ratio tests reject it against one easiness per distance (χ² = 49.9 on 15 df), and that in turn against one per level (χ² = 35.6 on 16 df); the AICs are 12,948, 12,928 and 12,925. Out of sample:
 
 ```{r rr98-imv}
 #| echo: true
 #| code-fold: show
 ```
 
-Against the overall proportion correct, the line earns an IMV of 0.0772; one value per distance adds a thousandth, and one value per level loses one. Two parameters predict new trials as well as 33.
+Against the overall proportion correct, the line earns an IMV of 0.0772; one easiness per distance adds a thousandth, and one easiness per level loses one. Two parameters predict new trials as well as 33.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Item response data and the IRW](irw-data.qmd): in this table errors were slower than correct responses by 0.09 s pooled, but by only about 0.02 s within a brightness level, because errors crowd into the hard levels, which are slow for every response. Giving each level its own easiness makes the same separation for accuracy: the difficulty of an item is kept apart from anything about the respondent.
@@ -467,7 +471,7 @@ nba <- cbind(nba, D)
 
 ```{r}
 #| output: asis
-ask_claude("trials", "It covers experimental trials as item response data: respondents, trials, items (sets of trials pooled under one difficulty), repeated trials, features and effects; the Rasch model fit to one row per trial with lme4's glmer; replacing item difficulties with a feature of the stimulus (a psychometric function, the LLTM with a continuous feature) and comparing the accounts out of sample with the IMV; the decomposition of trial responses into an average effect, person differences in the effect and trial noise, the reliability of a person's effect, and the reliability paradox of Hedge, Powell and Sumner (2018); and the bias when respondents choose their own trials, with a brightness-discrimination experiment, a cross-modal mental rotation task, a Stroop task given twice and a simulated season of basketball shots (from the IRW's simsyn source, with the true skills known) as examples.")
+ask_claude("trials", "It covers experimental trials as item response data: respondents, trials, stimuli, features, items (sets of trials pooled under one difficulty) and effects; the Rasch model fit to one row per trial with lme4's glmer; replacing item difficulties with a feature of the stimulus (a psychometric function, the LLTM with a continuous feature) and comparing the accounts out of sample with the IMV; the decomposition of trial responses into an average effect, person differences in the effect and trial noise, the reliability of a person's effect, and the reliability paradox of Hedge, Powell and Sumner (2018); and the bias when respondents choose their own trials, with a brightness-discrimination experiment, a cross-modal mental rotation task, a Stroop task given twice and a simulated season of basketball shots (from the IRW's simsyn source, with the true skills known) as examples.")
 ```
 
 ## Going further
