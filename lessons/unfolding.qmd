@@ -27,7 +27,7 @@ Two different accounts of how a respondent answers an item:
 - **Dominance.** The more of the trait a respondent has, the more likely they are to agree or answer correctly: each item's curve only rises. Every model in this course so far has assumed this.
 - **Ideal point.** A respondent agrees most with statements close to their own position, and less the farther a statement is from it, in either direction. A statement that stakes out a middle position is rejected from both sides, by respondents who find it too strong and by those who find it too weak, so its curve rises and then falls.
 
-For tests of ability dominance is natural; for attitude statements it can fail. [Where CTT breaks](ctt-limits.qmd) found two such statements among eight about capital punishment and left them there. This lesson picks them up: what an unfolding response process leaves in the data, the models written for it (the hyperbolic cosine model, a folded partial credit model, and the GGUM), and what happens when we fit them to real attitude statements. The main example is a survey of immigration attitudes written to span the middle, where a statement that splits the difference is single-peaked even in the raw data and an ideal-point curve predicts it better than a dominance curve. The eight capital-punishment statements show the other side: most sit near the ends, only 54 people answered, and a dominance model does just as well.
+For tests of ability dominance is natural; for attitude statements it can fail. [Where CTT breaks](ctt-limits.qmd) found two such statements among eight about capital punishment and left them there. This lesson picks them up: what an unfolding response process leaves in the data, the models written for it (the hyperbolic cosine model, a folded partial credit model, and the GGUM), and what happens when we fit them to real attitude statements. The main example is a survey of immigration attitudes written to span the middle, where a statement that splits the difference is single-peaked even in the raw data and an ideal-point curve predicts it better than a dominance curve. The eight capital-punishment statements show the other side: most sit near the ends, only 54 people answered, and a dominance model does just as well. The last example is the U.S. Senate, whose roll calls political scientists model with "ideal points" that, on inspection, give a dominance curve, and where a few votes still turn over.
 
 ## Goals
 
@@ -37,6 +37,7 @@ By the end of this lesson you should be able to:
 - say what unfolding leaves in the data: runs of agreement in the right order, negative correlations between the ends, and middle statements that correlate with nothing;
 - derive the hyperbolic cosine model by folding a three-category partial credit model, and place the GGUM and `mirt`'s ideal-point item beside it;
 - fit dominance, ideal-point and mixed models in R, compare them on held-out responses, and find a statement order with MUDFOLD;
+- show why a spatial model of voting, with an ideal point for each legislator, gives a 2PL for each roll call, and say when a vote's curve can still rise and fall;
 - explain why the two kinds of model are hard to tell apart when statements sit near the ends of the scale, and design statements that could tell them apart.
 
 ## Core ideas
@@ -401,6 +402,62 @@ For contrast, [eurpar2_mudfold](https://itemresponsewarehouse.org/tables/eurpar2
 
 MUDFOLD orders five of the six parties from left to right (communists, social democrats, liberals, Christian democrats, conservatives), with $H = 0.79$. The four commonest pairs are the four neighbouring pairs in that order (437 + 341 + 217 + 202 = 1,197 of the 1,786 choices); communists with conservatives came up 4 times. MUDFOLD leaves out the democratic progressives, paired with the liberals (124), social democrats (106) and conservatives (77) alike: a second dimension, or a party chosen for reasons other than left and right, would do that.
 
+### Roll calls in the Senate
+
+Political scientists have their own ideal-point models, for legislators' votes ([Poole & Rosenthal, 1985](https://doi.org/10.2307/2111172); [Clinton, Jackman & Rivers, 2004](https://doi.org/10.1017/S0003055404001194)). [rollcall_senate](https://itemresponsewarehouse.org/tables/rollcall_senate/) holds every roll call in the Senate from the 110th to the 118th Congress (2007–2024), built from the Senate's own records (public domain): 1 for yea, 0 for nay, with present and not voting left missing. Its job is to show an ideal-point story that ends in a dominance curve, and the few votes where it doesn't.
+
+Each senator has an ideal point $\theta_j$ on a left–right scale. A roll call offers two outcomes, located at $y_i$ if the yeas win and $n_i$ if the nays win, and the senator prefers whichever is closer. Poole and Rosenthal's NOMINATE uses a bell-shaped utility; with the quadratic utility of Clinton, Jackman and Rivers, and a logistic error, the algebra is short:
+
+$$
+\operatorname{logit}\Pr(\text{yea}) = (\theta_j - n_i)^2 - (\theta_j - y_i)^2 = 2(y_i - n_i)\,\theta_j - (y_i^2 - n_i^2) = a_i(\theta_j - b_i),
+$$
+
+with $a_i = 2(y_i - n_i)$ and $b_i = (y_i + n_i)/2$. The utility is single-peaked, but the vote is a 2PL. The slope's sign says which side of the chamber the yea outcome sits on, and $b_i$, the midpoint between the outcomes, is the cutting point: senators to one side vote yea, those to the other nay. Nothing folds, because the vote is a choice between two positions, both on the scale. A survey respondent who disagrees with a statement isn't choosing a second statement, so disagreement can come from either side. Clinton, Jackman and Rivers assume a normal error, which makes the curve a probit rather than a logistic.
+
+We take the 118th Congress (2023–2024), in which the Democrats held the Senate by a seat or two. Clinton, Jackman and Rivers fit the model in a Bayesian way; here `mirt` fits the same 2PL with normal priors on the slopes and intercepts, since on a party-line vote the parties separate perfectly and the slope would otherwise grow without bound.
+
+```{r fetch-senate}
+#| echo: true
+#| code-fold: show
+```
+
+```{r fit-senate}
+#| echo: true
+#| code-fold: show
+```
+
+With Republicans pointed positive, the parties don't overlap: Democrats run from −4.24 to −1.73 and Republicans from −0.10 to 4.99. The three independents sit among the Democrats (−2.38 to −1.47), and Joe Manchin, who left the Democrats to sit as an independent in 2024, falls between the parties (−0.79). On 522 of the 659 roll calls the yea lies to the left, including 434 of the 438 nominations: in 2023–2024 the nominees were a Democratic president's, brought up by a Democratic majority. Of the other 221 votes, 133 put the yea to the right. The negative slopes aren't reversed items. They say which way each question was put.
+
+Is every vote a dominance item, then? The algebra assumes each senator weighs only the distance to the two outcomes, on one scale. When both ends of the chamber oppose a bill for opposite reasons, one side because it goes too far and the other because it doesn't go far enough, the curve rises and falls, the pattern [Duck-Mayr and Montgomery (2023)](https://doi.org/10.1017/pan.2022.33) call "ends against the middle".
+
+```{ojs}
+//| echo: false
+predict({
+  q: "On 19 April 2024 the Senate passed a reauthorization of the Foreign Intelligence Surveillance Act (FISA), 60–34. Using the 2PL scores, where were the nays?",
+  choices: ["Mostly at the left end", "Mostly at the right end", "At both ends"],
+  answer: "At both ends",
+  reveal: "At both ends: among the senators kept here, 17 Democrats and 16 Republicans voted nay. The Republican nays came from the party's right end; the Democratic nays leaned, less sharply, to its left end. Check the output below."
+})
+```
+
+We screen every vote with the check from [Where CTT breaks](ctt-limits.qmd): a logistic regression of the vote on the 2PL score, with and without a squared term. A vote is flagged if the squared term is negative, the fitted curve peaks inside the range of the scores, and the AIC improves by more than 10.
+
+```{r screen-senate}
+#| echo: true
+#| code-fold: show
+```
+
+```{r plot-fisa}
+#| echo: true
+#| code-fold: show
+#| fig-width: 6
+#| fig-height: 4
+```
+
+Twenty-one of the 659 roll calls are flagged. Most are votes where a coalition of the middle met opposition from both ends: final passage of the FISA reauthorization (AIC gain 31.2) and two procedural votes on it; the defense authorization of 2023; repeal of the 2002 authorization to use military force in Iraq, with amendments to it; the foreign-aid package for Ukraine and Israel in 2024; and the debt-ceiling deal of 2023. The rest are a spending package, two nominations to the energy regulator, an amendment barring funds to Chinese entities, and three votes on two resolutions to overturn agency rules. The FISA vote splits both parties (28 Democrats yea and 17 nay, 30 Republicans yea and 16 nay). The Republican nays come from the party's right end (median score 3.72, against 2.48 for its yeas); the Democratic nays lean to its left end, less sharply (−3.17 against −2.94). A line through the plot is nearly flat; the curve with a squared term turns over.
+
+Look at where the peak sits, though: in the gap between the parties, where only two senators are. As in the mimicry widget, the data see a curve only where there are respondents. They show that both ends voted nay, but not the shape of the curve in between. The other 638 votes show no such turn, which is why a monotone model serves for most roll calls. Whether the flagged votes call for a folded curve, or for a second dimension on which the ends agree, is a question the data could be asked (problem 6).
+
 ## Problems
 
 1. **Folding the PCM.** Starting from a three-category PCM with steps $b - \tau$ and $b + \tau$, derive $\Pr(\text{agree}) = e^{\tau}/(e^{\tau} + 2\cosh(\theta - b))$. Show that the curve peaks at $\theta = b$, find the height of the peak, and show that far from $b$ the log odds of agreeing fall by one for each unit of $\theta$.
@@ -408,11 +465,13 @@ MUDFOLD orders five of the six parties from left to right (communists, social de
 3. **Judgment.** DONTBELIEV correlates with no other statement above 0.18, gets a 2PL slope of −0.11, and gets a GGUM location near 0. With 54 respondents, what could change your mind about whether it follows an ideal-point process? What would you look for in a new sample, and roughly how large would it need to be?
 4. **Design.** Write eight statements about a policy you know well, for 300 respondents, so that a dominance model and an unfolding model could be told apart. Where on the scale must the statements sit, and where must the respondents be? Check your design in the simulation: set `delta` to your planned locations and `np` to 300, and see whether the ideal-point model wins.
 5. **Order from pairs.** In `eurpar2_mudfold`, recover a left-to-right order of the six parties from the pair counts alone (for example, treat the counts as similarities and scale them in one dimension with `cmdscale`). Compare with MUDFOLD's order. Where do the democratic progressives land, and does that fit what the counts showed?
-6. **Challenge (open).** The GGUM wins in sample on the immigration statements and loses out of sample. Is that overfitting, a problem with scoring respondents whose posterior for $\theta$ has two humps, or something else? How would you find out? Or: are some personality items ideal-point items? [Stark et al. (2006)](https://doi.org/10.1037/0021-9010.91.1.25) argue that some are. Pick an IRW personality table with Likert items and say how you would find out; then try it, fitting the GRM and the GGUM (`mirt`'s `itemtype = "ggum"`) and comparing the curves. Or model the rankings in [franco_2024_unfolding](https://itemresponsewarehouse.org/tables/franco_2024_unfolding/). I don't know the answer for either.
+6. **Folded curve or second dimension?** For the 21 flagged roll calls, fit two models to the 118th Senate: a 2PL with `mirt`'s `"ideal"` item for the flagged votes, and a two-dimensional 2PL for all of them (keep the priors). Compare them on held-out votes, as with the immigration statements. The flagged votes were chosen by the same scores, so how would you make the comparison fair?
+7. **Across Congresses.** `rollcall_senate` covers the 110th to the 118th Congress, and many senators served in several. Fit the 117th and 118th separately and put their scores on one scale through the senators who served in both, a common-person design (see [Linking and equating](equating.qmd)). What does this assume about those senators, and how would you check it?
+8. **Challenge (open).** The GGUM wins in sample on the immigration statements and loses out of sample. Is that overfitting, a problem with scoring respondents whose posterior for $\theta$ has two humps, or something else? How would you find out? Or: are some personality items ideal-point items? [Stark et al. (2006)](https://doi.org/10.1037/0021-9010.91.1.25) argue that some are. Pick an IRW personality table with Likert items and say how you would find out; then try it, fitting the GRM and the GGUM (`mirt`'s `itemtype = "ggum"`) and comparing the curves. Or model the rankings in [franco_2024_unfolding](https://itemresponsewarehouse.org/tables/franco_2024_unfolding/). I don't know the answer for either.
 
 ```{r}
 #| output: asis
-ask_claude("unfolding", "It covers unfolding (ideal-point) models for attitude statements: dominance versus ideal-point response processes, what unfolding leaves in the data (runs of agreement, the parallelogram, negative correlations between the ends), the hyperbolic cosine model as a folded partial credit model, the generalized graded unfolding model (GGUM), mirt's ideal-point item type, MUDFOLD and its H coefficient, and why a 2PL with negative slopes can mimic an ideal-point model when statements sit near the ends of the scale, with fits in R (mirt, GGUM, mudfold) to Duck-Mayr and Montgomery's (2023) immigration-policy statements (GRM, GGUM and a mixed model, compared in and out of sample), Andrich's capital-punishment statements and European party activists' pick-two-of-six choices.")
+ask_claude("unfolding", "It covers unfolding (ideal-point) models for attitude statements: dominance versus ideal-point response processes, what unfolding leaves in the data (runs of agreement, the parallelogram, negative correlations between the ends), the hyperbolic cosine model as a folded partial credit model, the generalized graded unfolding model (GGUM), mirt's ideal-point item type, MUDFOLD and its H coefficient, and why a 2PL with negative slopes can mimic an ideal-point model when statements sit near the ends of the scale, with fits in R (mirt, GGUM, mudfold) to Duck-Mayr and Montgomery's (2023) immigration-policy statements (GRM, GGUM and a mixed model, compared in and out of sample), Andrich's capital-punishment statements, European party activists' pick-two-of-six choices, and roll calls in the 118th U.S. Senate (why a spatial voting model with quadratic utility gives a 2PL whose slope sign says which side the yea is on, and a screen for ends-against-the-middle votes such as the 2024 FISA reauthorization).")
 ```
 
 ## Going further
@@ -421,6 +480,8 @@ ask_claude("unfolding", "It covers unfolding (ideal-point) models for attitude s
 - Coombs, C. H. (1964). *A theory of data*. Wiley. <https://openlibrary.org/works/OL1361275W>. Unfolding, the parallelogram and the geometry of preference. [Flament's (1966) review](https://doi.org/10.1007/bf02289474) summarizes it.
 - Guttman, L. (1944). A basis for scaling qualitative data. *American Sociological Review*, 9(2), 139–150. <https://doi.org/10.2307/2086306>. The scalogram, the dominance pattern the parallelogram is set against.
 - Duck-Mayr, J., & Montgomery, J. (2023). Ends against the middle: Measuring latent traits when opposites respond the same way for antithetical reasons. *Political Analysis*, 31(4), 606–625. <https://doi.org/10.1017/pan.2022.33>. The immigration statements, and the GGUM for survey and roll-call data. Data: Duck-Mayr & Montgomery (2023), replication data, Harvard Dataverse, <https://doi.org/10.7910/DVN/HXORK9> (CC0); the IRW table `duckmayr_2023_immigration` is to follow.
+- Poole, K. T., & Rosenthal, H. (1985). A spatial model for legislative roll call analysis. *American Journal of Political Science*, 29(2), 357–384. <https://doi.org/10.2307/2111172>. NOMINATE: legislators' ideal points from roll calls.
+- Clinton, J., Jackman, S., & Rivers, D. (2004). The statistical analysis of roll call data. *American Political Science Review*, 98(2), 355–370. <https://doi.org/10.1017/S0003055404001194>. Quadratic utility, the resulting item response model, and a Bayesian fit.
 - Duck-Mayr, J., & Montgomery, J. (2020). *bggum: Bayesian estimation of generalized graded unfolding model parameters* [R package]. <https://doi.org/10.32614/CRAN.package.bggum>. The package the authors fit the GGUM with.
 - Andrich, D. (1988). The application of an unfolding model of the PIRT type to the measurement of attitude. *Applied Psychological Measurement*, 12(1), 33–51. <https://doi.org/10.1177/014662168801200105>. The capital-punishment statements and a model for them.
 - Andrich, D., & Luo, G. (1993). A hyperbolic cosine latent trait model for unfolding dichotomous single-stimulus responses. *Applied Psychological Measurement*, 17(3), 253–276. <https://doi.org/10.1177/014662169301700307>. The hyperbolic cosine model.
@@ -433,7 +494,7 @@ ask_claude("unfolding", "It covers unfolding (ideal-point) models for attitude s
 - van Schuur, W. H. (1992). Nonparametric unidimensional unfolding for multicategory data. *Political Analysis*, 4, 41–74. <https://doi.org/10.1093/pan/4.1.41>. MUDFOLD, and unfolding without a parametric curve.
 - Balafas, S. E., Krijnen, W. P., Post, W. J., & Wit, E. C. (2020). mudfold: An R package for nonparametric IRT modelling of unfolding processes. *The R Journal*, 12(1), 49–75. <https://doi.org/10.32614/rj-2020-002>. The `mudfold` package, which distributes both data sets.
 - Drasgow, F., Chernyshenko, O. S., & Stark, S. (2010). 75 years after Likert: Thurstone was right! *Industrial and Organizational Psychology*, 3(4), 465–476. <https://doi.org/10.1111/j.1754-9434.2010.01273.x>. The case for ideal-point models of attitude and personality items.
-- Stark, S., Chernyshenko, O. S., Drasgow, F., & Williams, B. A. (2006). Examining assumptions about item responding in personality assessment: Should ideal point methods be considered for scale development and scoring? *Journal of Applied Psychology*, 91(1), 25–39. <https://doi.org/10.1037/0021-9010.91.1.25>. Dominance and ideal-point models compared on personality items (problem 6).
+- Stark, S., Chernyshenko, O. S., Drasgow, F., & Williams, B. A. (2006). Examining assumptions about item responding in personality assessment: Should ideal point methods be considered for scale development and scoring? *Journal of Applied Psychology*, 91(1), 25–39. <https://doi.org/10.1037/0021-9010.91.1.25>. Dominance and ideal-point models compared on personality items (problem 8).
 - Brown, A. (2016). Item response models for forced-choice questionnaires: A common framework. *Psychometrika*, 81(1), 135–160. <https://doi.org/10.1007/s11336-014-9434-9>. Choice formats under dominance and ideal-point processes.
 - Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package, whose `itemtype` list includes the ideal-point, GGUM and hyperbolic cosine items.
 - Akaike, H. (1974). A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>. The AIC.
@@ -452,10 +513,10 @@ data_sources("unfolding")
 ## For instructors
 
 - **Source:** EDUC 252 class 9 (slides c9, 13–14, "The unfolding model"), problem set 9 (#3, "Dominant or unfolding?") and problem set 2 (#5c, now in [Where CTT breaks](ctt-limits.qmd)); code in `ben-domingue/252`: `ps9/unfold.R`. Slide 14's pointer to Andrich's handbook chapter is Andrich (1997).
-- **Timing:** the core ideas and widgets take about 45 minutes; the analyses work as a 30-minute lab. The real-data code takes under three minutes in local R, most of it the held-out comparison and the GGUM fits.
-- **Changed from 252:** PS9#3 compared the Rasch and ideal-point models on the capital-punishment statements. The main example is now Duck-Mayr and Montgomery's (2023) immigration survey (Ben, 09-25), with the GRM, the GGUM and a mixed model compared in and out of sample; the capital-punishment analysis adds the 2PL (so the dominance model can have negative slopes) and the GGUM. The `GGUM` package doesn't run in the browser, so the GGUM is fitted only in the real-data section, at render time; Simulate uses `mirt`.
+- **Timing:** the core ideas and widgets take about 45 minutes; the analyses work as a 30-minute lab. The real-data code takes about four minutes in local R, most of it the held-out comparison, the GGUM fits and the Senate 2PL (about 40 seconds).
+- **Changed from 252:** PS9#3 compared the Rasch and ideal-point models on the capital-punishment statements. The main example is now Duck-Mayr and Montgomery's (2023) immigration survey (Ben, 09-25), with the GRM, the GGUM and a mixed model compared in and out of sample; the capital-punishment analysis adds the 2PL (so the dominance model can have negative slopes) and the GGUM. The `GGUM` package doesn't run in the browser, so the GGUM is fitted only in the real-data section, at render time; Simulate uses `mirt`. The Senate roll calls are new (Ben, 09-26, after irw PR #2451 built `rollcall_senate`): they show that the political scientists' ideal-point model is a 2PL, and screen for the votes where it isn't.
 - **Interim data:** `duckmayr_2023_immigration` isn't public on the IRW yet. The lesson reads a copy in `lessons/data/` (provenance in `lessons/data/duckmayr_2023_immigration.md`), so the Data sources block doesn't list it and `lessons.yml` doesn't yet name it under `tables:`. Switch to the IRW URL when the landing page is live. Only the immigration battery is used, not the deposit's roll-call or IFE data.
 - **Reuse:** `andrich_mudfold` also appears in [Where CTT breaks](ctt-limits.qmd), where the two middle statements' curves turn over against a score on the other six.
-- **Held back:** multidimensional unfolding; rankings and paired comparisons as unfolding data (`franco_2024_unfolding`, problem 6 only); ideal-point models for personality items (problem 6 only); graded (Likert) unfolding beyond a mention of the GGUM.
-- **Item text:** three immigration statements (IMM_1, IMM_2, IMM_3) are quoted from the survey export in the replication data (CC0), checked word for word; the other seven are summarized. Of the capital-punishment statements only WISHNOTNEC is quoted (as in [Where CTT breaks](ctt-limits.qmd)), in the wording of the `mudfold` package's `ANDRICH` help page, cited to Andrich (1988); it hasn't been checked against the printed article.
-- **Solutions:** held back in `solutions/unfolding.qmd` (not published). Problem 6 is open.
+- **Held back:** multidimensional unfolding; rankings and paired comparisons as unfolding data (`franco_2024_unfolding`, problem 8 only); ideal-point models for personality items (problem 8 only); graded (Likert) unfolding beyond a mention of the GGUM. Roll calls: the House table ([rollcall_house](https://itemresponsewarehouse.org/tables/rollcall_house/)), Congresses before the 118th, dynamic ideal points across Congresses (problem 7 only), NOMINATE itself, and a second dimension (problem 6 only).
+- **Item text:** three immigration statements (IMM_1, IMM_2, IMM_3) are quoted from the survey export in the replication data (CC0), checked word for word; the other seven are summarized. Of the capital-punishment statements only WISHNOTNEC is quoted (as in [Where CTT breaks](ctt-limits.qmd)), in the wording of the `mudfold` package's `ANDRICH` help page, cited to Andrich (1988); it hasn't been checked against the printed article. The Senate vote questions come from the IRW item text, which reproduces the Senate's own records (public domain); the lesson paraphrases them.
+- **Solutions:** held back in `solutions/unfolding.qmd` (not published); problems 6 and 7 (roll calls) have no solutions yet. Problem 8 is open.

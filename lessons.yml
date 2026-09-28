@@ -300,7 +300,7 @@ lessons:
     module: beyond
     prereqs: [polytomous]
     origin: {slides: [c9], ps: ["PS9#3"], code: [ps9/unfold.R]}
-    tables: [andrich_mudfold, eurpar2_mudfold]
+    tables: [andrich_mudfold, eurpar2_mudfold, rollcall_senate]
     reuses: [andrich_mudfold]
     status: draft
     tranche: extension
