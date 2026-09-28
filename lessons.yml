@@ -449,7 +449,7 @@ lessons:
     prereqs: [rasch]
     origin: {slides: [], ps: [], code: []}
     tables: [nba_2012-2018, friedman2019_risk_harm, friedman2019_risk_disaster]
-    status: stub
+    status: draft
     tranche: extension
 
   # 2026-09-25: added by Ben, reviewing g-theory ("we should have an advanced page on
