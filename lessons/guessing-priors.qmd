@@ -17,7 +17,7 @@ lesson_header("guessing-priors")
 //| echo: false
 import {grid, palette} from "./widgets/irt.js"
 import {p4pl} from "./widgets/1pl-to-4pl.js"
-import {se3pl, shareNearFloor, slopePosterior} from "./widgets/guessing-priors.js"
+import {se3pl, shareNearFloor, slopePosterior, guessCurves} from "./widgets/guessing-priors.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 
@@ -162,6 +162,62 @@ The 3PL and the fixed floor both give guessing to items. But a respondent who ha
 
 If guessing belongs to respondents, an item's lower asymptote spreads a few respondents' behaviour over everyone. [Response time and the speed-accuracy tradeoff](response-time.qmd) models times and responses together.
 
+Two models put guessing with respondents without response times. In the **ability-based guessing** model (1PL-AG) of [San Martín, del Pino and De Boeck (2006)](https://doi.org/10.1177/0146621605282773), a respondent who doesn't know the answer guesses right with a probability that rises with ability, as if stronger respondents rule out more options:
+$$\Pr(x_{ij} = 1) = P_{ij} + (1 - P_{ij})\,\frac{\exp(\alpha\theta_j + \gamma_i)}{1 + \exp(\alpha\theta_j + \gamma_i)}, \qquad P_{ij} = \frac{\exp(\theta_j - b_i)}{1 + \exp(\theta_j - b_i)}.$$
+In a **two-class mixture**, each respondent either follows the Rasch model, with probability $\pi$, or answers every item correctly with the chance probability $c$. For a respondent whose class we don't know, and if the classes don't differ in ability, the probability of a correct answer is $\pi P_{ij} + (1 - \pi)c$.
+
+#### Try it: four ways to add guessing
+
+One item with difficulty $b$. The widget sets $\gamma_i$ so that a respondent at $\theta = 0$ who doesn't know the answer guesses right with probability $c$, as under the fixed floor.
+
+```{ojs}
+//| echo: false
+viewof gc_b = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "Item difficulty b"})
+viewof gc_c = Inputs.range([0.05, 0.5], {value: 0.25, step: 0.01, label: "Chance rate c"})
+viewof gc_alpha = Inputs.range([0, 1], {value: 0.5, step: 0.05, label: "1PL-AG: α, how guessing rises with ability"})
+viewof gc_pi = Inputs.range([0.5, 1], {value: 0.85, step: 0.01, label: "Mixture: π, share of engaged respondents"})
+```
+
+```{ojs}
+//| echo: false
+gc = guessCurves({b: gc_b, c: gc_c, alpha: gc_alpha, pi: gc_pi})
+gc_names = ["Rasch", "Fixed floor", "1PL-AG", "Mixture"]
+gc_long = gc.curves.flatMap((d) => [
+  {theta: d.theta, p: d.rasch, model: "Rasch"}, {theta: d.theta, p: d.floor, model: "Fixed floor"},
+  {theta: d.theta, p: d.ag, model: "1PL-AG"}, {theta: d.theta, p: d.mix, model: "Mixture"}])
+Plot.plot({
+  width: 700, height: 340, x: {label: "Ability θ"}, y: {label: "Probability correct", domain: [0, 1]},
+  color: {legend: true, domain: gc_names,
+          range: [palette.guide, palette.main, d3.interpolateRgb(palette.main, palette.contrast)(0.5), palette.contrast]},
+  marks: [
+    Plot.ruleY([gc_c], {stroke: palette.rule}),
+    Plot.ruleY([gc.ceiling], {stroke: palette.contrast, strokeDasharray: "4 3", strokeOpacity: 0.6}),
+    Plot.line(gc_long, {x: "theta", y: "p", stroke: "model", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+gc_lo = gc.at(gc_b - 3)
+gc_hi = gc.at(gc_b + 3)
+md`Three logits below the item: fixed floor **${gc_lo.floor.toFixed(2)}**, 1PL-AG **${gc_lo.ag.toFixed(2)}**, mixture **${gc_lo.mix.toFixed(2)}** (Rasch ${gc_lo.rasch.toFixed(2)}). Three logits above: fixed floor **${gc_hi.floor.toFixed(2)}**, 1PL-AG **${gc_hi.ag.toFixed(2)}**, mixture **${gc_hi.mix.toFixed(2)}** (Rasch ${gc_hi.rasch.toFixed(2)}). The mixture's ceiling (dashed) is π + (1 − π)c = **${gc.ceiling.toFixed(3)}**.`
+```
+
+The curves part company at the two ends. At the bottom, the fixed floor lifts every respondent to $c$, while the mixture lifts them only to $(1 - \pi)c$, 0.04 at the defaults, because only the guessing class guesses. At the top, the mixture never reaches 1: a guesser misses easy items too, so its ceiling is $\pi + (1 - \pi)c$, 0.89 at the defaults. The 1PL-AG has no fixed floor at all: guessing fades for weak respondents and helps strong ones. Set $\alpha$ to 0 and it becomes the fixed floor; set $\pi$ to 1 and the mixture becomes the Rasch model.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Under the two-class mixture, why does a very able respondent's probability of a correct answer stay below 1?",
+  options: [
+    {text: "We don't know their class, and a respondent in the guessing class answers even easy items only at chance", correct: true, why: "The curve averages the two classes: $\\pi$ times a probability near 1, plus $1 - \\pi$ times $c$. Knowing a respondent's class, from their responses or response times, would move them to one curve or the other."},
+    {text: "The mixture adds an upper asymptote to each item, as in the 4PL", correct: false, why: "The ceiling comes from respondents, not items: it is the same for every item, and it is set by $\\pi$ and $c$."},
+    {text: "Able respondents are more likely to guess", correct: false, why: "In this mixture the classes have the same abilities; that is the ability-based guessing model's idea, and there guessing helps able respondents."}
+  ]
+})
+```
+
 ### Priors keep item estimates in bounds
 
 ::: {.callout-tip appearance="simple"}
@@ -290,7 +346,7 @@ Out of sample, the fixed floor beats the Rasch model in all five folds, by an IM
 
 The response times say who those respondents are. Of all responses, 3.1% came in under 0.3 seconds, at an accuracy of 0.51 against 0.81 for the rest. Eleven of the 123 respondents gave more than 10% of their responses that fast; the four with the most gave 40–47%, at overall accuracies of 0.50 to 0.55. On this task, guessing looks more like something a handful of respondents did than something every item invites.
 
-Can the responses alone find those respondents? [Xiao, Ulitzsch, Zhang, Frank and Domingue (2026)](https://doi.org/10.31234/osf.io/7gtwd_v1) study a two-class mixture: each respondent either follows the Rasch model (with probability $\pi$) or answers every item correctly with the chance probability. As $\hat\pi$ approaches 1 it becomes the Rasch model, the "safety valve" of their title. They leave two-option tasks out of scope, since at a chance rate of 0.5 a guessing class is hard to tell from engaged respondents on hard items. The code below fits it anyway, from responses alone.
+Can the responses alone find those respondents? [Xiao, Ulitzsch, Zhang, Frank and Domingue (2026)](https://doi.org/10.31234/osf.io/7gtwd_v1) study the two-class mixture of *Guessing may belong to respondents*. As $\hat\pi$ approaches 1 it becomes the Rasch model, the "safety valve" of their title. They leave two-option tasks out of scope, since at a chance rate of 0.5 a guessing class is hard to tell from engaged respondents on hard items. The code below fits it anyway, from responses alone.
 
 ```{r mixture-roar}
 #| echo: true
