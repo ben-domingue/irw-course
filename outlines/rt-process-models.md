@@ -2,7 +2,7 @@
 
 # Process models for response time: drift diffusion and race models (`rt-process-models`)
 
-Module: beyond · Prereqs: response-time, 1pl-to-4pl · Extension · Status: outline
+Module: beyond · Prereqs: response-time, 1pl-to-4pl · Extension · Status: draft
 
 ## Core ideas
 
@@ -67,3 +67,16 @@ Table citations come from IRW biblio. Before drafting, read `motion`'s processin
 ## Open questions
 
 - The verdict above restates Ben's slide-55 view as a choice for the practitioner. *Default:* use it unless you'd put it differently.
+
+## Drafted (2026-09-25, #65)
+
+What changed from this outline when the lesson was drafted:
+
+- **Notation:** boundary separation is written $\alpha$ (the literature's $a$), keeping $a$ for the item slope; $s = 1$ throughout, with the $s = 0.1$ convention noted (source: `rtdists` documentation). EZ numbers are therefore 10× the outline's ($v$ 1.98, $\alpha$ 1.13 for the lexical median).
+- **Trimming:** responses under 0.3 s (at chance in both speeded tables) and the slowest 1% of each table set aside. Recomputed: lexical r(v, θ) = 0.82, r(α, θ) = 0.50, r(α, speed) = −0.71, r(θ, speed) = −0.19; errors 0.633 vs correct 0.639 s. Motion: drift 0.28 → 1.12 (6–48%), 0.85 at 100%; boundary 2.52 → 2.39; errors slower within child × level by 0.13–0.34 s. Licensure: median $T_{er}$ 12.8 s, negative for 6.7%, 5 respondents undefined at 0.5.
+- **`motion` item codes:** the item is "<block> <coherence>", block 1–6 first, coherence (6/12/24/48/100) second; each item seen 10 times (`trialnum`), so 60 trials per coherence level (processing script `data/motion_discrimination.R`; verify script `itemtext/itemtables/batch_110/verify_motion.R`). The outline's "second index (1–6)" was the first index.
+- **Software:** `rtdists` is in the webR repo, but `rdiffusion` with a drift per respondent–item pair ran > 2 min locally for 20,000 trials; the Simulate cell and the widgets use a plain random walk (base R / JS). Simulate uses the logit of proportion correct instead of `glmer`, so the page loads nothing.
+- **Simulate:** drift variability's effect on EZ is shown by `eta <- 1` in Simulate (EZ drift 1.18 vs true 1.47).
+- **F12 (problem 2):** the word/nonword flag comes from the original OSF deposit (`Experiment1.data`, osf.io/za9y8, CC BY 4.0, `column_7_value`), not the IRW item-text snapshot, which needs a Redivis login. All 4,588 strings match with one flag each.
+- **Sanity table `rr98_accuracy`** (not in the lesson): EZ drift by distance from the middle brightness rises 0.08 → 2.9 ($s = 1$); boundary is not flat under EZ per cell (1.76 → 0.60), unlike the outline's note.
+- Quick checks: 3; predict-then-check: which EZ parameter tracks the glmer ability. Widgets: 4 (random walk, drift vs boundary, 2PL inside the walk, slow errors). Go deeper: 2 (EZ equations; walk → 2PL).
