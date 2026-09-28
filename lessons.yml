@@ -322,7 +322,7 @@ lessons:
     origin: {slides: [c9], ps: ["PS9#1"], code: [ps9/sat.R]}
     tables: [credentialform_lnirt, roar_lexical, rapm_poulton_2022_timed, rapm_poulton_2022_untimed]
     reuses: [roar_lexical]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: trials

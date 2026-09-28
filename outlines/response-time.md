@@ -2,12 +2,12 @@
 
 # Response time and the speed–accuracy tradeoff (`response-time`)
 
-Module: beyond · Prereqs: explanatory-irt · Extension · Status: outline
+Module: beyond · Prereqs: explanatory-irt · Extension · Status: draft
 
 ## Core ideas
 
-1. **Response time is data, and it is skewed.** Model log time: $\log t_{ij} = \beta_i - \tau_j + \varepsilon_{ij}$ (item time intensity $\beta_i$, person speed $\tau_j$), a crossed random-effects model like those in `explanatory-irt`. *(major)* Sources: van der Linden (2006), doi:10.3102/10769986031002181; Thissen (1983), doi:10.1016/b978-0-12-742780-5.50019-6.
-2. **The hierarchical model, and what it assumes.** An IRT model for accuracy, the lognormal model for time, and a second level correlating θ with τ (and b with β). It buys better estimates and the speed–ability correlation, *if* two assumptions hold: each respondent works at one constant speed, and given θ and τ, speed and accuracy are conditionally independent. The lesson asks whether they hold and lets the tables answer (ideas 4 and 5). *(major)* Sources: van der Linden (2007), doi:10.1007/s11336-006-1478-z; Klein Entink, Fox & van der Linden (2009), doi:10.1007/s11336-008-9075-y; `LNIRT`: Fox, Klotzke & Simsek (2023), doi:10.7717/peerj-cs.1232; De Boeck & Jeon (2019), doi:10.3389/fpsyg.2019.00102.
+1. **Response time is data, and it is skewed.** Model log time: $\log t_{ij} = \kappa_i - \tau_j + \varepsilon_{ij}$ (item time intensity $\kappa_i$, person speed $\tau_j$), a crossed random-effects model like those in `explanatory-irt`. *(major)* Sources: van der Linden (2006), doi:10.3102/10769986031002181; Thissen (1983), doi:10.1016/b978-0-12-742780-5.50019-6.
+2. **The hierarchical model, and what it assumes.** An IRT model for accuracy, the lognormal model for time, and a second level correlating θ with τ (and b with κ). It buys better estimates and the speed–ability correlation, *if* two assumptions hold: each respondent works at one constant speed, and given θ and τ, speed and accuracy are conditionally independent. The lesson asks whether they hold and lets the tables answer (ideas 4 and 5). *(major)* Sources: van der Linden (2007), doi:10.1007/s11336-006-1478-z; Klein Entink, Fox & van der Linden (2009), doi:10.1007/s11336-008-9075-y; `LNIRT`: Fox, Klotzke & Simsek (2023), doi:10.7717/peerj-cs.1232; De Boeck & Jeon (2019), doi:10.3389/fpsyg.2019.00102.
 3. **The speed–accuracy tradeoff is a within-person claim.** Forced to go faster, a person gets less accurate. That says nothing about whether fast *people* are more able; the between-person correlation can take either sign. *(major)* Sources: Heitz (2014), doi:10.3389/fnins.2014.00150; Goldhammer et al. (2014), doi:10.1037/a0034716.
 4. **Does conditional independence hold? The conditional accuracy function.** Remove person and item effects, then ask how an unusually slow response relates to accuracy. Under the model the answer is "not at all"; across the tables the curve rises, falls or is an inverted U. *(major)* Sources: Bolsinova, De Boeck & Tijmstra (2017), doi:10.1007/s11336-016-9537-6; Domingue et al. (2022), doi:10.3102/10769986221099906.
 5. **Is speed constant? Speed changes over a test.** Response acceleration in an adaptive test: a response 10 positions later takes about 88% as long (slides 30–33); very fast responses at chance are rapid guesses. Sources: Domingue, Kanopka, Stenhaug, Soland, Kuhfeld & Wise (2021), doi:10.1111/jedm.12291; Wise & Kong (2005), doi:10.1207/s15324818ame1802_2.
@@ -34,14 +34,14 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 
 | Table | Job | What it should turn up | Also used in |
 |---|---|---|---|
-| `credentialform_lnirt` | main example | Licensure exam (Cizek & Wollack, 2016, from IRW biblio): 1,636 respondents, median 54 s per item. More able respondents are faster (θ–speed r = 0.30); harder items take longer (b–β r = 0.51); log-time variance mostly within person (0.25 vs. person 0.03, item 0.11). Slower than expected goes with lower accuracy: 0.83 in the fastest residual decile, 0.56 in the slowest. | — |
+| `credentialform_lnirt` | main example | Licensure exam (Cizek & Wollack, 2016, from IRW biblio): 1,636 respondents, median 54 s per item. More able respondents are faster (θ–speed r = 0.30); harder items take longer (b–κ r = 0.51); log-time variance mostly within person (0.25 vs. person 0.03, item 0.11). Slower than expected goes with lower accuracy: 0.83 in the fastest residual decile, 0.56 in the slowest. | — |
 | `roar_lexical` | contrast | Lexical decision, median 0.85 s. θ–speed r = −0.09; the within-person curve is an inverted U (0.63, 0.86, 0.70), its fast end the rapid guessing restated from `guessing-priors`. | `guessing-priors` (recorded under `reuses:`) |
 | `rapm_poulton_2022_timed` + `_untimed` | contrast (forced speed; one job, two tables, agreed by Ben 09-24) | Raven's APM, 12 items. Timed (60 s/item, 479 people): 11% hit the limit, at 0.29 accuracy; able people are *slower* (r = −0.36). Untimed (567): accuracy 0.65 vs. 0.55; hard items lose most (item 10: 0.45 → 0.25). | — |
 | `rr98_accuracy` | sanity | Errors slower than correct (0.65 vs. 0.56 s), as published. | `irw-data`, `trials` |
 
 **The finding:** the speed–ability correlation has no fixed sign (+0.30, −0.09, −0.36) and the within-person curve no fixed shape. On the licensure exam and in lexical decision, an unusually slow response predicts accuracy, in different shapes, so conditional independence doesn't hold there (idea 4). The constant-speed check on these tables (log time by item position, e.g. in `credentialform_lnirt`) is to be computed when drafting; until then idea 5 rests on the cited acceleration result.
 
-**Deep dive #24 (Across the IRW).** `irw_filter(var = "rt", n_categories = 2, n_participants = c(150, Inf))`, 20 tables today (150 for stable crossed random effects; dichotomous for one accuracy model). Per table: θ–speed and b–β correlations, and the IMV gain from centred log RT. The vignette reports median gains of 0.0054 (78% positive) and 0.0091 (94%). Pilot: `chess_lnirt`, `credentialform_lnirt`. Vignette: <https://itemresponsewarehouse.org/vignettes/rt_imv.html>.
+**Deep dive #24 (Across the IRW).** `irw_filter(var = "rt", n_categories = 2, n_participants = c(150, Inf))`, 20 tables today (150 for stable crossed random effects; dichotomous for one accuracy model). Per table: θ–speed and b–κ correlations, and the IMV gain from centred log RT. The vignette reports median gains of 0.0054 (78% positive) and 0.0091 (94%). Pilot: `chess_lnirt`, `credentialform_lnirt`. Vignette: <https://itemresponsewarehouse.org/vignettes/rt_imv.html>.
 
 ## Widget / simulation / problem ideas
 
@@ -56,7 +56,7 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 **Simulate:** generate from the hierarchical model with conditional independence; fit accuracy (`glmer`) and log time (`lmer`); recover ρ; the within-person slope is near zero, as it should be. Then add a within-person SAT and watch it appear. 200 × 20, seconds.
 
 **Problems**
-1. Derivation: under the lognormal model the median time is $\exp(\beta_i - \tau_j)$ and the mean is larger by $\exp(\sigma^2/2)$. Why report medians?
+1. Derivation: under the lognormal model the median time is $\exp(\kappa_i - \tau_j)$ and the mean is larger by $\exp(\sigma^2/2)$. Why report medians?
 2. Real data with a twist (PS9#1): `resp ~ lrt + (1|item) + (1|id)` on `roar_lexical`, then with log time centred within person and item. Which slope answers the SAT question?
 3. Real data: the 46 flagged licensure respondents barely differ on means (0.71 vs. 0.72). What would preknowledge leave that means can't show?
 4. Judgment: should a program report a speed score beside ability? Use the three tables.
@@ -70,3 +70,17 @@ Articles checked on Crossref (09-24); Thissen (1983) is a chapter whose Crossref
 ## Open questions
 
 - The verdict above (when to model response time) is proposed for the lesson in place of the slide-29 aside, per E8b. *Default:* use it unless you'd put it differently.
+
+## Drafted (09-25, #53)
+
+What the draft does differently from this outline, and why:
+
+- **Numbers recomputed.** Licensure: 105 responses at 0 s are set aside (109 counted the pilot items); median 54 s, accuracy 0.73; variance shares 65% residual, 28% item, 7% person; θ–speed r = 0.30, b–κ r = 0.48 (not 0.51); deciles 0.83 → 0.56, slope −1.03. Lexical: deciles 0.63 / 0.86 (middle) / 0.70, linear slope 0.09. Raven's: the timed curve rises over the fastest deciles and then falls (0.49, 0.68, …, 0.39; slope −0.64), not a plain fall; untimed is nearly flat (slope −0.04) apart from its fastest decile (0.52 against 0.68). Untimed has 608 respondents at wave 1 (the outline's 567 may have dropped the 41 with missing times). θ–speed untimed −0.45.
+- **The finding** is "conditional independence fails in all four tables, in different shapes, least in the untimed Raven's" (the untimed fast dip is a departure too).
+- **Constant speed.** None of the four tables records presentation order, so idea 5 rests on the cited acceleration result (verified in the preprint, osf.io/r54ec) plus a weaker check the tables allow: one speed across item halves (licensure, r = 1 to two decimals) and across real and made-up words (lexical, 0.98).
+- **Correlations** are of estimates from separate `lmer`/`glmer` fits; a Recall of Spearman's attenuation (ctt-reliability, problem 2) says why they understate ρ. Not in the lesson: `LNIRT` joint fits give ρ = 0.40 (licensure) and −0.53 (timed Raven's), same signs.
+- **Verdict** as proposed, with the IMV numbers verified from the vignette (0.0054, 78%; 0.0091, 94%; 18 tables). The pilot deep dive finds a larger IMV on the licensure exam (0.020), so the lesson says the verdict is about the typical table.
+- **Go deeper** reframed as "what the pooled slope estimates under the hierarchical model" (the covariance decomposition; within-person slope zero; ρ not causal).
+- **rr98_accuracy** is not reloaded: the aggregation point is a Recall of `irw-data`'s numbers, extended to the person and item levels.
+- **Problem 3** states no numbers (the flagged/unflagged means are in the solutions).
+- **Deep dive #24:** pilot on `credentialform_lnirt`, `chess_lnirt` + 2 random (`himmelstein-impossible_question-2025`, `knight_2026_crt`). Per table: θ–speed and b–κ correlations, deciles, within slope, linear and spline IMV (5 folds, log time centred within item, as the vignette).
