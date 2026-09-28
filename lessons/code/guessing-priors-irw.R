@@ -114,38 +114,121 @@ c(respondents = nrow(by_id), with_any_fast = sum(by_id$share_fast > 0),
 round(head(by_id[order(-by_id$share_fast), ], 6), 2)
 round(cor(by_id$share_fast, by_id$accuracy, method = "spearman"), 2)
 
+## ---- mixture-roar
+# Guessing as a property of respondents: a two-class mixture (Xiao et al., 2026).
+# Engaged respondents follow the Rasch model, theta ~ normal(0, sd^2); guessing
+# respondents answer every item correctly with probability g = 0.5. pi is the
+# share of engaged respondents. mirt has no ready-made version, so we fit it by EM
+# on a grid of abilities: the E step gives each respondent's posterior over
+# (class, ability); the M step updates the difficulties (Newton steps), the SD
+# and pi. Takes a few seconds.
+fit_mixture <- function(X, g = 0.5, Q = 41, maxit = 1000, tol = 1e-6) {
+  pl <- function(x) pmin(pmax(plogis(x), 1e-10), 1 - 1e-10)
+  z <- seq(-5, 5, length.out = Q); wz <- dnorm(z) / sum(dnorm(z))
+  b <- -qlogis(pmin(pmax(colMeans(X), 0.01), 0.99)); s <- 1; pi <- 0.9
+  ll_guess <- rowSums(X) * log(g) + rowSums(1 - X) * log(1 - g)
+  old <- -Inf
+  for (it in 1:maxit) {
+    P <- pl(outer(s * z, b, "-"))                                    # nodes x items
+    a <- X %*% t(log(P)) + (1 - X) %*% t(log(1 - P)) + rep(log(wz), each = nrow(X))
+    m <- apply(a, 1, max); ll_engaged <- m + log(rowSums(exp(a - m)))
+    both <- cbind(log(pi) + ll_engaged, log(1 - pi) + ll_guess)
+    mm <- apply(both, 1, max); ll_i <- mm + log(rowSums(exp(both - mm)))
+    ll <- sum(ll_i)
+    p_engaged <- exp(log(pi) + ll_engaged - ll_i)
+    W <- exp(a - ll_engaged) * p_engaged                            # respondents x nodes
+    nq <- colSums(W); r <- t(W) %*% X
+    pi <- mean(p_engaged)
+    for (k in 1:5) {
+      P <- pl(outer(s * z, b, "-"))
+      step <- colSums(nq * P - r) / colSums(nq * P * (1 - P))
+      b <- b + pmax(pmin(step, 1), -1)
+    }
+    s <- exp(optimize(function(ls) {
+      P <- pl(outer(exp(ls) * z, b, "-")); -sum(r * log(P) + (nq - r) * log(1 - P))
+    }, c(-2, 1.5))$minimum)
+    if (abs(ll - old) < tol) break
+    old <- ll
+  }
+  list(b = b, sd = s, pi = pi, loglik = ll, p_guess = 1 - p_engaged)
+}
+mix <- fit_mixture(X)
+data.frame(pi_hat = round(mix$pi, 2), loglik_mixture = round(mix$loglik),
+           gain_over_rasch = round(mix$loglik - extract.mirt(rasch, "logLik")),
+           gain_fixed_floor = round(extract.mirt(fixed, "logLik") - extract.mirt(rasch, "logLik")))
+# Who lands in the guessing class? Compare with the rapid responders found above.
+guesser <- mix$p_guess > 0.5
+high_rapid <- by_id[rownames(X), "share_fast"] > 0.1
+table(over_10pct_rapid = high_rapid, guessing_class = guesser)
+round(range(rowMeans(X)[guesser]), 2)   # accuracy of the guessing class
+
 ## ---- fetch-viqt
 viqt_url <- "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v60_0.vocabulary_iq/rows?format=csv"
 viqt <- read.csv(viqt_url)
 # Items 1-45 are the vocabulary questions (pick the two words of five that mean
 # the same). Items 46-75 are an optional personality survey bundled into the same
-# table, which we drop. resp is 1 for the correct pair and 0 for a wrong pair or no
-# answer; choosing "don't know" is missing. No waves.
+# table, which we drop. resp is 1 for the correct pair and 0 otherwise; choosing
+# "don't know" is missing. No waves.
 viqt <- viqt[viqt$item <= 45, ]
 round(c(correct = mean(viqt$resp == 1, na.rm = TRUE), dont_know = mean(is.na(viqt$resp))), 3)
 resp_all <- long2wide(viqt)
 resp_all <- resp_all[, order(as.numeric(colnames(resp_all)))]
 names(resp_all) <- paste0("Q", names(resp_all))
-# We keep the respondents who never chose "don't know", so every response is an answer.
-resp_viqt <- resp_all[complete.cases(resp_all), ]
-c(respondents = nrow(resp_all), answered_every_item = nrow(resp_viqt))
+# We keep the respondents who never chose "don't know", so every response is scored.
+resp_cc <- resp_all[complete.cases(resp_all), ]
+c(respondents = nrow(resp_all), never_dont_know = nrow(resp_cc))
+# Sum scores at the bottom. A random pair is right 1 time in 10, so random answers
+# to all 45 items would score about 4.5.
+score <- rowSums(resp_cc)
+table(score)[as.character(0:6)]
+# The source file codes a question left unanswered as 0, apart from "don't know"
+# (-1); the IRW table scores 0 as a wrong pair. How many of the low scorers left
+# questions blank? The IRW id is the row number in the source file.
+zipf <- tempfile(fileext = ".zip")
+download.file("http://openpsychometrics.org/_rawdata/VIQT_data.zip", zipf, quiet = TRUE, mode = "wb")
+raw <- read.delim(unz(zipf, "VIQT_data/VIQT_data.csv"))
+blanks <- rowSums(raw[as.numeric(rownames(resp_cc)), paste0("Q", 1:45)] == 0)
+c(score_0 = sum(score == 0), score_0_all_blank = sum(score == 0 & blanks == 45),
+  score_1_to_4 = sum(score >= 1 & score <= 4), score_4_or_less_any_blank = sum(score <= 4 & blanks > 0))
+# A score of 0 on 45 answered items
+# is very unlikely (0.9^45 = 0.009 for a respondent choosing pairs at random), so
+# these low scores mostly record blanks. We set aside everyone scoring 4 or less.
+resp_viqt <- resp_cc[score > 4, ]
+c(set_aside = sum(score <= 4), kept = nrow(resp_viqt))
 round(quantile(colMeans(resp_viqt), c(0, 0.25, 0.5, 0.75, 1)), 2)   # proportion correct by item
 
 ## ---- full-viqt
-# The 3PL on all 2,802, as a reference, without priors and with them. Priors in
-# mirt's syntax: log a ~ normal(0, 1), and c ~ beta(2, 18), with mean 0.1 (ten
-# possible pairs, so chance is one in ten) and worth about 20 responses.
+# The 3PL on everyone kept, as a reference, without priors and with them; and,
+# for comparison, without priors on the sample that still includes the low scorers.
+# Priors in mirt's syntax: log a ~ normal(0, 1), and c ~ beta(2, 18). mirt stores
+# c (its g) on the logit scale, and "expbeta" puts the beta prior on plogis() of
+# that value, the probability. mirt maximizes the posterior, so with little
+# information c settles near the prior's mode, (2 - 1)/(2 + 18 - 2) = 0.056
+# (its mean is 0.1, the chance rate).
 ni <- ncol(resp_viqt)
 spec <- mirt.model(paste0("F = 1-", ni, "\n",
   "PRIOR = (1-", ni, ", a1, lnorm, 0, 1), (1-", ni, ", g, expbeta, 2, 18)"))
 set.seed(252)
 ref <- mirt(resp_viqt, 1, itemtype = "3PL", verbose = FALSE, technical = list(NCYCLES = 5000))
 ref_prior <- mirt(resp_viqt, spec, itemtype = "3PL", verbose = FALSE, technical = list(NCYCLES = 5000))
+ref_with_low <- mirt(resp_cc, 1, itemtype = "3PL", verbose = FALSE, technical = list(NCYCLES = 5000))
 cf_ref <- coef(ref, simplify = TRUE, IRTpars = TRUE)$items         # a, b, g (our c)
 cf_ref_prior <- coef(ref_prior, simplify = TRUE, IRTpars = TRUE)$items
-round(rbind(c_no_prior = quantile(cf_ref[, "g"], c(0, 0.5, 1)),
+cf_with_low <- coef(ref_with_low, simplify = TRUE, IRTpars = TRUE)$items
+round(rbind(c_with_low_scorers = quantile(cf_with_low[, "g"], c(0, 0.5, 1)),
+            c_no_prior = quantile(cf_ref[, "g"], c(0, 0.5, 1)),
             c_with_prior = quantile(cf_ref_prior[, "g"], c(0, 0.5, 1)),
+            a_with_low_scorers = quantile(cf_with_low[, "a"], c(0, 0.5, 1)),
             a_no_prior = quantile(cf_ref[, "a"], c(0, 0.5, 1))), 3)
+
+## ---- beta-viqt
+# A trap: "beta" in place of "expbeta" puts the beta prior on the logit of c
+# itself. Logits below 0 have zero prior density, so every logit is pushed into
+# (0, 1) and every c to at least 0.5.
+spec_beta <- mirt.model(paste0("F = 1-", ni, "\n",
+  "PRIOR = (1-", ni, ", a1, lnorm, 0, 1), (1-", ni, ", g, beta, 2, 18)"))
+wrong <- mirt(resp_viqt, spec_beta, itemtype = "3PL", verbose = FALSE, technical = list(NCYCLES = 5000))
+round(quantile(coef(wrong, simplify = TRUE, IRTpars = TRUE)$items[, "g"], c(0, 0.5, 1)), 3)
 
 ## ---- sub-viqt
 # Now pretend we had only 300 respondents. Fit the 3PL to a random 300, without
@@ -153,7 +236,11 @@ round(rbind(c_no_prior = quantile(cf_ref[, "g"], c(0, 0.5, 1)),
 rmse <- function(x, y) sqrt(mean((x - y)^2))
 compare <- function(seed) {
   set.seed(seed)
-  sub <- resp_viqt[sample(nrow(resp_viqt), 300), ]
+  # Redraw if some item has no wrong answers in the subsample (it can't be fitted).
+  repeat {
+    sub <- resp_viqt[sample(nrow(resp_viqt), 300), ]
+    if (all(colMeans(sub) < 1)) break
+  }
   # Without priors, EM may still be crawling after 2,000 cycles (a warning says
   # so); that slow drift of slopes toward large values is part of the finding.
   none <- coef(mirt(sub, 1, itemtype = "3PL", verbose = FALSE, technical = list(NCYCLES = 2000)),
@@ -170,7 +257,7 @@ one <- compare(1)
 round(one$summary, 2)
 plot(cf_ref[, "a"], one$none[, "a"], pch = 19, col = "#c2410c", log = "xy",
      ylim = range(c(one$none[, "a"], one$prior[, "a"])),
-     xlab = "Slope from all 2,802 respondents", ylab = "Slope from 300")
+     xlab = "Slope from the full sample", ylab = "Slope from 300")
 points(cf_ref[, "a"], one$prior[, "a"], pch = 19, col = "#2780e3")
 abline(0, 1, lty = 2)
 legend("topleft", c("No priors", "Priors"), pch = 19, col = c("#c2410c", "#2780e3"), bty = "n")
