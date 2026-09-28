@@ -242,6 +242,10 @@ Plot.plot({
 md`Everyone: **${sel[0].r.toFixed(3)}**. Upper half split on true ability: **${sel[1].r.toFixed(3)}**. Upper half split on the sum score: **${sel[3].r.toFixed(3)}**.`
 ```
 
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): reliability is a property of scores in a population, the share of observed-score variance that is true-score variance.
+:::
+
 Splitting on true ability lowers the correlations, because each half has a narrower range of $\theta$ (the previous section). Splitting on the sum score lowers them further, to about zero at the defaults. With four or five items it pushes them well below zero, since a fixed sum spread over a few items forces a trade-off between them. Raise the slope and every correlation rises, but the sum-score halves stay below the ability halves at every setting.
 
 What about the Rasch model? There the sum score is sufficient, and conditional maximum likelihood estimates the difficulties from the responses *given* the sum score. Selecting respondents by that sum score leaves the conditional likelihood unchanged.

@@ -15,8 +15,7 @@ lesson_header("guessing-priors")
 
 ```{ojs}
 //| echo: false
-import {grid, palette} from "./widgets/irt.js"
-import {p4pl} from "./widgets/1pl-to-4pl.js"
+import {grid, palette, p4pl} from "./widgets/irt.js"
 import {se3pl, shareNearFloor, slopePosterior, guessCurves} from "./widgets/guessing-priors.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```

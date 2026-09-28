@@ -218,3 +218,72 @@ export function logisticFit(x, y, n = null) {
   }
   return {b0, b1};
 }
+
+// Shared by several lessons (moved here from 1pl-to-4pl.js and dif.js).
+
+// Four-parameter logistic curve: lower asymptote c, upper asymptote u. With c = 0
+// and u = 1 it is the 2PL; with a = 1 as well, the Rasch model.
+export const p4pl = (theta, b, a = 1, c = 0, u = 1) => c + (u - c) * logistic(a * (theta - b));
+
+// The 2PL curve closest to a target curve f(theta), by weighted least squares over
+// the points thetas with weights w (e.g. a normal density: where respondents are).
+// Grid search over slope a in [aLo, aHi] and difficulty b in [bLo, bHi], then a
+// finer search around the best point. Returns {a, b, maxDiff}, where maxDiff is the
+// largest |difference| in probability over the thetas whose weight is at least
+// 14.6% of the peak: for normal weights, the middle 95% of respondents.
+export function closest2pl(f, thetas, w, aLo = 0.2, aHi = 4, bLo = -5, bHi = 5) {
+  const target = thetas.map(f);
+  const loss = (a, b) => {
+    let s = 0;
+    for (let k = 0; k < thetas.length; k++) s += w[k] * (p2pl(thetas[k], b, a) - target[k]) ** 2;
+    return s;
+  };
+  let best = {a: 1, b: 0, l: Infinity};
+  for (const a of grid(aLo, aHi, 60)) for (const b of grid(bLo, bHi, 80)) {
+    const l = loss(a, b);
+    if (l < best.l) best = {a, b, l};
+  }
+  const da = (aHi - aLo) / 59, db = (bHi - bLo) / 79;
+  for (const a of grid(Math.max(aLo, best.a - da), best.a + da, 41))
+    for (const b of grid(best.b - db, best.b + db, 41)) {
+      const l = loss(a, b);
+      if (l < best.l) best = {a, b, l};
+    }
+  const wmax = Math.max(...w);
+  let maxDiff = 0;
+  for (let k = 0; k < thetas.length; k++)
+    if (w[k] >= 0.146 * wmax) maxDiff = Math.max(maxDiff, Math.abs(p2pl(thetas[k], best.b, best.a) - target[k]));
+  return {a: best.a, b: best.b, maxDiff};
+}
+
+// Row sums over the columns in cols (all columns by default).
+export function scores(X, cols = null) {
+  return X.map(row => (cols ? cols.reduce((s, i) => s + row[i], 0) : row.reduce((s, v) => s + v, 0)));
+}
+
+// Mantel-Haenszel for one item: y the item's responses, g the groups (1 = focal),
+// s the matching scores. Returns delta = -2.35 ln(alpha_MH) (negative: harder for the
+// focal group at the same score), its standard error (Robins-Breslow-Greenland) and
+// the continuity-corrected chi-square p-value.
+export function mhItem(y, g, s) {
+  const K = Math.max(...s) + 1;
+  const A = Array(K).fill(0), B = Array(K).fill(0), C = Array(K).fill(0), D = Array(K).fill(0);
+  for (let j = 0; j < y.length; j++) {
+    const k = s[j];
+    if (g[j] === 0) { if (y[j]) A[k]++; else B[k]++; } else { if (y[j]) C[k]++; else D[k]++; }
+  }
+  let sR = 0, sS = 0, sPR = 0, sPSQR = 0, sQS = 0, sA = 0, sE = 0, sV = 0;
+  for (let k = 0; k < K; k++) {
+    const n = A[k] + B[k] + C[k] + D[k];
+    if (n < 2) continue;
+    const R = A[k] * D[k] / n, S = B[k] * C[k] / n, P = (A[k] + D[k]) / n, Q = (B[k] + C[k]) / n;
+    sR += R; sS += S; sPR += P * R; sPSQR += P * S + Q * R; sQS += Q * S;
+    const nR = A[k] + B[k], nF = C[k] + D[k], m1 = A[k] + C[k], m0 = B[k] + D[k];
+    sA += A[k]; sE += nR * m1 / n; sV += nR * nF * m1 * m0 / (n * n * (n - 1));
+  }
+  const alpha = sR / sS;
+  const varLog = sPR / (2 * sR * sR) + sPSQR / (2 * sR * sS) + sQS / (2 * sS * sS);
+  const chisq = Math.max(0, Math.abs(sA - sE) - 0.5) ** 2 / sV;
+  const p = 2 * (1 - pnorm(Math.sqrt(chisq)));
+  return {delta: -2.35 * Math.log(alpha), se: 2.35 * Math.sqrt(varLog), p};
+}

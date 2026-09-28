@@ -15,8 +15,8 @@ lesson_header("1pl-to-4pl")
 
 ```{ojs}
 //| echo: false
-import {p2pl, grid, dnorm, patternsWithSum, palette} from "./widgets/irt.js"
-import {p4pl, mle4, closest2pl} from "./widgets/1pl-to-4pl.js"
+import {p2pl, grid, dnorm, patternsWithSum, palette, p4pl, closest2pl} from "./widgets/irt.js"
+import {mle4} from "./widgets/1pl-to-4pl.js"
 import {quiz, predict} from "./widgets/quiz.js"
 ```
 

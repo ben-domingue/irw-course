@@ -138,6 +138,10 @@ The bound also explains the **reliability paradox** that [Classical test theory 
 
 Criterion evidence can be **incremental**: does the new score predict beyond what we already have ([Sechrest, 1963](https://doi.org/10.1177/001316446302300113))? That is the change in $R^2$ when it joins a regression.
 
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): reliability is a property of scores in a population, the share of observed-score variance that is true-score variance.
+:::
+
 What if the sample was selected on the predictor? A college sees grades only for the students it admitted, partly for their test scores. In that narrower group scores vary less and the correlation shrinks (comment to Standard 1.21, [AERA, APA & NCME, 2014, p. 29](https://www.testingstandards.net/open-access-files.html)).
 
 #### Try it: selecting on the predictor
