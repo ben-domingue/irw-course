@@ -14,17 +14,22 @@ options(digits = 7)  # R's default, in case a .Rprofile changes it
 # and difficulties b, and each respondent's maximum-likelihood theta.
 # l_0 - E(l_0) is the sum over items of (x - P) * w, with w = log(P / (1 - P)).
 # l_z* replaces w by its residual after taking out the part along the slopes
-# (the direction the ML score equation has already set to zero).
+# (the direction the ML score equation has already set to zero). Outfit - 1 is
+# also a weighted sum of residuals, with w = (1 - 2P) / (P (1 - P)), since for 0/1
+# responses (x - P)^2 = P (1 - P) + (1 - 2P) (x - P); zout and zout_star are its
+# standardized and corrected versions (positive = underfit).
 lz_stats <- function(X, a, b, theta) {
   P <- plogis(sweep(outer(theta, b, "-"), 2, a, "*"))
   Q <- 1 - P
-  w <- log(P / Q)
   A <- matrix(a, nrow(X), length(a), byrow = TRUE)
-  lz <- rowSums((X - P) * w) / sqrt(rowSums(P * Q * w^2))
-  cn <- rowSums(P * Q * w * A) / rowSums(P * Q * A^2)
-  wt <- w - cn * A
-  lzstar <- rowSums((X - P) * wt) / sqrt(rowSums(P * Q * wt^2))
-  data.frame(lz = lz, lzstar = lzstar)
+  wsum <- function(w) {
+    cn <- rowSums(P * Q * w * A) / rowSums(P * Q * A^2)
+    wt <- w - cn * A
+    num <- rowSums((X - P) * w)
+    cbind(num / sqrt(rowSums(P * Q * w^2)), num / sqrt(rowSums(P * Q * wt^2)))
+  }
+  L <- wsum(log(P / Q)); O <- wsum((1 - 2 * P) / (P * Q))
+  data.frame(lz = L[, 1], lzstar = L[, 2], zout = O[, 1], zout_star = O[, 2])
 }
 
 # Normalized Guttman errors G*: order the items from easiest to hardest by
@@ -35,6 +40,21 @@ gstar <- function(X) {
   n <- ncol(X); r <- rowSums(X)
   errors <- apply(X, 1, function(x) sum(x * c(0, head(cumsum(1 - x), -1))))
   errors / (r * (n - r))
+}
+
+# Sijtsma's H^T: Loevinger's H with respondents in place of items. For each
+# respondent, the covariance over items between their responses and everyone
+# else's summed responses, over the most it could be given the respondents'
+# proportions correct p: the sum over the others of min(p_n, p_m) - p_n p_m.
+# For rows that are neither all 0 nor all 1.
+ht <- function(X) {
+  p <- rowMeans(X)
+  others <- sweep(-X, 2, colSums(X), "+")
+  num <- rowMeans((X - p) * (others - rowMeans(others)))
+  ps <- sort(p)
+  below <- findInterval(p, ps, left.open = TRUE)   # respondents with a lower p
+  sum_min <- c(0, cumsum(ps))[below + 1] + p * (length(p) - below - 1)
+  num / (sum_min - p * (sum(p) - p))
 }
 
 # Fit a 2PL, score every respondent with a sum score strictly between 0 and n by
@@ -50,7 +70,7 @@ person_fit <- function(X) {
   list(model = m, ip = ip, ok = ok,
        res = data.frame(r = rowSums(X)[ok], theta = th[ok], s,
                         outfit = pf$outfit[ok], infit = pf$infit[ok], zh = pf$Zh[ok],
-                        G = gstar(X)[ok]))
+                        G = gstar(X[ok, ]), Ht = ht(X[ok, ])))
 }
 share_below <- function(z) round(mean(z < -1.645), 3)
 
@@ -86,8 +106,19 @@ abline(v = -1.645, lty = 2, col = "#999")
 par(op)
 
 ## ---- cor-cf
-round(cor(res_cf[, c("lzstar", "lz", "infit", "outfit", "G", "r")],
+round(cor(res_cf[, c("lzstar", "lz", "infit", "outfit", "zout_star", "G", "Ht", "r")],
           method = "spearman")["lzstar", ], 2)
+
+## ---- band-cf
+# The statistics by sum-score band (fifths of the respondents): the SD of l_z and
+# l_z*, the share of each below -1.645, and the mean of G* and H^T.
+band5 <- cut(res_cf$r, quantile(res_cf$r, 0:5 / 5), include.lowest = TRUE)
+with(res_cf, data.frame(
+  n = as.vector(table(band5)),
+  sd_lz = round(tapply(lz, band5, sd), 2), sd_lzstar = round(tapply(lzstar, band5, sd), 2),
+  below_lz = round(tapply(lz < -1.645, band5, mean), 3),
+  below_lzstar = round(tapply(lzstar < -1.645, band5, mean), 3),
+  mean_G = round(tapply(G, band5, mean), 3), mean_Ht = round(tapply(Ht, band5, mean), 3)))
 
 ## ---- flagged-cf
 flag <- people_cf$Flagged[pf_cf$ok]
@@ -199,5 +230,7 @@ ip3 <- cbind(pf_cf$ip[, "a"], pf_cf$ip[, "b"], 0)   # PerFit wants a, b and c co
 pf_lzs <- lzstar(X_cf[ok, ], IP = ip3, IRT.PModel = "2PL",
                  Ability = res_cf$theta, Ability.PModel = "ML")$PFscores$PFscores
 pf_G <- Gnormed(X_cf[ok, ])$PFscores$PFscores
+pf_Ht <- Ht(X_cf[ok, ])$PFscores$PFscores
 round(c(max_diff_lzstar = max(abs(pf_lzs - res_cf$lzstar)),
-        max_diff_G = max(abs(pf_G - res_cf$G))), 4)
+        max_diff_G = max(abs(pf_G - res_cf$G)),
+        max_diff_Ht = max(abs(pf_Ht - res_cf$Ht))), 4)
