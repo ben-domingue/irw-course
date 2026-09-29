@@ -2,9 +2,17 @@
 
 # Mixture models: when respondents differ in kind (`mixture-models`)
 
-Module: beyond · Prereqs: guessing-priors, person-fit, instrument-building (+ polytomous, proposed; see Open questions) · Extension · Status: stub (outlined)
+Module: beyond · Prereqs: guessing-priors, person-fit, instrument-building (+ polytomous, proposed; see Open questions) · Extension · Status: draft
 
 Ancestry. #189 proposed `rasch`, `fit-prediction`, `guessing-priors`; the first two are ancestors of `guessing-priors`. `person-fit` adds no new ancestors and makes `misfit-many-causes` and the Much reuse threads. `instrument-building` brings `constructs` and `ctt-reliability`, which were already ancestors, and makes `wording-direction` and the new `response-styles` legal returns. `polytomous` would add only itself, since `information` is already an ancestor; idea 4 fits a partial credit model. `response-time`, `cdm`, `irtrees` and `dif` are not ancestors; each gets an "if you've done" Recall (E2).
+
+**Drafted 2026-09-28 (PR for this lesson).** What changed from this outline:
+- *Widgets:* four, not five. *How many classes?* (BIC and IMV against $K$ with a rerun button) was dropped: fitting mixtures in the browser widget is too slow, and label switching and local maxima are covered by a quick check and the Simulate section. *Which screen sees which?* uses time, SD, even–odd and Mahalanobis (no $l_z$ in the widget; the Su output shows $Z_h$ tracking Mahalanobis, 0.84). *Levels, kinds or styles?* became *Levels or styles?* (category use under the PCM; the skewed-$	heta$ toggle was dropped).
+- *Real data numbers* are in *With real data*, not in the core ideas; the core ideas point forward to them.
+- *Mixed PCM (idea 4), computed:* `lessons/code/mixture-models-pcm.R` on two samples of 2,000 (slower respondents; everyone), 1–3 classes, `nruns = 3`, 11.6 minutes; saved to `lessons/data/mixture-models-pcm.csv`. Slower: BIC 69,693 → 64,916 → 63,669; the two-class fit has an end-using class (25%; 71% of responses in end categories vs 16%) that is also lower in stress (mean keyed sum 12.7 vs 20.9), so style and level are confounded. Everyone: the three-class fit gives the fast respondents their own class (14%, 0.54 s per item, mean keyed sum 27.2, alpha 0.23). Held-out IMV for the PCM was not computed.
+- *Kay held-out IMV, $K = 4$ BIC and the ten-start check* moved to `lessons/code/mixture-models-precompute.R` (saved to `lessons/data/mixture-models-kay.csv`); the page fits $K = 1$–3 once each.
+- *Sanity table* `roar_lexical`: refitted in `mirt` before drafting (scratch `mixture-models/roar_sv.R`; kept out of the lesson code because check_tables.R counts any pinned URL as a load): log likelihood −25,281 vs −25,579, $\hat\pi$ = 0.87, 16 in the guessing class.
+- PSS alpha among slower respondents prints as 0.85 (outline: 0.84); the PSS's second eigenvalue with everyone as 3.7 (outline: 3.6); the median $Z_h$ of all-same respondents as 1.35.
 
 ## Core ideas
 
