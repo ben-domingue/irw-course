@@ -484,7 +484,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [mthimkhulu_2023_pirls_reading, pirlsmissing_sirt, borges_brazil_residency_2024_cbt]
     reuses: [pirlsmissing_sirt]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: nonparametric-irt

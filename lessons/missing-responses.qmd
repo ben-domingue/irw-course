@@ -8,19 +8,456 @@ source("_course.R")
 lesson_header("missing-responses")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {simMissing, posteriorGaps, propensityStudy, classifyGaps} from "./widgets/missing-responses.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.* The plan is in [outlines/missing-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/missing-responses.md).
+A fourth grader answers the first eight questions on a reading passage, leaves the ninth blank, answers the tenth and eleventh, and writes nothing after that. What should the blank on item 9 count for, and the four at the end? Most analyses in this course have left gaps missing, a choice that rests on *why* a response is missing. This lesson separates responses that are omitted (seen and skipped) from those not reached (never got to), recovers the two from the order of the items in an IRW table that doesn't record them, and asks, in PIRLS 2023 reading data, which kind carries information about ability. It picks up from [Estimating abilities](ability-estimation.qmd), because the EAP's pull toward the mean is part of what a missing response does to a score.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- classify a kind of missing response as MCAR, MAR or MNAR, and say what the long table can't tell you;
+- explain why marginal maximum likelihood can ignore gaps left by a booklet design or a stopping rule, and when it can't;
+- show what scoring an omit as wrong, or leaving it missing, does to one respondent's estimate;
+- recover omitted and not-reached responses from item order, and check the rule against a source that records them;
+- fit the same data under several treatments of the gaps, including a response-propensity model, and report how far the estimates move.
+
 ## Core ideas
 
-## Worked example
+### Why a response is missing is part of the data
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): a missing response is an absent row in a long table, and it becomes an empty cell when the table is reshaped. Skipped at random, missing by booklet design and stopped early leave different patterns of gaps, and the table alone doesn't say which produced a given gap.
+:::
+
+Write $m_{ij} = 1$ when respondent $j$'s response to item $i$ is missing, so that every cell carries a pair $(x_{ij}, m_{ij})$, with $x_{ij}$ unseen when $m_{ij} = 1$. [Rubin (1976)](https://doi.org/10.1093/biomet/63.3.581) sorted the ways the $m_{ij}$ can arise into three kinds ([Little & Rubin, 2019](https://doi.org/10.1002/9781119482260); [Schafer & Graham, 2002](https://doi.org/10.1037/1082-989X.7.2.147)):
+
+- **Missing completely at random (MCAR):** missingness has nothing to do with the respondent or the item, as when a page is lost in the post.
+- **Missing at random (MAR):** it depends only on what we observe. A booklet design, an adaptive test (the next item depends on the answers so far) and a stopping rule on the first half of a test are MAR.
+- **Missing not at random (MNAR):** it depends on something unobserved, such as the response itself ("skip it if I'd get it wrong") or $\theta$ (weaker readers skip more).
+
+The labels describe the process that produced the gaps, not the gaps ([Seaman, Galati, Jackson & Carlin, 2013](https://doi.org/10.1214/13-STS415), state them with care). The design and the source's missing codes say which kind we have; the long table rarely does.
+
+#### Try it: three mechanisms
+
+2,000 simulated respondents answer twelve Rasch items ($b$ from −2 to 2). Choose how responses go missing; the grid shows 30 of them, sorted by true $\theta$.
+
+```{ojs}
+//| echo: false
+viewof mm_mech = Inputs.radio(new Map([["Skipped at random (MCAR)", "MCAR"], ["Stopping rule after item 6 (MAR)", "MAR"], ["Lower θ skips more (MNAR)", "MNAR-theta"], ["Skip if it would be wrong (MNAR)", "MNAR-own"]]), {value: "MCAR", label: "Mechanism"})
+viewof mm_share = Inputs.range([0.05, 0.4], {value: 0.2, step: 0.05, label: "Target share missing"})
+```
+
+```{ojs}
+//| echo: false
+mm = simMissing(mm_mech, mm_share)
+mm_rows = Array.from({length: 30}, (_, j) => j * Math.floor(mm.theta.length / 30))
+  .sort((a, c) => mm.theta[a] - mm.theta[c])
+mm_cells = mm_rows.flatMap((j, r) => mm.b.map((_, i) => ({row: r + 1, item: i + 1,
+  state: mm.M[j][i] ? "Missing" : (mm.X[j][i] ? "Right" : "Wrong")})))
+Plot.plot({
+  width: 520, height: 420, padding: 0.05,
+  x: {label: "Item (easiest to hardest)", tickFormat: d => d}, y: {label: "Respondent (lowest θ at top)", ticks: []},
+  color: {legend: true, domain: ["Right", "Wrong", "Missing"], range: [palette.main, palette.light, palette.contrast]},
+  marks: [Plot.cell(mm_cells, {x: "item", y: "row", fill: "state"})]
+})
+```
+
+```{ojs}
+//| echo: false
+mm_mean = a => a.reduce((s, v) => s + v, 0) / a.length
+mm_obs = mm.X.flatMap((x, j) => x.filter((_, i) => !mm.M[j][i]))
+mm_gap = mm.theta.filter((_, j) => mm.M[j].some(Boolean))
+mm_nogap = mm.theta.filter((_, j) => !mm.M[j].some(Boolean))
+md`Missing: **${(100 * mm_mean(mm.M.flat().map(Number))).toFixed(0)}%** of cells. Proportion correct among the observed responses: **${mm_mean(mm_obs).toFixed(2)}**, against **${mm_mean(mm.X.flat()).toFixed(2)}** with nothing missing. Mean true θ of respondents with at least one gap: **${mm_gap.length ? mm_mean(mm_gap).toFixed(2) : "none"}**; without a gap: **${mm_nogap.length ? mm_mean(mm_nogap).toFixed(2) : "none"}**.`
+```
+
+Under MCAR the observed responses are a fair sample: 0.50 correct, as in the complete data. Under the other three the observed proportion correct rises (to 0.61, 0.55 and 0.63 at the default share), because the missing responses would more likely have been wrong. On this summary the stopping rule looks no better than the two MNAR mechanisms; what separates them is what a model can do about it.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An online test shows each respondent a random 20 of 60 items, and records which 20. Which mechanism describes the 40 unseen items?",
+  options: [
+    {text: "Missing completely at random", correct: true, why: "Which items go unseen is decided by a random draw that has nothing to do with the respondent or their answers. (Because the draw is recorded, it is also MAR; MCAR is the stronger statement.)"},
+    {text: "Missing not at random, because respondents differ in which items they saw", correct: false, why: "MNAR means the missingness depends on something unobserved, such as the response or $\\theta$. Here it depends on a random draw only."},
+    {text: "It can't be classified without fitting a model", correct: false, why: "The mechanism is a fact about how the data were collected, and here the design says it: a random draw. Fitting a model can't establish the mechanism."}
+  ]
+})
+```
+
+### Ignorable: when the likelihood can leave the gaps alone
+
+Why does the mechanism matter for a fitted model? [Rubin (1976)](https://doi.org/10.1093/biomet/63.3.581) showed that if the gaps are MAR, and the parameters of the missingness process are distinct from the model's, the likelihood of the observed responses alone gives the right answer: the process is **ignorable** ([Mislevy & Wu, 1996](https://doi.org/10.1002/j.2333-8504.1996.tb01708.x), and [Mislevy, 2017](https://doi.org/10.1201/b19166-10), work this out for item response models). The marginal likelihood that `mirt` maximizes ([Bock & Aitkin, 1981](https://doi.org/10.1007/BF02293801); [Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)) is that likelihood: an empty cell contributes nothing. So booklet designs and adaptive tests are ignorable, although an adaptive test's gaps depend on ability through the answers already given. The Go deeper callout writes out the argument.
+
+Deleting incomplete respondents (listwise deletion) is also unbiased under MCAR, at the cost of the data it discards; in a booklet design it discards everyone (in the TIMSS 2007 data checked below, no student saw every item). [Finch (2008)](https://doi.org/10.1111/j.1745-3984.2008.00062.x) compares treatments of missing responses for item parameters.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Confirmatory factor analysis](fa-confirmatory.qmd): `lavaan`'s `missing = "ml"` (full-information ML) is the same idea for factor models ([Enders & Bandalos, 2001](https://doi.org/10.1207/S15328007SEM0803_5)). If you've done [Estimating item parameters](item-estimation.qmd): EM treats $\theta$ itself as missing data.
+:::
+
+::: {.callout-note collapse="true"}
+## Go deeper: why MAR gaps drop out of the likelihood, and when they don't
+
+**Assumptions:** responses $x$ follow an item response model with item parameters $\beta$ and a population distribution $g(\theta)$; the indicators $m$ follow a model with parameters $\phi$; write $x = (x_{\text{obs}}, x_{\text{mis}})$. (Here $\beta$ collects every item parameter, not regression coefficients.)
+
+**The factorization.** The observed data are $(x_{\text{obs}}, m)$, and their probability averages over what we didn't see:
+$$p(x_{\text{obs}}, m \mid \beta, \phi) = \int\!\!\int p(x_{\text{obs}}, x_{\text{mis}} \mid \theta, \beta)\, p(m \mid x_{\text{obs}}, x_{\text{mis}}, \theta, \phi)\, g(\theta)\, dx_{\text{mis}}\, d\theta.$$
+Under MAR, $p(m \mid x_{\text{obs}}, x_{\text{mis}}, \theta, \phi) = p(m \mid x_{\text{obs}}, \phi)$: the gaps depend only on what we observe. That factor then leaves both integrals, and
+$$p(x_{\text{obs}}, m \mid \beta, \phi) = p(m \mid x_{\text{obs}}, \phi) \int p(x_{\text{obs}} \mid \theta, \beta)\, g(\theta)\, d\theta.$$
+If $\phi$ and $\beta$ are *distinct* (no restriction ties them), the first factor is a constant as far as $\beta$ is concerned, and maximizing the second, the marginal likelihood of the observed responses, is all we need.
+
+**Where it breaks.** If the gaps depend on $\theta$, as when lower-ability respondents skip more, then $p(m \mid \cdot)$ contains $\theta$ and can't leave the integral over it. For the marginal likelihood this is MNAR, although no single response is hidden from the mechanism. It becomes ignorable again if we add a second latent variable $\xi$ for the propensity to respond, correlated with $\theta$: given $(\theta, \xi)$, the gaps depend on nothing unobserved. That is the premise of the propensity models in this lesson ([Holman & Glas, 2005](https://doi.org/10.1348/000711005X47168)). Gaps that depend on the unseen response itself ("skip it if wrong") remain MNAR even then.
+
+**Why it is load-bearing.** Concurrent calibration across booklets ([Linking and equating](equating.qmd)), adaptive testing ([Item banks and adaptive testing](item-banks-cat.qmd)) and a skip node in a tree ([IRTrees](irtrees.qmd)) all rest on this factorization.
+:::
+
+### Omitted: wrong, missing, or something in between?
+
+A student who reads an item and leaves it blank has omitted it. The two simple treatments are each an assumption: scoring it wrong assumes the student would have got it wrong, and leaving it missing assumes the omit says nothing about $\theta$. [Lord (1974)](https://doi.org/10.1007/BF02291471) argued that the first is not justified when estimating abilities or item parameters, and gave a method that uses what omits reveal. Treatments are compared in simulation by [De Ayala, Plake and Impara (2001)](https://doi.org/10.1111/j.1745-3984.2001.tb01124.x) and reviewed for large-scale assessments by [Robitzsch (2021)](https://doi.org/10.3390/ejihpe11040117).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd): the EAP is pulled toward the prior mean, most where the likelihood is flattest, which includes short tests; and a respondent who gets every item right has no maximum-likelihood estimate.
+:::
+
+Leaving an omit missing shortens the respondent's test, so both apply. A respondent who answers only the items they know can have a perfect pattern on those items, and no MLE; their EAP is pulled toward the population mean, which moves a below-average respondent up.
+
+#### Try it: one respondent, omits scored two ways
+
+Ten Rasch items ($b$ from −2 to 2, easiest first), normal(0, 1) prior. Tick the items right and the items omitted (an omit overrides a "correct" tick); the rest are wrong.
+
+```{ojs}
+//| echo: false
+og_b = Array.from({length: 10}, (_, i) => -2 + 4 * i / 9)
+og_labels = og_b.map((_, i) => `${i + 1}`)
+viewof og_right = Inputs.checkbox(og_labels, {label: "Correct on item", value: ["1", "2", "3"]})
+viewof og_omit = Inputs.checkbox(og_labels, {label: "Omitted item", value: ["6", "7", "8", "9", "10"]})
+```
+
+```{ojs}
+//| echo: false
+og_x = og_labels.map(l => og_right.includes(l) ? 1 : 0)
+og_om = og_labels.map(l => og_omit.includes(l))
+og_w = posteriorGaps(og_x, og_om, og_b, "wrong")
+og_m = posteriorGaps(og_x, og_om, og_b, "missing")
+og_pm = Math.max(...og_w.post, ...og_m.post)
+og_data = og_w.nodes.flatMap((t, q) => [
+  {theta: t, y: og_w.post[q] / og_pm, curve: "Posterior, omits wrong"},
+  {theta: t, y: og_m.post[q] / og_pm, curve: "Posterior, omits missing"}])
+Plot.plot({
+  width: 700, height: 280, x: {label: "Ability θ", domain: [-5, 5]}, y: {label: "Posterior (scaled)", domain: [0, 1.05]},
+  color: {legend: true, domain: ["Posterior, omits wrong", "Posterior, omits missing"], range: [palette.contrast, palette.main]},
+  marks: [
+    Plot.ruleX([0], {stroke: palette.rule}),
+    Plot.line(og_data, {x: "theta", y: "y", stroke: "curve", strokeWidth: 2.5}),
+    Plot.ruleX([og_w.eap], {stroke: palette.contrast, strokeDasharray: "4,3"}),
+    Plot.ruleX([og_m.eap], {stroke: palette.main, strokeDasharray: "4,3"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+og_fmt = v => Number.isFinite(v) ? v.toFixed(2) : (Number.isNaN(v) ? "none (no responses)" : (v > 0 ? "+∞ (no maximum)" : "−∞ (no maximum)"))
+md`Omits scored wrong (all 10 items count): EAP **${og_w.eap.toFixed(2)}** (posterior SD ${og_w.psd.toFixed(2)}), MLE ${og_fmt(og_w.mle)}. Omits left missing (${og_m.nCounted} items count): EAP **${og_m.eap.toFixed(2)}** (posterior SD ${og_m.psd.toFixed(2)}), MLE ${og_fmt(og_m.mle)}. Dashed lines mark the EAPs.`
+```
+
+With three right, two wrong and five omitted, the EAP is −0.73 when the omits are wrong and −0.31 when they are missing. Tick items 4 and 5 as omitted too: left missing, the three answered items are all right, the MLE is $+\infty$, and the EAP rises to 0.45, though the respondent answered only the three easiest items. The posterior SD grows as items drop out.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "On a test where lower-ability respondents omit more, you leave every omit missing and score by EAP. On average, what happens to the heavy omitters' estimates?",
+  options: [
+    {text: "They come out too high", correct: true, why: "Each omit shortens the respondent's test, so the EAP leans on the prior mean more; heavy omitters sit below that mean, so they move up. Leaving omits missing also sets aside the information that omitting goes with lower ability."},
+    {text: "They come out too low, because fewer answers means fewer right", correct: false, why: "Left missing, an omit is neither right nor wrong. The estimate rests on the answered items, and the EAP moves toward the prior mean, which for below-average respondents is up."},
+    {text: "Nothing changes on average; the EAP is unbiased under MAR", correct: false, why: "If omitting depends on $\\theta$, the gaps are not MAR for the marginal likelihood, and the EAP's shrinkage adds its own pull toward the mean."}
+  ]
+})
+```
+
+### Modelling the propensity to respond
+
+If omitting goes with ability, can a model use it? The latent-ignorability models add a second latent variable, the **response propensity** $\xi_j$, which drives the indicators $m_{ij}$ and correlates with $\theta_j$ ([Holman & Glas, 2005](https://doi.org/10.1348/000711005X47168); [Rose, von Davier & Xu, 2010](https://doi.org/10.1002/j.2333-8504.2010.tb02218.x)). Given both, the gaps are ignorable, and the correlation carries what omitting says about $\theta$. The model of [Mislevy and Wu (1996)](https://doi.org/10.1002/j.2333-8504.1996.tb01708.x) also lets an omit depend on the response the student would have given; scoring omits wrong and latent ignorability are special cases of it ([Rose, von Davier & Nagengast, 2017](https://doi.org/10.1007/s11336-016-9544-7)). Each rests on an assumption about unseen responses that the data can't check directly. On the German National Educational Panel Study's competence tests, the model-based treatments and leaving the gaps missing gave similar results, and scoring omits wrong different ones ([Pohl, Gräfe & Rose, 2014](https://doi.org/10.1177/0013164413504926); [Köhler, Pohl & Carstensen, 2015](https://doi.org/10.1177/0013164414561785)).
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [IRTrees](irtrees.qmd): a first node "answered?" is a propensity model ([Debeer, Janssen & De Boeck, 2017](https://doi.org/10.1111/jedm.12147)). There, simulated heavy skippers came out 0.24 too low with skips wrong, 0.41 too high with skips missing, and 0.02 off with the skip node.
+:::
+
+#### Try it: the propensity dial
+
+400 simulated respondents answer 16 Rasch items and omit about a fifth; their propensity to respond correlates with $\theta$ at the value you choose. Each is scored by EAP three ways, with the true parameters known. The bars show the average error ($\hat\theta - \theta$) for the quarter who omit most.
+
+```{ojs}
+//| echo: false
+viewof pd_rho = Inputs.range([0, 0.8], {value: 0.5, step: 0.1, label: "Correlation of propensity and θ"})
+```
+
+```{ojs}
+//| echo: false
+pd = propensityStudy(pd_rho)
+Plot.plot({
+  width: 640, height: 220, marginLeft: 150, x: {label: "Average error for heavy omitters (EAP − θ)", domain: [-1.2, 0.8]},
+  y: {label: null, domain: ["Omits scored wrong", "Omits left missing", "Propensity model"]},
+  marks: [
+    Plot.ruleX([0], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.barX(pd, {y: "scoring", x: "heavyError", fill: palette.main})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`At a correlation of **${pd_rho.toFixed(1)}**, heavy omitters' average error: omits wrong **${pd[0].heavyError.toFixed(2)}**, omits missing **${pd[1].heavyError.toFixed(2)}**, propensity model **${pd[2].heavyError.toFixed(2)}**. Root mean squared error for everyone, in the same order: ${pd.map(d => d.rmse.toFixed(2)).join(", ")}.`
+```
+
+At a correlation of 0, leaving omits missing is right on average (−0.02), the propensity model agrees, and scoring them wrong puts heavy omitters about a logit too low. As the correlation rises, the "missing" estimates drift up (0.24 at 0.5, 0.42 at 0.8), while the propensity model stays within 0.04 of zero. Scoring wrong stays furthest off, since these respondents omit without regard to whether they'd be right.
+
+### Not reached: time, not knowledge
+
+A not-reached item sits at the end of a timed part the respondent never finished, and it says something about speed, which may or may not go with ability. The IEA, which runs TIMSS and PIRLS, defines it by position: within a part of the booklet, an unanswered item is not reached if the item before it is also unanswered and no later item in the part is answered ([Foy, Galia & Li, 2008](https://timssandpirls.bc.edu/TIMSS2007/PDF/T07_TR_Chapter11.pdf), §11.3.3). So the first blank of a trailing run counts as omitted, and a run of one is an omit. TIMSS 2007 treated not-reached items as not administered when it estimated item parameters, and as wrong when it scored students (the same section).
+
+Why treat them differently for items? Scored wrong, an item late in a timed test looks harder than it is. In TIMSS 2003 the same item looked harder when it came late in a booklet than when it came early (the same report, §11.3.1), and [Oshima (1994)](https://doi.org/10.1111/j.1745-3984.1994.tb00443.x) showed the effect in simulation. Speeded respondents can also be modelled as a latent class ([Bolt, Cohen & Wollack, 2002](https://doi.org/10.1111/j.1745-3984.2002.tb01146.x)) or with a propensity for speed ([Glas & Pimentel, 2008](https://doi.org/10.1177/0013164408315262)); [van der Linden (2018)](https://www.taylorfrancis.com/chapters/edit/10.1201/9781315117430-12) treats speededness in full.
+
+The IEA rule needs only the order in which items were presented and where each timed part ends. The IRW keeps the gaps, so where the order is known the rule works on a table that records no codes at all.
+
+#### Try it: read the order
+
+The PIRLS 2023 learners from the main table below, in item order: 150 of the 1,894 are plotted, sorted by their last answer, and the counts use everyone. Choose a rule for the gaps.
+
+```{ojs}
+//| echo: false
+viewof ro_rule = Inputs.radio(new Map([["Every gap omitted", "omit"], ["Every trailing gap not reached", "trailing"], ["IEA rule (first trailing gap omitted)", "iea"]]), {value: "iea", label: "Rule"})
+```
+
+```{ojs}
+//| echo: false
+ro_ans = p23_ans.map(s => s.split("").map(c => c === "1"))
+ro_src = p23_src.map(s => s.split(""))
+ro_last = ro_ans.map(a => a.lastIndexOf(true))
+ro_order = ro_ans.map((_, j) => j).sort((a, c) => ro_last[a] - ro_last[c] || a - c)
+ro_show = Array.from({length: 150}, (_, r) => ro_order[Math.floor(r * ro_order.length / 150)])
+ro_cls = ro_ans.map(a => classifyGaps(a, ro_rule))
+ro_cells = ro_show.flatMap((j, r) => ro_cls[j].map((c, i) => ({row: r + 1, item: i + 1, state: c === "answered" ? "Answered" : c === "omitted" ? "Omitted" : "Not reached"})))
+Plot.plot({
+  width: 520, height: 460, padding: 0,
+  x: {label: "Item, in the order printed", tickFormat: d => d}, y: {label: "Learner (sorted by last answer)", ticks: []},
+  color: {legend: true, domain: ["Answered", "Omitted", "Not reached"], range: [palette.rule, palette.contrast, palette.main]},
+  marks: [Plot.cell(ro_cells, {x: "item", y: "row", fill: "state"})]
+})
+```
+
+```{ojs}
+//| echo: false
+ro_flat = ro_cls.flat()
+ro_srcf = ro_src.flat()
+ro_nr = ro_flat.filter(c => c === "not reached").length
+ro_om = ro_flat.filter(c => c === "omitted").length
+ro_coded = ro_flat.map((c, q) => [c, ro_srcf[q]]).filter(([, s]) => s === "n" || s === "o")
+ro_agree = ro_coded.filter(([c, s]) => (c === "not reached") === (s === "n")).length
+md`Under this rule: **${ro_nr.toLocaleString()}** not reached and **${ro_om.toLocaleString()}** omitted. Agreement with the source's own codes on the ${ro_coded.length.toLocaleString()} cells it codes 6 (not reached) or 9 (omitted): **${(100 * ro_agree / ro_coded.length).toFixed(1)}%**.`
+```
+
+Learners lower down the plot stop earlier. Calling every gap an omit agrees with the source on 43.5% of the coded cells; calling the whole trailing run not reached, 89.5% (it misses wherever a learner's first trailing blank was a skip); the IEA rule, 100%.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "In one timed part of ten items, a respondent answers items 1–6, leaves 7 blank, answers 8, and leaves 9 and 10 blank. Under the IEA rule, how are items 7, 9 and 10 coded?",
+  options: [
+    {text: "7 omitted, 9 omitted, 10 not reached", correct: true, why: "Item 7 has a later answer, so it is an omit. Items 9 and 10 form the trailing run; its first item counts as omitted and the rest as not reached."},
+    {text: "7 omitted, 9 and 10 not reached", correct: false, why: "That calls the whole trailing run not reached. The IEA rule needs the item *before* a blank to be blank too, so the first blank of the run is an omit."},
+    {text: "All three omitted, since the respondent reached item 8", correct: false, why: "Reaching item 8 makes item 7 an omit, but nothing after item 8 is answered, so item 10 meets the definition of not reached."}
+  ]
+})
+```
+
+## Simulate
+
+What does each treatment do when we know the truth? The code below simulates Rasch responses (1,000 respondents, 20 items), deletes some by four mechanisms like those in the first widget, and fits the Rasch model with the gaps missing and with them scored wrong. It reports the average and worst error in $b$, and the average error in the EAP for the tenth of respondents with the most gaps. The first run takes 20–30 seconds while `mirt` loads.
+
+With the seed as written, leaving the gaps missing recovers $b$ within 0.07 on average under MCAR, the stopping rule and the $\theta$-driven skips, and misses by −0.57 when respondents skip what they'd get wrong. Scoring the gaps wrong is right only in that last case, and pushes $b$ up by half a logit under MCAR. For the heavy skippers under $\theta$-driven skipping, the EAPs come out 0.43 too high with the gaps missing and 0.46 too low with them wrong, though $b$ is nearly right. Try the skip correlation at −0.3 or 0 (the `-0.6` in the line that makes `xi`), or `n <- 5000` locally.
+
+```{webr}
+{{< include code/missing-responses-sim.R >}}
+```
+
+[Download this code](code/missing-responses-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/missing-responses-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Our main example is [mthimkhulu_2023_pirls_reading](https://itemresponsewarehouse.org/tables/mthimkhulu_2023_pirls_reading/): 1,894 South African fourth graders' responses to the fifteen questions on "Octopuses", a released informational passage from PIRLS 2023, shared by the University of Pretoria ([Mthimkhulu, Roux & Mihai, 2023](https://doi.org/10.25403/UPresearchdata.24784086); CC BY 4.0). Its job is to be a fixed-order test on which a quarter of the responses are missing. Constructed-response items were scored by PIRLS raters (0–1, 0–2 or 0–3) and the four multiple-choice items against the key, so higher is better throughout. The IRW script drops the source's missing codes, so a missing response is an absent row. [Download the code](code/missing-responses-irw.R) to run every chunk yourself; every choice about missing data is marked in its comments.
+
+```{r fetch-p23}
+#| echo: true
+#| code-fold: show
+```
+
+A quarter of the cells are empty, and 36% of learners have no gap. Is a gap an omit or a sign of running out of time? We treat the passage as one timed part and apply the IEA rule in item order.
+
+```{r rule-p23}
+#| echo: true
+#| code-fold: show
+```
+
+The rule finds 4,043 not-reached cells and 3,113 omits. Not reached climbs along the passage from 0 on the first two items to 35% on the last; omits stay between 5% and 19%. A third of learners (35%) have at least one not-reached item, and 427 have five or more.
+
+The source file keeps the codes, so we can check the rule. It also carries each learner's first plausible value, PIRLS's reading score from the whole booklet: an ability measure from outside these fifteen items.
+
+```{r source-p23}
+#| echo: true
+#| code-fold: true
+```
+
+The rule reproduces the source's codes on every cell: 4,032 of 4,032 not reached and 3,107 of 3,107 omitted. The 17 cells blank in the source, with neither code, come out as 11 not reached and 6 omitted. With the item order, the IRW table holds everything the codes would have told us.
+
+```{r}
+#| include: false
+local({
+  src_mat <- matrix(source_code, nrow(Y))
+  ojs_define(
+    p23_ans = unname(apply(!is.na(Y), 1, function(a) paste(as.integer(a), collapse = ""))),
+    p23_src = unname(apply(src_mat, 1, function(s) paste(c("6 not reached" = "n", "9 omitted" = "o",
+      "answered" = "a", "blank in source" = "s")[s], collapse = ""))))
+})
+```
+
+```{ojs}
+//| echo: false
+predict({
+  q: "In PIRLS 2023 South Africa, which tracks reading ability (the first plausible value) more closely: how many items a learner omits, or how many they don't reach?",
+  choices: ["Omitted items", "Not-reached items", "Both about equally", "Neither"],
+  answer: "Omitted items",
+  reveal: "Omitted items: the correlation is −0.16, against −0.02 for not-reached items. By fifth of reading ability, omits fall from 13% of the passage in the lowest fifth to 7% in the highest; not-reached items don't fall steadily (11%, 15%, 17%, 18%, 11%). Check the output below."
+})
+```
+
+```{r ability-p23}
+#| echo: true
+#| code-fold: show
+```
+
+Omits track ability and not-reached items hardly do: −0.16 against −0.02. The lowest fifth omits 13.1% of the items and the highest 7.1%, while not reached rises from 11.3% to 17.7% across the first four fifths and falls back to 10.7% in the top one. Skipping leans toward the bottom of the ability range; running out of time sits in its middle.
+
+What do the treatments do? We fit the partial credit model ([Masters, 1982](https://doi.org/10.1007/BF02296272)) with every gap wrong, every gap missing, and a split by the rule (`rule` in the code): omits 0, and not-reached items missing, as TIMSS calibrates them.
+
+```{r fit-p23}
+#| echo: true
+#| code-fold: show
+```
+
+With every gap wrong, the last five items sit 0.40 logits higher on average than under the split, and the first five only 0.06 higher: the late items absorb the time limit. The 427 learners with five or more not-reached items average −0.51 SD with every gap wrong, −0.10 with every gap missing and −0.20 under the split. For the 322 learners with four or more omits, the last two change places: −0.31 with gaps missing, −0.56 under the split.
+
+A propensity model gives the omits a second latent variable; not-reached items stay missing on both the item and its indicator.
+
+```{r propensity-p23}
+#| echo: true
+#| code-fold: show
+```
+
+The propensity to answer a reached item correlates 0.30 with reading ability, and the heavy omitters' mean estimate is −0.46 SD: between leaving their omits missing (−0.31) and scoring them 0 (−0.56), nearer the second.
+
+### A contrast: when the codes were merged
+
+Our contrast table is [pirlsmissing_sirt](https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/), one PIRLS 2011 booklet (the PIRLS Reader) taken by fourth graders in Austria, Germany, France and the Netherlands, released with the `sirt` package ([Robitzsch, 2022](https://cran.r-project.org/package=sirt)). Its job is to show the rule where the source had already merged omitted and not reached into one code. Responses are 1 when correct; each passage is taken to be its own timed part, still to be checked against the PIRLS 2011 design.
+
+```{r pirls11}
+#| echo: true
+#| code-fold: true
+```
+
+The rule splits the missing cells into 7.2% omitted and 1.3% not reached. Here both kinds go with the proportion correct on the answered items (−0.26 and −0.14), unlike PIRLS 2023. The Netherlands–France difference is 0.46 SD with every gap wrong, 0.28 with every gap missing and 0.43 under the split. Without the student weights, these show how far a comparison moves with the scoring, not either country's performance.
+
+### A twist: a table that has already decided
+
+In [borges_brazil_residency_2024_cbt](https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_cbt/), 3,223 applicants to medical residency at a Brazilian hospital took a 120-item computer-based exam ([Borges et al., 2024](https://doi.org/10.3352/jeehp.2024.21.32); CC0). Its job is to show a table in which the gaps have already been scored. The source marks some responses "X" (on a computer-based test most likely an item with no option chosen, though the deposit doesn't say); the IRW script scores an X as 0 and leaves `resp_raw` empty, so those rows can still be found.
+
+```{r borges}
+#| echo: true
+#| code-fold: true
+```
+
+There are 1,914 such responses, all scored 0. Most applicants (2,651) have none, and 18 have ten or more. Applicants with three or more average 0.30 correct, against 0.57 for those with none. Whether an X is an omit or a not-reached item, the table scores it wrong; problem 2 undoes that.
+
+::: {.callout-note collapse="true"}
+## A check on the rule: TIMSS 2007, two timed parts
+
+The exact match in PIRLS 2023 comes from one passage in one part. Does the rule hold where a booklet has two timed parts? TIMSS 2007 grade 8 data from Russia, released with `sirt`, keep the IEA codes. Each booklet holds four blocks in two parts ([Ruddock, O'Sullivan, Arora & Erberber, 2008](https://timssandpirls.bc.edu/TIMSS2007/PDF/T07_TR_Chapter2.pdf), Exhibit 2.13), and the code recovers each student's booklet from the blocks they saw.
+
+```{r timss-check}
+#| echo: true
+#| code-fold: true
+```
+
+No student saw every item, as a booklet design intends. With the parts known, the rule agrees with the IEA codes on 99.6% of missing cells. Calling every trailing gap not reached gets 93.3%, and ignoring the break between parts finds only 39% of the not-reached cells. So the rule needs both the order and the part boundaries.
+:::
+
+### Which treatment to report
+
+Each treatment is an assumption. Leaving omits missing assumes they say nothing about $\theta$; scoring them 0, that the respondent would have got them wrong; a propensity model, that the correlation between answering and ability carries what omitting reveals. Treating not-reached items as not administered assumes the student would have answered them like those who reached them; scoring them wrong counts running out of time as part of the performance.
+
+In the case that omissions are rare and unrelated to ability, leaving them missing under marginal maximum likelihood may be sufficient for some purposes. Where omission tracks ability, as it does in PIRLS 2023 South Africa, neither simple rule is neutral, and reporting $\theta$ under both, with a response-propensity model as a check, may be sufficient for some purposes. For not-reached items, the TIMSS rule (missing when calibrating, wrong when scoring) keeps what an item is apart from what a respondent did; it is one defensible choice among several.
 
 ## Problems
 
+1. **The factorization.** For a Rasch test, show that under MAR with distinct $\phi$, $m$ drops out of the likelihood for the item parameters. Then show where the argument breaks when omitting depends on $\theta$ and the likelihood is marginal over $\theta$.
+2. **Undo the scoring.** In `borges_brazil_residency_2024_cbt`, set `resp` to missing where `resp_raw` is empty and fit a Rasch model both ways. Whose estimates move, and how far? Are the X's of the 18 applicants with ten or more at the end of the exam, or scattered?
+3. **Which comparison to report.** In PIRLS 2011, the Netherlands–France difference is 0.46, 0.28 or 0.43 SD, depending on the scoring. Which would you report in a comparison of the two countries, and what else would you want to see first?
+4. **Formats.** In PIRLS 2023, compare the omission rates of the four multiple-choice and eleven constructed-response items. The source's code 9 means "omitted or invalid". What might explain the difference, and what does each scoring do to a comparison of formats?
+5. **Design a record.** For a low-stakes online test with a 20-minute limit, what would you record (timestamps, the order each respondent saw, a "skip" button) so that omitted and not-reached items can be told apart without an order rule?
+6. **Challenge (open): what an omit would have been.** Whether an omitted item would have been answered correctly is never observed. What assumption lets the Mislevy–Wu model estimate it, and could any design check that assumption? As far as I know, this is not settled.
+
+```{r}
+#| output: asis
+ask_claude("missing-responses", "It covers missing item responses: Rubin's MCAR, MAR and MNAR stated for item responses; why marginal maximum likelihood ignores gaps that are missing by design or by a stopping rule; what scoring an omit as wrong or leaving it missing does to one respondent's EAP; response-propensity (latent ignorability) models and the Mislevy-Wu model; not-reached items and the IEA rule that infers them from item order; with mirt analyses of PIRLS 2023 reading in South Africa, PIRLS 2011 in four European countries, a Brazilian residency exam, and a check on TIMSS 2007 Russia.")
+```
+
 ## Going further
+
+- Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3), 581–592. <https://doi.org/10.1093/biomet/63.3.581>. MCAR, MAR and ignorability.
+- Little, R. J. A., & Rubin, D. B. (2019). *Statistical analysis with missing data* (3rd ed.). Wiley. <https://doi.org/10.1002/9781119482260>. A book-length treatment of missing data in general.
+- Seaman, S., Galati, J., Jackson, D., & Carlin, J. (2013). What is meant by "missing at random"? *Statistical Science*, 28(2). <https://doi.org/10.1214/13-STS415>. The definitions, stated with care.
+- Schafer, J. L., & Graham, J. W. (2002). Missing data: Our view of the state of the art. *Psychological Methods*, 7(2), 147–177. <https://doi.org/10.1037/1082-989X.7.2.147>. A survey of treatments for psychologists.
+- Mislevy, R. J., & Wu, P.-K. (1996). Missing responses and IRT ability estimation: Omits, choice, time limits, and adaptive testing. *ETS Research Report Series*, 1996(2). <https://doi.org/10.1002/j.2333-8504.1996.tb01708.x>. Ignorability worked out for item response models, case by case.
+- Mislevy, R. J. (2017). Missing responses in item response modeling. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 2. Statistical tools* (pp. 171–194). Chapman and Hall/CRC. <https://doi.org/10.1201/b19166-10>. A handbook chapter on the same ground.
+- Lord, F. M. (1974). Estimation of latent ability and item parameters when there are omitted responses. *Psychometrika*, 39(2), 247–264. <https://doi.org/10.1007/BF02291471>. The case against scoring omits as wrong, and an alternative.
+- De Ayala, R. J., Plake, B. S., & Impara, J. C. (2001). The impact of omitted responses on the accuracy of ability estimation in item response theory. *Journal of Educational Measurement*, 38(3), 213–234. <https://doi.org/10.1111/j.1745-3984.2001.tb01124.x>. Treatments of omits compared in simulation.
+- Finch, H. (2008). Estimation of item response theory parameters in the presence of missing data. *Journal of Educational Measurement*, 45(3), 225–245. <https://doi.org/10.1111/j.1745-3984.2008.00062.x>. Treatments of missing data compared for item parameters.
+- Holman, R., & Glas, C. A. W. (2005). Modelling non-ignorable missing-data mechanisms with item response theory models. *British Journal of Mathematical and Statistical Psychology*, 58(1), 1–17. <https://doi.org/10.1348/000711005X47168>. Missingness as a second latent variable.
+- Rose, N., von Davier, M., & Xu, X. (2010). Modeling nonignorable missing data with item response theory (IRT). *ETS Research Report Series*, 2010(1). <https://doi.org/10.1002/j.2333-8504.2010.tb02218.x>. Propensity models for omitted responses.
+- Rose, N., von Davier, M., & Nagengast, B. (2017). Modeling omitted and not-reached items in IRT models. *Psychometrika*, 82(3), 795–819. <https://doi.org/10.1007/s11336-016-9544-7>. How the models relate, the Mislevy–Wu model among them.
+- Pohl, S., Gräfe, L., & Rose, N. (2014). Dealing with omitted and not-reached items in competence tests. *Educational and Psychological Measurement*, 74(3), 423–452. <https://doi.org/10.1177/0013164413504926>. Treatments compared on the NEPS competence tests.
+- Köhler, C., Pohl, S., & Carstensen, C. H. (2015). Taking the missing propensity into account when estimating competence scores. *Educational and Psychological Measurement*, 75(5), 850–874. <https://doi.org/10.1177/0013164414561785>. Whether a propensity model changes competence scores.
+- Robitzsch, A. (2021). On the treatment of missing item responses in educational large-scale assessment data. *European Journal of Investigation in Health, Psychology and Education*, 11(4), 1653–1687. <https://doi.org/10.3390/ejihpe11040117>. A review for large-scale assessments.
+- Debeer, D., Janssen, R., & De Boeck, P. (2017). Modeling skipped and not-reached items using IRTrees. *Journal of Educational Measurement*, 54(3), 333–363. <https://doi.org/10.1111/jedm.12147>. Skips and not-reached items as nodes of a tree.
+- Oshima, T. C. (1994). The effect of speededness on parameter estimation in item response theory. *Journal of Educational Measurement*, 31(3), 200–219. <https://doi.org/10.1111/j.1745-3984.1994.tb00443.x>. What a time limit does to late items' parameters.
+- Bolt, D. M., Cohen, A. S., & Wollack, J. A. (2002). Item parameter estimation under conditions of test speededness: Application of a mixture Rasch model with ordinal constraints. *Journal of Educational Measurement*, 39(4), 331–348. <https://doi.org/10.1111/j.1745-3984.2002.tb01146.x>. Speeded respondents as a latent class.
+- Glas, C. A. W., & Pimentel, J. L. (2008). Modeling nonignorable missing data in speeded tests. *Educational and Psychological Measurement*, 68(6), 907–922. <https://doi.org/10.1177/0013164408315262>. A propensity model for not-reached items.
+- van der Linden, W. J. (2018). Test speededness and time limits. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (ch. 12, pp. 249–266). Chapman and Hall/CRC. <https://www.taylorfrancis.com/chapters/edit/10.1201/9781315117430-12>. Speededness and time limits in full.
+- Foy, P., Galia, J., & Li, I. (2008). Scaling the data from the TIMSS 2007 mathematics and science assessments. In J. F. Olson, M. O. Martin, & I. V. S. Mullis (Eds.), *TIMSS 2007 technical report* (ch. 11). TIMSS & PIRLS International Study Center, Boston College. <https://timssandpirls.bc.edu/TIMSS2007/PDF/T07_TR_Chapter11.pdf>. The not-reached rule and how TIMSS treats omitted and not-reached items (§11.3.3).
+- Ruddock, G. J., O'Sullivan, C. Y., Arora, A., & Erberber, E. (2008). Developing the TIMSS 2007 mathematics and science assessments and scoring guides. In J. F. Olson, M. O. Martin, & I. V. S. Mullis (Eds.), *TIMSS 2007 technical report* (ch. 2). <https://timssandpirls.bc.edu/TIMSS2007/PDF/T07_TR_Chapter2.pdf>. The booklet design used in the check (Exhibit 2.13).
+- Masters, G. N. (1982). A Rasch model for partial credit scoring. *Psychometrika*, 47(2), 149–174. <https://doi.org/10.1007/BF02296272>. The partial credit model fitted to the PIRLS items.
+- Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443–459. <https://doi.org/10.1007/BF02293801>. The marginal likelihood `mirt` maximizes.
+- Enders, C. K., & Bandalos, D. L. (2001). The relative performance of full information maximum likelihood estimation for missing data in structural equation models. *Structural Equation Modeling*, 8(3), 430–457. <https://doi.org/10.1207/S15328007SEM0803_5>. FIML against deletion.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. Every fit in this lesson, including the two-dimensional propensity model.
 
 ```{r}
 #| output: asis
@@ -28,3 +465,9 @@ data_sources("missing-responses")
 ```
 
 ## For instructors
+
+- **Source:** no EDUC 252 class covers missing responses; the lesson is new (#153). The data audit in `outlines/missing-responses.md` records how the IRW represents missing responses and which tables keep the codes.
+- **Timing:** the core ideas and widgets take about 60 minutes; the PIRLS 2023 analysis works as a 30-minute lab. Every fit takes seconds in local R, the propensity model about ten.
+- **Data:** the PIRLS 2023 check downloads the source file (4.5 MB, CC BY 4.0) from the University of Pretoria's repository. Only the check and the plausible value depend on it; everything else uses the IRW table alone. The TIMSS 2007 check needs `sirt`.
+- **Held back:** rapid guessing as a missing-data screen ([Mixture models](mixture-models.qmd)); plausible values with background conditioning, which is how TIMSS and PIRLS score students; missingness by design in adaptive testing ([Item banks and adaptive testing](item-banks-cat.qmd)). ENEM tables carry each candidate's item order, but blanks are rare there (a blank earns what a wrong answer earns), so they stay in the outline.
+- **Solutions:** held back in `solutions/missing-responses.qmd` (not published).
