@@ -493,7 +493,7 @@ lessons:
     prereqs: [ctt-limits, rasch]
     origin: {slides: [], ps: [], code: []}
     tables: [mcmi_mokken, balance_mokken, swmd_mokken]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: continuous-responses
