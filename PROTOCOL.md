@@ -346,10 +346,17 @@ From what broke while building the pilots and the draft site. Source:
   render any page you add or edit (and every page, after editing `lessons.yml`, since
   the header boxes come from it) and commit its `_freeze/` directory. `python3
   tools/check_freeze.py` fails on a missing or stale entry (a missing one broke the
-  publish on 09-24, run 36051532494).
+  publish on 09-24, run 36051532494). **This includes one-line edits:** any PR that
+  touches `lessons/<id>.qmd` re-renders that lesson and commits `_freeze/lessons/<id>/`
+  in the same PR, and check_freeze passes before it opens (an unrendered one-line edit
+  broke the publish on 09-28, #197 → #199). Render lessons one file at a time
+  (`quarto render lessons/<id>.qmd`): a project-wide `quarto render` reuses frozen
+  output, so header, thread and citation changes from `lessons.yml`, `_course.R` or
+  `_citations.yml` don't reach unchanged pages. Don't commit `_freeze/index` from a
+  lesson PR.
 - **Preview for Ben.** One local server serves every worktree:
-  `python3 -m http.server 4400 --bind 127.0.0.1 --directory ~/worktrees` (start it if
-  it isn't running). After rendering, the PR description links the page at
+  `python3 ~/worktrees/.preview_server.py` (127.0.0.1:4400; it sends no-store, so
+  browsers don't keep stale widget code). Start it if it isn't running. After rendering, the PR description links the page at
   `http://127.0.0.1:4400/<worktree-dir>/_site/lessons/<id>.html`. Widgets, quizzes and
   webR need a server: a self-contained HTML opened from disk shows text, math, code and
   the real-data output, but Quarto disables the widgets and webR on `file://` pages.
