@@ -1,0 +1,15 @@
+{
+  "hash": "81977607c6210c70836269e02e6ad6dc",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Continuous responses: sliders and bounded scales\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Beyond the standard models  \n**Tranche:** extension (beyond a first course)  \n**Before this:** [Models for polytomous responses](polytomous.qmd) · [Factor analysis II: confirmatory models, omega, and IRT as factor analysis](fa-confirmatory.qmd)  \n**Builds toward:** none  \n**IRW tables:** [`estcrm_epia`](https://itemresponsewarehouse.org/tables/estcrm_epia/), [`karlsson_2023_climate_risk`](https://itemresponsewarehouse.org/tables/karlsson_2023_climate_risk/)  \n**From EDUC 252:** n/a  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n**Comments:** [open an issue on GitHub](https://github.com/ben-domingue/irw-course/issues/new?title=Continuous%20responses%3A%20sliders%20and%20bounded%20scales%3A%20) about this lesson.\n:::\n\n## What this is for\n\n*To be written.* The plan is in [outlines/continuous-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/continuous-responses.md).\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## Data sources\n\nData from the [Item Response Warehouse](https://itemresponsewarehouse.org) (each table name links to its IRW page); references from IRW biblio.\n\n- [`estcrm_epia`](https://itemresponsewarehouse.org/tables/estcrm_epia/): Ferrando, P.J.(2002). Theoretical and Empirical Comparison between Two Models for Continuous Item Responses. Multivariate Behavioral Research, 37(4), 521-542. <https://doi.org/10.1207/S15327906MBR3704_05>. Licence: GPL-3.0.\n- [`karlsson_2023_climate_risk`](https://itemresponsewarehouse.org/tables/karlsson_2023_climate_risk/): Karlsson, H., Asutay, E., & Vastfjall, D. (2023). A causal link between mental imagery and affect-laden perception of climate change related risks. Scientific Reports, 13, 10163. <https://doi.org/10.1038/s41598-023-37195-w>. Licence: CC BY 4.0.\n\n## For instructors\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

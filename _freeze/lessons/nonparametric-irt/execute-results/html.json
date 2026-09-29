@@ -1,0 +1,15 @@
+{
+  "hash": "72d1ec076d8281ebd915b5915b3bb7bd",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Nonparametric IRT: Mokken scaling\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Tranche:** extension (beyond a first course)  \n**Before this:** [Where CTT breaks: toward item response models](ctt-limits.qmd) · [The Rasch model](rasch.qmd)  \n**Builds toward:** none  \n**IRW tables:** [`mcmi_mokken`](https://itemresponsewarehouse.org/tables/mcmi_mokken/), [`balance_mokken`](https://itemresponsewarehouse.org/tables/balance_mokken/), [`swmd_mokken`](https://itemresponsewarehouse.org/tables/swmd_mokken/)  \n**From EDUC 252:** n/a  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n**Comments:** [open an issue on GitHub](https://github.com/ben-domingue/irw-course/issues/new?title=Nonparametric%20IRT%3A%20Mokken%20scaling%3A%20) about this lesson.\n:::\n\n## What this is for\n\n*To be written.* The plan is in [outlines/nonparametric-irt.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/nonparametric-irt.md).\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## Data sources\n\nData from the [Item Response Warehouse](https://itemresponsewarehouse.org) (each table name links to its IRW page); references from IRW biblio.\n\n- [`mcmi_mokken`](https://itemresponsewarehouse.org/tables/mcmi_mokken/): Rossi, G., Elklit, A., & Simonsen, E. (2010). Empirical evidence for a four factor framework of personality disorder organization: multigroup confirmatory factor analysis of the millon clinical multiaxial inventory—III personality disorder scales across belgian and danish data samples. Journal of Personality Disorders, 24(1), 128-150. <https://doi.org/10.1521/pedi.2010.24.1.128>. Licence: GPL-3.0.\n- [`balance_mokken`](https://itemresponsewarehouse.org/tables/balance_mokken/): Van Maanen, L., Been, P. H., & Sijtsma, K. (1989). Problem solving strategies and the linear logistic test model. In Mathematical psychology in progress (pp. 267-287). Springer. <https://cran.r-project.org/web/packages/mokken/index.html>. Licence: GPL-3.0.\n- [`swmd_mokken`](https://itemresponsewarehouse.org/tables/swmd_mokken/): Zijsling, D., Keuning, J., Keizer-Mittelhaeuser, M.-A., Naaijer, H., & Timmermans, A. (2017). Cohortonderzoek COOL5-18: Technisch rapport meting VO-3 in 2014. Onderwijs/Onderzoek. <https://cran.r-project.org/web/packages/mokken/index.html>. Licence: GPL-3.0.\n\n## For instructors\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

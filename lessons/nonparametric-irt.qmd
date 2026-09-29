@@ -1,0 +1,30 @@
+---
+title: "Nonparametric IRT: Mokken scaling"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("nonparametric-irt")
+```
+
+## What this is for
+
+*To be written.* The plan is in [outlines/nonparametric-irt.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/nonparametric-irt.md).
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("nonparametric-irt")
+```
+
+## For instructors
