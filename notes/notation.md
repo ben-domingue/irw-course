@@ -68,6 +68,12 @@ clash is noted; each lesson defines its symbols where they first appear.
 | `trials` | $\tau^2_\theta$, $\tau^2_\gamma$ | between-respondent variances in the RT model | $\tau_j$ is speed in `response-time` |
 | `guessing-priors` | $\alpha$, $\gamma_i$ | 1PL-AG: how guessing rises with ability; item guessing intercept | $\alpha$ also names beta-prior parameters there |
 | `guessing-priors` | $\pi$ | share of engaged respondents in the two-class mixture | |
+| `mixture-models` | $k$, $\pi_k$, $b_{ik}$ | latent class ($k = 1, \dots, K$), class share, item $i$'s difficulty in class $k$ | $\pi$ as in `guessing-priors`, same meaning; $k$ indexes categories in `polytomous` |
+| `continuous-responses` | $M$, $z_{ij}$, $\mu_i$, $\psi_i$ | scale maximum; logit of the rescaled response; item intercept; unique variance (as in the FA lessons) | $z$ is the starting point in `rt-process-models` |
+| `continuous-responses` | $\nu$, $\omega_0$, $\omega_1$, $\phi$ | squeeze constant; shares of responses at 0 and 1; beta precision | chosen to avoid $\varepsilon$ and $\pi$ |
+| `nonparametric-irt` | $H_{ij}$, $H_i$, $H$, $H^T$, $R_{(i)}$, $h$, $K$ | Loevinger's scalability coefficients; IIO accuracy; rest score; kernel bandwidth; kernel | |
+| `nonparametric-irt` | $c$ | AISP lower bound for $H_i$ | $c$ is the lower asymptote |
+| `missing-responses` | $\beta$ (Go deeper) | item parameters in the response-propensity model | $\beta$ is for regression coefficients; flagged for Ben |
 
 **Open (for Ben):** $\eta$ carries four meanings (CFA factor, DINA ideal response, LLTM
 weight, drift SD) and $\alpha$ three. Each is defined where used and none meet in one
