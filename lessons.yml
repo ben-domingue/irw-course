@@ -512,7 +512,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [kay_2025_antonyms, su_2024_pss14, su_2024_phq9, test_taking_much_2025_mr]
     reuses: [test_taking_much_2025_mr]
-    status: stub
+    status: draft
     tranche: extension
 
 paths:

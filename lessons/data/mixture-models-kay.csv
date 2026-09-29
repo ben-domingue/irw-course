@@ -1,0 +1,8 @@
+"comparison","value","date_run"
+"2 classes over Rasch",0.1737,"2026-09-28"
+"3 classes over 2",0.01618,"2026-09-28"
+"2PL over Rasch",0.1634,"2026-09-28"
+"2 classes over 2PL",0.008842,"2026-09-28"
+"BIC, 4 classes",12110,"2026-09-28"
+"10 starts, 2 classes: distinct maxima",1,"2026-09-28"
+"10 starts, 3 classes: distinct maxima",1,"2026-09-28"
