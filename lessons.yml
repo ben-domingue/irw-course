@@ -477,15 +477,6 @@ lessons:
     status: stub
     tranche: extension
 
-  - id: careless-responding
-    title: Careless responding and response styles
-    module: beyond
-    prereqs: [response-time, instrument-building, person-fit]
-    origin: {slides: [], ps: [], code: []}
-    tables: [su_2024_pss14, su_2024_phq9, depression_anxiety_stress]
-    status: stub
-    tranche: extension
-
   - id: missing-responses
     title: "Missing responses: omitted, not reached, and ignorable"
     module: irt
@@ -517,10 +508,10 @@ lessons:
   - id: mixture-models
     title: "Mixture models: when respondents differ in kind"
     module: beyond
-    prereqs: [guessing-priors, person-fit]
+    prereqs: [guessing-priors, person-fit, instrument-building, polytomous]
     origin: {slides: [], ps: [], code: []}
-    tables: [kay_2025_antonyms, test_taking_much_2025_mr, balance_mokken]
-    reuses: [test_taking_much_2025_mr, balance_mokken]
+    tables: [kay_2025_antonyms, su_2024_pss14, su_2024_phq9, test_taking_much_2025_mr]
+    reuses: [test_taking_much_2025_mr]
     status: stub
     tranche: extension
 

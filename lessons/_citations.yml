@@ -144,11 +144,6 @@ de_vries_2022_hexaco_self:
   link: https://doi.org/10.1371/journal.pone.0272095
   license: CC BY 4.0
   irw_version: IRW v459
-depression_anxiety_stress:
-  reference: (2021). Depression Anxiety Stress Scales [dataset and codebook]. http://openpsychometrics.org/_rawdata/DASS_data_21.02.19.zip
-  link: http://openpsychometrics.org/_rawdata/
-  license: CC BY 4.0
-  irw_version: IRW v459
 duckmayr_2023_immigration:
   reference: 'Duck-Mayr, J., & Montgomery, J. (2023). Ends against the middle: Measuring
     latent traits when opposites respond the same way for antithetical reasons. Political
