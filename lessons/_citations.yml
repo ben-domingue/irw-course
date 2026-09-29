@@ -19,6 +19,13 @@ andrich_mudfold:
   link: https://doi.org/10.1177/014662168801200105
   license: GPL-3.0
   irw_version: IRW v459
+balance_mokken:
+  reference: Van Maanen, L., Been, P. H., & Sijtsma, K. (1989). Problem solving strategies
+    and the linear logistic test model. In Mathematical psychology in progress (pp.
+    267-287). Springer.
+  link: https://cran.r-project.org/web/packages/mokken/index.html
+  license: GPL-3.0
+  irw_version: IRW v459
 bfi_goldberg_1992_conscientiousness:
   reference: 'Goldberg, Lewis R. "The development of markers for the Big-Five factor
     structure." Psychological assessment 4.1 (1992): 26.'
@@ -35,6 +42,15 @@ bialowolski_2024_financial_literacy:
   reference: Bialowolski, P. (2024). Financial literacy in a gendered language context
     [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/MTQGSF
   link: https://doi.org/10.7910/DVN/MTQGSF
+  license: CC0 1.0
+  irw_version: IRW v459
+borges_brazil_residency_2024_cbt:
+  reference: 'Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro,
+    P. S., Fonseca, P. C., ... & Ricz, H. M. A. (2024). Increased accessibility of
+    computer-based testing for residency application to a hospital in Brazil with
+    item characteristics comparable to paper-based testing: a psychometric study.
+    Journal of Educational Evaluation for Health Professions, 21, 32.'
+  link: https://doi.org/10.3352/jeehp.2024.21.32
   license: CC0 1.0
   irw_version: IRW v459
 borges_brazil_residency_2024_pbt:
@@ -128,6 +144,11 @@ de_vries_2022_hexaco_self:
   link: https://doi.org/10.1371/journal.pone.0272095
   license: CC BY 4.0
   irw_version: IRW v459
+depression_anxiety_stress:
+  reference: (2021). Depression Anxiety Stress Scales [dataset and codebook]. http://openpsychometrics.org/_rawdata/DASS_data_21.02.19.zip
+  link: http://openpsychometrics.org/_rawdata/
+  license: CC BY 4.0
+  irw_version: IRW v459
 duckmayr_2023_immigration:
   reference: 'Duck-Mayr, J., & Montgomery, J. (2023). Ends against the middle: Measuring
     latent traits when opposites respond the same way for antithetical reasons. Political
@@ -149,6 +170,13 @@ enkavi_2019_stroop:
     of Sciences, 116(12), 5472-5477. https://doi.org/10.1073/pnas.1818430116
   link: https://doi.org/10.1073/pnas.1818430116
   license: CC BY 4.0
+  irw_version: IRW v459
+estcrm_epia:
+  reference: Ferrando, P.J.(2002). Theoretical and Empirical Comparison between Two
+    Models for Continuous Item Responses. Multivariate Behavioral Research, 37(4),
+    521-542.
+  link: https://doi.org/10.1207/S15327906MBR3704_05
+  license: GPL-3.0
   irw_version: IRW v459
 eurpar2_mudfold:
   reference: 'Schuur, H. V. (1984). Structure in political beliefs: A new model for
@@ -364,6 +392,19 @@ introversion_extroversion:
   link: http://openpsychometrics.org/_rawdata/
   license: CC BY 4.0
   irw_version: IRW v459
+karlsson_2023_climate_risk:
+  reference: Karlsson, H., Asutay, E., & Vastfjall, D. (2023). A causal link between
+    mental imagery and affect-laden perception of climate change related risks. Scientific
+    Reports, 13, 10163. https://doi.org/10.1038/s41598-023-37195-w
+  link: https://doi.org/10.1038/s41598-023-37195-w
+  license: CC BY 4.0
+  irw_version: IRW v459
+kay_2025_antonyms:
+  reference: ay, C.S. Why you shouldn’t trust data collected on MTurk. Behav Res 57,
+    340 (2025).
+  link: https://doi.org/10.3758/s13428-025-02852-7
+  license: CC BY 4.0
+  irw_version: IRW v459
 lessR_Mach4:
   reference: 'Hunter, J. E., Gerbing, D. W., & Boster, F. J. (1982). Machiavellian
     beliefs and personality: Construct invalidity of the Machiavellianism dimension.
@@ -376,6 +417,15 @@ manolika_2021_mini_ipip:
     Do Predict Movie and Reading Preferences? [Data set]. Harvard Dataverse. https://doi.org/10.7910/DVN/23NDKX'
   link: https://doi.org/10.7910/DVN/23NDKX
   license: CC0 1.0
+  irw_version: IRW v459
+mcmi_mokken:
+  reference: 'Rossi, G., Elklit, A., & Simonsen, E. (2010). Empirical evidence for
+    a four factor framework of personality disorder organization: multigroup confirmatory
+    factor analysis of the millon clinical multiaxial inventory—III personality disorder
+    scales across belgian and danish data samples. Journal of Personality Disorders,
+    24(1), 128-150.'
+  link: https://doi.org/10.1521/pedi.2010.24.1.128
+  license: GPL-3.0
   irw_version: IRW v459
 mentalrotation_wolf_2024:
   reference: Wolf, J. E., & Larsen, M. (2024). A New Procedure and Stimulus Set for
@@ -450,6 +500,12 @@ promis1wave1_pain:
   link: https://doi.org/10.7910/DVN/0NGAKG
   license: CC0 1.0
   irw_version: IRW v459
+psychtools_epi:
+  reference: Eysenck, H.J. and Eysenck, S. B.G. (1968). Manual for the Eysenck Personality
+    Inventory.Educational and Industrial Testing Service, San Diego, CA.
+  link: https://cran.r-project.org/web/packages/psychTools/index.html
+  license: GPL-3.0
+  irw_version: IRW v459
 rapm_poulton_2022_timed:
   reference: Poulton, A., Rutherford, K., Boothe, S., Brygel, M., Crole, A., Dali,
     G., ... & Hester, R. (2022). Evaluating untimed and timed abridged versions of
@@ -521,12 +577,40 @@ song_2023_rses:
   link: https://doi.org/10.1371/journal.pone.0284335
   license: CC BY 4.0
   irw_version: IRW v459
+su_2024_phq9:
+  reference: 'Su, Z., Liu, R., Wei, Y., et al. (2024). Temporal dynamics in psychological
+    assessments: a novel dataset with scales and response times. Scientific Data,
+    11, 1046. https://doi.org/10.1038/s41597-024-03888-8'
+  link: https://doi.org/10.1038/s41597-024-03888-8
+  license: CC BY 4.0
+  irw_version: IRW v459
+su_2024_pss14:
+  reference: 'Su, Z., Liu, R., Wei, Y., et al. (2024). Temporal dynamics in psychological
+    assessments: a novel dataset with scales and response times. Scientific Data,
+    11, 1046. https://doi.org/10.1038/s41597-024-03888-8'
+  link: https://doi.org/10.1038/s41597-024-03888-8
+  license: CC BY 4.0
+  irw_version: IRW v459
+swmd_mokken:
+  reference: 'Zijsling, D., Keuning, J., Keizer-Mittelhaeuser, M.-A., Naaijer, H.,
+    & Timmermans, A. (2017). Cohortonderzoek COOL5-18: Technisch rapport meting VO-3
+    in 2014. Onderwijs/Onderzoek'
+  link: https://cran.r-project.org/web/packages/mokken/index.html
+  license: GPL-3.0
+  irw_version: IRW v459
 teacherjudgements_lohmann_2026_essayratings:
   reference: 'Lohmann, J. F., Lötscher, F., Junge, F., Keller, S., Jansen, T., Fleckenstein,
     J., & Möller, J. (2026). Testing teacher judgments comprehensively: Accuracy,
     halo, frame of reference, strategy, and personality effects in holistic and analytic
     assessments of student essays.Journal of Educational Psychology, 118(6), 941–960.'
   link: https://doi.org/10.1037/edu0000969
+  license: CC BY 4.0
+  irw_version: IRW v459
+test_taking_much_2025_mr:
+  reference: Much, S., Mutak, A., Pohl, S., & Ranger, J. (2025, May 7). Modeling speed-ability
+    trade-off and test-taking persistence - Parameter validation for two psychometric
+    models. https://doi.org/10.17605/OSF.IO/9J6HM
+  link: https://doi.org/10.17605/OSF.IO/9J6HM
   license: CC BY 4.0
   irw_version: IRW v459
 trog_brinchmann_2019:

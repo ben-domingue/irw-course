@@ -1,0 +1,30 @@
+---
+title: "Careless responding and response styles"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("careless-responding")
+```
+
+## What this is for
+
+*To be written.* The plan is in [outlines/careless-responding.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/careless-responding.md).
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("careless-responding")
+```
+
+## For instructors

@@ -1,0 +1,15 @@
+{
+  "hash": "20b22e982534d5634352ef0c671646c9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Missing responses: omitted, not reached, and ignorable\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Item response theory  \n**Tranche:** extension (beyond a first course)  \n**Before this:** [Estimating abilities: MLE and EAP](ability-estimation.qmd)  \n**Builds toward:** none  \n**IRW tables:** [`pirlsmissing_sirt`](https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/), [`borges_brazil_residency_2024_cbt`](https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_cbt/)  \n**From EDUC 252:** n/a  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n**Comments:** [open an issue on GitHub](https://github.com/ben-domingue/irw-course/issues/new?title=Missing%20responses%3A%20omitted%2C%20not%20reached%2C%20and%20ignorable%3A%20) about this lesson.\n:::\n\n## What this is for\n\n*To be written.* The plan is in [outlines/missing-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/missing-responses.md).\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## Data sources\n\nData from the [Item Response Warehouse](https://itemresponsewarehouse.org) (each table name links to its IRW page); references from IRW biblio.\n\n- [`pirlsmissing_sirt`](https://itemresponsewarehouse.org/tables/pirlsmissing_sirt/): Robitzsch A (2022). sirt: Supplementary Item Response Theory Models. R package version 3.12-66, <https://CRAN.R-project.org/package=sirt>. <https://cran.r-project.org/web/packages/sirt/index.html>. Licence: GPL-3.0.\n- [`borges_brazil_residency_2024_cbt`](https://itemresponsewarehouse.org/tables/borges_brazil_residency_2024_cbt/): Borges, M. C., Santos, L. L., Manso, P. H., Moisés, E. C. D., Coltro, P. S., Fonseca, P. C., ... & Ricz, H. M. A. (2024). Increased accessibility of computer-based testing for residency application to a hospital in Brazil with item characteristics comparable to paper-based testing: a psychometric study. Journal of Educational Evaluation for Health Professions, 21, 32. <https://doi.org/10.3352/jeehp.2024.21.32>. Licence: CC0 1.0.\n\n## For instructors\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,30 @@
+---
+title: "Missing responses: omitted, not reached, and ignorable"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("missing-responses")
+```
+
+## What this is for
+
+*To be written.* The plan is in [outlines/missing-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/missing-responses.md).
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("missing-responses")
+```
+
+## For instructors

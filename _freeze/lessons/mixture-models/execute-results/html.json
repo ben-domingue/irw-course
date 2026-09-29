@@ -1,0 +1,15 @@
+{
+  "hash": "5185e8299cb9e9768fad30d10b6e0228",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Mixture models: when respondents differ in kind\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Module:** Beyond the standard models  \n**Tranche:** extension (beyond a first course)  \n**Before this:** [Guessing and priors](guessing-priors.qmd) · [Person fit: does a respondent's pattern fit the model?](person-fit.qmd)  \n**Builds toward:** none  \n**IRW tables:** [`kay_2025_antonyms`](https://itemresponsewarehouse.org/tables/kay_2025_antonyms/), [`test_taking_much_2025_mr`](https://itemresponsewarehouse.org/tables/test_taking_much_2025_mr/), [`balance_mokken`](https://itemresponsewarehouse.org/tables/balance_mokken/)  \n**From EDUC 252:** n/a  \n**Status:** stub  \n**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n**Comments:** [open an issue on GitHub](https://github.com/ben-domingue/irw-course/issues/new?title=Mixture%20models%3A%20when%20respondents%20differ%20in%20kind%3A%20) about this lesson.\n:::\n\n## What this is for\n\n*To be written.* The plan is in [outlines/mixture-models.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/mixture-models.md).\n\n## Goals\n\n## Core ideas\n\n## Worked example\n\n## Problems\n\n## Going further\n\n## Data sources\n\nData from the [Item Response Warehouse](https://itemresponsewarehouse.org) (each table name links to its IRW page); references from IRW biblio.\n\n- [`kay_2025_antonyms`](https://itemresponsewarehouse.org/tables/kay_2025_antonyms/): ay, C.S. Why you shouldn’t trust data collected on MTurk. Behav Res 57, 340 (2025). <https://doi.org/10.3758/s13428-025-02852-7>. Licence: CC BY 4.0.\n- [`test_taking_much_2025_mr`](https://itemresponsewarehouse.org/tables/test_taking_much_2025_mr/): Much, S., Mutak, A., Pohl, S., & Ranger, J. (2025, May 7). Modeling speed-ability trade-off and test-taking persistence - Parameter validation for two psychometric models. <https://doi.org/10.17605/OSF.IO/9J6HM>. Licence: CC BY 4.0.\n- [`balance_mokken`](https://itemresponsewarehouse.org/tables/balance_mokken/): Van Maanen, L., Been, P. H., & Sijtsma, K. (1989). Problem solving strategies and the linear logistic test model. In Mathematical psychology in progress (pp. 267-287). Springer. <https://cran.r-project.org/web/packages/mokken/index.html>. Licence: GPL-3.0.\n\n## For instructors\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

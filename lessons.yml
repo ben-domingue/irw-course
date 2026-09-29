@@ -465,6 +465,65 @@ lessons:
     tranche: extension
 
 # Paths are orderings through the map. Anyone teaching from this can add their own.
+
+  # New extension lessons approved by Ben 2026-09-28 (#153, #189); outlined, not drafted.
+  - id: person-fit
+    title: "Person fit: does a respondent's pattern fit the model?"
+    module: irt
+    prereqs: [fit-prediction, ability-estimation]
+    origin: {slides: [], ps: [], code: []}
+    tables: [credentialform_lnirt, psychtools_epi, test_taking_much_2025_mr]
+    reuses: [credentialform_lnirt]
+    status: stub
+    tranche: extension
+
+  - id: careless-responding
+    title: Careless responding and response styles
+    module: beyond
+    prereqs: [response-time, instrument-building, person-fit]
+    origin: {slides: [], ps: [], code: []}
+    tables: [su_2024_pss14, su_2024_phq9, depression_anxiety_stress]
+    status: stub
+    tranche: extension
+
+  - id: missing-responses
+    title: "Missing responses: omitted, not reached, and ignorable"
+    module: irt
+    prereqs: [ability-estimation]
+    origin: {slides: [], ps: [], code: []}
+    tables: [pirlsmissing_sirt, borges_brazil_residency_2024_cbt]
+    reuses: [pirlsmissing_sirt]
+    status: stub
+    tranche: extension
+
+  - id: nonparametric-irt
+    title: "Nonparametric IRT: Mokken scaling"
+    module: irt
+    prereqs: [ctt-limits, rasch]
+    origin: {slides: [], ps: [], code: []}
+    tables: [mcmi_mokken, balance_mokken, swmd_mokken]
+    status: stub
+    tranche: extension
+
+  - id: continuous-responses
+    title: "Continuous responses: sliders and bounded scales"
+    module: beyond
+    prereqs: [polytomous, fa-confirmatory]
+    origin: {slides: [], ps: [], code: []}
+    tables: [estcrm_epia, karlsson_2023_climate_risk]
+    status: stub
+    tranche: extension
+
+  - id: mixture-models
+    title: "Mixture models: when respondents differ in kind"
+    module: beyond
+    prereqs: [guessing-priors, person-fit]
+    origin: {slides: [], ps: [], code: []}
+    tables: [kay_2025_antonyms, test_taking_much_2025_mr, balance_mokken]
+    reuses: [test_taking_much_2025_mr, balance_mokken]
+    status: stub
+    tranche: extension
+
 paths:
   - id: first-course
     title: "A first course (preliminary and core lessons)"

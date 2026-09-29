@@ -1,0 +1,30 @@
+---
+title: "Continuous responses: sliders and bounded scales"
+---
+
+```{r}
+#| output: asis
+source("_course.R")
+lesson_header("continuous-responses")
+```
+
+## What this is for
+
+*To be written.* The plan is in [outlines/continuous-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/continuous-responses.md).
+
+## Goals
+
+## Core ideas
+
+## Worked example
+
+## Problems
+
+## Going further
+
+```{r}
+#| output: asis
+data_sources("continuous-responses")
+```
+
+## For instructors
