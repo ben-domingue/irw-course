@@ -502,7 +502,7 @@ lessons:
     prereqs: [polytomous, fa-confirmatory]
     origin: {slides: [], ps: [], code: []}
     tables: [estcrm_epia, karlsson_2023_climate_risk]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: mixture-models

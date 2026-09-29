@@ -8,19 +8,435 @@ source("_course.R")
 lesson_header("continuous-responses")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {grid, dnorm, pnorm, palette} from "./widgets/irt.js"
+import {samejimaBand, linearMatch, logitNormalDens, betaDens, betaUpper, squeezeSample, squeeze, twoItemInfo, cuts, cutInfo, lineInfo} from "./widgets/continuous-responses.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.* The plan is in [outlines/continuous-responses.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/continuous-responses.md).
+Some items offer no categories: the respondent marks a point on a line, or drags a slider from 0 to 100. [Factor analysis II](fa-confirmatory.qmd) imagined a continuous latent response behind every ordered category; a line seems to hand it to us directly. So do we just fit a factor model? Often that may be enough, and this lesson says when. But a line has ends, and respondents use them: on one climate-risk slider, almost a quarter of the ratings sit at 100. We build the linear model and Samejima's continuous response model, look at models that treat the ends as part of the response, and ask what cutting a line into categories costs. On five impulsivity items marked on a line, the graded model fitted to the cut line *reports* more information than the continuous models, which it can't have if they hold. Checking that claim takes up most of the real-data section.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write the linear model for continuous item responses, and say why its information, $\lambda^2/\psi$, is the same at every $\theta$;
+- fit Samejima's continuous response model as a factor model for logits, and convert its estimates to `EstCRM`'s;
+- say what the ends of a bounded scale do to these models, and what a squeeze constant, a beta model and an ordered beta model each assume about them;
+- compute what cutting a line into $K$ categories costs, and where;
+- check a model's claim about information against the data, with a split into halves that doesn't depend on the model.
+
 ## Core ideas
 
-## Worked example
+### The latent response, observed
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Factor analysis II](fa-confirmatory.qmd): an ordered response can be read as a latent response $y^* = \lambda\eta + \varepsilon$ cut at thresholds, and the ordinal factor model that results is the graded response model.
+:::
+
+On a line there is nothing to cut. A respondent's mark $x_{ij}$, in millimetres or slider points, can be modelled directly:
+$$x_{ij} = \mu_i + \lambda_i\theta_j + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim N(0, \psi_i),$$
+with $\theta_j$ standard normal. This is the one-factor model of [Factor analysis I](fa-exploratory.qmd), with $\psi_i$ the unique variance, read as an item response model for continuous responses ([Mellenbergh, 1994](https://doi.org/10.1207/s15327906mbr2903_2); [Bejar, 1977](https://doi.org/10.1177/014662167700100407), applies such a model to personality items).
+
+How much does one response say about $\theta$? Given $\theta$, the response is normal with mean $\mu_i + \lambda_i\theta$ and variance $\psi_i$, so the log likelihood is a parabola in $\theta$ with curvature $\lambda_i^2/\psi_i$. That is the item's information, and $\theta$ doesn't appear in it.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Information, precision, and short forms](information.qmd): the conditional SEM is $1/\sqrt{I(\theta)}$, and it replaced the single standard error of measurement of [Classical test theory and reliability](ctt-reliability.qmd) with one that varies with $\theta$.
+:::
+
+Under the linear model the single SEM comes back: $1/\sqrt{\sum_i \lambda_i^2/\psi_i}$ for everyone. With standardized loadings, $\psi_i = 1 - \lambda_i^2$, and a test information of $I$ gives a reliability of $I/(1+I)$.
+
+### The ends, and Samejima's model
+
+A line has ends, and the linear model doesn't know it: its mean keeps rising past the top of the scale, and its error variance is the same at the ends as in the middle. [Samejima (1973)](https://doi.org/10.1007/BF02291114) extended her graded model to a **continuous response model**. In the parameterization of [Wang and Zeng (1998)](https://doi.org/10.1177/014662169802200402) it is easy to fit: divide by the scale's maximum $M$, take logits,
+$$z_{ij} = \ln\frac{x_{ij}}{M - x_{ij}},$$
+and fit the linear model to $z_{ij}$. The logit stretches the ends out to $\pm\infty$, so the responses stay bounded, and are squeezed near the ends. The `EstCRM` package ([Zopluoglu, 2012](https://doi.org/10.1177/0146621612436599)) fits it by EM; `factanal()` on the logits gives the same estimates, as the real-data section shows.
+
+#### Try it: the linear model against Samejima's model
+
+An item follows Samejima's model. The shaded band holds 95% of responses at each $\theta$, and the solid blue line is the median. The orange lines are the linear model that best matches the item across respondents (the regression of the response on $\theta$), with its own 95% band dashed.
+
+```{ojs}
+//| echo: false
+viewof lb_a = Inputs.range([0.5, 3], {value: 1, step: 0.1, label: "Slope on the logit scale"})
+viewof lb_b = Inputs.range([-2, 2], {value: -1, step: 0.1, label: "Location b (median response 0.5)"})
+viewof lb_s = Inputs.range([0.3, 2], {value: 0.6, step: 0.05, label: "Residual SD on the logit scale"})
+```
+
+```{ojs}
+//| echo: false
+lb_th = grid(-3, 3, 121)
+lb_lin = linearMatch(lb_a, lb_b, lb_s)
+lb_rows = lb_th.map(t => { const q = samejimaBand(t, lb_a, lb_b, lb_s); const m = lb_lin.intercept + lb_lin.slope * t;
+  return {theta: t, ...q, lm: m, llo: m - 1.96 * lb_lin.sd, lhi: m + 1.96 * lb_lin.sd}; })
+Plot.plot({
+  width: 700, height: 320, x: {label: "θ", domain: [-3, 3]}, y: {label: "Response (0 to 1)", domain: [-0.4, 1.4]},
+  marks: [
+    Plot.areaY(lb_rows, {x: "theta", y1: "lo", y2: "hi", fill: palette.light, fillOpacity: 0.5}),
+    Plot.ruleY([0, 1], {stroke: palette.ink}),
+    Plot.line(lb_rows, {x: "theta", y: "median", stroke: palette.main, strokeWidth: 2.5}),
+    Plot.line(lb_rows, {x: "theta", y: "lm", stroke: palette.contrast, strokeWidth: 2}),
+    Plot.line(lb_rows, {x: "theta", y: "llo", stroke: palette.contrast, strokeDasharray: "5,4"}),
+    Plot.line(lb_rows, {x: "theta", y: "lhi", stroke: palette.contrast, strokeDasharray: "5,4"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+lb_out = { const w = lb_th.map(t => dnorm(t)), sw = w.reduce((u, v) => u + v, 0);
+  return lb_rows.reduce((s, r, k) => s + (r.llo < 0 || r.lhi > 1 ? w[k] : 0), 0) / sw; }
+md`The linear model's band leaves the scale for **${(100 * lb_out).toFixed(0)}%** of respondents. Its residual SD is **${lb_lin.sd.toFixed(3)}** everywhere; under Samejima's model the SD is **${samejimaBand(lb_b, lb_a, lb_b, lb_s).sd.toFixed(3)}** at θ = b and **${samejimaBand(lb_b + 2, lb_a, lb_b, lb_s).sd.toFixed(3)}** two units above it. Samejima's item information, slope² over residual variance, is **${(lb_a * lb_a / (lb_s * lb_s)).toFixed(2)}** at every θ.`
+```
+
+At the defaults the item sits low on the scale for most respondents ($b = -1$). The linear band spills over the top for 30% of them, while Samejima's responses bunch below 1: their SD falls from 0.139 at $\theta = b$ to 0.069 two units above it. Move $b$ to 0 and the linear band still leaves the scale for 18%, in both tails.
+
+The widget's last number is the odd one. Samejima's responses change shape along $\theta$, yet the information is flat. That follows from a general fact: Fisher information is unchanged by a one-to-one transformation of the data, because the densities of $x$ and of $z$ differ only by a Jacobian that doesn't involve $\theta$ (problem 1). The IRW's [bounded continuous responses vignette](https://itemresponsewarehouse.org/vignettes/continuous_bounded.html) makes the same point. So Samejima's model keeps the single SEM.
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Response times](response-time.qmd): the lognormal model for response times is the linear model for log time. Samejima's model is the same construction, with the logit in place of the log.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "An item follows Samejima's model with logit slope 1.2 and residual SD 0.8. What is its information at $\\theta = 2$, near the top of the scale?",
+  options: [
+    {text: "2.25, the same as everywhere else", correct: true, why: "Information is slope² over residual variance on the logit scale, $1.44/0.64 = 2.25$. The logit is a one-to-one transformation of the response, so the information about $\\theta$ is the same on either scale, at every $\\theta$."},
+    {text: "Less than 2.25: responses near the top are squeezed together", correct: false, why: "They are squeezed on the response scale, but the logit spreads them out again, and a one-to-one transformation loses no information."},
+    {text: "More than 2.25: responses near the top vary less", correct: false, why: "The smaller SD near the top comes with a smaller change in the mean per unit of θ; on the logit scale both are constant."}
+  ]
+})
+```
+
+### Bounded models: beta IRT and its relatives
+
+Another route builds the bounds into the distribution. **Beta IRT** ([Noel & Dauvier, 2007](https://doi.org/10.1177/0146621605287691)) takes the response, rescaled to (0, 1), to be beta-distributed given $\theta$, with a mean that rises with $\theta$ and a precision $\phi$ that sets the spread. [Müller (1987)](https://doi.org/10.1007/BF02294232) built a Rasch model for continuous ratings, and [Ferrando (2001)](https://doi.org/10.1348/000711001159573) a nonlinear factor model for them. Under these models information varies with $\theta$. The IRW vignette fits them to 11 slider tables: on held-out log probability the bounded models beat the linear model on every table, but on the error of a predicted response (RMSE) they didn't. They pay off when a question needs the shape of the response, such as the chance of a rating at the ceiling.
+
+#### Try it: three densities at one θ
+
+One item, three models: Samejima's (logit slope 1.5, residual SD 1), a beta with the same median and precision $\phi = 10$, and the same beta with shares $\omega_0$ and $\omega_1$ of responses exactly at 0 and 1. The shares are set at $\theta = 0$ and move with $\theta$ on the logit scale, with slope 1.5.
+
+```{ojs}
+//| echo: false
+viewof dn_th = Inputs.range([-2.5, 2.5], {value: 1.5, step: 0.1, label: "θ"})
+viewof dn_w1 = Inputs.range([0, 0.3], {value: 0.02, step: 0.01, label: "ω1, share at 1 when θ = 0"})
+viewof dn_w0 = Inputs.range([0, 0.3], {value: 0.02, step: 0.01, label: "ω0, share at 0 when θ = 0"})
+```
+
+```{ojs}
+//| echo: false
+dn = { const mu = 1.5 * dn_th, m = 1 / (1 + Math.exp(-mu));
+  const sh = (w, s) => w <= 0 ? 0 : 1 / (1 + Math.exp(-(Math.log(w / (1 - w)) + s * 1.5 * dn_th)));
+  let w1 = sh(dn_w1, 1), w0 = sh(dn_w0, -1); const tot = w0 + w1; if (tot > 0.95) { w1 *= 0.95 / tot; w0 *= 0.95 / tot; }
+  return {mu, m, w0, w1}; }
+dn_rows = grid(0.003, 0.997, 200).flatMap(x => [
+  {x, d: logitNormalDens(x, dn.mu, 1), model: "Samejima (logit-normal)"},
+  {x, d: betaDens(x, dn.m, 10), model: "Beta"},
+  {x, d: (1 - dn.w0 - dn.w1) * betaDens(x, dn.m, 10), model: "Zero-one inflated beta"}])
+Plot.plot({
+  width: 700, height: 300, x: {label: "Response (0 to 1)", domain: [0, 1]}, y: {label: "Density", domain: [0, 8]},
+  color: {legend: true, domain: ["Samejima (logit-normal)", "Beta", "Zero-one inflated beta"], range: [palette.main, palette.light, palette.contrast]},
+  marks: [Plot.line(dn_rows, {x: "x", y: d => Math.min(d.d, 8), stroke: "model", strokeWidth: 2.5}),
+          Plot.ruleX([0, 1], {stroke: palette.guide, strokeDasharray: "4,3"})]
+})
+```
+
+```{ojs}
+//| echo: false
+dn_beta = betaUpper(0.99, dn.m, 10)
+md`Share of responses above 0.99: Samejima **${(100 * (1 - pnorm(Math.log(99) - dn.mu))).toFixed(1)}%**, beta **${(100 * dn_beta).toFixed(1)}%**, zero-one inflated beta **${(100 * (dn.w1 + (1 - dn.w0 - dn.w1) * dn_beta)).toFixed(1)}%**, of which **${(100 * dn.w1).toFixed(1)}%** is exactly 1 (and **${(100 * dn.w0).toFixed(1)}%** is exactly 0).`
+```
+
+At $\theta = 1.5$ the Samejima and beta curves have the same median, 0.90, but different tails: Samejima's puts 1.0% of responses above 0.99, the beta 9.9%. Neither puts any response *exactly* at 1. The inflated model does, 16.2% of them, and 24.5% above 0.99 in all. Set both shares to 0 and the inflated curve becomes the beta.
+
+### Responses at the ends
+
+A response of exactly 0 or $M$ has an infinite logit. Samejima's model needs the ends pulled in first, $z = \ln\{(x + \nu)/(M - x + \nu)\}$ with a small **squeeze constant** $\nu$. The beta needs the same ([Smithson & Verkuilen, 2006](https://doi.org/10.1037/1082-989X.11.1.54), squeeze by an amount that shrinks with the sample size). When few responses sit at the ends, the choice hardly matters. When many do, it matters a good deal: [Molenaar, Cúri and Bazán (2022)](https://doi.org/10.3102/10769986221108455) found estimates affected with as few as 5% of responses on a bound.
+
+#### Try it: the squeeze constant
+
+Five hundred respondents answer two items on a 0–100 slider; each logit is $1.5\theta$ plus normal noise, and responses are recorded as whole numbers, so everything above 99.5 becomes 100. Move the items up the scale and pick $\nu$. The histogram shows item 1's logits.
+
+```{ojs}
+//| echo: false
+viewof sq_shift = Inputs.range([0, 5], {value: 4, step: 0.25, label: "How far the items sit toward the top"})
+viewof sq_nu = Inputs.radio([0.5, 0.05, 0.005], {value: 0.5, label: "Squeeze constant ν", format: v => String(v)})
+```
+
+```{ojs}
+//| echo: false
+sq = squeezeSample(500, sq_shift)
+sq_z = sq.x1.map(v => squeeze(v, sq_nu))
+Plot.plot({
+  width: 700, height: 250, x: {label: "Logit of item 1's response"}, y: {label: "Respondents"},
+  marks: [Plot.rectY(sq_z, Plot.binX({y: "count"}, {x: d => d, thresholds: 60, fill: palette.main})), Plot.ruleY([0])]
+})
+```
+
+```{ojs}
+//| echo: false
+sq_info = [0.5, 0.05, 0.005].map(nu => twoItemInfo(sq.x1.map(v => squeeze(v, nu)), sq.x2.map(v => squeeze(v, nu))).info)
+md`At the ceiling: **${(100 * sq.x1.filter(v => v === 100).length / 500).toFixed(0)}%** of item 1's responses. Test information from the two items: raw responses (linear model) **${twoItemInfo(sq.x1, sq.x2).info.toFixed(2)}**; logits with ν = 0.5, 0.05, 0.005: **${sq_info.map(v => v.toFixed(2)).join(", ")}**. Without the ceiling and the rounding it would be 4.50.`
+```
+
+At the default, 22% of responses are at 100, the tall bar on the right. With $\nu = 0.5$ it sits just past the other logits; with $\nu = 0.005$ it stands far out, and the fitted information falls from 4.01 to 2.54, against 4.50 with no ceiling. Move the items down to 0 and the three agree within 0.25. The squeeze constant decides where to put responses the model can't place.
+
+Two families give the ends their own probabilities instead. **Zero-one inflated** models add a share at each end to a continuous density ([Ospina & Ferrari, 2010](https://doi.org/10.1007/s00362-008-0125-4)), and Molenaar, Cúri and Bazán (2022) build such shares into four IRT models for bounded responses. They are a reasonable choice when responses at the ends may arise differently from the rest, for example as a choice of the end itself. The **ordered beta** ([Kubinec, 2023](https://doi.org/10.1017/pan.2022.20)) uses cutpoints, as ordered logit does, to fit one linear model to 0, to 1 and to the beta-distributed responses in between. It is a reasonable choice when a respondent at 100 is plausibly one who would rate higher still. Both can be fitted with `glmmTMB` ([Brooks et al., 2017](https://doi.org/10.32614/RJ-2017-066)).
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A third of a slider item's responses are at 100. What can those responses say about respondents above the ceiling?",
+  options: [
+    {text: "Only that they are somewhere above it: the item can't tell them apart", correct: true, why: "Everyone above the ceiling gives the same response, so the item carries almost no information there, whichever model is fitted. A model can describe how many sit at the end, not order them."},
+    {text: "A squeeze constant recovers their order", correct: false, why: "The squeeze moves every response at 100 to the same logit. It changes where the pile sits, not who is in it."},
+    {text: "An ordered beta model recovers their order", correct: false, why: "It predicts how many respondents reach 1 at each θ, which is useful, but their responses are identical, so no model can order them."}
+  ]
+})
+```
+
+### Cutting the line
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Models for polytomous responses](polytomous.qmd): merging two categories never adds information (the Cauchy–Schwarz step in its second Go deeper callout), and collapsing a four-category item costs most away from the boundary that is kept.
+:::
+
+A line is the limit of that argument. If the linear model holds, a line cut into $K$ categories is an ordinal item with its thresholds at the cuts, and it can't carry more than the line's $\lambda^2/\psi$. [MacCallum, Zhang, Preacher and Rucker (2002)](https://doi.org/10.1037/1082-989X.7.1.19) make the parallel case about dichotomizing a continuous variable. How much does a cut item carry?
+
+#### Try it: cutting a line into K categories
+
+The latent response has loading λ and is observed on a line spanning ±3 SD. Cut it into K categories of equal width, or holding equal shares of respondents.
+
+```{ojs}
+//| echo: false
+viewof ct_l = Inputs.range([0.3, 0.9], {value: 0.6, step: 0.05, label: "Loading λ"})
+viewof ct_K = Inputs.range([2, 21], {value: 5, step: 1, label: "Categories K"})
+viewof ct_kind = Inputs.radio(["Equal shares", "Equal width"], {value: "Equal shares", label: "Cuts"})
+```
+
+```{ojs}
+//| echo: false
+ct_t = cuts(ct_K, ct_kind === "Equal width" ? "equal" : "quantile")
+ct_full = lineInfo(ct_l)
+Plot.plot({
+  width: 700, height: 290, x: {label: "θ", domain: [-3, 3]}, y: {label: "Item information", domain: [0, ct_full * 1.15]},
+  color: {legend: true, domain: ["The line", `Cut into ${ct_K}`], range: [palette.contrast, palette.main]},
+  marks: [Plot.ruleY([ct_full], {stroke: palette.contrast, strokeWidth: 2, strokeDasharray: "5,4"}),
+          Plot.line(grid(-3, 3, 121).map(t => ({theta: t, I: cutInfo(t, ct_l, ct_t)})), {x: "theta", y: "I", stroke: palette.main, strokeWidth: 2.5}),
+          Plot.ruleY([0])]
+})
+```
+
+```{ojs}
+//| echo: false
+md`The line carries **${ct_full.toFixed(2)}** at every θ. Cut into ${ct_K}, the item keeps **${(100 * cutInfo(0, ct_l, ct_t) / ct_full).toFixed(0)}%** of it at θ = 0 and **${(100 * cutInfo(-2, ct_l, ct_t) / ct_full).toFixed(0)}%** at θ = −2.`
+```
+
+Five categories holding equal shares keep 92% of the line's information at $\theta = 0$ and 67% at $\theta = -2$; cuts of equal width spread the loss more evenly (84% and 82%). Two categories keep 64% and 27%. No setting reaches the dashed line.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A slider item with loading 0.6 is cut into three categories holding equal shares. Where is the loss of information largest?",
+  options: [
+    {text: "In the tails, near θ = ±2", correct: true, why: "The two cuts sit near the middle of the distribution, leaving each tail inside one category. The widget gives 81% kept at θ = 0 and 47% at θ = −2."},
+    {text: "In the middle, near θ = 0", correct: false, why: "Cuts at equal shares sit near the middle, so that is where the cut item is most informative."},
+    {text: "Nowhere: three categories keep all the information", correct: false, why: "Merging can't add information and usually loses some; only by K = 21 or so is the loss small."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: the line as the limit of the graded model, and why cutting it loses information
+
+**Assumptions:** one item; the response (or its logit) is $y = \mu + \lambda\theta + \varepsilon$ with $\varepsilon \sim N(0, \psi)$; item parameters known.
+
+**Cutting gives a graded item.** Cut $y$ at thresholds $t_1 < \dots < t_{K-1}$. The chance of reaching category $k$ or above is $\Pr(y > t_k \mid \theta) = \Phi\big((\mu + \lambda\theta - t_k)/\sqrt\psi\big)$: a normal-ogive graded item with slope $\lambda/\sqrt\psi$ and boundaries $(t_k - \mu)/\lambda$.
+
+**The limit.** Let the thresholds fill the line, spaced $h$ apart, with $h \to 0$. Category $k$'s probability becomes $h\,f(t_k \mid \theta)$, with $f$ the normal density of $y$ given $\theta$, and the polytomous information $\sum_k (P_k')^2/P_k$ becomes
+$$\int \frac{\big(\partial f(y \mid \theta)/\partial\theta\big)^2}{f(y \mid \theta)}\,dy = \frac{\lambda^2}{\psi},$$
+the Fisher information about a normal mean $\mu + \lambda\theta$ with variance $\psi$. With the logit of the response as $y$, this is Samejima's model.
+
+**Cutting loses information.** Any cut version is a merger of the fine categories. By the Cauchy–Schwarz step in [Models for polytomous responses](polytomous.qmd), each merger keeps or lowers the information, so a cut item has at most $\lambda^2/\psi$ at every $\theta$, with equality only in the limit.
+
+**What the proof needs.** Both steps assume the model holds. If the response isn't normal given $\theta$, then $\lambda^2/\psi$ is what a normal model reports, not necessarily the information in the data, and a graded model fitted to the cut line can report more. The real-data section meets exactly this.
+:::
+
+### Do sliders behave like items with more categories?
+
+That depends on how respondents use them. A respondent who picks only multiples of 10 is answering an 11-category item. In a web experiment by [Couper, Tourangeau, Conrad and Singer (2006)](https://doi.org/10.1177/0894439305281503), visual analogue scales gave the same response distributions as radio buttons, with more missing data and longer completion times. In one by [Funke and Reips (2012)](https://doi.org/10.1177/1525822X12444061), respondents adjusted their ratings more often on the line than on five-point scales, with no difference in means, nonresponse or time. [Matejka, Glueck, Grossman and Fitzmaurice (2016)](https://doi.org/10.1145/2858036.2858063) found that a slider's ticks and labels shift where respondents put it. [Preston and Colman (2000)](https://doi.org/10.1016/S0001-6918(99)00050-5) found reliability and validity rising with the number of categories up to about seven. Heaping can be counted: an evenly spread 0–100 response lands on a multiple of 10 about 11% of the time, and the vignette found a table where over half the responses sat on the scale's quarter points. A paper line scored with a ruler gives respondents no numbers to round to.
+
+## Simulate
+
+The code simulates 500 respondents answering six slider items from Samejima's model, fits the linear model, Samejima's model ($\nu = 0.5$) and the graded model on `K` bins, and compares each with the true test information. The first run takes 20–30 seconds while R and `mirt` load.
+
+With the seed as written, the true test information is 5.2; the linear model gives 4.7 and Samejima's 5.6. The graded model on five bins gives 5.6 at $\theta = 0$ and 1.6 at $\theta = -2$. That 5.6 is above the truth, which a cut line can't carry: sampling error, and perhaps the graded model's logistic link where these data are normal. Keep it in mind. Set `ends <- 0.1` to push responses to the ends: information falls to 3.3 (linear) and 2.5 (Samejima). Heaping, `round_to <- 10`, costs little (4.7 for both).
+
+```{webr}
+{{< include code/continuous-responses-sim.R >}}
+```
+
+[Download this code](code/continuous-responses-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/continuous-responses-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### Impulsivity on a line
+
+Our main example is [estcrm_epia](https://itemresponsewarehouse.org/tables/estcrm_epia/): 1,033 undergraduates each marked five items of the impulsivity subscale of the Spanish Eysenck Personality Inventory (EPI-A) on a 112 mm line running from "almost never" to "almost always", scored in millimetres from 1 to 111 ([Ferrando, 2002](https://doi.org/10.1207/S15327906MBR3704_05); distributed as `EPIA` in `EstCRM`, [Zopluoglu, 2012](https://doi.org/10.1177/0146621612436599)). Its job here: a line that respondents use away from its ends, where the continuous models should do well. Higher means more impulsive, and all five items are keyed that way. [Download the code](code/continuous-responses-irw.R) to run every chunk.
+
+```{r fetch-epia}
+#| echo: true
+#| code-fold: show
+```
+
+Only 2.6% of marks are at 1 and 1.8% at 111, and there is little heaping: 22% fall on multiples of 5 and 12% on multiples of 10, against 20% and 10% for marks spread evenly. The items correlate only 0.13 to 0.31, and every item is flatter than a normal distribution (kurtosis 1.6 to 3.1, against 3).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Factor analysis II](fa-confirmatory.qmd): for continuous responses that are roughly normal, ML is a reasonable first choice of estimator.
+:::
+
+These marks are continuous, seldom at the ends and not far from symmetric: ML, on the raw marks and on their logits.
+
+```{r fit-epia}
+#| echo: true
+#| code-fold: show
+```
+
+The two models agree. Loadings run from 0.31 to 0.57 under either, test information is 1.4 under both (reliability 0.59 and 0.58), and the scores correlate 0.96. With five weakly related items the SEM is $1/\sqrt{1.43} \approx 0.84$, for every respondent.
+
+```{r estcrm-epia}
+#| echo: true
+#| code-fold: show
+```
+
+`EstCRM` gives the same item parameters as `factanal()` on the logits, to two decimals: its $a$ is the logit slope over the residual SD, and its $b$ is minus the mean logit over the logit slope. (Its $\alpha$ is the logit slope itself; the course keeps $\alpha$ for other things.)
+
+Now cut the lines into bins.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Cut each EPI line into five bins of equal width and fit the graded response model. Its test information at θ = 0, against the 1.4 both continuous models report for the full lines, will be:",
+  choices: ["Lower: cutting loses information", "About the same", "Higher"],
+  answer: "Higher",
+  reveal: "1.75 with five bins, and 1.97 with 21. If the linear model held, no cut version could have more than 1.4, so either the continuous models understate the information in the lines or the graded model overstates it. The checks below ask which."
+})
+```
+
+```{r bins-epia}
+#| echo: true
+#| code-fold: show
+```
+
+More bins mean more information, as the widget says: at $\theta = -2$ it rises from 0.36 with two bins to 1.91 with 21. Five bins keep 89% of the 21-bin information at $\theta = 0$ (1.75 against 1.97) and 58% at $\theta = -2$ (1.10 against 1.91). But from five bins on, every graded fit reports more information at $\theta = 0$ than the continuous models' 1.4.
+
+Does the graded model inflate information on its own? Simulate from the fitted linear model, cut the same way and refit:
+
+```{r simcheck-epia}
+#| echo: true
+#| code-fold: show
+```
+
+On data that follow the linear model, the graded model reports 1.35, a little below the true 1.43. So the gap comes from something in the EPI lines. Which model is right about them? A check that leans on neither: split the five items into a pair and a triple (10 ways) and correlate the halves' sums. More information means halves that agree more, and each fitted model says how much they should.
+
+```{r halves-epia}
+#| echo: true
+#| code-fold: show
+```
+
+The halves agree at 0.39, whether we sum the lines or the 21 bins. The linear model implies 0.38; the graded model fitted to the 21 bins implies 0.44. The extra information the graded model reports doesn't show up where we can see information without a model. Why the graded model fits steeper slopes to these lines, whether through the items' flat distributions or something else, I don't know (problem 6).
+
+### Climate risk on a slider
+
+For contrast, [karlsson_2023_climate_risk](https://itemresponsewarehouse.org/tables/karlsson_2023_climate_risk/): 1,001 US adults rated the risk of climate change on six 0–100 visual analogue scales before and after a mental-imagery manipulation ([Karlsson, Asutay & Västfjäll, 2023](https://doi.org/10.1038/s41598-023-37195-w); data at <https://osf.io/k6vp9/>). Its job: a slider where responses pile up at the top. Two items each ask about the risk to oneself, to other people and to non-human populations (item 4 reads "How big of a risk is climate change for you?", from the deposit's variable label as quoted in the IRW's [processing script](https://github.com/ben-domingue/irw/blob/main/data/karlsson_2023_climate_risk.py)). Higher means more perceived risk. We use wave 1, before the manipulation.
+
+```{r fetch-karl}
+#| echo: true
+#| code-fold: show
+```
+
+Here 23% of ratings are at 100 (15% to 32% by item) and 3.2% at 0, and 12% of respondents gave 100 on all six. Ratings heap: 59% fall on multiples of 5 and 44% on multiples of 10, against 21% and 11% for values spread evenly. The items pair up, correlating 0.93 to 0.96 within three pairs (items 1 and 4, 2 and 5, 3 and 6), which fits two items per target. That is local dependence, and the information figures below, which treat the six items as independent given $\theta$, overstate the precision for that reason.
+
+```{r squeeze-karl}
+#| echo: true
+#| code-fold: show
+```
+
+The squeeze constant now moves Samejima's fit: test information 36, 31 and 28 as $\nu$ goes from 0.5 to 0.005 slider points, against 38 for the linear model.
+
+```{r beta-karl}
+#| echo: true
+#| code-fold: show
+```
+
+A beta model fitted to squeezed responses puts 16% of simulated responses above 0.995 and 1.0% below 0.005, against 23% and 3.2% observed. The ordered beta gives the ends their own probabilities and comes close to both: 25% at 1 and 2.9% at 0.
+
+```{r bins-karl}
+#| echo: true
+#| code-fold: show
+```
+
+How much do the ratings measure above the ceiling? Cut into 21 bins, the graded model has 68 units of information at $\theta = 0$ but 0.41 at $\theta = 2$, and under 0.1 there with seven bins or fewer. Marginal reliability is 0.84 with five bins and 0.93 with 21.
+
+So which model should an analyst fit? It turns on two assumptions: that the response is normal given $\theta$ (on the raw or the logit scale), and that responses at the ends are ordinary responses that happen to be extreme. On the EPI lines, marks sit away from the ends, the two continuous models agree, and the linear model's claim about the halves matches the data. In the case that responses sit away from the ends and the goal is a score, the linear factor model on the raw responses may be sufficient for some purposes. In the case that a fifth or more of the responses sit at an end, as on the climate slider, a model that gives the ends their own probability, such as the ordered beta, is the one whose predictions at the ends can be checked against the data. And in the case that a slider is to be cut, five categories holding equal shares may be sufficient for some purposes: under the linear model they keep about nine tenths of the information in the middle and two thirds two SDs out.
 
 ## Problems
 
+1. **Information on two scales.** (a) Show that the linear model's item information is $\lambda^2/\psi$ at every $\theta$. (b) Show that Fisher information about $\theta$ is unchanged by a one-to-one, differentiable transformation of the response that doesn't depend on $\theta$. (c) Show that `EstCRM`'s $a$ equals $\lambda/\sqrt{1 - \lambda^2}$, with $\lambda$ the standardized loading of the logits.
+2. **Where is the end of the line?** [estcrm_selfeff](https://itemresponsewarehouse.org/tables/estcrm_selfeff/) has 307 pre-service teachers' marks on ten teaching self-efficacy items, made on an 11 cm line ([Kan, 2009](https://cran.r-project.org/web/packages/EstCRM/index.html); `EstCRM::SelfEff`). Many marks fall between 9.5 and 10.5 cm, and a few above. Fit Samejima's model with the scale maximum at 11 and at 10.5 (squeezing the marks above 10.5). What moves, and why? Which maximum would you defend?
+3. **Replacing a five-point item.** A team plans to replace a five-point item with a 0–100 slider "to get more information". What would you look for in pilot data (heaping, the ends, the information by $K$ from this lesson's code) before agreeing, and what result would make the switch worth it?
+4. **Designing a slider.** Design a slider item to limit heaping and piling at the ends. Decide whether it shows numbers, where the handle starts and how the ends are labelled, drawing on [Couper et al. (2006)](https://doi.org/10.1177/0894439305281503) and [Matejka et al. (2016)](https://doi.org/10.1145/2858036.2858063). How would you test your design against a five-point version?
+5. **Does imagery move the ends?** Use wave 2 of `karlsson_2023_climate_risk` and the three arms in `cov_condition`. Fit the ordered beta with the arm as a predictor. Does the manipulation move the share at 100, the middle of the scale, or both? What does the local dependence within pairs do to your standard errors?
+6. **Challenge (open): the graded model's extra information.** On the EPI lines the graded model fitted to bins reports about 40% more information than the linear model, yet the halves agree only as much as the linear model implies. Why does the graded model report more? Test one explanation: error flatter than normal, a variance that shrinks near the ends, a beta response, or the logistic link. I don't know which one holds.
+
+```{r}
+#| output: asis
+ask_claude("continuous-responses", "It covers item response models for continuous responses such as visual analogue scales and sliders: the linear (factor) model and its constant information, Samejima's continuous response model as a factor model for logits (checked against EstCRM), beta IRT, responses at the ends (squeeze constants, zero-one inflated and ordered beta models, fitted with glmmTMB), what cutting a line into categories costs, heaping on round numbers, and real-data analyses of EPI impulsivity items marked on a line and climate-risk ratings on a slider, including a check of the graded model's reported information against split-half agreement.")
+```
+
 ## Going further
+
+- The IRW vignette [Bounded continuous responses](https://itemresponsewarehouse.org/vignettes/continuous_bounded.html). The linear, beta, Samejima and Müller models compared on held-out responses across 11 slider tables, with information curves for each; this lesson builds on it rather than repeating it.
+- Mellenbergh, G. J. (1994). A unidimensional latent trait model for continuous item responses. *Multivariate Behavioral Research*, 29(3), 223–236. <https://doi.org/10.1207/s15327906mbr2903_2>. The linear model as an item response model.
+- Mellenbergh, G. J. (2016). Models for continuous responses. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models*. Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter on the models here (chapter pages not verified).
+- Samejima, F. (1973). Homogeneous case of the continuous response model. *Psychometrika*, 38(2), 203–219. <https://doi.org/10.1007/BF02291114>. The continuous response model.
+- Wang, T., & Zeng, L. (1998). Item parameter estimation for a continuous response model using an EM algorithm. *Applied Psychological Measurement*, 22(4), 333–344. <https://doi.org/10.1177/014662169802200402>. The parameterization and the EM algorithm that `EstCRM` uses.
+- Zopluoglu, C. (2012). EstCRM: An R package for Samejima's continuous IRT model. *Applied Psychological Measurement*, 36(2), 149–150. <https://doi.org/10.1177/0146621612436599>. The package, and the distributor of both the EPI and self-efficacy data.
+- Ferrando, P. J. (2002). Theoretical and empirical comparisons between two models for continuous item responses. *Multivariate Behavioral Research*, 37(4), 521–542. <https://doi.org/10.1207/S15327906MBR3704_05>. The source of the EPI lines.
+- Ferrando, P. J. (2001). A nonlinear congeneric model for continuous item responses. *British Journal of Mathematical and Statistical Psychology*, 54(2), 293–313. <https://doi.org/10.1348/000711001159573>. A factor model that bends at the bounds.
+- Bejar, I. I. (1977). An application of the continuous response level model to personality measurement. *Applied Psychological Measurement*, 1(4), 509–521. <https://doi.org/10.1177/014662167700100407>. An early application.
+- Noel, Y., & Dauvier, B. (2007). A beta item response model for continuous bounded responses. *Applied Psychological Measurement*, 31(1), 47–73. <https://doi.org/10.1177/0146621605287691>. Beta IRT.
+- Müller, H. (1987). A Rasch model for continuous ratings. *Psychometrika*, 52(2), 165–181. <https://doi.org/10.1007/BF02294232>. A Rasch model for the line.
+- Noel, Y. (2014). A beta unfolding model for continuous bounded responses. *Psychometrika*, 79(4), 647–674. <https://doi.org/10.1007/s11336-013-9361-1>. If you've done [Unfolding models](unfolding.qmd): an ideal-point model for bounded responses.
+- Smithson, M., & Verkuilen, J. (2006). A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. *Psychological Methods*, 11(1), 54–71. <https://doi.org/10.1037/1082-989X.11.1.54>. Beta regression, and the squeeze used in the code.
+- Ospina, R., & Ferrari, S. L. P. (2010). Inflated beta distributions. *Statistical Papers*, 51(1), 111–126. <https://doi.org/10.1007/s00362-008-0125-4>. Beta distributions with point masses at the ends.
+- Molenaar, D., Cúri, M., & Bazán, J. L. (2022). Zero and one inflated item response theory models for bounded continuous data. *Journal of Educational and Behavioral Statistics*, 47(6), 693–735. <https://doi.org/10.3102/10769986221108455>. Responses on the bounds, in IRT.
+- Kubinec, R. (2023). Ordered beta regression: A parsimonious, well-fitting model for continuous data with lower and upper bounds. *Political Analysis*, 31(4), 519–536. <https://doi.org/10.1017/pan.2022.20>. The ordered beta.
+- Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg, C. W., Nielsen, A., Skaug, H. J., Mächler, M., & Bolker, B. M. (2017). glmmTMB balances speed and flexibility among packages for zero-inflated generalized linear mixed modeling. *The R Journal*, 9(2), 378–400. <https://doi.org/10.32614/RJ-2017-066>. The package for the beta fits.
+- MacCallum, R. C., Zhang, S., Preacher, K. J., & Rucker, D. D. (2002). On the practice of dichotomization of quantitative variables. *Psychological Methods*, 7(1), 19–40. <https://doi.org/10.1037/1082-989X.7.1.19>. What cutting a continuous variable costs.
+- Lubke, G. H., & Muthén, B. O. (2004). Applying multigroup confirmatory factor models for continuous outcomes to Likert scale data complicates meaningful group comparisons. *Structural Equation Modeling*, 11(4), 514–534. <https://doi.org/10.1207/S15328007SEM1104_2>. The reverse move: treating categories as continuous.
+- Rhemtulla, M., Brosseau-Liard, P. É., & Savalei, V. (2012). When can categorical variables be treated as continuous? *Psychological Methods*, 17(3), 354–373. <https://doi.org/10.1037/a0029315>. Recalled from [Factor analysis II](fa-confirmatory.qmd).
+- Couper, M. P., Tourangeau, R., Conrad, F. G., & Singer, E. (2006). Evaluating the effectiveness of visual analog scales: A web experiment. *Social Science Computer Review*, 24(2), 227–245. <https://doi.org/10.1177/0894439305281503>. Sliders against radio buttons and text boxes.
+- Funke, F., & Reips, U.-D. (2012). Why semantic differentials in web-based research should be made from visual analogue scales and not from 5-point scales. *Field Methods*, 24(3), 310–327. <https://doi.org/10.1177/1525822X12444061>. Lines against five-point scales.
+- Preston, C. C., & Colman, A. M. (2000). Optimal number of response categories in rating scales: Reliability, validity, discriminating power, and respondent preferences. *Acta Psychologica*, 104(1), 1–15. <https://doi.org/10.1016/S0001-6918(99)00050-5>. From 2 to 11 categories, and a 101-point scale.
+- Matejka, J., Glueck, M., Grossman, T., & Fitzmaurice, G. (2016). The effect of visual appearance on the performance of continuous sliders and visual analogue scales. *Proceedings of the 2016 CHI Conference on Human Factors in Computing Systems*, 5421–5432. <https://doi.org/10.1145/2858036.2858063>. How a slider's look moves responses.
+- Kloft, M., Hartmann, R., Voss, A., & Heck, D. W. (2023). The Dirichlet dual response model: An item response model for continuous bounded interval responses. *Psychometrika*, 88(3), 888–916. <https://doi.org/10.1007/s11336-023-09924-7>. When the response is an interval rather than a point.
+- Finch, W. H. (2023). The impact and detection of uniform differential item functioning for continuous item response models. *Educational and Psychological Measurement*, 83(5), 929–952. <https://doi.org/10.1177/00131644221111993>. DIF for continuous items, which this lesson leaves out.
 
 ```{r}
 #| output: asis
@@ -28,3 +444,11 @@ data_sources("continuous-responses")
 ```
 
 ## For instructors
+
+- **Source:** new material, added with the lessons Ben approved on 09-28 (#153). It starts from the IRW vignette [Bounded continuous responses](https://itemresponsewarehouse.org/vignettes/continuous_bounded.html), cites its held-out comparison rather than repeating it, and takes up what it leaves aside: Samejima's model as a factor model, the ends, and cutting the line.
+- **Timing:** about 50 minutes for the core ideas and widgets; the real-data section is a 30-minute lab. The ordered beta fit takes about 30 seconds locally; every other chunk takes seconds.
+- **Software:** the page runs `factanal()` and `mirt` in the browser. `EstCRM` and `glmmTMB` are used only in the downloadable real-data code, each behind a check that it is installed.
+- **Changed from the outline:** the real-data section was to be built on the graded model's extra information, with its explanation left open. A check added while drafting (agreement between halves) sides with the linear model, so the section now presents the extra information as a claim the halves don't bear out, and problem 6 asks why the graded model makes it. The heaping widget was dropped (four widgets); heaping is counted in both tables instead.
+- **Held back:** the ends as a separate response process (a choice of the end), heaping as a response style, DIF for continuous items, interval responses, and a held-out comparison of these models on the lesson's tables.
+- **Data:** the EPI-A items aren't quoted. The climate-risk items are summarized from Karlsson et al. (2023), with one item quoted from the deposit's variable label (the data are CC BY 4.0).
+- **Solutions:** held back in `solutions/continuous-responses.qmd` (not published).
