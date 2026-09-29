@@ -440,6 +440,13 @@ motion:
   link: https://doi.org/10.1111/desc.13039
   license: CC BY 4.0
   irw_version: IRW v459
+mthimkhulu_2023_pirls_reading:
+  reference: Mthimkhulu, S., Roux, K., & Mihai, M. (2023). Progress in International
+    Reading Literacy (PIRLS) 2023 English and isiZulu achievement [Data set]. University
+    of Pretoria. https://doi.org/10.25403/UPresearchdata.24784086
+  link: https://doi.org/10.25403/UPresearchdata.24784086
+  license: CC BY 4.0
+  irw_version: IRW v459
 mturkddm_lexical:
   reference: Ratcliff, R., Hendrickson, A.T. Do data from mechanical Turk subjects
     replicate accuracy, response time, and diffusion modeling results?. Behav Res

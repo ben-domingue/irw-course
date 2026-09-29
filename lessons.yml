@@ -491,7 +491,7 @@ lessons:
     module: irt
     prereqs: [ability-estimation]
     origin: {slides: [], ps: [], code: []}
-    tables: [pirlsmissing_sirt, borges_brazil_residency_2024_cbt]
+    tables: [mthimkhulu_2023_pirls_reading, pirlsmissing_sirt, borges_brazil_residency_2024_cbt]
     reuses: [pirlsmissing_sirt]
     status: stub
     tranche: extension
