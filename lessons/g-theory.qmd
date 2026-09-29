@@ -23,13 +23,13 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Classical test theory gives a score one error term. Suppose 202 people list unusual uses for a paperclip, a garbage bag and a rope, and five raters judge how clever each list is. A respondent might have done better with other objects, and would have got a different score from other raters. Which source of error is larger decides whether to add raters or objects. **Generalizability theory** (G theory) starts from a question CTT leaves implicit: what should the score generalize over? Tasks, raters, both? It then splits the error into those sources and prices each one ([Cronbach, Rajaratnam & Gleser, 1963](https://doi.org/10.1111/j.2044-8317.1963.tb00206.x)). In the cleverness ratings the answer is *more tasks*; in a second table, teachers rating essays, it is *more raters*.
+Classical test theory gives a score one error term. Suppose 202 people list unusual uses for a paperclip, a garbage bag and a rope, and five raters judge how clever each list is. A respondent might have done better with other objects, and would have got a different score from other raters. Which source of error is larger decides whether to add raters or objects. **Generalizability theory** (G theory) asks what the score should generalize over, then splits the error into those sources and prices each one ([Cronbach, Rajaratnam & Gleser, 1963](https://doi.org/10.1111/j.2044-8317.1963.tb00206.x)). In the cleverness ratings the answer is *more tasks*; in teachers' ratings of essays, *more raters*. Like CTT, G theory is a theory of observed scores. Item response theory, from [The Rasch model](rasch.qmd) on, is a latent-trait theory that models each response, and the two rest on different assumptions.
 
 ## Goals
 
 By the end of this lesson you should be able to:
 
-- name the facets of a measurement design, say which are crossed, and decide which the score should generalize over (random) and which not (fixed);
+- name the facets of a measurement design, say which are crossed and which nested, and decide which the score should generalize over (random) and which not (fixed);
 - estimate variance components for a persons × tasks × raters design with `lme4`, and say which ones are error for which decision;
 - compute relative and absolute G coefficients, and show that the one-facet relative coefficient is alpha;
 - use a D study to decide whether to add tasks or raters;
@@ -49,7 +49,7 @@ Where does $E$ come from? The items behind alpha are one source; [From construct
 **Recall** from [Constructs and construct maps](constructs.qmd): a test built from a blueprint supports a claim about a domain, and its items can be seen as a sample from a larger pool.
 :::
 
-G theory applies that view to every facet. The tasks we used are a sample from the tasks we could have used; the raters, from the raters we would accept. Together these make up the **universe of admissible observations**, and the investigator, not the data, decides what belongs in it. The score we would like is a respondent's average over that universe, the **universe score** (G theory's counterpart of the true score). The question that runs through this lesson is how well an average over the few conditions we used stands in for it ([Shavelson, Webb & Rowley, 1989](https://doi.org/10.1037/0003-066X.44.6.922)). A facet we want to generalize over is **random**; a facet we don't (these three objects and no others) is **fixed**, and then what is specific to its conditions stops being error ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)).
+G theory applies that view to every facet. The tasks we used are a sample from the tasks we could have used; the raters, from the raters we would accept. Together these make up the **universe of admissible observations**, which the investigator, not the data, defines. A decision maker may care about only part of it (raters trained on this rubric, say); that part is the **universe of generalization**. A respondent's average over it is the **universe score**, G theory's counterpart of the true score, and the question of this lesson is how well an average over the few conditions we used stands in for it ([Shavelson, Webb & Rowley, 1989](https://doi.org/10.1037/0003-066X.44.6.922)). A facet we generalize over is **random**; a facet we don't (these three objects and no others) is **fixed**, and what is specific to its conditions stops being error ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)).
 
 ### Variance components
 
@@ -57,14 +57,16 @@ Take the cleverness design: every person $p$ does every task $t$, and every rate
 $$X_{ptr} = \mu + \nu_p + \nu_t + \nu_r + \nu_{pt} + \nu_{pr} + \nu_{tr} + \nu_{ptr,e}.$$
 Each $\nu$ is a random effect with mean zero and its own variance, and the effects are uncorrelated, so the variance of one rating splits into seven **variance components**, $\sigma^2_p + \sigma^2_t + \dots + \sigma^2_{ptr,e}$ ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). $\sigma^2_p$ is how much people differ, the signal; $\sigma^2_r$, how much raters differ in severity; $\sigma^2_{pt}$, how much people's standing changes from task to task; $\sigma^2_{pr}$, raters disagreeing about who is better. The last term mixes the three-way interaction with whatever else the design can't separate from it, hence the $e$.
 
-How do we estimate them? Classically, by setting the mean squares of an analysis of variance equal to their expected values, a reasonable choice for a balanced design ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). This lesson fits the model directly: each term is a random intercept in a mixed model. With `lme4` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)) and a long table with one row per rating:
+Not every design is crossed. If each essay is read by its own teachers, raters are **nested** within essays ($r{:}p$), and a teacher seen with one essay can't show both how harsh they are and how they react to that essay: $\sigma^2_r$ and $\sigma^2_{pr}$ merge into $\sigma^2_{r:p}$ ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)).
+
+How do we estimate them? Classically, by setting the mean squares of an analysis of variance equal to their expected values, a reasonable choice for a balanced design ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)) and one the essay section uses as a check. This lesson fits each term as a random intercept in a mixed model, with `lme4` ([Bates, Mächler, Bolker & Walker, 2015](https://doi.org/10.18637/jss.v067.i01)) and a long table of one row per rating:
 
 ```r
 lmer(resp ~ 1 + (1 | id) + (1 | item) + (1 | rater) +
        (1 | id:item) + (1 | id:rater) + (1 | item:rater), data = ratings)
 ```
 
-The residual variance is $\sigma^2_{ptr,e}$. Why this route? `lmer` estimates the variances by restricted maximum likelihood (REML). Plain maximum likelihood treats the fixed effects as known and so underestimates each variance, by more the fewer levels a facet has; REML accounts for the degrees of freedom the fixed effects use and removes that bias ([Patterson & Thompson, 1971](https://doi.org/10.1093/biomet/58.3.545); [Harville, 1977](https://doi.org/10.1080/01621459.1977.10480998)). With facets of three and five levels, that matters. In a balanced design REML reproduces the ANOVA estimates whenever none is negative ([Searle, Casella & McCulloch, 1992](https://doi.org/10.1002/9780470316856)), and it also handles the missing ratings and sparse designs the second table has.
+The residual variance is $\sigma^2_{ptr,e}$. `lmer` estimates the variances by restricted maximum likelihood (REML). Plain maximum likelihood treats the fixed effects as known and so underestimates each variance, by more the fewer levels a facet has; REML removes that bias ([Patterson & Thompson, 1971](https://doi.org/10.1093/biomet/58.3.545); [Harville, 1977](https://doi.org/10.1080/01621459.1977.10480998)), which matters with facets of three and five levels. In a balanced design REML reproduces the ANOVA estimates whenever none is negative ([Searle, Casella & McCulloch, 1992](https://doi.org/10.1002/9780470316856)), and it also handles sparse designs like the second table's.
 
 ### Two G coefficients
 
@@ -74,11 +76,11 @@ For an **absolute** decision (is this score above 3? how clever is this list, on
 $$\sigma^2_\Delta = \sigma^2_\delta + \frac{\sigma^2_t}{n_t} + \frac{\sigma^2_r}{n_r} + \frac{\sigma^2_{tr}}{n_t n_r}.$$
 Each coefficient sets the universe-score variance against one of them ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)): the **generalizability coefficient** $E\rho^2 = \sigma^2_p/(\sigma^2_p + \sigma^2_\delta)$ and the **dependability coefficient** $\Phi = \sigma^2_p/(\sigma^2_p + \sigma^2_\Delta)$. Since $\sigma^2_\Delta \ge \sigma^2_\delta$, $\Phi$ is never the larger. Error near a cut score is taken up in [What does a score mean?](score-meaning.qmd).
 
-Both have the form of reliability in [Classical test theory and reliability](ctt-reliability.qmd), $\sigma^2_T/(\sigma^2_T + \sigma^2_E)$. The "true" variance is universe-score variance, $\sigma^2_p$: what stays with a person across every condition we generalize over. The error is what changes from one sample of conditions to another: $\sigma^2_\delta$ for rankings, $\sigma^2_\Delta$ for levels. Fix a facet and the split moves. With the tasks fixed, $\sigma^2_{pt}/n_t$ belongs to the universe score rather than the error ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)); the interrater section uses this.
+Both have the form of reliability in [Classical test theory and reliability](ctt-reliability.qmd), $\sigma^2_T/(\sigma^2_T + \sigma^2_E)$: the "true" variance is universe-score variance, $\sigma^2_p$, what stays with a person across the conditions we generalize over, and the error is what changes from one sample of conditions to another. Fix a facet and the split moves (the interrater section shows how).
 
 #### Try it: the two coefficients side by side
 
-Each bar is one coefficient's denominator: the universe score and the error that coefficient counts. The light pieces (task, rater, task × rater) count only for Φ. The sliders start at the cleverness ratings' estimates from *With real data*; switch to the essays to see raters that differ in severity. (For the essays, "task" is a rating criterion.)
+Each bar is one coefficient's denominator: the universe score plus the error it counts; the light pieces count only for Φ. The sliders start at the cleverness estimates from *With real data*; switch to the essays to see raters that differ in severity (there, "task" is a rating criterion).
 
 ```{ojs}
 //| echo: false
@@ -122,7 +124,7 @@ Plot.plot({
 md`Averaged over ${wn.nt} task${wn.nt > 1 ? "s" : ""} and ${wn.nr} rater${wn.nr > 1 ? "s" : ""}: relative error **${cb.g.rel.toFixed(3)}**, absolute error **${cb.g.abs.toFixed(3)}**; Eρ² **${cb.g.erho2.toFixed(2)}**, Φ **${cb.g.phi.toFixed(2)}**.`
 ```
 
-The coefficients agree when raters and tasks don't differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). So use Φ when the decision is absolute (a cut) or raters vary across respondents, and Eρ² for ranking in a fully crossed design, the rule of this lesson's verdict (end of the interrater section).
+The coefficients agree when raters and tasks don't differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). The interrater section takes up which to report.
 
 ```{ojs}
 //| echo: false
@@ -139,7 +141,7 @@ quiz({
 
 What does the simplest case look like? Keep one facet, items, in a persons × items design. Then $\sigma^2_\delta = \sigma^2_{pi,e}/n_i$ and
 $$E\rho^2 = \frac{\sigma^2_p}{\sigma^2_p + \sigma^2_{pi,e}/n_i},$$
-which is Cronbach's alpha ([Cronbach, 1951](https://doi.org/10.1007/BF02310555); [Hoyt, 1941](https://doi.org/10.1007/BF02289270), estimated reliability from the same analysis of variance). Alpha is the one-facet relative G coefficient; the callout shows why.
+which is Cronbach's alpha ([Cronbach, 1951](https://doi.org/10.1007/BF02310555); [Hoyt, 1941](https://doi.org/10.1007/BF02289270), estimated reliability from the same analysis of variance). The callout shows why.
 
 ::: {.callout-note collapse="true"}
 ## Go deeper: why the one-facet coefficient is alpha
@@ -170,7 +172,7 @@ quiz({
 
 ### D studies: what would another design buy?
 
-A **decision study** (D study) uses the G study's components to ask what a different design would give: change $n_t$ and $n_r$ in the formulas and recompute. With one facet this is Spearman–Brown (problem 1); with two, the components say which lever moves the coefficient more.
+A **decision study** (D study) uses the G study's components to ask what a different design would give for the universe of generalization: which facets are random, and how many conditions of each are averaged over. Change $n_t$ and $n_r$ in the formulas and recompute. With one facet this is Spearman–Brown (problem 1); with two, the components say which lever moves the coefficient more.
 
 #### Try it: a D study
 
@@ -202,13 +204,13 @@ md`Ten tasks with one rater: **${gCoef(wv, 10, 1).erho2.toFixed(2)}** (relative)
 
 With the cleverness components, ten tasks with one rater reach 0.74, one task with ten raters 0.49: person × task (0.284) dwarfs person × rater (0.053). Switch the previous widget to the essays and raters become the lever. Every curve flattens: past a point only the *other* facet helps.
 
-What are we assuming when a D study adds raters we never had, ten when the data had five? That new raters are exchangeable draws from the same universe (same pool, same training); that the variance components hold, so a new rater disagrees with the others as much as the old ones did; and that the design stays crossed, every new rater scoring every response. If the new raters come from a different pool, $\sigma^2_r$ and $\sigma^2_{pr}$ change and the curve is wrong; if each respondent gets different raters, severity joins the relative error (next section). And the components themselves were estimated from a handful of raters, so a point far beyond the observed design is a projection that carries that uncertainty (Simulate shows how noisy a facet with three levels is).
+What are we assuming when a D study adds raters we never had, ten when the data had five? That new raters are exchangeable draws from the universe of generalization, disagreeing with the others as much as the old ones did, and that the design stays crossed. Raters from a different pool change $\sigma^2_r$ and $\sigma^2_{pr}$; if each respondent gets different raters, severity joins the relative error (next section). And components estimated from a handful of raters make a far projection uncertain (Simulate shows how noisy a facet with three levels is).
 
 ### Interrater reliability as a G study
 
 In a persons × raters design, the setting for **interrater reliability**, the intraclass correlations of [Shrout and Fleiss (1979)](https://doi.org/10.1037/0033-2909.86.2.420) and [McGraw and Wong (1996)](https://doi.org/10.1037/1082-989X.1.1.30) are G coefficients. The **consistency** ICC for one rater, ICC(C,1) in McGraw and Wong's notation, is $\sigma^2_p/(\sigma^2_p + \sigma^2_{pr,e})$, the relative coefficient. The **absolute agreement** ICC, ICC(A,1), is $\sigma^2_p/(\sigma^2_p + \sigma^2_r + \sigma^2_{pr,e})$, the dependability coefficient. Averaged over $k$ raters, they are the D study for $k$ raters.
 
-When raters score the same tasks, what counts as true? If the question is only whether another rater would score the same response the same way, the tasks are fixed. [Brennan (2001)](https://doi.org/10.1007/978-1-4757-3456-0) then puts $\sigma^2_{pt}$ in the universe score: for one rater on one task the coefficient is $(\sigma^2_p + \sigma^2_{pt})/(\sigma^2_p + \sigma^2_{pt} + \sigma^2_{pr} + \sigma^2_{ptr,e})$. It answers a narrower question than a coefficient that generalizes over tasks too.
+When raters score the same tasks and the question is only whether another rater would score the same response the same way, the tasks are fixed. [Brennan (2001)](https://doi.org/10.1007/978-1-4757-3456-0) then puts $\sigma^2_{pt}$ in the universe score: for one rater on one task the coefficient is $(\sigma^2_p + \sigma^2_{pt})/(\sigma^2_p + \sigma^2_{pt} + \sigma^2_{pr} + \sigma^2_{ptr,e})$, the answer to a narrower question than a coefficient that generalizes over tasks too.
 
 #### Try it: consistency and agreement
 
@@ -250,13 +252,13 @@ quiz({
 })
 ```
 
-Which should you report? The choice rests on two facts about the use. If every respondent is scored by the same raters and only the order matters, severity cancels and consistency is the coefficient that describes the scores. If scores are compared with a fixed standard, or respondents are scored by different raters (each essay by whichever teacher it was assigned to), a harsh rater lowers some respondents' scores and not others', and rater variance is error even for ranking ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0), treats these nested designs). I report the absolute coefficient, $\Phi$ or the agreement ICC, whenever raters vary across respondents or a cut is involved, and the consistency coefficient only for a fully crossed design whose scores are used to rank.
+Which should you report? If every respondent has the same raters and only the order matters, severity cancels. If scores are compared with a fixed standard, or respondents have different raters (each essay its own teachers, a nested design), a harsh rater lowers some scores and not others, and rater variance is error even for ranking ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). In the case that raters vary across respondents or a cut is involved, the absolute coefficient, $\Phi$ or the agreement ICC, may be the one to report; for a fully crossed design whose scores are used only to rank, the consistency coefficient may be sufficient for some purposes.
 
 ## Simulate
 
-The code generates a persons × tasks × raters design with known variance components (150 persons, 3 tasks, 3 raters, with components loosely like the cleverness ratings below), fits the crossed random-effects model with `lme4`, and compares the estimates and the G coefficients with the truth. Loading `lme4` takes 10 to 20 seconds the first time the page runs code; the fit itself takes about two.
+The code generates a persons × tasks × raters design with known variance components (150 persons, 3 tasks, 3 raters, loosely like the cleverness ratings), fits the crossed model with `lme4`, and compares the estimates and G coefficients with the truth. Loading `lme4` takes 10 to 20 seconds the first time the page runs code; the fit, about two.
 
-With the seed as written, the person components come back close (person 0.346 against 0.30; person × task 0.317 against 0.30), and so does the relative coefficient (0.692 against 0.668). The task component does not (0.065 against 0.02): with three tasks, its variance is estimated from three numbers, however many persons there are. Set `nt <- 10` and the coefficient rises to 0.842, though the task component is still off (0.067). Put `nt` back and set `nr <- 10`: the coefficient rises only to 0.723, since person × rater is small.
+With the seed as written, the person components come back close (person 0.346 against 0.30; person × task 0.317 against 0.30), and so does the relative coefficient (0.692 against 0.668). The task component does not (0.065 against 0.02): its variance is estimated from three numbers, however many persons there are. Set `nt <- 10` and the coefficient rises to 0.842; put it back and set `nr <- 10`, and it rises only to 0.723.
 
 ```{webr}
 {{< include code/g-theory-sim.R >}}
@@ -279,7 +281,7 @@ knitr::read_chunk("code/g-theory-irw.R")
 
 ### Cleverness ratings: tasks or raters?
 
-The main example is [Forthmann-2024-cleverness_ratings](https://itemresponsewarehouse.org/tables/forthmann-2024-cleverness_ratings/), released by [Forthmann and Myszkowski (2024)](https://osf.io/a9qnc) for a special issue of the *Journal of Intelligence* (CC BY 4.0; the project page points to [Forthmann et al., 2017](https://doi.org/10.1080/10400419.2017.1360059), as an earlier analysis of these data). Respondents listed unusual uses for three objects (the alternate uses task), and five raters rated each respondent's list for each object for cleverness, on a scale stored as 1 to 5, with higher meaning cleverer. ([Silvia et al., 2008](https://doi.org/10.1037/1931-3896.2.2.68), study the reliability of such ratings.) The table's job: a fully crossed persons × tasks × raters G study. [Download the code](code/g-theory-irw.R); it needs `lme4`.
+The main example is [Forthmann-2024-cleverness_ratings](https://itemresponsewarehouse.org/tables/forthmann-2024-cleverness_ratings/), released by [Forthmann and Myszkowski (2024)](https://osf.io/a9qnc) for a special issue of the *Journal of Intelligence* (CC BY 4.0; [Forthmann et al., 2017](https://doi.org/10.1080/10400419.2017.1360059), is an earlier analysis). Respondents listed unusual uses for three objects (the alternate uses task), and five raters rated each list for cleverness, stored as 1 to 5, higher meaning cleverer ([Silvia et al., 2008](https://doi.org/10.1037/1931-3896.2.2.68), study the reliability of such ratings). [Download the code](code/g-theory-irw.R); it needs `lme4`.
 
 ```{r fetch-clever}
 #| echo: true
@@ -337,21 +339,23 @@ A second rater would score the same list much as the first did (0.64), but a res
 
 ### Essays: when raters matter
 
-The contrast is a table where raters are a large source of error: [teacherjudgements_lohmann_2026_essayratings](https://itemresponsewarehouse.org/tables/teacherjudgements_lohmann_2026_essayratings/), from a study in which preservice English teachers rated essays by learners of English as a second language ([Lohmann et al., 2026](https://doi.org/10.1037/edu0000969); CC BY 4.0). Each teacher rated five essays on four criteria (language quality, structure, content, and a holistic rating), from 1 (very low quality) to 7 (very high quality). "Person" in the output now means essay, and criteria take the place of tasks. We set aside the table's expert benchmark scores; the question is about the teachers.
+The contrast is [teacherjudgements_lohmann_2026_essayratings](https://itemresponsewarehouse.org/tables/teacherjudgements_lohmann_2026_essayratings/), from a study in which preservice English teachers rated essays by learners of English as a second language ([Lohmann et al., 2026](https://doi.org/10.1037/edu0000969); CC BY 4.0). Each teacher rated five essays on four criteria (language quality, structure, content, and a holistic rating), from 1 (very low quality) to 7 (very high quality). "Person" in the output now means essay, and criteria take the place of tasks. We set aside the table's expert benchmark scores.
 
 ```{r fetch-essays}
 #| echo: true
 #| code-fold: show
 ```
 
-This design is sparse. Every teacher rated 5 essays, but 435 of the 881 essays were rated by a single teacher, and only 50 by four or more. Most essay–teacher pairs were never observed; the components rest on the essays more than one teacher rated, and on each teacher's five essays.
+This design is sparse. Every teacher rated 5 essays, but 435 of the 881 essays were rated by a single teacher, and only 50 by four or more. Each essay has its own teachers, so raters are effectively nested within essays, though each teacher's five essays link the teachers to one another.
+
+How does the fit handle the essay–teacher pairs never observed? Nothing is filled in. REML uses only the ratings that exist and learns each component where ratings overlap: a teacher's severity from how their five essays fare against other ratings of those essays, essay × rater from essays that two or more teachers read, essay × criterion from the four criteria of every rating. An essay read by one teacher informs the essay and criterion components but can't, alone, separate that teacher's view of it from the essay itself.
 
 ```{r fit-essays}
 #| echo: true
 #| code-fold: show
 ```
 
-The picture reverses. Teachers differ in severity (rater, 9.7% of the variance, against 2.1% in the cleverness ratings), and essay × rater is 25.2%, against the essays' own 29.7%: teachers disagree about which essays are better. The criteria matter less (essay × criterion, 9.6%). Since each teacher rated an essay on four criteria, essay × rater is an impression that carries across all four, the pattern a halo effect (named in Lohmann et al.'s title) would produce. On the rating scale, teachers' severity has an SD of 0.50 points, against 0.87 for essays' universe scores.
+The picture reverses. Teachers differ in severity (rater, 9.7% of the variance, against 2.1% in the cleverness ratings), and essay × rater is 25.2%, against the essays' own 29.7%: teachers disagree about which essays are better. Criteria matter less (essay × criterion, 9.6%). Since each teacher rated an essay on all four criteria, essay × rater is an impression that carries across them, the pattern a halo effect (named in Lohmann et al.'s title) would produce. Teachers' severity has an SD of 0.50 points, against 0.87 for essays' universe scores.
 
 ```{r dstudy-essays}
 #| echo: true
@@ -360,29 +364,71 @@ The picture reverses. Teachers differ in severity (rater, 9.7% of the variance, 
 
 With one teacher and four criteria, the relative coefficient is 0.47 and the absolute 0.40. A second teacher brings them to 0.62 and 0.56; five, to 0.78 and 0.73. One teacher on unlimited criteria reaches only 0.54: the lever is raters. Since each essay had its own teachers, the absolute coefficient describes these scores.
 
+#### A check: the balanced subset
+
+Is the sparse fit believable? Part of the data is balanced: the essays rated by exactly three teachers, each on all four criteria.
+
+```{r balanced-essays}
+#| echo: true
+#| code-fold: show
+```
+
+Treating each essay's teachers as its own gives the design $(r{:}p) \times t$ (criteria as $t$), with five components: essay, criterion, rater within essay, essay × criterion and the residual. The classic route works here: compute the mean squares and solve the expected-mean-squares equations (the callout gives them).
+
+```{r anova-essays}
+#| echo: true
+#| code-fold: show
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: expected mean squares for raters nested within essays
+
+**Assumptions:** $n_p$ essays, each rated by its own $n_r$ raters on the same $n_t$ criteria, one rating per cell, $X_{prt} = \mu + \nu_p + \nu_t + \nu_{r:p} + \nu_{pt} + \nu_{rt:p,e}$, with uncorrelated random effects ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). Here $\sigma^2_{r:p} = \sigma^2_r + \sigma^2_{pr}$ and $\sigma^2_{rt:p,e} = \sigma^2_{rt} + \sigma^2_{prt,e}$ from the crossed design.
+
+$$\begin{aligned}
+E(MS_p) &= \sigma^2_{rt:p,e} + n_t\sigma^2_{r:p} + n_r\sigma^2_{pt} + n_r n_t\sigma^2_p\\
+E(MS_t) &= \sigma^2_{rt:p,e} + n_r\sigma^2_{pt} + n_p n_r\sigma^2_t\\
+E(MS_{r:p}) &= \sigma^2_{rt:p,e} + n_t\sigma^2_{r:p}\\
+E(MS_{pt}) &= \sigma^2_{rt:p,e} + n_r\sigma^2_{pt}\\
+E(MS_{rt:p,e}) &= \sigma^2_{rt:p,e}
+\end{aligned}$$
+
+Set each mean square equal to its expectation and solve from the bottom up: $\hat\sigma^2_{rt:p,e} = MS_{rt:p,e}$, $\hat\sigma^2_{pt} = (MS_{pt} - MS_{rt:p,e})/n_r$, $\hat\sigma^2_{r:p} = (MS_{r:p} - MS_{rt:p,e})/n_t$, $\hat\sigma^2_t = (MS_t - MS_{pt})/(n_p n_r)$, and $\hat\sigma^2_p = (MS_p - MS_{r:p} - MS_{pt} + MS_{rt:p,e})/(n_r n_t)$. These are the lines of `v_anova`, which writes `c` for criteria. Some teachers read more than one of these essays; the nested analysis ignores that and treats each essay's three as its own.
+:::
+
+Now the same design by REML, next to the full sparse fit with its components combined to match (rater within essay is rater plus essay × rater; the residual absorbs criterion × rater):
+
+```{r reml-balanced}
+#| echo: true
+#| code-fold: show
+```
+
+ANOVA and REML agree to the third decimal: in a balanced design with no negative estimate, REML is the ANOVA solution. The full sparse fit is close: essay 0.754 against 0.775, rater within essay 0.886 against 0.902, residual 0.648 against 0.597. The gaps have three sources: a different set of essays (126 of 881, picked by how many teachers they got); a small sample, so noisy estimates (criterion, from four levels, most of all: 0.010 against 0.023); and a design that can't split rater within essay into severity and essay × rater, as the full fit can. Where the data allow the classical estimate, REML on the sparse design gives much the same answer.
+
 The two tables call for different designs, and only their variance components could say so.
 
 ## Problems
 
 1. **Derivation.** Fill in the sums of squares in the Go deeper callout to show that $1 - MS_{pi,e}/MS_p$ is alpha. Then show that the D-study coefficient for $m n_i$ items is the Spearman–Brown formula with multiplier $m$.
 2. **Real data with a twist.** From the cleverness components, find the combinations of tasks and raters that give a relative G coefficient of at least 0.8. Is there more than one? If a task costs a respondent five minutes and a rating costs a rater one minute per respondent, which design is cheapest for 200 respondents? Does the answer change for $\Phi$?
-3. **Judgment: a sparse design.** Refit the essay model using only essays with at least two teachers. Which components change? Suppose every essay had one teacher: which components could the data no longer separate, and what would that do to your D study?
+3. **Judgment: a sparse design.** Refit the essay model using only essays with at least two teachers. Which components change, and how do they compare with the balanced subset's? Suppose every essay had one teacher: which components could the data no longer separate, and what would that do to your D study?
 4. **Design.** Plan a G study for a performance assessment you know. What should the score generalize over? Name the facets, random or fixed, crossed or nested, and choose sample sizes. Which component do you expect to be largest?
 5. **Real data: two raters.** In the cleverness data, take raters 1 and 2 and the paperclip task. Compute the consistency and agreement ICCs from a `lmer` fit with random intercepts for respondent and rater. Which pair of raters agrees least?
 6. **Challenge (open).** G theory treats a harsh rater as a random effect to be averaged away. When should severity be estimated and adjusted for instead, and what would you need to know about the essays' teachers to decide? ([Rater models](rater-models.qmd) takes this up with the many-facet Rasch model.)
 
 ```{r}
 #| output: asis
-ask_claude("g-theory", "It covers generalizability theory: facets and universe scores, variance components for a persons x tasks x raters design estimated as crossed random effects with lme4, relative and absolute error and the two G coefficients (with the one-facet coefficient equal to Cronbach's alpha and an expected-mean-squares derivation), D studies, and interrater reliability as a G study (consistency and agreement ICCs), with cleverness ratings of alternate-uses responses and teachers' ratings of essays as examples.")
+ask_claude("g-theory", "It covers generalizability theory: facets and universe scores, variance components for a persons x tasks x raters design estimated as crossed random effects with lme4 (and, for a balanced subset with raters nested within essays, by expected mean squares), relative and absolute error and the two G coefficients (with the one-facet coefficient equal to Cronbach's alpha and an expected-mean-squares derivation), D studies, and interrater reliability as a G study (consistency and agreement ICCs), with cleverness ratings of alternate-uses responses and teachers' ratings of essays as examples.")
 ```
 
 ## Going further
 
+- Shavelson, R. J., & Webb, N. M. (1991). *Generalizability theory: A primer*. Sage. No DOI; see [Sundre's (1993) review](https://doi.org/10.1177/109821409301400219). The most accessible first read, at book length.
 - Brennan, R. L. (2001). *Generalizability theory*. Springer. <https://doi.org/10.1007/978-1-4757-3456-0>. The reference: designs, nested and fixed facets, estimation and D studies, at book length.
-- Shavelson, R. J., & Webb, N. M. (1991). *Generalizability theory: A primer*. Sage. No DOI; see [Sundre's (1993) review](https://doi.org/10.1177/109821409301400219). A gentler book-length introduction.
 - Shavelson, R. J., Webb, N. M., & Rowley, G. L. (1989). Generalizability theory. *American Psychologist*, 44(6), 922–932. <https://doi.org/10.1037/0003-066X.44.6.922>. A short overview.
 - Brennan, R. L. (2000). Performance assessments from the perspective of generalizability theory. *Applied Psychological Measurement*, 24(4), 339–353. <https://doi.org/10.1177/01466210022031796>. Which facets matter for performance assessments, and how popular reliability estimates for them, interrater reliability among them, look from G theory.
 - Brennan, R. L. (1992). Generalizability theory. *Educational Measurement: Issues and Practice*, 11(4), 27–34. <https://doi.org/10.1111/j.1745-3992.1992.tb00260.x>. An instructional module on G and D studies.
+- Cronbach, L. J., Gleser, G. C., Nanda, H., & Rajaratnam, N. (1972). *The dependability of behavioral measurements: Theory of generalizability for scores and profiles*. Wiley. No DOI; see [Bock's (1972) review](https://doi.org/10.1126/science.178.4067.1275). The book-length statement of the theory.
 - Cronbach, L. J., Rajaratnam, N., & Gleser, G. C. (1963). Theory of generalizability: A liberalization of reliability theory. *British Journal of Statistical Psychology*, 16(2), 137–163. <https://doi.org/10.1111/j.2044-8317.1963.tb00206.x>. Where the theory starts.
 - McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. *Psychological Methods*, 1(1), 30–46. <https://doi.org/10.1037/1082-989X.1.1.30>. The ICCs, sorted by design and by consistency versus agreement.
 - Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. *Journal of Statistical Software*, 67(1). <https://doi.org/10.18637/jss.v067.i01>. How `lmer` specifies and fits crossed random effects.
@@ -397,7 +443,7 @@ data_sources("g-theory")
 ## For instructors
 
 - **Source:** new material, not in EDUC 252. The course's landscape analysis (`notes/landscape-2026-09-24.md`, gap 2) put G theory and interrater reliability into one lesson.
-- **Default, to be revised (#76):** the main line estimates variance components with `lme4`, and the ANOVA / expected-mean-squares route is a pointer plus a short Go deeper (the one-facet coefficient is alpha). A colleague consulted on #76 preferred `lmer` (REML) and asked for more on what the score generalizes over, the assumptions behind D-study projections, and Brennan's interrater coefficient with tasks fixed; those are in this version.
+- **Estimation (#76):** the main line estimates variance components with `lme4` (REML); the ANOVA / expected-mean-squares route appears twice, in the Go deeper on alpha and in the balanced essay subset, where it matches REML. Comments on #76 asked for what the score generalizes over, the assumptions behind D-study projections, Brennan's interrater coefficient with tasks fixed, observed-score versus latent-trait theories, the universe of generalization, crossed versus nested designs, and how the sparse essay design is handled; those are in this version.
 - **Timing:** about 50 minutes for the core ideas and widgets; the two real-data analyses work as a 25-minute lab (the essay fit takes about half a minute in local R).
-- **Held back:** nested designs are named, not developed, and fixed facets appear only in the interrater coefficient (see Brennan, 2001); multivariate G theory is not covered. Raters in item response models (many-facet Rasch) are left to [Rater models](rater-models.qmd); random item effects to [What is an item?](explanatory-irt.qmd); error near a cut to [What does a score mean?](score-meaning.qmd); occasions as a facet to [Measurement invariance under treatment and life events](invariance-experience.qmd).
+- **Held back:** nested designs appear only in the balanced essay subset, and fixed facets only in the interrater coefficient (see Shavelson & Webb, 1991, and Brennan, 2001); multivariate G theory is not covered. Raters in item response models (many-facet Rasch) are left to [Rater models](rater-models.qmd); random item effects to [What is an item?](explanatory-irt.qmd); error near a cut to [What does a score mean?](score-meaning.qmd); occasions as a facet to [Measurement invariance under treatment and life events](invariance-experience.qmd).
 - **Solutions:** held back in `solutions/g-theory.qmd` (not published). Problem 6 is open.

@@ -102,3 +102,47 @@ v_es <- vc_es$variance
 sapply(c(1, 2, 3, 5), function(r) round(g_coef(v_es, 4, r), 2))   # 4 criteria, 1-5 raters
 round(g_coef(v_es, 1e6, 1), 2)    # one rater, as many criteria as you like
 round(sqrt(v_es[c(1, 3)]), 2)     # SD of essays' universe scores; SD of teachers' severity
+
+## ---- balanced-essays
+# A balanced part of the essay data: the essays rated by exactly three teachers,
+# each on all four criteria. Treating each essay's teachers as its own (raters
+# nested within essays) makes the design (r:p) x c, the classic balanced case.
+n_teach <- table(pairs$id)
+bal <- es[es$id %in% names(n_teach)[n_teach == 3], ]
+c(essays = length(unique(bal$id)), teachers = length(unique(bal$rater)), ratings = nrow(bal))
+table(table(bal$id))   # ratings per essay: 3 teachers x 4 criteria = 12 for every essay
+
+## ---- anova-essays
+# The classic route, by hand: sums of squares, mean squares, then the
+# expected-mean-squares equations solved for the five components (see the callout).
+# ave() returns each row's group mean, so the sums run over all ratings.
+n_p <- length(unique(bal$id)); n_r <- 3; n_c <- 4
+m    <- mean(bal$resp)
+m_p  <- ave(bal$resp, bal$id)                 # essay means
+m_c  <- ave(bal$resp, bal$item)               # criterion means
+m_rp <- ave(bal$resp, bal$id, bal$rater)      # teacher-within-essay means
+m_pc <- ave(bal$resp, bal$id, bal$item)       # essay x criterion means
+ss <- c(p = sum((m_p - m)^2), c = sum((m_c - m)^2), "r:p" = sum((m_rp - m_p)^2),
+        pc = sum((m_pc - m_p - m_c + m)^2), "rc:p,e" = sum((bal$resp - m_rp - m_pc + m_p)^2))
+df <- c(n_p - 1, n_c - 1, n_p * (n_r - 1), (n_p - 1) * (n_c - 1), n_p * (n_r - 1) * (n_c - 1))
+ms <- ss / df
+round(cbind(df, ms), 3)
+v_anova <- c(essay = (ms[["p"]] - ms[["r:p"]] - ms[["pc"]] + ms[["rc:p,e"]]) / (n_r * n_c),
+             criterion = (ms[["c"]] - ms[["pc"]]) / (n_p * n_r),
+             "rater within essay" = (ms[["r:p"]] - ms[["rc:p,e"]]) / n_c,
+             "essay x criterion" = (ms[["pc"]] - ms[["rc:p,e"]]) / n_r,
+             residual = ms[["rc:p,e"]])
+
+## ---- reml-balanced
+# The same design by REML: id:rater is a teacher within an essay.
+fit_bal <- lmer(resp ~ 1 + (1 | id) + (1 | item) + (1 | id:rater) + (1 | id:item), data = bal)
+vb <- as.data.frame(VarCorr(fit_bal))
+v_reml <- setNames(vb$vcov, vb$grp)[c("id", "item", "id:rater", "id:item", "Residual")]
+# The full sparse fit, its seven components combined to match the nested design:
+# rater within essay = rater + essay x rater; residual = criterion x rater + residual.
+vf <- as.data.frame(VarCorr(fit_es))
+vf <- setNames(vf$vcov, vf$grp)
+v_full <- c(vf[["id"]], vf[["item"]], vf[["rater"]] + vf[["id:rater"]], vf[["id:item"]],
+            vf[["item:rater"]] + vf[["Residual"]])
+round(cbind(ANOVA = v_anova, REML = v_reml, "full sparse fit" = v_full), 3)
+signif(max(abs(v_anova - v_reml)), 2)   # largest gap between ANOVA and REML

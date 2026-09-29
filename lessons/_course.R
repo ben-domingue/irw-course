@@ -231,6 +231,13 @@ lesson_header <- function(id) {
     if (length(l$origin$ps)) paste("problem sets", paste(unlist(l$origin$ps), collapse = ", ")),
     if (length(code)) paste("code", paste(sprintf("[`%s`](%s%s)", code, CODE_BASE, code), collapse = ", "))
   )
+  # Optional credit line (lessons.yml `thanks:`): "A", "A and B", "A, B and C".
+  thanks <- unlist(l$thanks)
+  thanks_row <- if (length(thanks)) paste0(
+    "**Feedback:** This page improved thanks to feedback from ",
+    if (length(thanks) == 1) thanks else
+      paste(paste(head(thanks, -1), collapse = ", "), "and", tail(thanks, 1)),
+    ". All remaining errors are the responsibility of the page's creator (BD).  \n")
   cat(
     "::: {.callout-note appearance=\"simple\"}\n",
     "**Module:** ", mod, "  \n",
@@ -244,6 +251,7 @@ lesson_header <- function(id) {
     # Authorship note on every lesson (#70).
     "**Authorship:** Written largely by Claude (Anthropic), from Ben Domingue's EDUC 252 ",
     "materials and under Ben's direction. Ben reviews each lesson before it is marked done.  \n",
+    thanks_row,
     # Comments go to GitHub issues, titled with the lesson.
     "**Comments:** [open an issue on GitHub](", ISSUE_BASE, "?title=",
     utils::URLencode(paste0(l$title, ": "), reserved = TRUE), ") about this lesson.\n",

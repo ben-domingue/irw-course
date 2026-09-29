@@ -361,6 +361,7 @@ lessons:
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
     status: draft
     tranche: core
+    thanks: [Rich Shavelson]   # optional credit line in the lesson header (lesson_header)
 
   - id: fa-exploratory
     title: "Factor analysis I: exploring dimensionality"
