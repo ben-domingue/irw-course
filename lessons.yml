@@ -553,12 +553,14 @@ threads:
       - {lesson: fa-exploratory, how: reads tau-equivalence as equal loadings}
       - {lesson: fa-confirmatory, how: replaces alpha with omega}
       - {lesson: dimensionality, how: shows correlated errors and testlets breaking the bound}
+      - {lesson: mixture-models, how: sees a high alpha from respondents who ignored the content}
   - id: one-sem
     idea: One standard error of measurement for everyone
     introduced: ctt-reliability
     returns:
       - {lesson: information, how: replaces it with a conditional SEM that varies with θ}
       - {lesson: score-meaning, how: turns it into error bands around reported scores}
+      - {lesson: continuous-responses, how: finds constant information again under the linear and Samejima models}
   - id: reverse-keying
     idea: Keying has to be checked; the data can't always tell
     introduced: ctt-reliability
@@ -568,6 +570,7 @@ threads:
       - {lesson: polytomous, how: reverses rating-scale categories before fitting}
       - {lesson: irtrees, how: keys the data before the tree is built}
       - {lesson: unfolding, how: shows items that are neither forward nor reversed}
+      - {lesson: mixture-models, how: sees a content-free class answer a balanced scale at its midpoint}
   - id: attenuation
     idea: Unreliability attenuates correlations
     introduced: ctt-reliability
@@ -604,6 +607,7 @@ threads:
       - {lesson: cdm, how: contrasts attribute counts with sum scores}
       - {lesson: scale-properties, how: asks what it licenses about the scale}
       - {lesson: rater-models, how: keeps it in the many-facet Rasch model}
+      - {lesson: mixture-models, how: loses sufficiency across classes}
   - id: specific-objectivity
     idea: Item comparisons don't depend on who took the items
     introduced: rasch
@@ -611,6 +615,8 @@ threads:
       - {lesson: 1pl-to-4pl, how: shows it failing when ICCs cross (Y15)}
       - {lesson: parameter-invariance, how: tests it across samples}
       - {lesson: scale-properties, how: asks what it buys for an equal-interval scale}
+      - {lesson: nonparametric-irt, how: "asks only for curves that don't cross (invariant item ordering)"}
+      - {lesson: mixture-models, how: holds within each class but not across them}
   - id: no-origin
     idea: Only θ − b is identified; the scale has no origin
     introduced: rasch
@@ -631,6 +637,7 @@ threads:
       - {lesson: fit-prediction, how: gives outfit its null distribution}
       - {lesson: item-banks-cat, how: screens bank items with it}
       - {lesson: scale-properties, how: asks how much misfit a scale can bear}
+      - {lesson: mixture-models, how: finds same-option respondents overfitting}
   - id: local-independence
     idea: Responses are independent given θ
     introduced: rasch
@@ -639,6 +646,7 @@ threads:
       - {lesson: explanatory-irt, how: models the dependence with random effects}
       - {lesson: unfolding, how: keeps it but drops the monotone curve the Rasch model pairs with it}
       - {lesson: rater-models, how: keeps it across raters in the hierarchical rater model}
+      - {lesson: nonparametric-irt, how: "keeps it, with monotone curves, as the whole model"}
 
   # Pass 2 (09-24 night): proposed by the wave-0 drafts (#123-#126); returns kept only
   # where they are descendants of the introducing lesson (E2).
@@ -647,12 +655,14 @@ threads:
     introduced: ctt-limits
     returns:
       - {lesson: rasch, how: shows r = 0 and r = max agreeing by construction (wirs)}
+      - {lesson: nonparametric-irt, how: checks monotonicity with the rest score}
   - id: items-rise-with-score
     idea: "Item curves rise with the sum score (monotonicity)"
     introduced: ctt-limits
     returns:
       - {lesson: rasch, how: models them as ICCs}
       - {lesson: unfolding, how: finds single-peaked curves (andrich_mudfold)}
+      - {lesson: nonparametric-irt, how: "tests monotonicity without a curve, in rest-score groups"}
   - id: sum-score-depends-on-items
     idea: "The sum score depends on which items were taken"
     introduced: ctt-limits
@@ -704,6 +714,7 @@ threads:
     introduced: irw-data
     returns:
       - {lesson: ctt-reliability, how: meets the unkeyed Mach IV}
+      - {lesson: mixture-models, how: finds the PSS codes arrive already keyed}
   - id: slow-errors
     idea: "Errors are slower than correct responses, partly because of where errors happen"
     introduced: irw-data
@@ -731,6 +742,7 @@ threads:
     introduced: fit-prediction
     returns:
       - {lesson: guessing-priors, how: asks whether c helps out of sample}
+      - {lesson: mixture-models, how: chooses the number of classes on held-out responses}
   - id: measurement-invariance
     idea: "Comparing group means needs scalar invariance"
     introduced: measurement-invariance
@@ -746,12 +758,14 @@ threads:
     introduced: fa-confirmatory
     returns:
       - {lesson: dimensionality, how: fits multidimensional IRT as factor analysis}
+      - {lesson: continuous-responses, how: observes the latent response the ordinal model cuts}
   # 09-25 (#58): the estimator section added when fa-confirmatory was split.
   - id: estimator-choice
     idea: "Choose the estimator from the data: categories, shape, missingness"
     introduced: fa-confirmatory
     returns:
       - {lesson: measurement-invariance, how: chooses again for multigroup fits}
+      - {lesson: continuous-responses, how: "meets continuous but bounded, piled-up responses"}
 
   # Pass 4 (09-25): proposed by the wave-2 drafts (#135-#139); returns kept only
   # where they are descendants of the introducing lesson (E2).
@@ -761,18 +775,21 @@ threads:
     returns:
       - {lesson: item-banks-cat, how: stops a CAT on the posterior SD}
       - {lesson: guessing-priors, how: puts priors on items as well}
+      - {lesson: missing-responses, how: shows omitters pulled toward the mean when omits are left missing}
   - id: perfect-patterns
     idea: "No maximum-likelihood estimate for all-right or all-wrong patterns"
     introduced: ability-estimation
     returns:
       - {lesson: item-banks-cat, how: starts a CAT without an estimate}
       - {lesson: item-estimation, how: meets perfect patterns in joint estimation}
+      - {lesson: missing-responses, how: gets a perfect pattern by leaving omits missing}
   - id: wording-direction
     idea: "Wording direction can act as a second dimension"
     introduced: instrument-building
     returns:
       - {lesson: fa-exploratory, how: finds at most a trace of it in the BFI-2}
       - {lesson: dimensionality, how: models it as a method factor}
+      - {lesson: mixture-models, how: watches the second eigenvalue fall when fast responders leave}
   - id: contaminated-criterion
     idea: "A criterion built from the same items inflates validity evidence"
     introduced: validity-argument
@@ -817,6 +834,7 @@ threads:
     introduced: guessing-priors
     returns:
       - {lesson: nominal, how: looks at which distractors attract guesses}
+      - {lesson: mixture-models, how: puts the chance floor on a class of respondents}
   - id: raters-exchangeable
     idea: "Raters are treated as exchangeable draws from a universe of raters"
     introduced: g-theory
@@ -828,6 +846,8 @@ threads:
     returns:
       - {lesson: cdm, how: fits both and looks for class profiles that cross}
       - {lesson: validity-causal, how: reads the balance-scale rules as latent classes}
+      - {lesson: nonparametric-irt, how: "finds balance-scale items whose curves fall, read as Siegler's rules"}
+      - {lesson: mixture-models, how: asks whether a class is a kind of respondent or a stretch of a continuum}
   - id: population-dependence
     idea: "Reliability, like any correlation, depends on how much the population varies"
     introduced: ctt-reliability
@@ -835,3 +855,20 @@ threads:
       - {lesson: validity-evidence, how: corrects a validity coefficient for selection on the predictor}
       - {lesson: parameter-invariance, how: shows a narrow range of θ lowering item correlations}
       - {lesson: trials, how: meets an effect too uniform across people to rank them}
+      - {lesson: mixture-models, how: sees reliability change with who is in the sample}
+  # Registered 09-28 from the drafts of the new extension lessons (#191, #193-#195).
+  - id: missing-kinds
+    idea: "Why a response is missing (skipped, not shown, stopped early)"
+    introduced: irw-data
+    returns:
+      - {lesson: missing-responses, how: "infers omitted and not reached from item order, and asks which is ignorable"}
+  - id: merging-categories
+    idea: "Merging categories can't add information"
+    introduced: polytomous
+    returns:
+      - {lesson: continuous-responses, how: "takes it to the continuous limit, and checks a graded fit that seems to gain"}
+  - id: response-styles
+    idea: "Acquiescence and other response styles are shared by every item; alpha counts them as signal"
+    introduced: instrument-building
+    returns:
+      - {lesson: mixture-models, how: fits response styles as classes with a mixed partial credit model}
