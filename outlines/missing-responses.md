@@ -1,9 +1,20 @@
 <!-- Outlined 2026-09-28 (#153; Ben: "handle with care", so the data audit came first). Preliminary numbers from R (mirt 1.x, sirt 4.2-133, TAM 4.3-25) on the tokenless CSVs (IRW v64 / v25) and on sirt::data.timss07.G8.RUS; scratch code in the session scratchpad (missing-responses/). Citations checked on Crossref, OpenAlex or the publisher's page on 09-28, with no mailto or other identifier. -->
 <!-- Revised 2026-09-28 (Ben's idea: infer not-reached from trailing runs on fixed-order tests). New Data audit part 4; main table changed from the TIMSS rebuild to mthimkhulu_2023_pirls_reading. Scratch code in the session scratchpad (missing-trailing/): the ENEM nominal tables via irw_fetch(source = "nom"), the PIRLS 2023 source .sav from figshare (public download, no identifier sent), and sirt::data.timss07.G8.RUS. -->
 
+<!-- Drafted 2026-09-28 (lessons/missing-responses.qmd, status draft). What changed from this outline:
+  - Widgets: four, not six. "Ignorable or not" is covered by the Simulate cell (b recovered under each mechanism, gaps missing vs. wrong); "Time limit" (Oshima) is cited, not built. The "where does the part end?" switch in "Read the order" became the TIMSS check (a collapsible), which reports the misplaced-boundary figures from rendered code.
+  - Ability measure for PIRLS 2023: the first plausible value, read from the source .sav (figshare, CC BY 4.0, no identifier sent) in a folded chunk that also checks the rule against codes 6 and 9. Everything else uses the IRW table alone, so the lesson works without Data audit 5(a). The IRW-only proxy (proportion correct on answered items) is floored for this sample (853 of 1,894 at or below 0.10), so it was not used.
+  - The third scoring is called "the split" in the prose (omits 0, not reached missing), since the TIMSS report verifies the not-reached half of the rule only (§11.3.3 doesn't say how omits are scored).
+  - A response-propensity model (two-dimensional mirt: theta on the 15 items, xi on 15 answered-if-reached indicators) is fitted in the rendered R: cor 0.30; heavy omitters -0.46 SD (between -0.31 missing and -0.56 split).
+  - TIMSS 2007 Russia: computed in the page (sirt) as a collapsible check, not only reported. Booklet design verified in the TIMSS 2007 Technical Report ch. 2, Exhibit 2.13.
+  - pirlsmissing_sirt: the two "CZ" composites are dropped (they combine their lettered parts; checked in the data). NLD-FRA: 0.46 / 0.28 / 0.43 SD (wrong / missing / split).
+  - Lord (1974): the specific method (chance-level credit) could not be checked from the abstract, so the lesson says only that he gave a method that uses what omits reveal.
+  - Not used: ENEM (mentioned in For instructors), c19prc wordsum sanity (the simulation does that job), rapm_poulton.
+-->
+
 # Missing responses: omitted, not reached, and ignorable (`missing-responses`)
 
-Module: irt · Prereqs: ability-estimation · Extension · Status: stub (outlined)
+Module: irt · Prereqs: ability-estimation · Extension · Status: draft
 
 ## Core ideas
 

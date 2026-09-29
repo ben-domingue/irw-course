@@ -2,7 +2,23 @@
 
 # Nonparametric IRT: Mokken scaling (`nonparametric-irt`)
 
-Module: irt · Prereqs: ctt-limits, rasch · Extension · Status: stub (outlined)
+Module: irt · Prereqs: ctt-limits, rasch · Extension · Status: draft
+
+## Drafting notes (09-28)
+
+Drafted as `lessons/nonparametric-irt.qmd`. What changed from the plan above:
+
+- **Rasch vs. kernel on `mcmi_mokken`.** The outline's numbers evaluated the Rasch curve at the kernel's N(0, 1) points, but `mirt`'s Rasch fit estimates the SD of θ (1.70 here). Rescaled, the Rasch curve is off by up to 0.30 (median item 0.09), not 0.32 (0.17); the 2PL figures stand (0.20, 0.07). Item 12: Rasch 0.16 → 0.84 between −1.3 and 0.6.
+- **Predict-then-check** uses `mokken`'s own rest-score groups for CW1 (4–10: 0.90, n = 121; 11–14: 0.61; 15–16: 0.27; 17–20: 0.17, n = 109), not hand-made ones.
+- **IIO:** `check.iio()$HT` is for the items that remain: 0.21 for all 44 (`item.selection = FALSE`), 0.25 for the 22 left. Removed items include the flattest and steepest 2PL slopes (0.82, 3.04); kept slopes 1.03–2.19.
+- **Kernel smoother** written by hand (webR, widget and the downloadable code); it reproduces `KernSmoothIRT::ksIRT()` to 1e−15. Its default bandwidth is 1.06 N^(−1/5) (Silverman), not 1.1.
+- **`mokken` in webR:** available in the webR repo (with poLCA, scatterplot3d, MASS), so Simulate uses it directly; the in-browser check passes.
+- **Siegler's rules** checked against Hofman, Visser, Jansen & van der Maas (2015, PLOS ONE, Table 1), a secondary restatement; Siegler (1976) itself not read. The balance-scale sample's age wasn't found anywhere, so the lesson says "children" only.
+- **Balance citation:** the lesson cites Crossref's title for van Maanen, Been & Sijtsma (1989); IRW biblio and `mokken` give another title for the same chapter.
+- **H^T benchmarks** (Ligtvoet et al., 2010) not stated: the primary source couldn't be reached. The lesson compares H^T with the simulation's Rasch items (0.28) instead.
+- **Sanity table** `transreas_mokken` checked outside the lesson (mentioned in For instructors), so it isn't loaded or listed.
+- `swmd_mokken`, problem 4 only: pupil-level H 0.55 (Item7 0.39); two-level `MLcoefH`: H^W 0.55, H^B 0.12, H^BW 0.21 (solutions).
+- Nothing from the core ideas was dropped. Polytomous Mokken scaling stays at one sentence.
 
 ## Core ideas
 

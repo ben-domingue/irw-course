@@ -37,6 +37,8 @@ References verified 09-24 against Crossref unless noted; table citations from IR
 
 Numbers from the 09-24 outline pass (not recomputed). **Recomputed in the draft (09-25):** cleverness as above (person 32.1%, person × task 29.4%, residual 29.6%, rater 2.1%, person × rater 5.5%). Essays, with the expert-benchmark rows removed (315 teachers, 5 essays each; 435 of 881 essays have one teacher): essay 29.7%, rater 9.7%, essay × rater 25.2%, essay × criterion 9.6%. The rater and essay × rater shares differ from the outline's (14%, 19%), but the conclusion (more raters is the lever) stands. Sanity: the simulation (known components recovered) checks the `lme4` pipeline before the real tables.
 
+**Revised 09-28 (#76, second round):** observed-score vs latent-trait framing; universe of generalization (with D studies); crossed vs nested named, essay raters effectively nested within essays; how REML uses only observed ratings; a balanced check on the 126 essays with exactly three teachers, (r:p) × criteria, where ANOVA/EMS by hand equals `lmer` REML (essay 0.775, criterion 0.023, rater within essay 0.902, essay × criterion 0.248, residual 0.597) and sits close to the full sparse fit combined the same way (0.754, 0.010, 0.886, 0.243, 0.648). Going further: 1972 book added, Primer first.
+
 ## Widget / simulation / problem ideas
 
 **Widgets**

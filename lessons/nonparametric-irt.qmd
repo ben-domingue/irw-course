@@ -8,19 +8,451 @@ source("_course.R")
 lesson_header("nonparametric-irt")
 ```
 
+```{webr}
+#| context: setup
+options(mc.cores = 1)
+webr::install("mokken", quiet = TRUE)
+suppressPackageStartupMessages(library(mokken))
+```
+
+```{ojs}
+//| echo: false
+import {p2pl, grid, logistic, logisticFit, rng, palette} from "./widgets/irt.js"
+import {curve, simWithTarget, restGroups, violations, pairH, rankTheta, kernelCurve, reversedShare} from "./widgets/nonparametric-irt.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.* The plan is in [outlines/nonparametric-irt.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/nonparametric-irt.md).
+The Rasch model says three things about each item: one latent variable drives it, responses are independent given that variable, and its curve is a logistic with slope 1. If the job is only to order respondents by their sum score, how much of that do we need? Rather little. Drop the formula, keep only that the curve never falls, and the sum score still orders respondents on $\theta$. This is the **monotone homogeneity model** at the core of Mokken scaling ([Mokken, 1971](https://doi.org/10.1515/9783110813203)), and its checks need no fitted curve. This lesson is about those checks and what they can't see: a clinical inventory whose items all rise but whose curves cross, and balance-scale problems on which children who do better on the rest of the test do *worse*.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Where CTT breaks](ctt-limits.qmd): plotted against the sum score, the proportion correct on each fourth-grade mathematics item rose, at its own place and rate. That lesson noted that estimating these curves directly, without a model for their shape, is the business of nonparametric item response theory, and it showed two capital-punishment statements, DONTBELIEV and WISHNOTNEC, whose curves rose and then fell.
+:::
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- state the monotone homogeneity model and what it buys without a parametric curve;
+- compute Loevinger's $H$ from Guttman errors, and read item and scale $H$;
+- check monotonicity in rest-score groups, and say why the rest score is used;
+- explain invariant item ordering and its link to crossing curves and specific objectivity;
+- draw a kernel-smoothed item curve, choose a bandwidth, and compare it with a logistic curve;
+- say which claims about a scale a Mokken analysis in `mokken` supports.
+
 ## Core ideas
 
-## Worked example
+### The Rasch model's assumptions without its curve
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): the model rests on two assumptions, a single $\theta$ behind every response (unidimensionality) and local independence given $\theta$, and pairs them with a formula for the item characteristic curve.
+:::
+
+The **monotone homogeneity model** (MHM) keeps both assumptions and replaces the formula with an inequality. For every item $i$, the curve $P_i(\theta) = \Pr(x_i = 1 \mid \theta)$ is nondecreasing in $\theta$: it may be steep or flat, S-shaped or lumpy, but it never goes down ([Mokken, 1971](https://doi.org/10.1515/9783110813203); [Sijtsma & Molenaar, 2002](https://doi.org/10.4135/9781412984676)). Every logistic model with a positive slope is a special case.
+
+What does so weak a model buy? First, every pair of items has a non-negative covariance, in every population ([Holland & Rosenbaum, 1986](https://doi.org/10.1214/aos/1176350174)), so a negative one is evidence against the model. Second, for dichotomous items, respondents with higher sum scores have, as a group, higher $\theta$: the sum score orders respondents stochastically ([Grayson, 1988](https://doi.org/10.1007/BF02294219)). Under the Rasch model the sum score is sufficient; the MHM keeps only the order. For polytomous items even the order can fail ([Hemker, Sijtsma, Molenaar & Junker, 1997](https://doi.org/10.1007/BF02294555)).
+
+::: {.callout-note collapse="true"}
+## Go deeper: why monotone curves give positive covariances and an ordered sum score
+
+**Assumptions:** dichotomous items; one latent variable $\theta$ with any distribution; local independence given $\theta$; every $P_i(\theta)$ nondecreasing.
+
+**Covariances.** For two items, local independence gives $E(x_i x_j) = E[P_i(\theta)P_j(\theta)]$, so
+$$\operatorname{cov}(x_i, x_j) = \operatorname{cov}\big(P_i(\theta), P_j(\theta)\big).$$
+Two nondecreasing functions of the same random variable have a non-negative covariance. Take an independent copy $\theta'$ of $\theta$: the product $[P_i(\theta) - P_i(\theta')][P_j(\theta) - P_j(\theta')]$ is never negative, since both brackets have the sign of $\theta - \theta'$, and its expectation is twice the covariance. [Holland and Rosenbaum (1986)](https://doi.org/10.1214/aos/1176350174) prove much more: *conditional association*, non-negative covariances between any nondecreasing functions of the items, even within subgroups defined by other items. So $H_{ij} \ge 0$ for every pair is a necessary condition for the MHM, not a convention.
+
+**Ordering.** Write $r$ for the sum score. [Grayson (1988)](https://doi.org/10.1007/BF02294219) showed that under these assumptions $r$ has monotone likelihood ratio in $\theta$: for $r' > r$, $\Pr(r' \mid \theta)/\Pr(r \mid \theta)$ is nondecreasing in $\theta$. By Bayes' theorem the posterior of $\theta$ given $r'$ is then stochastically larger than given $r$, whatever the prior, so $E(\theta \mid r)$ and every posterior quantile rise with $r$. Compare the sufficiency callout in [The Rasch model](rasch.qmd): there the pattern carries no information beyond $r$; here the pattern may carry more, but a higher $r$ still means a higher $\theta$ on average. [Hemker et al. (1997)](https://doi.org/10.1007/BF02294555) show that the second result doesn't carry over to polytomous items in general.
+:::
+
+### Scalability: Loevinger's H
+
+Suppose items could be ordered perfectly: anyone who endorses a harder item also endorses every easier one. That is a **Guttman scale** ([Guttman, 1944](https://doi.org/10.2307/2086306)), and a respondent who gets the harder item of a pair right and the easier one wrong commits a **Guttman error**. Real items make errors. How many, compared with what?
+
+Take items $i$ and $j$ with proportions $p_i \le p_j$, so $i$ is the harder. If the items were independent, the expected number of errors among $N$ respondents would be $N p_i (1 - p_j)$. Loevinger's coefficient ([Loevinger, 1948](https://doi.org/10.1037/h0055827)) compares observed with expected:
+$$H_{ij} = 1 - \frac{\text{observed Guttman errors}}{\text{expected Guttman errors under independence}} = \frac{\operatorname{cov}(x_i, x_j)}{\operatorname{cov}_{\max}(x_i, x_j)},$$
+where $\operatorname{cov}_{\max} = p_i(1 - p_j)$ is the largest covariance the two proportions allow (problem 1). 1 means no errors, 0 as many as chance. Pooling numerators and denominators over the pairs involving item $i$ gives $H_i$, and over all pairs the scale's $H$ ([Sijtsma & Molenaar, 2002](https://doi.org/10.4135/9781412984676)). By convention every $H_i$ should exceed a bound $c$, usually 0.3, and an $H$ of 0.3–0.4 is called weak, 0.4–0.5 medium, and 0.5 or more strong ([Mokken, 1971](https://doi.org/10.1515/9783110813203); summarized in [Sijtsma & van der Ark, 2017, pp. 145–146](https://doi.org/10.1111/bmsp.12078)). These are conventions for describing a scale, not tests with a known error rate.
+
+#### Try it: Guttman errors for two items
+
+A thousand simulated respondents answer two items with a common slope. Item A is the easier when its difficulty is lower.
+
+```{ojs}
+//| echo: false
+viewof h_bA = Inputs.range([-2, 2], {value: -0.5, step: 0.1, label: "Item A difficulty"})
+viewof h_bB = Inputs.range([-2, 2], {value: 0.5, step: 0.1, label: "Item B difficulty"})
+viewof h_a = Inputs.range([0, 3], {value: 1.5, step: 0.1, label: "Slope (both items)"})
+viewof h_flip = Inputs.toggle({label: "Item B falls as θ rises", value: false})
+```
+
+```{ojs}
+//| echo: false
+h_sim = {
+  const r = rng(71), x1 = [], x2 = [];
+  for (let j = 0; j < 1000; j++) {
+    const t = r.norm();
+    x1.push(r.unif() < p2pl(t, h_bA, h_a) ? 1 : 0);
+    x2.push(r.unif() < p2pl(t, h_bB, h_flip ? -h_a : h_a) ? 1 : 0);
+  }
+  return pairH(x1, x2);
+}
+Inputs.table([
+  {" ": "B right", "A right": h_sim.n11, "A wrong": h_sim.n01},
+  {" ": "B wrong", "A right": h_sim.n10, "A wrong": h_sim.n00}], {layout: "auto"})
+```
+
+```{ojs}
+//| echo: false
+md`Proportions: A ${h_sim.p1.toFixed(2)}, B ${h_sim.p2.toFixed(2)}, so item ${h_sim.hard === 1 ? "A" : "B"} is the harder. Guttman errors (harder right, easier wrong): **${h_sim.observed}** observed, **${h_sim.expected.toFixed(1)}** expected under independence. H = 1 − ${h_sim.observed}/${h_sim.expected.toFixed(1)} = **${h_sim.H.toFixed(2)}**; the covariance over its maximum, ${h_sim.cov.toFixed(3)}/${h_sim.covMax.toFixed(3)}, gives the same **${h_sim.Hcov.toFixed(2)}**.`
+```
+
+At a slope of 0, $H$ hovers around 0; raise the slope and errors become rarer. Now move the difficulties apart: $H$ rises again, since an error needs a respondent between the two items. So $H$ depends on the slopes *and* the spacing of the items, which merits comment before comparing $H$ across scales. Turn on the toggle and errors outnumber chance: $H$ is negative, which the MHM forbids.
+
+If you've done [Unfolding models](unfolding.qmd): MUDFOLD's $H$ is this coefficient with a different definition of an error, one built for statements whose curves peak.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two items have proportions 0.30 and 0.60. Among 1,000 respondents, 84 got the harder item right and the easier one wrong. What is $H_{ij}$?",
+  options: [
+    {text: "0.30", correct: true, why: "Expected errors under independence are $1000 \\times 0.30 \\times (1 - 0.60) = 120$, so $H_{ij} = 1 - 84/120 = 0.30$: weak by Mokken's convention."},
+    {text: "0.70", correct: false, why: "That is the ratio of observed to expected errors, $84/120$. $H_{ij}$ is one minus it."},
+    {text: "0.84", correct: false, why: "That treats 84 as a share of 100. $H$ compares the observed errors with those expected under independence, 120 here."}
+  ]
+})
+```
+
+### Building scales from the bottom up: automated item selection
+
+Which items in a pool form a scale? Mokken's **automated item selection procedure** (AISP) starts with the most scalable pair, adds items while every $H_i$ stays above the bound $c$, and starts a second scale from the leftovers ([Mokken, 1971](https://doi.org/10.1515/9783110813203); [van der Ark, 2012](https://doi.org/10.18637/jss.v048.i05)). Raising $c$ splits scales into smaller ones; a genetic algorithm that searches whole partitions sometimes does better than adding one item at a time ([Straat, van der Ark & Sijtsma, 2013](https://doi.org/10.1007/s00357-013-9122-y)). AISP is a reasonable first look at a pool whose structure isn't known ([Sijtsma & van der Ark, 2017](https://doi.org/10.1111/bmsp.12078)): it groups items and says nothing about why they belong together.
+
+### Checking monotonicity in rest-score groups
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Where CTT breaks](ctt-limits.qmd): the sum score contains the item, so at the extremes its proportion is fixed by construction (every curve ended at exactly 1), and problem 3 there swapped in the **rest score**, the sum of the other items. [The Rasch model](rasch.qmd) met the same fact in the `wirs` table, where observed and predicted proportions agreed at sum scores 0 and 6 by construction.
+:::
+
+How do we check that a curve never falls when we never see $\theta$? Use the rest score $R_{(i)}$ in its place. Under the MHM, $\Pr(x_i = 1 \mid R_{(i)} = s)$ is nondecreasing in $s$ ([Junker & Sijtsma, 2001](https://doi.org/10.1177/01466210122032028); [Sijtsma & Molenaar, 2002, ch. 5](https://doi.org/10.4135/9781412984676)). Not the sum score, which contains the item and so builds part of the rise into the check. `mokken` pools adjacent rest scores into groups of a minimum size ($N/10$ by default when $N \ge 500$) and compares every pair of groups: a drop larger than 0.03 is a violation, and a one-sided test says whether it is significant ([van der Ark, 2007](https://doi.org/10.18637/jss.v020.i11)).
+
+#### Try it: rest-score groups
+
+A thousand simulated respondents answer ten ordinary items and one target item whose true curve you choose. Groups involved in a significant drop are drawn in orange; the grey bars show which rest scores each group pools.
+
+```{ojs}
+//| echo: false
+viewof rs_shape = Inputs.radio(new Map([["Rises (logistic)", "logistic"], ["Flat", "flat"], ["Rises then falls", "bump"]]), {value: "logistic", label: "Target item's curve"})
+viewof rs_min = Inputs.range([25, 300], {value: 100, step: 25, label: "Minimum group size"})
+```
+
+```{ojs}
+//| echo: false
+rs_sim = simWithTarget(11, 1000, 10, rs_shape, {b: 0})
+rs_rest = rs_sim.X.map(row => row.reduce((u, v) => u + v, 0))
+rs_groups = restGroups(rs_rest, rs_sim.y, rs_min)
+rs_viol = violations(rs_groups)
+rs_flag = new Set(rs_viol.filter(d => d.sig).flatMap(d => [d.from, d.to]))
+rs_pts = rs_groups.map((g, i) => ({...g, mid: (g.lo + g.hi) / 2, flag: rs_flag.has(i) ? "in a significant drop" : "no significant drop"}))
+Plot.plot({
+  width: 700, height: 300, x: {label: "Rest score (sum of the other ten items)", domain: [0, 10]}, y: {label: "Proportion positive on the target item", domain: [0, 1]},
+  r: {range: [3, 10]},
+  color: {legend: true, domain: ["no significant drop", "in a significant drop"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.line(rs_pts, {x: "mid", y: "prop", stroke: palette.light, strokeWidth: 2}),
+    Plot.link(rs_pts, {x1: "lo", x2: "hi", y1: "prop", y2: "prop", stroke: palette.guide}),
+    Plot.dot(rs_pts, {x: "mid", y: "prop", r: "n", fill: "flag"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`**${rs_groups.length}** rest-score groups (${rs_groups.map(g => g.lo === g.hi ? `${g.lo}` : `${g.lo}–${g.hi}`).join(", ")}). Pairs of groups compared: ${rs_groups.length * (rs_groups.length - 1) / 2}. Violations (a drop larger than 0.03): **${rs_viol.length}**; significant at the 5% level: **${rs_viol.filter(d => d.sig).length}**.`
+```
+
+The logistic item rises through every group. The flat item wobbles, with four drops above 0.03 and none significant; a flat curve doesn't break the MHM anyway, and what gives it away is an $H_i$ near zero. The item that rises and falls drops significantly from the middle groups to the top one. Small groups make noisy proportions and more small drops; large groups can swallow a fall confined to one end.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Why does the monotonicity check group respondents by the rest score rather than the sum score?",
+  options: [
+    {text: "The sum score contains the item, so conditioning on it builds some of the rise into the curve", correct: true, why: "A respondent with a higher sum score is, by construction, more likely to have the item right. Removing the item from the score removes that built-in rise."},
+    {text: "The rest score is more reliable than the sum score", correct: false, why: "It has one item fewer, so if anything it is slightly less reliable. The reason is the part–whole overlap, not precision."},
+    {text: "The rest score has an equal unit and the sum score doesn't", correct: false, why: "The MHM vouches for a unit in neither; both only order respondents. The check needs only order."}
+  ]
+})
+```
+
+### Invariant item ordering: when the curves don't cross
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): specific objectivity. If two items' curves never cross, everyone finds the same item easier, whatever their ability; in the "do the curves cross?" widget, curves with equal slopes never crossed, and curves with different slopes crossed somewhere.
+:::
+
+Monotonicity says nothing about whether curves cross. Adding "the curves don't cross" to the MHM gives the **double monotonicity model**, whose content is **invariant item ordering** (IIO): the items come in the same order of difficulty for every respondent ([Sijtsma & Junker, 1996](https://doi.org/10.1111/j.2044-8317.1996.tb01076.x)). This is the ordinal part of specific objectivity. The Rasch model implies IIO; the 2PL generally doesn't. When does it matter? When an interpretation rests on the order of the items: a developmental sequence, a hierarchy of symptoms.
+
+::: {.callout-note collapse="true"}
+## How `mokken` checks IIO, and what $H^T$ is
+
+`check.iio()` follows [Ligtvoet, van der Ark, te Marvelde and Sijtsma (2010)](https://doi.org/10.1177/0013164409355697). For each pair of items it compares their proportions within rest-score groups (the rest score now leaving out both items) and flags significant reversals, then removes items one at a time, the one with the most violations first, until none are left. The coefficient $H^T$ is an $H$ computed with the roles of respondents and items swapped: near 0 when the curves lie close together, higher when they are well separated, so it says how accurately the order can be read off. `mokken` reports it for the items that remain.
+:::
+
+#### Try it: how many respondents does a crossing affect?
+
+```{ojs}
+//| echo: false
+viewof io_bA = Inputs.range([-2, 2], {value: -0.5, step: 0.1, label: "Item A difficulty"})
+viewof io_aA = Inputs.range([0.3, 3], {value: 1, step: 0.1, label: "Item A slope"})
+viewof io_bB = Inputs.range([-2, 2], {value: 0.5, step: 0.1, label: "Item B difficulty"})
+viewof io_aB = Inputs.range([0.3, 3], {value: 2, step: 0.1, label: "Item B slope"})
+```
+
+```{ojs}
+//| echo: false
+io_rs = reversedShare(io_aA, io_bA, io_aB, io_bB)
+io_data = grid(-4, 4).flatMap(t => [
+  {theta: t, p: p2pl(t, io_bA, io_aA), item: "Item A"},
+  {theta: t, p: p2pl(t, io_bB, io_aB), item: "Item B"}])
+io_edge = io_rs.cross === null ? null : Math.max(-4, Math.min(4, io_rs.cross))
+io_band = io_rs.cross === null ? [] : [io_rs.reversedBelow ? {x1: -4, x2: io_edge} : {x1: io_edge, x2: 4}]
+Plot.plot({
+  width: 700, height: 300, x: {label: "θ", domain: [-4, 4]}, y: {label: "P(x = 1)", domain: [0, 1]},
+  color: {legend: true, domain: ["Item A", "Item B"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.rect(io_band, {x1: "x1", x2: "x2", y1: 0, y2: 1, fill: palette.light, fillOpacity: 0.35}),
+    Plot.line(io_data, {x: "theta", y: "p", stroke: "item", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Across a normal population, item ${io_rs.easier === 1 ? "A" : "B"} is the easier (proportions ${io_rs.m1.toFixed(2)} for A and ${io_rs.m2.toFixed(2)} for B). ${io_rs.cross === null ? "With equal slopes the curves never cross: the order is the same for everyone." : `The curves cross at θ = ${io_rs.cross.toFixed(2)}. In the shaded range the order is reversed; it holds **${(100 * io_rs.share).toFixed(1)}%** of a N(0, 1) population.`}`
+```
+
+At the defaults the curves cross at $\theta = 1.5$, and the 6.7% of respondents above it find item B the easier. Pull the difficulties apart and the crossing moves into the tails; bring them together and the share approaches half. Unequal slopes matter for IIO in practice only when the curves cross where the respondents are.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A scale passes the monotonicity check with no violations, but the IIO check removes half its items. Which claim does the analysis support?",
+  options: [
+    {text: "Higher sum scores go with higher θ, but the items' order of difficulty depends on the respondent", correct: true, why: "Monotonicity supports ordering respondents by the sum score. IIO is a separate claim about the items, and here it fails for many pairs."},
+    {text: "The items fit the Rasch model", correct: false, why: "The Rasch model implies IIO. Crossing curves, which the IIO check found, are evidence against it."},
+    {text: "The items should not be summed", correct: false, why: "The sum score still orders respondents under the MHM. What is lost is a common order of the items, which only some uses need."}
+  ]
+})
+```
+
+### Kernel-smoothed item curves
+
+Can we draw a whole item curve without assuming its shape? [Ramsay (1991)](https://doi.org/10.1007/BF02294494) proposed a kernel smoother. Turn the ranks of the sum scores into standard normal quantiles, a stand-in for $\theta$ that uses only order, and estimate $P_i(t)$ by a weighted average of the item's responses, with weights falling off with distance from $t$ (the Nadaraya–Watson estimator; [Nadaraya, 1964](https://doi.org/10.1137/1109020); [Watson, 1964](https://www.jstor.org/stable/25049340)):
+$$\hat P_i(t) = \frac{\sum_j K\big((t - \hat\theta_j)/h\big)\, x_{ij}}{\sum_j K\big((t - \hat\theta_j)/h\big)},$$
+with $K$ the normal density, $\hat\theta_j$ respondent $j$'s rank-based ability and $h$ the **bandwidth**; `KernSmoothIRT` ([Mazza, Punzo & McGuire, 2014](https://doi.org/10.18637/jss.v058.i06)) defaults to Silverman's $h = 1.06\,N^{-1/5}$ ([Silverman, 1986](https://doi.org/10.1201/9781315140919)). This lesson writes the smoother out in R, and on the MCMI data it reproduces `KernSmoothIRT`.
+
+#### Try it: the bandwidth
+
+A thousand simulated respondents answer 30 ordinary items and one target item. Their rank-based abilities come from the sum of all 31.
+
+```{ojs}
+//| echo: false
+viewof ks_shape = Inputs.radio(new Map([["Rises then falls", "bump"], ["Rises (logistic)", "logistic"]]), {value: "bump", label: "True curve"})
+viewof ks_h = Inputs.range([0.05, 1.5], {value: 0.27, step: 0.01, label: "Bandwidth h"})
+```
+
+```{ojs}
+//| echo: false
+ks_opts = ({b: 0.3, a: 1.5})
+ks_sim = simWithTarget(23, 1000, 30, ks_shape, ks_opts)
+ks_theta = rankTheta(ks_sim.X.map((row, j) => row.reduce((u, v) => u + v, 0) + ks_sim.y[j]))
+ks_at = grid(-2.8, 2.8, 81)
+ks_k = kernelCurve(ks_theta, ks_sim.y, ks_at, ks_h)
+ks_fit = logisticFit(ks_theta, ks_sim.y)
+ks_err = Math.max(...ks_at.map((t, i) => Math.abs(t) < 2 ? Math.abs(ks_k[i] - curve(ks_shape, t, ks_opts)) : 0))
+Plot.plot({
+  width: 700, height: 320, x: {label: "Rank-based ability", domain: [-2.8, 2.8]}, y: {label: "P(x = 1)", domain: [0, 1]},
+  color: {legend: true, domain: ["kernel", "logistic fit", "true curve"], range: [palette.main, palette.contrast, palette.guide]},
+  marks: [
+    Plot.line(ks_at.map(t => ({t, p: curve(ks_shape, t, ks_opts), s: "true curve"})), {x: "t", y: "p", stroke: "s", strokeDasharray: "5 3", strokeWidth: 1.5}),
+    Plot.line(ks_at.map(t => ({t, p: logistic(ks_fit.b0 + ks_fit.b1 * t), s: "logistic fit"})), {x: "t", y: "p", stroke: "s", strokeWidth: 2}),
+    Plot.line(ks_at.map((t, i) => ({t, p: ks_k[i], s: "kernel"})), {x: "t", y: "p", stroke: "s", strokeWidth: 3})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Bandwidth **${ks_h.toFixed(2)}** (the default for 1,000 respondents is 1.06 × 1000^(−1/5) = 0.27). Largest gap between the kernel and the true curve, for abilities between −2 and 2: **${ks_err.toFixed(2)}**. Slope of the logistic fit: ${ks_fit.b1.toFixed(2)}.`
+```
+
+With the default bandwidth the kernel curve rises to about 0.8 and falls back to about 0.2 (a little below the true peak, since the rank-based abilities are noisy), while the logistic fit, which can only rise or fall, draws a gentle line through it. Shrink $h$ toward 0.05 and the curve turns jagged; push it past 1 and the peak flattens, as each point averages over respondents far away. Switch to the logistic item and the kernel and the logistic fit nearly coincide. A kernel curve is a check on a parametric curve, not a replacement for one: where the two agree, the parametric model's extra assumptions cost little; where they part, the kernel shows how ([Douglas & Cohen, 2001](https://doi.org/10.1177/01466210122032046)).
+
+Where does this leave us? The models differ in what they assume about each curve: that it rises (MHM); that it rises and crosses no other (double monotonicity); that it has a particular shape (Rasch, 2PL). In the case that the claim is only that the sum score orders respondents, a Mokken scale (every $H_i$ of at least 0.3 and no significant monotonicity violations) may be sufficient for some purposes, and it asks less of the data than a parametric model. A parametric model earns its place when items are compared across forms or groups, or when precision at a point on the scale matters. A claim that the items come in a fixed order is a third claim, and it needs its own check.
+
+## Simulate
+
+The code below simulates 1,000 respondents on ten 2PL items (slopes 0.5 to 2.5) and one item whose curve rises and then falls, runs the `mokken` checks, and draws two kernel curves with logistic fits. The first run takes about 20 seconds while R and `mokken` load.
+
+With the seed as written, the 2PL items have $H_i$ from 0.15 to 0.53, rising with the slope; the scale $H$ is 0.27; the eleventh item has $H_i$ of 0.02 and four significant violations. Item selection at 0.3 drops the two flattest items and the eleventh, and the IIO check removes the same two flattest ($H^T$ for the rest: 0.41). The kernel and logistic curves agree for i10 and part for the eleventh item. Now set `a <- rep(1, 10)`, the Rasch model: no item is removed, $H^T$ is 0.28, and $H$ drops to 0.20, below Mokken's bound, though the model holds exactly. $H$ measures how sharply items separate respondents, not whether a model is true.
+
+```{webr}
+{{< include code/nonparametric-irt-sim.R >}}
+```
+
+[Download this code](code/nonparametric-irt-sim.R) to run it as large as you like in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/nonparametric-irt-irw.R")
+```
+
+We use two tables, the `mokken` package ([van der Ark, 2007](https://doi.org/10.18637/jss.v020.i11)) and, for the parametric comparison, `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)); [download the code](code/nonparametric-irt-irw.R).
+
+```{r helpers}
+#| echo: true
+#| code-fold: show
+#| message: false
+```
+
+### A clinical inventory: monotone, but crossing
+
+The main example is [mcmi_mokken](https://itemresponsewarehouse.org/tables/mcmi_mokken/): 44 true/false items from a Dutch version of the Millon Clinical Multiaxial Inventory-III, answered by 1,208 patients and inmates ([Rossi, Elklit & Simonsen, 2010](https://doi.org/10.1521/pedi.2010.24.1.128)); the 44-item subset was assembled by [de la Torre, van der Ark and Rossi (2018)](https://doi.org/10.1080/07481756.2017.1327286) for diagnostic classification models. Its job is to show a scale whose items all rise but whose curves cross. A response is 1 if the item was endorsed. The items are deidentified, so we have their numbers but not their text.
+
+```{r fetch-mcmi}
+#| echo: true
+#| code-fold: show
+```
+
+```{r h-mcmi}
+#| echo: true
+#| code-fold: show
+```
+
+The scale $H$ is 0.42, medium by Mokken's convention. Every $H_i$ is between 0.25 and 0.60, and items 39, 26 and 42 are the only ones below the usual bound of 0.3. Item selection agrees:
+
+```{r aisp-mcmi}
+#| echo: true
+#| code-fold: show
+```
+
+At $c = 0.3$, 41 items form one scale; at 0.4 the main scale has 33; at 0.5 the items split into eight scales. What the smaller scales mean is a question for item content we can't see. Monotonicity:
+
+```{r mono-mcmi}
+#| echo: true
+#| code-fold: show
+```
+
+Across 1,417 comparisons of rest-score groups, not one drop exceeds 0.03. By the checks of the MHM these 44 items form a fairly clean scale, and the sum score orders respondents. Do the curves cross?
+
+```{r iio-mcmi}
+#| echo: true
+#| code-fold: show
+```
+
+They do, often. $H^T$ for all 44 items is 0.21, and the backward selection removes 22 items, leaving an $H^T$ of 0.25, below the 0.28 of the simulation's Rasch items. The removed items include both the flattest 2PL slope (0.82) and the steepest (3.04); the survivors' slopes run from 1.03 to 2.19. Invariant item ordering and equal slopes are close relatives. (If you've done [From the 1PL to the 4PL](1pl-to-4pl.qmd), the 2PL is that lesson's model, with a slope for each item; the Rasch model's slider in [The Rasch model](rasch.qmd) previewed it.) The kernel curves show it:
+
+```{r kernel-mcmi}
+#| echo: true
+#| code-fold: show
+#| fig-width: 8
+#| fig-height: 3.8
+```
+
+Item 12's kernel curve climbs from 0.05 to 0.92 between rank-based abilities of −1.3 and 0.6; the 2PL follows it to within 0.06 at every point shown, while the Rasch curve, held to a common slope, rises only from 0.16 to 0.84. On the flat item 39 the Rasch curve is too steep. Over the middle 95% of respondents the 2PL strays from the kernel curve by at most 0.20 (median item 0.07), the Rasch curve by up to 0.30 (median 0.09). And the two items cross: 60% of respondents endorse item 12 and 37% item 39, yet at an ability of −1.3 item 39's kernel curve is at 0.16 and item 12's at 0.05. An analysis that stopped at $H$ and monotonicity would not see this.
+
+### Balance-scale problems: when the curve falls
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Constructs](constructs.qmd): a construct may be a continuum or a set of latent classes, and ordered classes close together look very much like a continuum. Telling them apart takes predictions that differ between the two accounts.
+:::
+
+The failure case is [balance_mokken](https://itemresponsewarehouse.org/tables/balance_mokken/): 484 children, 25 balance-scale problems ([van Maanen, Been & Sijtsma, 1989](https://doi.org/10.1007/978-3-642-83943-6_17)), each showing weights on pegs either side of a fulcrum and asking which way the beam tips. Its job is to show items whose curves fall. A response is 1 if correct. There are five problems of each type: weight (W) and distance (D), where only one differs, and three conflict types, with more weight on one side and more distance on the other, where the weight side goes down (CW), the distance side goes down (CD) or the beam balances (CB).
+
+```{r fetch-balance}
+#| echo: true
+#| code-fold: show
+```
+
+```{r h-balance}
+#| echo: true
+#| code-fold: show
+```
+
+The scale $H$ is 0.10, and three conflict-weight items have $H_i$ from −0.24 to −0.31: children who do well on the rest of the test tend to do *worse* on them, which the MHM rules out. What does the curve look like? The rest-score groups below are `mokken`'s own, of at least 96 children each.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Among the 121 children whose rest score (on the other 24 problems) is between 4 and 10, 90% solve conflict-weight problem CW1. What proportion of the 109 children with the highest rest scores, 17 to 20, solve it?",
+  choices: ["More, close to 1", "About the same, around 0.9", "Somewhat fewer, around 0.6", "Far fewer, under 0.2"],
+  answer: "Far fewer, under 0.2",
+  reveal: "17%. The proportion falls through every group: 0.90, 0.61, 0.27, 0.17. The children who solve the most of the other problems are the least likely to solve CW1. Check the output below."
+})
+```
+
+```{r rest-cw1}
+#| echo: true
+#| code-fold: show
+```
+
+```{r mono-balance}
+#| echo: true
+#| code-fold: show
+```
+
+CW1 falls from 0.90 to 0.17 across the four groups, and five of its six comparisons are significant drops; CW2 and CW3 behave the same way, and CW4 and CW5 fall less. The conflict-distance items show small violations, one of them significant (CD4). Item selection at $c = 0.3$ does something informative:
+
+```{r aisp-balance}
+#| echo: true
+#| code-fold: show
+```
+
+It sorts the items largely by type, though it was told nothing about types: distance and conflict-balance (with CD5) in the first scale, all five conflict-weight items (with two weight items) in the second, four conflict-distance items in the third.
+
+Why would stronger children do worse? [Siegler (1976)](https://doi.org/10.1016/0010-0285(76)90016-5) proposed that children use one of a series of rules: only the weights count (Rule I); distance counts only when the weights are equal (II); both count, but a conflict means a guess (III); the two are weighed properly (IV). Rules I and II solve every conflict-weight problem, since the heavier side does go down; a child who has moved on to Rule III guesses, and is right about a third of the time ([Hofman, Visser, Jansen & van der Maas, 2015, Table 1](https://doi.org/10.1371/journal.pone.0136449)). Progress elsewhere goes with a drop on these items: the item types behave like signatures of strategies, which is a claim about latent classes rather than a continuum.
+
+What does a parametric model make of CW1?
+
+```{r kernel-balance}
+#| echo: true
+#| code-fold: show
+#| fig-width: 9
+#| fig-height: 3.4
+```
+
+On D1 kernel and 2PL agree. For CW1 the 2PL has a slope of −2.83 and does what a logistic curve must: it falls all the way, from 1.00 to 0.01. The kernel curve rises to 0.89 near an ability of −1.7, falls to 0.24 by 1.1 and stays near a quarter up to 1.7, not far from a guesser's one in three. (The ends of the kernel curves rest on few children, 11 below −2 and 11 above 2, so CW1's upturn at the top and D1's bump at the bottom carry little weight.) For W1, which nearly every child solves, the 2PL is flat at about 0.9 while the kernel curve rises from 0.63 to 1.00. A single continuum doesn't describe these items, and the kernel curves show where each parametric curve departs from the data.
 
 ## Problems
 
+1. **H from first principles.** For two dichotomous items with $p_i \le p_j$, show that the largest covariance the margins allow is $p_i(1 - p_j)$, and that covariance over this maximum equals one minus observed over expected Guttman errors. What is the smallest possible covariance, and $H_{ij}$ there?
+2. **Strategies in the balance data.** Run `aisp()` on `balance_mokken` at $c$ = 0.3, 0.4 and 0.5. Which item types stay together as $c$ rises? Write down what each of Siegler's rules predicts on the five types. Which items should scale together, and does AISP agree?
+3. **Which claims survive?** The MCMI items have $H$ = 0.42, no monotonicity violations, and $H^T$ = 0.21. Does the analysis support these claims, and why: (a) the sum score orders patients on the trait; (b) every patient is likelier to endorse item 12 than item 3; (c) a 5-point difference means the same anywhere on the scale?
+4. **Pupils rating teachers.** In [swmd_mokken](https://itemresponsewarehouse.org/tables/swmd_mokken/), 651 pupils in 30 classes rate their teachers on seven items scored 1–5 (from the COOL5-18 study; `id` is the class and `rater` the pupil; also shipped as `irw::swmd_mokken`). Compute $H$ with pupils as respondents, then the two-level coefficients of [Koopman, Zijlstra and van der Ark (2020)](https://doi.org/10.1111/bmsp.12174) with `MLcoefH()`. Is this a scale for pupils or for teachers? What would a claim about classes need?
+5. **Where the crossing is.** Two 2PL items have slopes 1 and 2 and difficulties 0 and 0.5. Where do their curves cross, and what share of a N(0, 1) population lies on each side? Check with the crossing widget. For which difficulty gaps would you worry about IIO?
+6. **Challenge (open).** Build a test of a fitted 2PL curve against the kernel curve, following [Douglas and Cohen (2001)](https://doi.org/10.1177/01466210122032046). What is the null distribution of the largest gap, and how should the bandwidth and the estimated rank-based abilities enter it? Try it on CW1 and MCMI item 39.
+
+```{r}
+#| output: asis
+ask_claude("nonparametric-irt", "It covers nonparametric item response theory and Mokken scaling: the monotone homogeneity model, Loevinger's H and Guttman errors, automated item selection, checking monotonicity in rest-score groups, invariant item ordering, and kernel-smoothed item curves compared with Rasch and 2PL curves, using the mokken package in R on a clinical inventory (MCMI-III) and on balance-scale problems solved by children.")
+```
+
 ## Going further
+
+- Mokken, R. J. (1971). *A theory and procedure of scale analysis*. De Gruyter Mouton. <https://doi.org/10.1515/9783110813203>. Where the monotone homogeneity model, $H$ and item selection start.
+- Sijtsma, K., & Molenaar, I. W. (2002). *Introduction to nonparametric item response theory*. Sage. <https://doi.org/10.4135/9781412984676>. A short introduction to the models and their checks.
+- Sijtsma, K., & van der Ark, L. A. (2017). A tutorial on how to do a Mokken scale analysis on your test and questionnaire data. *British Journal of Mathematical and Statistical Psychology*, 70(1), 137–158. <https://doi.org/10.1111/bmsp.12078>. A step-by-step guide with `mokken`, including the conventions used here.
+- Sijtsma, K., & van der Ark, L. A. (2020). *Measurement models for psychological attributes*. Chapman and Hall/CRC. <https://doi.org/10.1201/9780429112447>. Chapter 5 analyses the MCMI and balance-scale data, with code on [OSF](https://osf.io/e9jrz).
+- van der Ark, L. A. (2007). Mokken scale analysis in R. *Journal of Statistical Software*, 20(11). <https://doi.org/10.18637/jss.v020.i11>; and van der Ark, L. A. (2012). New developments in Mokken scale analysis in R. *Journal of Statistical Software*, 48(5). <https://doi.org/10.18637/jss.v048.i05>. The package.
+- Holland, P. W., & Rosenbaum, P. R. (1986). Conditional association and unidimensionality in monotone latent variable models. *Annals of Statistics*, 14(4), 1523–1543. <https://doi.org/10.1214/aos/1176350174>. What monotone curves imply for the observable data.
+- Ligtvoet, R., van der Ark, L. A., te Marvelde, J. M., & Sijtsma, K. (2010). Investigating an invariant item ordering for polytomously scored items. *Educational and Psychological Measurement*, 70(4), 578–595. <https://doi.org/10.1177/0013164409355697>. The IIO method and $H^T$.
+- Ramsay, J. O. (1991). Kernel smoothing approaches to nonparametric item characteristic curve estimation. *Psychometrika*, 56(4), 611–630. <https://doi.org/10.1007/BF02294494>. The kernel smoother.
+- Mazza, A., Punzo, A., & McGuire, B. (2014). KernSmoothIRT: An R package for kernel smoothing in item response theory. *Journal of Statistical Software*, 58(6). <https://doi.org/10.18637/jss.v058.i06>. Kernel curves for dichotomous and polytomous items in R.
+- Karabatsos, G., & Sheu, C.-F. (2004). Order-constrained Bayes inference for dichotomous models of unidimensional nonparametric IRT. *Applied Psychological Measurement*, 28(2), 110–125. <https://doi.org/10.1177/0146621603260678>. A Bayesian route to the same order constraints.
+- van der Ark, L. A., Rossi, G., & Sijtsma, K. (2019). Nonparametric item response theory and Mokken scale analysis, with relations to latent class models and cognitive diagnostic models. In M. von Davier & Y.-S. Lee (Eds.), *Handbook of diagnostic classification models* (pp. 21–45). Springer. <https://doi.org/10.1007/978-3-030-05584-4_2>. Mokken scaling alongside latent classes, with the MCMI data.
+- Sijtsma, K., & Molenaar, I. W. (2016). Mokken models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models* (pp. 303–321). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. A handbook chapter.
+- Siegler, R. S. (1976). Three aspects of cognitive development. *Cognitive Psychology*, 8(4), 481–520. <https://doi.org/10.1016/0010-0285(76)90016-5>. The balance-scale rules.
 
 ```{r}
 #| output: asis
@@ -28,3 +460,10 @@ data_sources("nonparametric-irt")
 ```
 
 ## For instructors
+
+- **Source:** new; no EDUC 252 slides cover Mokken scaling. Built from the outline in `outlines/nonparametric-irt.md` (#153).
+- **Timing:** the core ideas and widgets take about 60 minutes; the two real-data analyses work as a 30-minute lab.
+- **Sanity check:** before the lesson's analyses, the pipeline was run on [transreas_mokken](https://itemresponsewarehouse.org/tables/transreas_mokken/), whose IRW rows equal `mokken::transreas`; its two pseudo-transitivity tasks have negative $H_i$ (−0.03 and −0.14), as their design predicts. The hand-written kernel smoother reproduces `KernSmoothIRT::ksIRT()` with its defaults on `mcmi_mokken` to within $10^{-14}$.
+- **Held back:** polytomous Mokken scaling (item-step curves) gets a sentence; two-level scalability is problem 4; a formal test of the parametric curve against the kernel curve is the open problem 6.
+- **Item text:** none is quoted. The MCMI items are deidentified in the source data.
+- **Solutions:** held back in `solutions/nonparametric-irt.qmd` (not published). Problem 6 is open.

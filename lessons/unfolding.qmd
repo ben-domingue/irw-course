@@ -212,6 +212,10 @@ The unfolding models keep the first two assumptions and drop the third. Given $\
 
 There is also a nonparametric counterpart. **MUDFOLD** ([van Schuur, 1992](https://doi.org/10.1093/pan/4.1.41); the `mudfold` package, [Balafas, Krijnen, Post & Wit, 2020](https://doi.org/10.32614/rj-2020-002)) looks for the longest order of statements in which triples behave as unfolding predicts, and reports a scalability coefficient $H$: one minus the ratio of observed to expected violations, so that 1 means none. It asks for no curve shape, only an order, which makes it a reasonable first look when the question is whether the statements can be placed on one line at all.
 
+::: {.callout-tip appearance="simple"}
+**If you've done** [Nonparametric IRT: Mokken scaling](nonparametric-irt.qmd): MUDFOLD's $H$ is Loevinger's $H$ with unfolding's definition of an error.
+:::
+
 ::: {.callout-note collapse="true"}
 ## Go deeper: the hyperbolic cosine model is a folded PCM
 

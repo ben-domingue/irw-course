@@ -8,19 +8,440 @@ source("_course.R")
 lesson_header("mixture-models")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {patternPosterior, screenGrid, contentFreeScale, categoryUse} from "./widgets/mixture-models.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.* The plan is in [outlines/mixture-models.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/mixture-models.md).
+Every model so far has assumed one measurement model for every respondent. What if some respondents answer a different question, or none at all? On an online extraversion survey analysed below, about half the respondents from one platform answer as if the content of the items didn't matter, and their sum scores are exactly as high as everyone else's. A **mixture model** lets respondents belong to latent classes, each with its own measurement model, and asks the data who is in which. [Guessing and priors](guessing-priors.qmd) fitted the simplest one. This lesson takes the idea to inattentive responding and response styles, and asks when a class is a kind of respondent and when it merely patches the model.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- write a pattern's likelihood under a mixture and compute posterior class probabilities;
+- say when two respondents with the same sum score can have different posteriors;
+- compute the usual screens for careless responding, and explain why they disagree;
+- explain why a content-free class shows on a balanced scale and hides in the trait on an all-forward one;
+- fit mixture Rasch and mixed partial credit models in `mirt`, choose the number of classes, and check a class against outside evidence.
+
 ## Core ideas
 
-## Worked example
+### One population, or several?
+
+Suppose each respondent belongs to one of $K$ latent classes, with shares $\pi_1, \dots, \pi_K$ that sum to 1, and each class $k$ has its own measurement model. In the **mixture Rasch model** ([Rost, 1990](https://doi.org/10.1177/014662169001400305); [Mislevy & Verhelst, 1990](https://doi.org/10.1007/bf02295283)), class $k$ has its own item difficulties $b_{ik}$ and its own distribution of $\theta$. For a respondent whose class we don't know, the probability of a pattern $\mathbf{x}$ is a weighted sum over classes, and Bayes' rule turns it around, as the EAP of [Estimating abilities](ability-estimation.qmd) did with a prior over $\theta$:
+$$\Pr(\mathbf{x}) = \sum_{k=1}^K \pi_k \Pr(\mathbf{x} \mid k), \qquad \Pr(k \mid \mathbf{x}) = \frac{\pi_k \Pr(\mathbf{x} \mid k)}{\sum_{m} \pi_m \Pr(\mathbf{x} \mid m)}.$$
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Guessing and priors](guessing-priors.qmd): in the "safety valve" of [Xiao et al. (2026)](https://doi.org/10.31234/osf.io/7gtwd_v1), a share $\pi$ of respondents follow the Rasch model and the rest answer at chance; on `roar_lexical`, $\hat\pi$ was 0.87. One class's model is fixed in advance.
+:::
+
+Here neither class is fixed. On a survey, the second class might be a **content-free class**: respondents who agree (or disagree) whatever an item says.
+
+#### Try it: whose pattern is it?
+
+Ten keyed items, five worded forward (F1–F5) and five reversed (R1–R5), with difficulties from −1 to 1 in each half. Engaged respondents follow the Rasch model, $\theta$ standard normal; content-free respondents agree with any item with the probability you set. Tick the items scored 1.
+
+```{ojs}
+//| echo: false
+viewof wp_x = Inputs.checkbox(["F1", "F2", "F3", "F4", "F5", "R1", "R2", "R3", "R4", "R5"], {value: ["F1", "F2", "F3", "F4", "F5"], label: "Items scored 1"})
+viewof wp_pi = Inputs.range([0.05, 0.95], {value: 0.5, step: 0.05, label: "Share of the content-free class"})
+viewof wp_agree = Inputs.range([0.5, 0.95], {value: 0.8, step: 0.05, label: "Content-free: chance of agreeing"})
+```
+
+```{ojs}
+//| echo: false
+wp_items = ["F1", "F2", "F3", "F4", "F5", "R1", "R2", "R3", "R4", "R5"]
+wp = patternPosterior({x: wp_items.map(i => wp_x.includes(i) ? 1 : 0), b: [-1, -0.5, 0, 0.5, 1, -1, -0.5, 0, 0.5, 1], piCF: wp_pi, pAgree: wp_agree})
+Plot.plot({
+  width: 700, height: 150, marginLeft: 110, x: {label: "Posterior probability", domain: [0, 1]}, y: {label: null},
+  marks: [
+    Plot.barX([{c: "Engaged", p: 1 - wp.post}, {c: "Content-free", p: wp.post}], {y: "c", x: "p", fill: d => d.c === "Engaged" ? palette.main : palette.contrast}),
+    Plot.ruleX([0.5], {stroke: palette.guide, strokeDasharray: "4,3"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Sum score **${wp.sum}**. Probability of this pattern: engaged ${wp.lE.toExponential(2)}, content-free ${wp.lC.toExponential(2)}. Posterior probability of the content-free class: **${wp.post.toFixed(3)}**.`
+```
+
+At the start, the five forward items are scored 1: a sum of 5, and a posterior of 0.997 for the content-free class. Score F1, F2, F3, R1 and R2 instead: the same sum, but a posterior of 0.065. An alternating pattern (F1, F3, F5, R2, R4) is unlikely under both classes, and its posterior (0.58) stays near the prior.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): the sum score is sufficient for $\theta$, and item comparisons don't depend on who took the items (specific objectivity).
+:::
+
+Both hold within a class, not between classes. Why can the pattern carry the class when the sum can't? If two classes' difficulties differ only by a constant, the class posterior depends on the pattern only through the sum (first Go deeper callout): the classes are levels of one continuum. Only when the difficulty profiles cross does the pattern carry the class, and then the classes differ in kind. If you've done [Latent classes and cognitive diagnosis](cdm.qmd), classes there were fixed by the attributes mastered; here a class is defined by the model a respondent follows.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "Two classes of a mixture Rasch model have difficulties $b_{i2} = b_{i1} + 1$ for every item. Two respondents have the same sum score but different patterns. How do their posterior class probabilities compare?",
+  options: [
+    {text: "They are equal", correct: true, why: "A constant shift in difficulty enters the likelihood as the sum times the shift, so the pattern adds nothing beyond the sum. The classes are levels of one continuum (first Go deeper callout)."},
+    {text: "They differ, because the patterns differ", correct: false, why: "Patterns carry the class only when the classes' difficulty profiles cross. A parallel shift leaves the sum sufficient for the class as well as for $\\theta$."},
+    {text: "They can't be computed without knowing $\\theta$", correct: false, why: "The class posterior integrates over $\\theta$ within each class; no estimate of $\\theta$ is needed."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: why the pattern, not the sum, carries the class
+
+**Assumptions:** a mixture Rasch model with classes $k = 1, \dots, K$, shares $\pi_k$, difficulties $b_{ik}$ and ability densities $g_k(\theta)$; local independence within a class.
+
+**Within a class.** Writing $r = \sum_i x_i$,
+$$\Pr(\mathbf{x} \mid \theta, k) = \prod_i \frac{\exp\{x_i(\theta - b_{ik})\}}{1 + \exp(\theta - b_{ik})} = \exp\Big(-\sum_i x_i b_{ik}\Big)\,\frac{\exp(r\theta)}{\prod_i \{1 + \exp(\theta - b_{ik})\}}.$$
+Integrating over $g_k$ gives $\Pr(\mathbf{x} \mid k) = \exp(-\sum_i x_i b_{ik})\,h_k(r)$, where $h_k(r)$ depends on the pattern only through $r$ ([Rost, 1990](https://doi.org/10.1177/014662169001400305), writes the same factorization with each class's score distribution).
+
+**The posterior odds.** For two classes,
+$$\log\frac{\Pr(1 \mid \mathbf{x})}{\Pr(2 \mid \mathbf{x})} = \log\frac{\pi_1 h_1(r)}{\pi_2 h_2(r)} + \sum_i x_i\,(b_{i2} - b_{i1}).$$
+The first term is a function of the sum. The second is where the pattern comes in, each item weighted by the difference between the classes' difficulties.
+
+**Levels.** If $b_{i2} - b_{i1} = \delta$ for every item, the second term is $r\delta$, a function of the sum. Respondents with the same sum have the same posterior, whatever their patterns.
+
+**Kinds.** If the differences vary across items (the profiles cross), two patterns with the same $r$ get different posteriors, and the items on which the classes disagree most weigh most. In the widget the content-free class behaves like difficulties of about −1.4 on the forward items and +1.4 on the reversed ones, so a forward item scored 1 pushes toward that class and a reversed item scored 1 pushes away from it.
+:::
+
+### Screening one respondent at a time
+
+The usual first pass is person-level screens ([Meade & Craig, 2012](https://doi.org/10.1037/a0028085); [Curran, 2016](https://doi.org/10.1016/j.jesp.2015.07.006)): *speed*, with a cut set by how long reading takes ([Huang et al., 2012](https://doi.org/10.1007/s10869-011-9231-8); [Wise & Kong, 2005](https://doi.org/10.1207/s15324818ame1802_2)); *sameness*, the longest run of one option or the within-person SD ([Johnson, 2005](https://doi.org/10.1016/j.jrp.2004.09.009)); *inconsistency* between two halves of a scale; *oddness*, the Mahalanobis distance or person fit; and *direct checks*, instructed-response and nonsense items ([Oppenheimer et al., 2009](https://doi.org/10.1016/j.jesp.2009.03.009); [Maniaci & Rogge, 2014](https://doi.org/10.1016/j.jrp.2013.09.008)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Person fit](person-fit.qmd): $l_z$ (`mirt`'s `Zh`) standardizes a pattern's log likelihood at $\hat\theta$; below 0 is underfit, above 0 overfit. Misfit says the model doesn't describe the respondent, not why.
+:::
+
+A mixture proposes the model that does. But first, do the screens agree?
+
+#### Try it: which screen sees which?
+
+2,000 simulated respondents answer ten five-point items, five reversed. Beside the engaged majority are three kinds, each a share you choose: random answering, one option throughout, and engaged but fast. Speed flags anyone under the cut; the other screens flag their worst 5%.
+
+```{ojs}
+//| echo: false
+viewof sg_share = Inputs.range([0.02, 0.15], {value: 0.05, step: 0.01, label: "Share of each kind"})
+viewof sg_cut = Inputs.range([0.5, 3], {value: 1.5, step: 0.1, label: "Speed cut (seconds per item)"})
+```
+
+```{ojs}
+//| echo: false
+sg = screenGrid({seed: 3, n: 2000, share: sg_share, timeCut: sg_cut})
+Plot.plot({
+  width: 700, height: 240, marginLeft: 120, padding: 0.05,
+  x: {label: null, domain: sg.screens}, y: {label: null, domain: sg.kinds},
+  color: {type: "linear", domain: [0, 1], range: [palette.white, palette.main], legend: true, label: "Share flagged"},
+  marks: [
+    Plot.cell(sg.grid, {x: "screen", y: "kind", fill: "rate", stroke: palette.rule}),
+    Plot.text(sg.grid, {x: "screen", y: "kind", text: d => (100 * d.rate).toFixed(0) + "%", fill: d => d.rate > 0.6 ? palette.white : palette.ink})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Engaged respondents flagged by the speed cut: **${(100 * sg.speedEngaged).toFixed(1)}%**.`
+```
+
+No screen sees every kind: sameness flags every straight line and no random responder; even–odd and Mahalanobis catch some random responders and almost no fast readers; speed flags about three-quarters of all three fast kinds, readers included. Careless responding isn't one behaviour, and each screen sees one of them ([Niessen et al., 2016](https://doi.org/10.1016/j.jrp.2016.04.010)). A straight line also overfits: it is more predictable than the model expects.
+
+### The content-free class
+
+What does a content-free class do to a scale? That depends on keying.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [From construct map to items](instrument-building.qmd): acquiescence is shared by every item, so on an all-forward scale alpha counts it as signal; on a balanced scale it cancels in the sum. Reversed items can form a wording factor.
+:::
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Classical test theory and reliability](ctt-reliability.qmd): alpha is a lower bound on reliability only when errors are uncorrelated; correlated errors can push it above reliability.
+:::
+
+That widget gave every respondent a little acquiescence. Here a few respondents have all of it.
+
+#### Try it: balanced or all forward?
+
+800 simulated respondents answer ten five-point items. Engaged respondents follow one trait; a content-free class either gives one option throughout (drawn at random per respondent) or agrees with everything (4 or 5).
+
+```{ojs}
+//| echo: false
+viewof cf_share = Inputs.range([0, 0.4], {value: 0.15, step: 0.01, label: "Share of the content-free class"})
+viewof cf_design = Inputs.radio(["Balanced (five reversed)", "All forward"], {value: "Balanced (five reversed)", label: "Keying"})
+viewof cf_kind = Inputs.radio(["Same option on every item", "Agree with everything"], {value: "Same option on every item", label: "Content-free class"})
+```
+
+```{ojs}
+//| echo: false
+cf = contentFreeScale({seed: 9, n: 800, share: cf_share, balanced: cf_design.startsWith("Balanced"), kind: cf_kind.startsWith("Same") ? "straight" : "agree"})
+Plot.plot({
+  width: 700, height: 260, x: {label: "Keyed sum score (10–50)"}, y: {label: "Respondents"},
+  color: {legend: true, domain: ["Engaged", "Content-free"], range: [palette.light, palette.contrast]},
+  marks: [
+    Plot.rectY(cf.sums, Plot.binX({y: "count"}, {x: "sum", fill: "cls", thresholds: 40, domain: [10, 50]})),
+    Plot.ruleY([0], {stroke: palette.rule})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Alpha: **${cf.alphaAll.toFixed(2)}** with the class, ${cf.alphaEngaged.toFixed(2)} without it; within the class, ${cf.nClass < 3 ? "no class" : cf.sdClass === 0 ? "undefined (every sum is the same, " + cf.meanClass.toFixed(0) + ")" : cf.alphaClass.toFixed(2)}. The class's mean keyed sum: ${cf.nClass ? cf.meanClass.toFixed(1) : "none"}. Second eigenvalue: **${cf.eig2.toFixed(2)}** with the class, ${cf.eig2Engaged.toFixed(2)} without it.`
+```
+
+On the balanced scale every straight line scores exactly 30, the midpoint. Alpha falls from 0.90 without them to 0.85, and the second eigenvalue rises from 0.62 to 2.47: a wording factor made of respondents. Switch to all forward and the class spreads across the whole range, with alpha 1.00 inside it, and the scale's alpha rises to 0.93. "Agree with everything" on the all-forward scale puts the class near the top (a mean of 45), where it passes for respondents high on the trait. Balanced keying is what makes a content-free class visible ([Woods, 2006](https://doi.org/10.1007/s10862-005-9004-7); [Kam & Meyer, 2015](https://doi.org/10.1177/1094428115571894); [Arias et al., 2020](https://doi.org/10.3758/s13428-020-01401-8)). [Weijters, Baumgartner and Schillewaert (2013)](https://doi.org/10.1037/a0032121) count careless responding among the wording factor's causes; [Jin, Chen and Wang (2018)](https://doi.org/10.1177/1094428117725792), [Ulitzsch, Yildirim-Erbasli et al. (2022)](https://doi.org/10.1111/bmsp.12272) and [van Laar and Braeken (2022)](https://doi.org/10.1111/jedm.12317) model the class directly.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A depression scale has nine items, all worded so that agreeing means more symptoms. 15% of respondents clicked through, giving the same option on every screen. What does that do to alpha?",
+  options: [
+    {text: "It raises it", correct: true, why: "Each such respondent's items move together perfectly, which adds covariance shared by every item. Alpha counts it as signal: in the widget, 0.93 with the class against 0.90 without."},
+    {text: "It lowers it, because the responses are noise", correct: false, why: "Random answering would add noise. A straight line on an all-forward scale is perfectly consistent, and consistency is what alpha measures."},
+    {text: "Nothing, because the class sits at the midpoint", correct: false, why: "It sits at the midpoint only on a balanced scale. On an all-forward scale the option chosen sets the score, anywhere from the bottom to the top."}
+  ]
+})
+```
+
+::: {.callout-note collapse="true"}
+## Go deeper: a contaminating class's covariance
+
+**Assumptions:** two classes with shares $\pi$ (engaged) and $1 - \pi$, mean vectors $\boldsymbol\mu_1, \boldsymbol\mu_0$ and covariance matrices $\Sigma_1, \Sigma_0$ of the keyed responses.
+
+**The mixture's covariance** is the average within-class covariance plus the covariance of the class means:
+$$\Sigma = \pi\Sigma_1 + (1 - \pi)\Sigma_0 + \pi(1 - \pi)(\boldsymbol\mu_1 - \boldsymbol\mu_0)(\boldsymbol\mu_1 - \boldsymbol\mu_0)^\top.$$
+
+**A straight-line class.** On a 1–5 scale, a respondent who chooses option $o$ everywhere has keyed responses $o$ on forward items and $6 - o$ on reversed ones: $3 + (o - 3)\mathbf{v}$, with $v_i = +1$ for forward and $-1$ for reversed items. So $\Sigma_0 = \text{Var}(o)\,\mathbf{v}\mathbf{v}^\top$, a rank-one term along the keying vector. On an all-forward scale $\mathbf{v}$ is all ones and lies along the trait's first factor: covariance is added everywhere and alpha rises. On a balanced scale the term adds covariance within each half and subtracts it across halves, which is a wording factor, and the sum score gets no variance from it ($\mathbf{1}^\top\mathbf{v} = 0$), so alpha falls.
+
+**An agree-with-everything class** has its own mean: on a balanced scale $\boldsymbol\mu_0 - \boldsymbol\mu_1$ points roughly along $\mathbf{v}$, and the last term is again close to rank one along the keying vector. This algebra is behind the Su alphas and eigenvalues below.
+:::
+
+### Response styles as classes
+
+Extreme and midpoint responding are tendencies, not lapses: fairly stable within a respondent and shared by every item ([Baumgartner & Steenkamp, 2001](https://doi.org/10.1509/jmkr.38.2.143.18840)). Can a mixture find them?
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Polytomous responses](polytomous.qmd): under the partial credit model, category $k$ is preferred to $k - 1$ with log odds $\theta - b_k$, $b_k$ being the step difficulty.
+:::
+
+In the **mixed partial credit model** ([Rost, 1991](https://doi.org/10.1111/j.2044-8317.1991.tb00951.x)) each class has its own steps: squeezed steps send a class to the ends, spread steps keep it in the middle. Both kinds have been reported on questionnaires ([Eid & Rauber, 2000](https://doi.org/10.1027//1015-5759.16.1.20); [Hernández, Drasgow & González-Romá, 2004](https://doi.org/10.1037/0021-9010.89.4.687); [Austin, Deary & Egan, 2006](https://doi.org/10.1016/j.paid.2005.10.018); [Wetzel, Carstensen & Böhnke, 2013](https://doi.org/10.1016/j.jrp.2012.10.010)).
+
+#### Try it: levels or styles?
+
+One item scored 0–4 under the partial credit model, with steps at −1.5, −0.5, 0.5 and 1.5 for class A. Class B's steps are A's times a spread, and its mean $\theta$ can shift. Bars show category use, averaged over $\theta$.
+
+```{ojs}
+//| echo: false
+viewof ls_spread = Inputs.range([0.2, 1.5], {value: 0.3, step: 0.05, label: "Class B: spread of the steps"})
+viewof ls_shift = Inputs.range([-2, 2], {value: 0, step: 0.1, label: "Class B: mean θ, relative to A"})
+```
+
+```{ojs}
+//| echo: false
+ls_b = [-1.5, -0.5, 0.5, 1.5]
+ls_A = categoryUse(ls_b, 0)
+ls_B = categoryUse(ls_b.map(v => v * ls_spread), ls_shift)
+Plot.plot({
+  width: 700, height: 260, x: {label: null, axis: null}, fx: {label: "Category"}, y: {label: "Share of responses", domain: [0, 0.6]},
+  color: {legend: true, domain: ["Class A", "Class B"], range: [palette.main, palette.contrast]},
+  marks: [
+    Plot.barY([0, 1, 2, 3, 4].flatMap(k => [{k, c: "Class A", p: ls_A[k]}, {k, c: "Class B", p: ls_B[k]}]), {fx: "k", x: "c", y: "p", fill: "c"}),
+    Plot.ruleY([0], {stroke: palette.rule})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Mean response: class A **${ls_A.reduce((u, p, k) => u + k * p, 0).toFixed(2)}**, class B **${ls_B.reduce((u, p, k) => u + k * p, 0).toFixed(2)}**. Share in the two end categories: A ${(ls_A[0] + ls_A[4]).toFixed(2)}, B ${(ls_B[0] + ls_B[4]).toFixed(2)}.`
+```
+
+At a spread of 0.3 and no shift, both classes average 2.00, but B puts 0.47 of its responses in the end categories against A's 0.24: an extreme style. With the spread at 1 and a shift, B differs only in level. Combine the two and B uses the ends more *and* sits lower. So ask of any style class: style, or trait? If you've done [IRTree models](irtrees.qmd), they separate the two by modelling the choice of an end category as its own node ([Böckenholt, 2012](https://doi.org/10.1037/a0028111)).
+
+### How many classes, and are they real?
+
+Another class always raises the likelihood. BIC is one way to choose $K$ ([Li et al., 2009](https://doi.org/10.1177/0146621608326422); [Nylund et al., 2007](https://doi.org/10.1080/10705510701575396)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Model fit and out-of-sample prediction](fit-prediction.qmd): the IMV scores predictions of held-out responses on a portable scale ([Domingue et al., 2024](https://doi.org/10.1007/s11336-024-09977-2)).
+:::
+
+Held-out responses are the other route: a real class should predict them. Two practical matters follow every fit. **Label switching**: classes come out in arbitrary order ([Stephens, 2000](https://doi.org/10.1111/1467-9868.00265)), so name them by profile, not number. **Local maxima**: a mixture's likelihood can have several peaks, so fit from several random starts (`mirt`'s `nruns` argument; [Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)).
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [What is a construct?](constructs.qmd): ordered latent classes close together look very much like a continuum cut into pieces.
+:::
+
+The converse holds too. A skewed continuum, or an item model wrong for everyone, can be fitted better by two classes than one, and the classes then describe the model's shortfall, not kinds of people ([Bauer & Curran, 2003](https://doi.org/10.1037/1082-989X.8.3.338); [Lubke & Muthén, 2005](https://doi.org/10.1037/1082-989X.10.1.21)). So a class needs outside evidence before it gets a name.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "You fit a two-class mixture twice with different seeds. The first run's class 1 has 30% of respondents; the second run's class 1 has 70%, with the same two difficulty profiles and the same log likelihood. What happened?",
+  options: [
+    {text: "Label switching: the same solution with the classes numbered the other way", correct: true, why: "The likelihood doesn't care which class is called 1. The profiles and shares match once the labels are swapped, so name classes by profile."},
+    {text: "A local maximum in one run", correct: false, why: "A local maximum would give a lower log likelihood and different profiles. Here only the numbering changed."},
+    {text: "The model isn't identified, so neither run can be trusted", correct: false, why: "The labels aren't identified, but the classes are: their shares and profiles are the same in both runs."}
+  ]
+})
+```
+
+### When responses can't tell, times can
+
+On a test with no chance floor, a disengaged respondent and an engaged one who finds every item too hard may both get everything wrong. No mixture of response models can separate identical patterns. What else did the respondent give us? Their time: a disengaged respondent tends to answer quickly and an engaged low scorer slowly ([Wang & Xu, 2015](https://doi.org/10.1111/bmsp.12054); [Ulitzsch, Pohl et al., 2022](https://doi.org/10.1007/s11336-021-09817-7)). The simplest version gives each class its own distribution of mean log time per item. If you've done [Response time and the speed-accuracy tradeoff](response-time.qmd), it modelled log time item by item; the full joint model is beyond this lesson.
+
+## Simulate
+
+The code below simulates 1,000 respondents on ten balanced items (80% Rasch, 20% agreeing with any item with probability 0.8), fits one and two classes in `mirt`, compares the estimates with the truth, and cross-tabulates three screens against the true class. The first run takes 20–30 seconds while R and `mirt` load, and the mixture up to a minute more.
+
+With the seed as written, the classes' mean sum scores are 5.10 and 5.04. The mixture estimates the content-free share at 0.20 (truth 0.21), with forward difficulties of −1.2 to −1.6 and reversed ones of 1.1 to 1.6 (truth ±1.39, the logit of 0.8), and puts 152 of the 208 content-free respondents in their class, with 27 of the 792 engaged ones. Speed flags 42% of the content-free respondents, sameness 64%, and the Mahalanobis distance 10%, no more than among the engaged. Try `p_agree <- 0.5` (random answering) or `reversed <- integer(0)` (all forward), and other seeds, where the class numbers may swap.
+
+```{webr}
+{{< include code/mixture-models-sim.R >}}
+```
+
+`mirt`'s `d` is an easiness, so the code converts with $b = -d$.
+
+[Download this code](code/mixture-models-sim.R) to run it with more respondents in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/mixture-models-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+### Antonyms on three platforms
+
+Our main example, [kay_2025_antonyms](https://itemresponsewarehouse.org/tables/kay_2025_antonyms/), is a data-quality probe ([Kay, 2025](https://doi.org/10.3758/s13428-025-02852-7); survey and data on [OSF](https://osf.io/frwq4/), CC BY 4.0): 1,200 respondents from Connect, Prolific and MTurk rated 29 pairs of statements, mostly opposites such as "I am an extravert" and "I am an introvert" (wording from the survey), from −3 to +3, alongside four instructed-response items. Its job: a mixture finding a content-free class unaided. We key ten extraversion items, five each way, and score agreement ("slightly agree" or more). [Download the code](code/mixture-models-irw.R) to run every chunk yourself; it needs `mirt` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)) and `psych` ([Revelle, 2026](https://CRAN.R-project.org/package=psych)).
+
+```{r fetch-kay}
+#| echo: true
+#| code-fold: show
+```
+
+On Connect and Prolific the extravert and introvert statements correlate −0.80; on MTurk, among respondents who failed at most one check, +0.18.
+
+```{r fit-kay}
+#| echo: true
+#| code-fold: show
+```
+
+BIC falls from 14,816 with one class to 12,340 with two and 12,116 with three. In the two-class solution, one class (a share of 0.50) finds the forward items easy (difficulties −3.6 to −1.2) and the reversed ones hard (2.4 to 3.4), with almost no spread in $\theta$ (variance 0.045): agreement, whatever the statement. The other class's difficulties lie between −0.8 and 0.8. The profiles cross, and 88% of the posteriors are above 0.9 or below 0.1. Who is in the content-free class? The model never saw the platform or the check items.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "Among the respondents who passed all four instructed-response items, what share does the mixture put in the content-free class?",
+  choices: ["Almost none (under 5%)", "About one in ten", "More than a third"],
+  answer: "More than a third",
+  reveal: "44%: 54% of those on MTurk, and 2% of those on Connect or Prolific. Passing the checks and answering the content were different things for many respondents. Check the output below."
+})
+```
+
+```{r check-kay}
+#| echo: true
+#| code-fold: show
+```
+
+The class holds 4 of the 200 Connect and Prolific respondents and 594 of the 1,000 from MTurk; 44% of those who passed every check and 67% of the rest. 90% of the class agree with a nonsense statement ("I am ffhjhl" or its partner, wording from the survey), against 28% of the others. On the 20 antonym pairs the model never saw, the median raw correlation is +0.28 within the class and −0.17 outside it. And both classes have a mean keyed sum of 4.95: only the pattern sees the class.
+
+```{r cv-kay}
+#| echo: true
+#| code-fold: show
+```
+
+On held-out responses, two classes gain an IMV of 0.17 over the Rasch model, more than the 0.1 benchmark for the Rasch model over item proportions ([Model fit and out-of-sample prediction](fit-prediction.qmd)). A third class adds 0.016; ten random starts reach one maximum. The 2PL alone gains 0.16: with keyed forward and reversed items correlating −0.25 on average (first chunk), its single dimension becomes agreement rather than extraversion. The mixture adds 0.0088 over it.
+
+### The same students on two keying designs
+
+Our contrast is a pair of tables from a mandatory online mental-health screening of students at a Chinese medical university ([Su et al., 2024](https://doi.org/10.1038/s41597-024-03888-8)), with a time for every response: the balanced Perceived Stress Scale ([Cohen, Kamarck & Mermelstein, 1983](https://doi.org/10.2307/2136404)) in [su_2024_pss14](https://itemresponsewarehouse.org/tables/su_2024_pss14/) and the all-forward PHQ-9 ([Kroenke, Spitzer & Williams, 2001](https://doi.org/10.1046/j.1525-1497.2001.016009606.x)) in [su_2024_phq9](https://itemresponsewarehouse.org/tables/su_2024_phq9/). Their one job: the same respondents on both keying designs.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Item response data and the IRW](irw-data.qmd): check keying in the documentation and in the data. The landing page doesn't say, but the deposit's total equals the sum of the codes minus one, so the stored PSS codes are already keyed (higher = more stress).
+:::
+
+```{r fetch-su}
+#| echo: true
+#| code-fold: show
+```
+
+4,078 respondents (17%) take under a second per item; the median takes 3.4 seconds.
+
+```{r fast-su}
+#| echo: true
+#| code-fold: show
+```
+
+A third of the fast group gave one keyed pattern; un-keyed, it is the same option on every screen, and it scores 28 of 56, the midpoint. On the balanced PSS the fast group's alpha is 0.00, against 0.85 for slower respondents. On the all-forward PHQ-9 the same respondents' alpha is 0.93, above the slower respondents' 0.87, and 52% of them answered "not at all" to all nine items (29% of the rest). The PSS's second eigenvalue is 3.7 with everyone and 2.3 without the fast group. These are the widget's three effects, and in a screening they matter: a straight line on the PHQ-9 reads as no symptoms. And since reliability belongs to a population ([Classical test theory and reliability](ctt-reliability.qmd)), including the fast respondents moves the PSS's alpha from 0.85 to 0.79.
+
+```{r screens-su}
+#| echo: true
+#| code-fold: show
+```
+
+In a random 5,000, the screens split into two families. Speed and long string share 83 flags, and Mahalanobis and $Z_h$ 129 of 250 (rank correlation 0.84); speed and $Z_h$ share 2, long string and even–odd none. The 311 respondents who gave one option on every screen have a median $Z_h$ of +1.35, against 0.65 overall: they overfit.
+
+Does a mixed partial credit model find response styles? The fits take twelve minutes, so they were run when the page was built ([code](code/mixture-models-pcm.R)).
+
+```{r pcm-su}
+#| echo: true
+#| code-fold: show
+```
+
+Among 2,000 slower respondents, BIC falls from 69,693 (one class) to 64,916 (two) and 63,669 (three). With two classes, a quarter of respondents put 71% of their responses in the end categories, against 16% for the rest. An extreme style? That class's mean keyed sum is also 12.7 against 20.9, with 59% of its responses in the lowest-stress category: style and level arrive together, as in the widget. Among 2,000 drawn from everyone, the three-class fit gives the fast respondents their own class: 14% of the sample, 0.54 seconds per item, a mean keyed sum of 27.2 (the midpoint is 28) and an alpha of 0.23. A model built for styles found the content-free class too.
+
+### Fast zero, slow zero
+
+Our last table is [test_taking_much_2025_mr](https://itemresponsewarehouse.org/tables/test_taking_much_2025_mr/): 20 constructed-response matrix reasoning items given on Prolific, with times ([Much et al., 2025](https://doi.org/10.5334/jopd.124)), and the case [Person fit](person-fit.qmd) couldn't see. Its job here is to show what times add.
+
+```{r much}
+#| echo: true
+#| code-fold: show
+```
+
+Of 1,243 respondents, 231 got every item wrong. From responses alone, the second class is simply the zero scorers (226, with a success rate of 0.000). Adding times moves 81 slow zero scorers to the engaged class and 14 fast non-zero scorers out: 164 respondents are disengaged ($\hat\pi$ = 0.87), at a median of 17 seconds per item against 37. A quarter of that class reported not understanding the task, partly or at all, against 7% of the rest; the attention checks barely separate them (13% of those passing all three are in the class, 15% of those passing two).
+
+So what should an analyst do with a class? The assumptions are on the table: the classes are kinds of respondent, not a continuum the model gets wrong; the cuts and $K$ were fixed before the substantive analysis; outside evidence agrees. In the case that a survey is balanced, or a test has a known chance rate, a two-class mixture fitted beside the one-class model may be sufficient for some purposes as a first look at inattentive responding. Where a score feeds a decision about a person, as in a campus screening, a high posterior may serve better as a reason to follow up than to delete. A class is a hypothesis about how someone answered, not a verdict on who they are.
 
 ## Problems
 
+1. **Derivation.** Write the posterior class probability under a two-class mixture Rasch model, and show that beyond the sum it depends on the pattern only through $\sum_i x_i(b_{i2} - b_{i1})$. Then show that on a balanced $2m$-item 1–5 scale a same-option respondent always scores the midpoint. What happens on an all-forward scale, and when every raw response is raised by an acquiescence $\delta$ (ignoring the ceiling)?
+2. **Real data with a twist: strategies.** [balance_mokken](https://itemresponsewarehouse.org/tables/balance_mokken/) holds 25 balance-scale tasks answered by 484 children ([van Maanen, Been & Sijtsma, 1989](https://doi.org/10.1007/978-3-642-83943-6_17); read it from the CSV link on its landing page). Fit mixture Rasch models with two and three classes. Do the classes' profiles cross, and do they match the rules [Siegler (1976)](https://doi.org/10.1016/0010-0285(76)90016-5) proposed ([Jansen & van der Maas, 1997](https://doi.org/10.1006/drev.1997.0437))? What would make a class a strategy rather than a level?
+3. **Judgment.** In [depression_anxiety_stress](https://itemresponsewarehouse.org/tables/depression_anxiety_stress/), a voluntary online DASS ([Lovibond & Lovibond, 1995](https://doi.org/10.1016/0005-7967(94)00075-U)), some respondents answered "applied to me very much" to all 42 items. Is that a straight line, or severe distress? Use their times, the fake words in the checklist that followed, and the design (items were shown in a random order). What can't the data tell, and what would you do in a campus screening where a score leads to a follow-up call?
+4. **Design.** Plan a 20-item survey on which both screens and a mixture can find inattentive respondents: keying, antonym pairs, instructed items, nonsense items, timing. Say what each buys, and set the cuts before collecting data. Then a colleague drops everyone in the Kay content-free class before correlating extraversion with political orientation (`cov_poli_cont`). What changes, and what should happen to respondents with posteriors near 0.5 ([Credé, 2010](https://doi.org/10.1177/0013164410366686))?
+5. **Real data: latent DIF.** Which Kay items function differently between the two classes, and how closely does the class line up with the platform ([Cohen & Bolt, 2005](https://doi.org/10.1111/j.1745-3984.2005.00007); if you've done [Differential item functioning](dif.qmd), compare)? When is a class an observed group under another name? Then refit on the three neuroticism pairs (`mood`, `upst`, `rlxd`): is the content-free class a property of the respondent or of the scale?
+6. **Challenge (open).** Fit a mixed graded or partial credit model to the full seven-point Kay ratings and look for style classes beside the content-free one. Does the gain survive against a skewed continuum, simulated to match? I don't know of a general test that tells a real class from a non-normal continuum.
+
+```{r}
+#| output: asis
+ask_claude("mixture-models", "It covers mixture item response models: latent classes each with their own measurement model, posterior class probabilities, the mixture Rasch model and when the response pattern rather than the sum score carries the class, screens for careless responding (speed, long string, even-odd, Mahalanobis distance, person fit) and why they disagree, a content-free class on balanced and all-forward scales and what it does to alpha, response styles in the mixed partial credit model, choosing the number of classes by BIC and held-out IMV, label switching and local maxima, and response times as evidence of class, with R analyses in mirt of an antonym survey on three platforms (kay_2025_antonyms), a stress and a depression scale from a student screening (su_2024_pss14, su_2024_phq9) and a matrix reasoning test (test_taking_much_2025_mr).")
+```
+
 ## Going further
+
+- Rost, J. (1990). Rasch models in latent classes: An integration of two approaches to item analysis. *Applied Psychological Measurement*, 14(3), 271–282. <https://doi.org/10.1177/014662169001400305>. The mixture Rasch model, and its conditional form.
+- Rost, J. (1991). A logistic mixture distribution model for polychotomous item responses. *British Journal of Mathematical and Statistical Psychology*, 44(1), 75–92. <https://doi.org/10.1111/j.2044-8317.1991.tb00951.x>. The mixed partial credit model.
+- Mislevy, R. J., & Verhelst, N. (1990). Modeling item responses when different subjects employ different solution strategies. *Psychometrika*, 55(2), 195–215. <https://doi.org/10.1007/bf02295283>. Classes as strategies.
+- von Davier, M., & Rost, J. (2016). Logistic mixture-distribution response models. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 1. Models*. Chapman and Hall/CRC. <https://doi.org/10.1201/9781315374512>. The handbook chapter this lesson follows.
+- Meade, A. W., & Craig, S. B. (2012). Identifying careless responses in survey data. *Psychological Methods*, 17(3), 437–455. <https://doi.org/10.1037/a0028085>. The screens, compared on one survey.
+- Curran, P. G. (2016). Methods for the detection of carelessly invalid responses in survey data. *Journal of Experimental Social Psychology*, 66, 4–19. <https://doi.org/10.1016/j.jesp.2015.07.006>. A practical review of the screens.
+- Schroeders, U., Schmidt, C., & Gnambs, T. (2022). Detecting careless responding in survey data using stochastic gradient boosting. *Educational and Psychological Measurement*, 82(1), 29–56. <https://doi.org/10.1177/00131644211004708>. Combining screens into one classifier.
+- Ulitzsch, E., Yildirim-Erbasli, S. N., Gorgun, G., & Bulut, O. (2022). An explanatory mixture IRT model for careless and insufficient effort responding in self-report measures. *British Journal of Mathematical and Statistical Psychology*, 75(3), 668–698. <https://doi.org/10.1111/bmsp.12272>. A content-free class modelled with covariates.
+- Ulitzsch, E., Pohl, S., Khorramdel, L., Kroehne, U., & von Davier, M. (2022). A response-time-based latent response mixture model for identifying and modeling careless and insufficient effort responding in survey data. *Psychometrika*, 87(2), 593–619. <https://doi.org/10.1007/s11336-021-09817-7>. Responses and item-level times in one mixture.
+- Bauer, D. J., & Curran, P. J. (2003). Distributional assumptions of growth mixture models: Implications for overextraction of latent trajectory classes. *Psychological Methods*, 8(3), 338–363. <https://doi.org/10.1037/1082-989X.8.3.338>. Classes from a non-normal continuum.
+- Frick, H., Strobl, C., Leisch, F., & Zeileis, A. (2012). Flexible Rasch mixture models with package psychomix. *Journal of Statistical Software*, 48(7). <https://doi.org/10.18637/jss.v048.i07>. Another R route to mixture Rasch models (not tried here).
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. The package, including `multipleGroup(..., dentype = "mixture")`.
 
 ```{r}
 #| output: asis
@@ -28,3 +449,9 @@ data_sources("mixture-models")
 ```
 
 ## For instructors
+
+- **Source:** new; there is no EDUC 252 class on mixtures. The spine is von Davier and Rost's handbook chapter. The careless-responding lesson once planned was folded in here (Ben, 09-28).
+- **Timing:** the core ideas and widgets take about 60 minutes; the Kay analysis works as a 30-minute lab. Locally, the real-data file runs in about five minutes; the held-out comparison ([code](code/mixture-models-precompute.R)) and the mixed partial credit fits ([code](code/mixture-models-pcm.R)) take about 15 and 12 minutes, so start them first.
+- **Sanity check:** before drafting, the safety valve of [Guessing and priors](guessing-priors.qmd) was refitted on `roar_lexical` with `multipleGroup()`, one class fixed at chance through `START` and `FIXED`; it reproduced $\hat\pi$ = 0.87 and the 16 respondents in the guessing class. The same syntax fixes a class in any `mirt` mixture.
+- **Held back:** latent DIF (problem 5); strategies on the balance scale (problem 2); the DASS straight lines (problem 3); the joint model of responses and item-level times; factor mixture models ([Lubke & Muthén, 2005](https://doi.org/10.1037/1082-989X.10.1.21)); faking on high-stakes surveys.
+- **Solutions:** held back in `solutions/mixture-models.qmd` (not published).
