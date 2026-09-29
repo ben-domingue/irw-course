@@ -8,19 +8,491 @@ source("_course.R")
 lesson_header("person-fit")
 ```
 
+```{webr}
+#| context: setup
+{{< include code/_webr-setup.R >}}
+```
+
+```{ojs}
+//| echo: false
+import {palette} from "./widgets/irt.js"
+import {gtB, gtA, mle, fitStats, guttman, patterns, simNull, power} from "./widgets/person-fit.js"
+import {quiz, predict} from "./widgets/quiz.js"
+```
+
 ## What this is for
 
-*To be written.* The plan is in [outlines/person-fit.md](https://github.com/ben-domingue/irw-course/blob/main/outlines/person-fit.md).
+A licensure program suspects 46 of its 1,636 respondents of inappropriate behaviour. Their scores look like everyone else's. Can the responses themselves say which patterns the model doesn't describe? Every fit statistic so far has asked about items: does an item behave as the model says, over all the respondents who answered it? Person fit turns the question around and asks it of one respondent, over all the items they answered. Two respondents with the same sum score can differ a lot in *which* items they got right, and a pattern can be far less likely (or more likely) than the model expects. This lesson builds the main person-fit statistics, shows that estimating $\theta$ from the same responses changes what "unlikely" means, and then asks the licensure data, a personality inventory and a matrix reasoning test what a flag can and can't tell us.
 
 ## Goals
 
+By the end of this lesson you should be able to:
+
+- count Guttman errors and compute $G^*$ for a response pattern, with no model fitted;
+- compute person outfit, infit and $l_z$, and say which direction is underfit and which overfit;
+- explain why $l_z$ at an estimated $\theta$ flags fewer respondents than its nominal rate, and compute Snijders's $l_z^*$ by hand;
+- say which kinds of aberrant responding a global index can find and which it can't;
+- read a person-fit flag as a reason to look at a pattern, and list what else could produce it.
+
 ## Core ideas
 
-## Worked example
+### Same score, different patterns
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd): under the Rasch model the sum score is sufficient, so two students who get 3 of 5 items right have the same ability estimate, whether they got the three easiest or the three hardest. That lesson's quiz added that the second pattern is less *likely*, which is a question of person fit.
+:::
+
+Order the items from easiest to hardest. If responses were perfectly consistent, a respondent with $r$ correct would get the $r$ easiest right and the rest wrong: a Guttman pattern ([Guttman, 1944](https://doi.org/10.2307/2086306)). Every pair in which an easier item is wrong and a harder one right is a **Guttman error**. A respondent can make at most $r(n - r)$ of them, so the normalized count
+$$G^* = \frac{\text{Guttman errors}}{r(n - r)}$$
+runs from 0 (a Guttman pattern) to 1 (the reverse). It needs no model, only an ordering of the items. [Meijer (1994)](https://doi.org/10.1177/014662169401800402) compared the count with the U3 statistic of [van der Flier (1982)](https://doi.org/10.1177/0022002182013003001), which weights each error by how far apart the two items' proportions correct are, and found that in most of the cases studied a weighted version of the count did as well. Counts like these are a reasonable choice before any model has been chosen, or when there are too few respondents to fit one.
+
+#### Try it: Guttman errors
+
+Ten items, easiest first (difficulties from −2.4 to 2.4). Choose which ones the respondent gets right.
+
+```{ojs}
+//| echo: false
+gt_labels = gtB.map((b, i) => `${i + 1} (b = ${b.toFixed(2).replace("-", "−")})`)
+viewof gt_pick = Inputs.checkbox(gt_labels, {label: "Correct on", value: [0, 1, 3, 4, 6].map(i => gt_labels[i])})
+```
+
+```{ojs}
+//| echo: false
+gt_x = gt_labels.map(l => gt_pick.includes(l) ? 1 : 0)
+gt_r = gt_x.reduce((s, v) => s + v, 0)
+gt_g = guttman(gt_x)
+Plot.plot({
+  width: 700, height: 110, marginLeft: 20, x: {label: "Item (easiest to hardest)", domain: gt_x.map((_, i) => i + 1)}, y: {axis: null},
+  color: {legend: true, domain: ["Right", "Wrong"], range: [palette.main, palette.light]},
+  marks: [Plot.cell(gt_x.map((v, i) => ({item: i + 1, v: v ? "Right" : "Wrong"})), {x: "item", fill: "v", inset: 2})]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Sum score **${gt_r}** of 10. ${gt_r > 0 && gt_r < 10 ?
+  `Guttman errors: **${gt_g.errors}** of a possible ${gt_r * (10 - gt_r)}, so G<sup>∗</sup> = **${gt_g.gstar.toFixed(2)}**.` :
+  "With every item right or every item wrong there is only one pattern, and nothing for it to disagree with."}`
+```
+
+The default pattern (items 1, 2, 4, 5 and 7) has 4 Guttman errors of a possible 25. Tick items 1 to 5 and the count is 0; tick 6 to 10 instead and it is 25, with the same sum score. The count doesn't say whether 4 errors is many for a respondent with this score on these items. That needs a model.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "On a 20-item test ordered by difficulty, two respondents each have 12 items right. One has 10 Guttman errors, the other 40. What is $G^*$ for each?",
+  options: [
+    {text: "0.10 and 0.42", correct: true, why: "The most errors possible is $r(n - r) = 12 \\times 8 = 96$, so $G^* = 10/96 \\approx 0.10$ and $40/96 \\approx 0.42$."},
+    {text: "0.50 and 2.00", correct: false, why: "That divides by the number of items, 20. $G^*$ divides by the number of (right, wrong) pairs, $r(n - r) = 96$, so it can't exceed 1."},
+    {text: "It depends on the items' difficulties", correct: false, why: "The difficulties set the order of the items, and so which pairs count as errors, but once the errors are counted $G^*$ is the count over $r(n - r)$."}
+  ]
+})
+```
+
+### Model-based indices: person outfit, infit and $l_z$
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Model fit and out-of-sample prediction](fit-prediction.qmd): with $z_{ij} = (x_{ij} - p_{ij})/\sqrt{p_{ij}(1 - p_{ij})}$, an item's outfit is the mean of $z_{ij}^2$ over its respondents, and infit weights each by $p_{ij}(1 - p_{ij})$. From [The Rasch model](rasch.qmd): below 1 is *overfit* (more predictable than the model expects), above 1 *underfit*.
+:::
+
+Average the same squared residuals over one respondent's items instead of one item's respondents and you have **person outfit** and **person infit** ([Wright & Masters, 1982](https://www.rasch.org/rsa.htm)). A strong respondent who misses an easy item gets a large $z^2$ from it, just as an item does from a strong respondent who misses it.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd): with the item parameters known, the likelihood of a respondent's pattern at $\theta$ is $\prod_i P_i^{x_i}(1 - P_i)^{1 - x_i}$; its first widget drew it for every pattern of three items.
+:::
+
+The other route starts from that likelihood. Let $l_0$ be the log likelihood of the pattern at $\theta$. If the model holds, $l_0$ has a mean and variance we can write down, item by item:
+$$E(l_0) = \sum_i \big[P_i \log P_i + (1 - P_i)\log(1 - P_i)\big], \qquad \text{Var}(l_0) = \sum_i P_i(1 - P_i)\Big[\log\frac{P_i}{1 - P_i}\Big]^2.$$
+Standardizing gives $l_z = \big(l_0 - E(l_0)\big)/\sqrt{\text{Var}(l_0)}$ ([Levine & Rubin, 1979](https://doi.org/10.3102/10769986004004269); [Drasgow, Levine & Williams, 1985](https://doi.org/10.1111/j.2044-8317.1985.tb00817.x)). Below 0 the pattern is less likely than the model expects (underfit); above 0 it is more predictable (overfit). `mirt`'s `personfit()` reports it as `Zh` ([Chalmers, 2012](https://doi.org/10.18637/jss.v048.i06)). Since $l_0 - E(l_0) = \sum_i (x_i - P_i)\log\frac{P_i}{1 - P_i}$, $l_z$ is a weighted sum of residuals, and a correct answer on an item far above the respondent (small $P_i$, a large negative weight) counts most against the pattern.
+
+#### Try it: same score, different likelihoods
+
+The pattern from the widget above, among every pattern with the same sum score. Each is scored by maximum likelihood, and $l_z$ is computed at that estimate. Under the Rasch model every pattern with the same score has the same $\hat\theta$; the 2PL gives the items slopes from 0.5 to 2.0.
+
+```{ojs}
+//| echo: false
+viewof gl_model = Inputs.radio(["Rasch", "2PL"], {value: "Rasch", label: "Model"})
+```
+
+```{ojs}
+//| echo: false
+gl_a = gl_model === "Rasch" ? gtB.map(() => 1) : gtA
+gl_all = (gt_r > 0 && gt_r < 10) ? patterns(10, gt_r).map(x => {
+  const th = mle(x, gl_a, gtB), s = fitStats(x, gl_a, gtB, th);
+  return {errors: guttman(x).errors, lz: s.lz, mine: x.join("") === gt_x.join("")};
+}) : []
+gl_me = (gt_r > 0 && gt_r < 10) ? fitStats(gt_x, gl_a, gtB, mle(gt_x, gl_a, gtB)) : null
+Plot.plot({
+  width: 700, height: 300, x: {label: "Guttman errors"}, y: {label: "l_z at the ML estimate"},
+  marks: [
+    Plot.ruleY([-1.645], {stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.dot(gl_all.filter(d => !d.mine), {x: "errors", y: "lz", r: 3, fill: palette.light}),
+    Plot.dot(gl_all.filter(d => d.mine), {x: "errors", y: "lz", r: 7, fill: palette.contrast})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`${gl_me ? `Your pattern (orange): θ̂ = **${(mle(gt_x, gl_a, gtB) + 0).toFixed(2).replace("-0.00", "0.00")}**, log likelihood ${gl_me.l0.toFixed(2)} against an expected ${gl_me.El.toFixed(2)} (SD ${Math.sqrt(gl_me.Vl).toFixed(2)}), so l<sub>z</sub> = **${gl_me.lz.toFixed(2)}**. Person outfit ${gl_me.outfit.toFixed(2)}, infit ${gl_me.infit.toFixed(2)}. The ${gl_all.length} patterns with this score run from l<sub>z</sub> = ${Math.min(...gl_all.map(d => d.lz)).toFixed(2)} to ${Math.max(...gl_all.map(d => d.lz)).toFixed(2)}.` : "Choose a sum score between 1 and 9."}`
+```
+
+Under the Rasch model the points fall close to a line: more Guttman errors, lower $l_z$. They don't fall exactly on it, because $l_z$ weighs an error by how far apart the two items are, while $G^*$ counts every error alike. Switch to the 2PL and the cloud spreads, since an error on a steep item now costs more than one on a flat item. The Guttman pattern sits at the top, with $l_z$ above 0. That is overfit: more orderly than a model with these slopes expects.
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A respondent's $l_z$ is +2.1 and their person outfit is 0.55. What does that say about their pattern?",
+  options: [
+    {text: "It is more predictable than the model expects: close to a Guttman pattern", correct: true, why: "Positive $l_z$ and outfit below 1 both mean overfit: the easy items right and the hard ones wrong, more consistently than the item curves allow."},
+    {text: "It is less likely than the model expects, so the respondent may have been careless", correct: false, why: "That is underfit, which shows as negative $l_z$ and outfit above 1."},
+    {text: "Nothing, since only negative $l_z$ is informative", correct: false, why: "Overfit is a finding too. It can mean that the item parameters don't describe this respondent, as the licensure data below suggest for some groups."}
+  ]
+})
+```
+
+### Estimating $\theta$ narrows the null distribution
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Model fit and out-of-sample prediction](fit-prediction.qmd), its *Simulate* section: with 20 items and the Rasch model true, item outfits computed from `mirt`'s EAP abilities averaged 0.90, and from maximum-likelihood abilities 0.97 to 0.99. Estimates fitted to the same responses pull a fit statistic toward the data.
+:::
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd): the EAP is pulled toward the mean of the prior (**shrinkage**), most at the ends of the scale and on short tests. The MLE solves the score equation $\sum_i a_i(x_i - P_i) = 0$; the WLE ([Warm, 1989](https://doi.org/10.1007/bf02294627)) adds a term that removes the MLE's first-order bias.
+:::
+
+$l_z$ is standard normal (for long tests) only at the respondent's true $\theta$. In practice $\hat\theta$ comes from the same responses, and a pattern always looks at least as likely at its own maximum-likelihood estimate as at the truth. What does that do to the flag rate at −1.645, the 5% point of the standard normal?
+
+```{ojs}
+//| echo: false
+predict({
+  q: "With 20 items and the 2PL true, what share of respondents will have $l_z$ below −1.645 when $l_z$ is computed at their maximum-likelihood $\\hat\\theta$?",
+  choices: ["About 1%", "About 3%", "About 5%", "About 8%"],
+  answer: "About 3%",
+  reveal: "About 3% (2.9% in the widget below): the estimate absorbs part of each pattern's departure from the model, and the statistic's SD falls to about 0.8. With 170 items it is still about 0.8. Check it below."
+})
+```
+
+#### Try it: $l_z$ at the true $\theta$ and at $\hat\theta$
+
+2,000 simulated respondents answer 2PL items (slopes around 1, difficulties standard normal) whose parameters are known; only $\theta$ is estimated, by maximum likelihood. Each line is the distribution of one statistic; the dashed curve is the standard normal.
+
+```{ojs}
+//| echo: false
+viewof nl_n = Inputs.radio([10, 20, 40, 170], {value: 20, label: "Number of items"})
+```
+
+```{ojs}
+//| echo: false
+nl = simNull(nl_n)
+nl_series = [["l_z at the true θ", nl.lzTrue], ["l_z at the ML estimate", nl.lzHat], ["l_z* at the ML estimate", nl.lzStar]]
+nl_dens = nl_series.flatMap(([name, v]) => {
+  const w = 0.25, c = Array(36).fill(0);
+  for (const z of v) { const k = Math.floor((z + 5) / w); if (k >= 0 && k < 36) c[k]++; }
+  return c.map((n, k) => ({z: -5 + (k + 0.5) * w, d: n / (v.length * w), s: name}));
+})
+nl_norm = Array.from({length: 101}, (_, k) => { const z = -5 + 0.09 * k; return {z, d: Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI)}; })
+Plot.plot({
+  width: 700, height: 300, x: {label: "Statistic", domain: [-5, 4]}, y: {label: "Density"},
+  color: {legend: true, domain: nl_series.map(d => d[0]), range: [palette.light, palette.main, palette.contrast]},
+  marks: [
+    Plot.line(nl_norm, {x: "z", y: "d", stroke: palette.guide, strokeDasharray: "4,3"}),
+    Plot.ruleX([-1.645], {stroke: palette.rule}),
+    Plot.line(nl_dens, {x: "z", y: "d", stroke: "s", strokeWidth: 2.5})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+nl_sd = v => { const m = v.reduce((s, x) => s + x, 0) / v.length; return Math.sqrt(v.reduce((s, x) => s + (x - m) ** 2, 0) / (v.length - 1)); }
+nl_low = v => v.filter(x => x < -1.645).length / v.length
+md`With ${nl_n} items (${nl.dropped} respondents with a perfect or zero score set aside): l<sub>z</sub> at the true θ has SD **${nl_sd(nl.lzTrue).toFixed(2)}**, with ${(100 * nl_low(nl.lzTrue)).toFixed(1)}% below −1.645; at the ML estimate, SD **${nl_sd(nl.lzHat).toFixed(2)}** and ${(100 * nl_low(nl.lzHat)).toFixed(1)}%; l<sub>z</sub><sup>∗</sup>, SD **${nl_sd(nl.lzStar).toFixed(2)}** and ${(100 * nl_low(nl.lzStar)).toFixed(1)}%.`
+```
+
+At the true $\theta$ the SD is about 1, but short tests give a skewed distribution, and 6–7% fall below −1.645 with 10 to 40 items ([Molenaar & Hoijtink, 1990](https://doi.org/10.1007/bf02294745)). At the estimate the SD drops to about 0.8 and the flag rate to 2–4%, at every length: a longer test doesn't remove the shrinkage ([Nering, 1995](https://doi.org/10.1177/014662169501900201)). [Snijders (2001)](https://doi.org/10.1007/BF02294437) derived the null distribution of any statistic that is a weighted sum of residuals, with $\hat\theta$ in place of $\theta$, and from it the corrected $l_z^*$, whose SD is about 1 at every length here. [Magis, Raîche and Béland (2012)](https://doi.org/10.3102/1076998610396894) set out $l_z^*$ step by step for the logistic models and for likelihood-based estimators, the MLE and WLE among them.
+
+The correction is short. At the ML estimate, the score equation has already set $\sum_i a_i(x_i - P_i)$ to zero, so the part of each weight $w_i = \log\frac{P_i}{1 - P_i}$ that lies along the slopes can't vary any more. $l_z^*$ removes it before standardizing:
+$$l_z^* = \frac{\sum_i (x_i - P_i)\,\tilde w_i}{\sqrt{\sum_i P_i(1 - P_i)\,\tilde w_i^2}}, \qquad \tilde w_i = w_i - c\,a_i, \quad c = \frac{\sum_i P_i(1 - P_i)\,a_i w_i}{\sum_i P_i(1 - P_i)\,a_i^2},$$
+all evaluated at $\hat\theta$. For the MLE the numerator equals that of $l_z$; only the denominator shrinks, to match. For the WLE, Snijders adds a term for the estimator's own correction.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [Estimating abilities](ability-estimation.qmd): all-right and all-wrong patterns have no maximum-likelihood estimate.
+:::
+
+What of those perfect patterns? They have no person-fit statistic either, whatever the estimator. There is only one pattern with a score of 0 or $n$, so there is nothing for it to disagree with.
+
+::: {.callout-note collapse="true"}
+## Go deeper: why $\hat\theta$ shrinks $l_z$, and where $l_z^*$ comes from
+
+**Assumptions:** dichotomous items under the 2PL with known parameters; responses independent given $\theta$; $\hat\theta$ the MLE; a first-order (large-test) expansion. Write $P_i = P_i(\theta)$, $Q_i = 1 - P_i$ and $w_i = \log(P_i/Q_i) = a_i(\theta - b_i)$.
+
+**A weighted sum of residuals.** $W(\theta) = \sum_i (x_i - P_i)w_i$ has mean 0 and variance $\sum_i P_iQ_iw_i^2$ at the true $\theta$. It equals $l_0 - E(l_0)$.
+
+**Plug in $\hat\theta$.** Since $P_i' = a_iP_iQ_i$, expanding around $\theta$ gives $P_i(\hat\theta) \approx P_i + a_iP_iQ_i(\hat\theta - \theta)$, and the score equation gives $\hat\theta - \theta \approx \sum_k a_k(x_k - P_k)/I(\theta)$, with $I = \sum_k a_k^2P_kQ_k$. The change in $w_i$ multiplies $(x_i - P_i)$ and is of smaller order. So
+$$W(\hat\theta) \approx \sum_i (x_i - P_i)w_i - (\hat\theta - \theta)\sum_i a_iP_iQ_iw_i = \sum_i (x_i - P_i)(w_i - c\,a_i), \qquad c = \frac{\sum_i a_iP_iQ_iw_i}{I}.$$
+The weights $w_i - c\,a_i$ are the residuals from a weighted regression (weights $P_iQ_i$) of $w_i$ on $a_i$. Their variance, $\sum_i P_iQ_i(w_i - c\,a_i)^2 = \sum_i P_iQ_iw_i^2 - c^2 I$, is smaller than $\text{Var}(l_0)$ by $c^2I$. $l_z$ divides by the larger number, so it shrinks toward 0; $l_z^*$ divides by the smaller one ([Snijders, 2001](https://doi.org/10.1007/BF02294437)). The loss $c^2 I$ grows with the test (both $c^2 I$ and $\text{Var}(l_0)$ are sums over items), which is why more items don't help.
+
+**Who is affected most.** Under the Rasch model $a_i = 1$ and $w_i = \theta - b_i$, so $c = \theta - \bar b$, with $\bar b$ the $P_iQ_i$-weighted mean difficulty, and $w_i - c = -(b_i - \bar b)$. The part removed is $(\theta - \bar b)^2 I$: nothing for a respondent in the middle of the items, a lot for one far from them. The numerator becomes $-\sum_i (x_i - P_i)(b_i - \bar b)$, which, given $r$, depends only on the sum of the difficulties of the items answered correctly. This is the person-side version of the point in [Model fit and out-of-sample prediction](fit-prediction.qmd) that outfit from estimated abilities runs below 1.
+
+**Other estimators.** The WLE solves a score equation with an added term $r_0(\theta) = J(\theta)/2I(\theta)$; Snijders's result then shifts the mean of $W$ by $-c\,r_0(\hat\theta)$, and $l_z^*$ adds it back. [Magis, Raîche and Béland (2012)](https://doi.org/10.3102/1076998610396894) give the term for each logistic model and likelihood-based estimator.
+:::
+
+```{ojs}
+//| echo: false
+quiz({
+  q: "A program computes $l_z$ at maximum-likelihood abilities on a 60-item test and flags everyone below −1.645, expecting to flag 5% of respondents who fit the model. Roughly what happens?",
+  options: [
+    {text: "It flags fewer than 5% of them, around 2–3%", correct: true, why: "At $\\hat\\theta$ the SD of $l_z$ is about 0.8, whatever the length, so −1.645 is about two SDs out. $l_z^*$ restores the SD."},
+    {text: "It flags about 5%, since 60 items is a long test", correct: false, why: "Length makes the distribution less skewed but doesn't remove the shrinkage: the variance lost to estimation grows with the test too."},
+    {text: "It flags more than 5%, since estimates are noisy", correct: false, why: "The estimate is fitted to the same responses, which makes each pattern look more likely than it would at the true $\\theta$, not less."}
+  ]
+})
+```
+
+### Power depends on the kind of aberrance
+
+A global index sums over every item. What if only a few items are affected? [Karabatsos (2003)](https://doi.org/10.1207/S15324818AME1604_2) compared 36 person-fit statistics across kinds of aberrant responding, and [Meijer and Sijtsma (2001)](https://doi.org/10.1177/01466210122031957) review how person fit is evaluated.
+
+#### Try it: what the statistics can find
+
+3,000 simulated respondents on 2PL items; about 10% of them respond aberrantly (for guessing, 10% of those below $\theta = -0.5$). Each statistic's cutoff is set so that 5% of a clean simulated sample is flagged (low $l_z^*$, high $G^*$, high outfit), the way PerFit sets cutoffs by simulation ([Tendeiro, Meijer & Niessen, 2016](https://doi.org/10.18637/jss.v074.i05)).
+
+```{ojs}
+//| echo: false
+viewof ab_kind = Inputs.radio(new Map([["Random responding (1 in 4 on every item)", "random"], ["Preknowledge of the k hardest items", "preknowledge"], ["Guessing by low scorers", "guessing"], ["A different trait on k items", "shift"]]), {value: "preknowledge", label: "Kind of aberrance"})
+viewof ab_n = Inputs.radio([20, 40], {value: 20, label: "Number of items"})
+viewof ab_k = Inputs.range([1, 8], {value: 4, step: 1, label: "k, items affected (preknowledge, different trait)"})
+```
+
+```{ojs}
+//| echo: false
+ab = power(ab_n, ab_k, ab_kind)
+ab_names = ({lzstar: "l_z*", gstar: "G*", outfit: "Person outfit"})
+Plot.plot({
+  width: 700, height: 240, marginLeft: 190, x: {label: "Share flagged", domain: [0, 1]}, y: {label: null, domain: ab.rows.flatMap(d => [`${ab_names[d.stat]}: aberrant`, `${ab_names[d.stat]}: clean`])},
+  color: {legend: true, domain: ["Aberrant respondents", "Clean respondents"], range: [palette.contrast, palette.light]},
+  marks: [
+    Plot.barX(ab.rows.flatMap(d => [{s: `${ab_names[d.stat]}: aberrant`, g: "Aberrant respondents", v: d.aberrant}, {s: `${ab_names[d.stat]}: clean`, g: "Clean respondents", v: d.clean}]),
+      {y: "s", x: "v", fill: "g", insetTop: 2, insetBottom: 2}),
+    Plot.ruleX([0.05], {stroke: palette.guide, strokeDasharray: "4,3"})
+  ]
+})
+```
+
+```{ojs}
+//| echo: false
+md`Of ${ab.nBad} aberrant respondents, l<sub>z</sub><sup>∗</sup> flags **${(100 * ab.rows[0].aberrant).toFixed(0)}%**, G<sup>∗</sup> ${(100 * ab.rows[1].aberrant).toFixed(0)}% and person outfit ${(100 * ab.rows[2].aberrant).toFixed(0)}%, against ${(100 * ab.rows[0].clean).toFixed(1)}%, ${(100 * ab.rows[1].clean).toFixed(1)}% and ${(100 * ab.rows[2].clean).toFixed(1)}% of the ${ab.nGood} clean ones.`
+```
+
+With preknowledge of the 4 hardest of 20 items, $l_z^*$ flags 72% of the aberrant respondents; with 2 items, 43%. Random responding is found only about half the time with 20 items: a random pattern from a respondent who would have scored low anyway looks much like their own. A different trait on a few items is barely found at all, and guessing by low scorers not much more. The three statistics mostly agree; the kind of aberrance matters far more than the choice among them.
+
+### What can misfit mean?
+
+A low $l_z^*$ says that the model, with these item parameters, describes this pattern poorly. It doesn't say why. The candidates include carelessness or inattention ([Meade & Craig, 2012](https://doi.org/10.1037/a0028085); [Niessen, Meijer & Tendeiro, 2016](https://doi.org/10.1016/j.jrp.2016.04.010)); preknowledge or copying ([Cizek & Wollack, 2016](https://doi.org/10.4324/9781315743097)); guessing; answering a different question from the one the scale asks, as when a respondent describes an ideal self; a trait that organizes some people's answers less than others' ([Reise & Waller, 1993](https://doi.org/10.1037/0022-3514.65.1.143)); and item parameters that are wrong for this respondent, as when they come from a group whose items behave differently. The last is a statement about the model, not the respondent, and a mixture Rasch model ([Rost, 1990](https://doi.org/10.1177/014662169001400305)) turns it into a model of its own. Overfit is a finding too. A flag starts an inquiry; the pattern alone can't finish it.
+
+::: {.callout-tip appearance="simple"}
+**Recall** from [The Rasch model](rasch.qmd), its Go deeper callout: given the sum score, a pattern's probability is $\Pr(\mathbf{x} \mid r) = \prod_i \varepsilon_i^{x_i}/\gamma_r(\boldsymbol\varepsilon)$, with $\varepsilon_i = e^{-b_i}$, free of $\theta$. Conditioning on $r$ removes $\theta$, which gave conditional maximum likelihood.
+:::
+
+::: {.callout-note collapse="true"}
+## Go deeper: exact person fit under the Rasch model
+
+**Assumptions:** the Rasch model holds with known difficulties $b_i$; responses are independent given $\theta$.
+
+**A null with no estimate in it.** By the Recall above, every quantity person fit needs is known once we condition on $r$. Among the $\binom{n}{r}$ patterns with score $r$, the probability of each is proportional to $\exp(-\sum_i x_ib_i)$: getting harder items right makes a pattern less probable, whatever the respondent's ability. A pattern's exact $p$-value is the total conditional probability of the patterns with score $r$ that are at most as probable as it is. Nothing is estimated for the respondent, so the shrinkage of the previous section never arises.
+
+**The statistic.** Ordering patterns by $\Pr(\mathbf{x} \mid r)$ is ordering them by $\sum_i x_ib_i$, and that is what $l_z^*$'s numerator reduces to under the Rasch model (previous Go deeper). [Molenaar and Hoijtink (1990)](https://doi.org/10.1007/bf02294745) compare three ways of setting the null (plug in $\hat\theta$, integrate over the population, condition on $r$) and recommend conditioning on the total score. Under the 2PL the weighted score plays the part of $r$, but its weights are item parameters, and the conditional null is no longer free of what has to be estimated.
+:::
+
+## Simulate
+
+The code below simulates 1,000 respondents on 20 2PL items, makes 5% of them aberrant, fits the 2PL with `mirt`, scores everyone by maximum likelihood, and computes $l_z$ (checked against `mirt`'s `Zh`) and $l_z^*$ by hand. The first run takes 20–30 seconds while R and `mirt` load; the fit then takes a few seconds.
+
+Unlike the widgets, this estimates the item parameters too. With the seed as written and `kind <- "random"`, $l_z$ has SD 0.75 among clean respondents and flags 1.7% of them; $l_z^*$ has SD 1.01 and flags 5.4%, and it finds 36% of the random responders ($l_z$: 16%). With `"preknowledge"` $l_z^*$ finds 78%; with `"guessing"`, 12%. Try `n_items <- 40`, or `share <- 0.2`, where the item parameters are fitted partly to the aberrant respondents.
+
+```{webr}
+{{< include code/person-fit-sim.R >}}
+```
+
+[Download this code](code/person-fit-sim.R) to run it in your own R session.
+
+## With real data
+
+```{r}
+#| include: false
+knitr::read_chunk("code/person-fit-irw.R")
+options(digits = 7)  # R's default, so the page prints what a fresh R session prints
+```
+
+Every analysis below uses the same few functions: $l_z$ and $l_z^*$ by hand, $G^*$, and a wrapper that fits a 2PL with `mirt`, scores respondents by maximum likelihood and collects the statistics. [Download the code](code/person-fit-irw.R); it ends by checking the hand-computed statistics against PerFit ([Tendeiro, Meijer & Niessen, 2016](https://doi.org/10.18637/jss.v074.i05)).
+
+```{r functions}
+#| echo: true
+#| code-fold: true
+```
+
+### A licensure exam
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Response time and the speed-accuracy tradeoff](response-time.qmd): this was its main example, a 170-item licensure exam whose response times were modelled with a lognormal model, and its problem 3 asked about the flagged respondents. Here we use only the responses.
+:::
+
+Our main example is [credentialform_lnirt](https://itemresponsewarehouse.org/tables/credentialform_lnirt/), one form of a licensure exam from the *Handbook of Quantitative Methods for Detecting Cheating on Tests* ([Cizek & Wollack, 2016](https://doi.org/10.4324/9781315743097)), distributed with the R package [LNIRT](https://cran.r-project.org/web/packages/LNIRT/index.html). Its job is to be the one IRW table that marks respondents whom the test vendor suspected of inappropriate behaviour (`Flagged`). A response is 1 when correct. We keep the 170 scored items; the pilot slots that follow them hold different items for different respondents.
+
+```{r fetch-cf}
+#| echo: true
+#| code-fold: show
+```
+
+Every respondent answered all 170 items, and no one scored 0 or 170.
+
+```{r fit-cf}
+#| echo: true
+#| code-fold: show
+```
+
+At the maximum-likelihood $\hat\theta$, $l_z$ has SD 0.76 and flags 2.0% below −1.645: the shrinkage from the widget, on 170 real items. $l_z^*$ has SD 1.14 and flags 7.8%, with 7.6% above +1.645. Both tails hold more respondents than a standard normal would put there.
+
+```{r hist-cf}
+#| echo: true
+#| code-fold: true
+#| fig-width: 6
+#| fig-height: 3.5
+```
+
+```{r cor-cf}
+#| echo: true
+#| code-fold: show
+```
+
+The statistics largely agree. The rank correlation of $l_z^*$ with $l_z$ is 0.99 and with person infit −0.96; with outfit it is −0.80 and with $G^*$ −0.61. With the sum score it is 0.04.
+
+```{ojs}
+//| echo: false
+predict({
+  q: "The vendor flagged 46 respondents for suspected inappropriate behaviour. Among the other 1,590, 7.8% have $l_z^* < -1.645$. What about the 46?",
+  choices: ["Far more of them fall below −1.645 (over 30%)", "Somewhat more (10–20%)", "About the same share, and a higher mean $l_z^*$ than everyone else"],
+  answer: "About the same share, and a higher mean $l_z^*$ than everyone else",
+  reveal: "About the same: 4 of 46 (8.7%), and their mean $l_z^*$ is 0.39 against 0.01. Whatever led to the flags, it didn't make their patterns across all 170 items less likely under the model. Check the output below."
+})
+```
+
+```{r flagged-cf}
+#| echo: true
+#| code-fold: show
+```
+
+The flagged respondents scored a little lower (119.9 against 123.4), and their patterns fit the model slightly *better* than the rest. As the aberrance widget suggests, a global index over 170 items has little power when few items are affected. The vendor's list of compromised items isn't in the IRW table, so a statistic on those items alone (problem 4) isn't possible here.
+
+What about the tail above +1.645?
+
+```{r groups-cf}
+#| echo: true
+#| code-fold: show
+```
+
+About a fifth of the respondents educated in India (19.9%) or the Philippines (19.0%) have $l_z^*$ above +1.645, against 4.8% of the 1,243 educated in the USA; repeat takers show the same, less strongly (13.6% against 5.1%). These groups score lower, but within each score band the gap remains (12–26% against about 5%). Their patterns are more orderly than the item curves allow. One possibility, which the patterns alone can't settle, is that some items work differently in these groups, so that parameters from a calibration dominated by USA-educated respondents don't describe them: wrong item parameters for these respondents (problem 5).
+
+::: {.callout-tip appearance="simple"}
+**If you've done** [Differential item functioning](dif.qmd): an item functions differently when respondents from two groups with the same ability have different chances of answering it correctly. Group-specific slopes are one form of it.
+:::
+
+### A personality inventory
+
+For contrast, [psychtools_epi](https://itemresponsewarehouse.org/tables/psychtools_epi/) holds the Eysenck Personality Inventory (Eysenck & Eysenck, 1968, as distributed in the R package [psychTools](https://cran.r-project.org/web/packages/psychTools/index.html)). Its job is to show misfit next to a measure of one possible cause: besides neuroticism and extraversion, the inventory has a Lie scale, nine items on which one answer describes an implausibly virtuous self. We analyse the 24 neuroticism items. The processing script subtracts 1 from psychTools' coding (1 = yes, 2 = no), so in the IRW table 1 means "no"; we reverse it once, as the data are read, so that 1 means yes, the neurotic answer for every item.
+
+```{r fetch-epi}
+#| echo: true
+#| code-fold: show
+```
+
+```{r fit-epi}
+#| echo: true
+#| code-fold: show
+```
+
+Of the 3,232 respondents who answered every neuroticism and Lie item, 3,216 have a score strictly between 0 and 24. $l_z^*$ flags 8.8% of them below −1.645, again more than 5%.
+
+```{r lie-epi}
+#| echo: true
+#| code-fold: show
+```
+
+The share flagged rises with the Lie score: 5.4% of respondents with Lie scores of 0–2, 10.6% at 3–4 and 19.2% at 5–9. It isn't a score effect: in each neuroticism band above 6, respondents with Lie scores of 5–9 are flagged most often (23–33%, against 5–10% at Lie scores of 0–2). Only among the lowest neuroticism scores, where few items are endorsed, does the gradient reverse. A respondent who presents an ideal self may deny some neuroticism items and not others, in an order that doesn't follow the items' difficulties: a different question answered on some of the items.
+
+### A matrix reasoning test
+
+Our failure case is [test_taking_much_2025_mr](https://itemresponsewarehouse.org/tables/test_taking_much_2025_mr/): 20 matrix reasoning items from the Open Matrices Item Bank ([Koch, Spinath, Greiff & Becker, 2022](https://doi.org/10.3390/jintelligence10030041)), in two blocks of ten, one under an instruction to work accurately and one to work fast, answered online by 1,244 respondents ([Much, Mutak, Pohl & Ranger, 2025](https://doi.org/10.5334/jopd.124); data at <https://doi.org/10.17605/OSF.IO/9J6HM>). Its job is to show what person fit can't see. A response is 1 when the respondent built the correct solution from a set of answer elements, which leaves little room for lucky guesses. The authors coded what respondents reported, at the end, about anything that affected their performance. The table has no listed processing script, and its `rater` column isn't described at the source, so we leave it aside.
+
+```{r fetch-mr}
+#| echo: true
+#| code-fold: show
+```
+
+225 of the 1,178 respondents who have every item (19.1%) answered none correctly.
+
+```{r zeros-mr}
+#| echo: true
+#| code-fold: show
+```
+
+Of the 29 who reported a complete lack of understanding of the task, 20 scored 0. None of the 225 has a person-fit statistic: a pattern of all zeros is the most likely pattern for a respondent at the bottom of the scale.
+
+```{r fit-mr}
+#| echo: true
+#| code-fold: show
+```
+
+Among the 924 respondents with a statistic, the 58 who reported not understanding the task, fully or partly, have a *higher* mean $l_z^*$ (0.39) than those who reported no issues (0.13), and fewer are flagged (3.4% against 7.7%). Attention checks make little difference either. A respondent who hasn't understood the task gets items wrong in a way that looks like low ability, and person fit, which asks only whether a pattern is consistent with *some* $\theta$, finds nothing to flag.
+
+So what should a program do with a person-fit statistic? Each option rests on assumptions. $l_z^*$ assumes the item parameters are right for everyone and corrects for $\theta$ being estimated from the same responses; $G^*$ assumes only an ordering of the items, but has no reference distribution without a model. Neither sees disengagement that looks like low ability, or a problem confined to a few items. In the case that the question is whether a respondent's pattern is consistent with the model, $l_z^*$ at a maximum-likelihood or WLE $\hat\theta$, read alongside $G^*$, may be sufficient for some purposes as a first screen. A flag is a reason to look at the pattern, not a finding about the respondent.
 
 ## Problems
 
+1. **Derivation.** Show that $E(l_0)$ and $\text{Var}(l_0)$ at a known $\theta$ are as given in the core ideas, and that $l_0 - E(l_0) = \sum_i (x_i - P_i)\log\frac{P_i}{1 - P_i}$. Then, following the Go deeper callout, show that for the Rasch model at the ML $\hat\theta$ the variance lost is $(\hat\theta - \bar b)^2 I(\hat\theta)$. Whose $l_z$ is least affected?
+2. **Real data with a twist.** Repeat the EPI analysis on the extraversion scale, whose items are keyed in both directions (psychTools `epi.keys`), remembering that the IRW table codes 1 as "no". Does the Lie gradient hold? What happens to $l_z^*$ if you forget to reverse the negatively keyed items?
+3. **Judgment.** A licensure program proposes to review everyone with $l_z^* < -1.645$: 7.8% of 1,636, about 128 people. What should a review look for, what would a flag not justify, and what would you tell a respondent who asks why they were reviewed?
+4. **Design.** Suppose preknowledge of 20 of the 170 licensure items. Why is a global index weak? Design a statistic on a suspected subset (for example, performance on the subset given a $\hat\theta$ from the other items), and simulate its power against $l_z^*$ ([Cizek & Wollack, 2016](https://doi.org/10.4324/9781315743097)).
+5. **Real data: the overfit tail.** In `credentialform_lnirt`, fit the 2PL separately to the USA-educated respondents and to the rest, and recompute $l_z^*$ in each group with its own item parameters. Does the tail above +1.645 shrink? What else could make patterns more predictable than the model expects?
+6. **Challenge (open): across the IRW.** Across many IRW tables, how often does $l_z^*$ fall below −1.645 more often than 5%, and is the excess about respondents or about the model? What would tell the two apart? (I don't know the answer. One start: compare the excess under a 2PL, a 3PL and a two-class mixture.)
+
+```{r}
+#| output: asis
+ask_claude("person-fit", "It covers person fit for dichotomous item response models: Guttman errors and the normalized G*, person outfit and infit, the l_z statistic and why its null distribution shrinks when ability is estimated from the same responses, Snijders's corrected l_z* (computed by hand and checked against mirt and PerFit), the power of person-fit statistics against random responding, preknowledge, guessing and a shifted construct, and what a flag can mean, with analyses in R of a licensure exam with vendor-flagged respondents, the Eysenck Personality Inventory and its Lie scale, and a matrix reasoning test on which a fifth of respondents scored zero.")
+```
+
 ## Going further
+
+- Snijders, T. A. B. (2001). Asymptotic null distribution of person fit statistics with estimated person parameter. *Psychometrika*, 66(3), 331–342. <https://doi.org/10.1007/BF02294437>. Where $l_z^*$ comes from, for any statistic linear in the responses.
+- Magis, D., Raîche, G., & Béland, S. (2012). A didactic presentation of Snijders's $l_z^*$ index of person fit with emphasis on response model selection and ability estimation. *Journal of Educational and Behavioral Statistics*, 37(1), 57–81. <https://doi.org/10.3102/1076998610396894>. $l_z^*$ step by step, for each logistic model and estimator.
+- Meijer, R. R., & Sijtsma, K. (2001). Methodology review: Evaluating person fit. *Applied Psychological Measurement*, 25(2), 107–135. <https://doi.org/10.1177/01466210122031957>. A review of person-fit methods, parametric and nonparametric.
+- Tendeiro, J. N., Meijer, R. R., & Niessen, A. S. M. (2016). PerFit: An R package for person-fit analysis in IRT. *Journal of Statistical Software*, 74(5). <https://doi.org/10.18637/jss.v074.i05>. The package: $l_z$, $l_z^*$, $G^*$, U3, polytomous versions, and cutoffs by simulation.
+- Meijer, R. R., Niessen, A. S. M., & Tendeiro, J. N. (2016). A practical guide to check the consistency of item response patterns in clinical research through person-fit statistics. *Assessment*, 23(1), 52–62. <https://doi.org/10.1177/1073191115577800>. Person fit in practice, for clinical scales.
+- Levine, M. V., & Rubin, D. B. (1979). Measuring the appropriateness of multiple-choice test scores. *Journal of Educational Statistics*, 4(4), 269–290. <https://doi.org/10.3102/10769986004004269>. The likelihood of a pattern as a measure of fit.
+- Drasgow, F., Levine, M. V., & Williams, E. A. (1985). Appropriateness measurement with polychotomous item response models and standardized indices. *British Journal of Mathematical and Statistical Psychology*, 38(1), 67–86. <https://doi.org/10.1111/j.2044-8317.1985.tb00817.x>. The standardized $l_z$.
+- Molenaar, I. W., & Hoijtink, H. (1990). The many null distributions of person fit indices. *Psychometrika*, 55(1), 75–106. <https://doi.org/10.1007/bf02294745>. Why the null depends on ability, and the case for conditioning on the total score.
+- Nering, M. L. (1995). The distribution of person fit using true and estimated person parameters. *Applied Psychological Measurement*, 19(2), 121–129. <https://doi.org/10.1177/014662169501900201>. $l_z$ at the true and the estimated $\theta$.
+- Karabatsos, G. (2003). Comparing the aberrant response detection performance of thirty-six person-fit statistics. *Applied Measurement in Education*, 16(4), 277–298. <https://doi.org/10.1207/S15324818AME1604_2>. Power across statistics and kinds of aberrance.
+- Meijer, R. R. (1994). The number of Guttman errors as a simple and powerful person-fit statistic. *Applied Psychological Measurement*, 18(4), 311–314. <https://doi.org/10.1177/014662169401800402>. The count of Guttman errors against U3.
+- van der Flier, H. (1982). Deviant response patterns and comparability of test scores. *Journal of Cross-Cultural Psychology*, 13(3), 267–298. <https://doi.org/10.1177/0022002182013003001>. The U3 statistic.
+- Harnisch, D. L., & Linn, R. L. (1981). Analysis of item response patterns: Questionable test data and dissimilar curriculum practices. *Journal of Educational Measurement*, 18(3), 133–146. <https://doi.org/10.1111/j.1745-3984.1981.tb00848.x>. Pattern indices applied to schools.
+- Guttman, L. (1944). A basis for scaling qualitative data. *American Sociological Review*, 9(2), 139–150. <https://doi.org/10.2307/2086306>. The perfectly consistent pattern.
+- Glas, C. A. W., & Khalid, M. N. (2018). Person fit. In W. J. van der Linden (Ed.), *Handbook of item response theory: Vol. 3. Applications* (ch. 6). Chapman and Hall/CRC. <https://doi.org/10.1201/9781315117430>. A handbook chapter on person fit (the volume's DOI).
+- Glas, C. A. W., & Meijer, R. R. (2003). A Bayesian approach to person fit analysis in item response theory models. *Applied Psychological Measurement*, 27(3), 217–233. <https://doi.org/10.1177/0146621603027003003>. Person fit by posterior predictive checks.
+- Emons, W. H. M. (2008). Nonparametric person-fit analysis of polytomous item scores. *Applied Psychological Measurement*, 32(3), 224–247. <https://doi.org/10.1177/0146621607302479>. Guttman errors for polytomous items.
+- Sinharay, S. (2016). Asymptotically correct standardization of person-fit statistics beyond dichotomous items. *Psychometrika*, 81(4), 992–1013. <https://doi.org/10.1007/s11336-015-9465-x>. $l_z^*$ for polytomous and mixed-format tests.
+- van der Linden, W. J., & Guo, F. (2008). Bayesian procedures for identifying aberrant response-time patterns in adaptive testing. *Psychometrika*, 73(3), 365–384. <https://doi.org/10.1007/s11336-007-9046-8>. Person fit for response times.
+- Reise, S. P., & Waller, N. G. (1993). Traitedness and the assessment of response pattern scalability. *Journal of Personality and Social Psychology*, 65(1), 143–151. <https://doi.org/10.1037/0022-3514.65.1.143>. Person fit on personality scales.
+- Meade, A. W., & Craig, S. B. (2012). Identifying careless responses in survey data. *Psychological Methods*, 17(3), 437–455. <https://doi.org/10.1037/a0028085>. Screens for careless responding.
+- Niessen, A. S. M., Meijer, R. R., & Tendeiro, J. N. (2016). Detecting careless respondents in web-based questionnaires: Which method to use? *Journal of Research in Personality*, 63, 1–11. <https://doi.org/10.1016/j.jrp.2016.04.010>. Person fit alongside other screens.
+- Rost, J. (1990). Rasch models in latent classes: An integration of two approaches to item analysis. *Applied Psychological Measurement*, 14(3), 271–282. <https://doi.org/10.1177/014662169001400305>. The mixture Rasch model.
+- Cizek, G. J., & Wollack, J. A. (Eds.). (2016). *Handbook of quantitative methods for detecting cheating on tests*. Routledge. <https://doi.org/10.4324/9781315743097>. Methods for preknowledge, copying and other kinds of cheating; the source of the licensure data.
+- Much, S., Mutak, A., Pohl, S., & Ranger, J. (2025). Data from a validation study of two psychometric models on test-taking behavior. *Journal of Open Psychology Data*, 13. <https://doi.org/10.5334/jopd.124>. The matrix reasoning study.
+- Koch, M., Spinath, F. M., Greiff, S., & Becker, N. (2022). Development and validation of the Open Matrices Item Bank. *Journal of Intelligence*, 10(3), 41. <https://doi.org/10.3390/jintelligence10030041>. The source of the matrix items.
+- Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. *Psychometrika*, 54(3), 427–450. <https://doi.org/10.1007/bf02294627>. The WLE.
+- Chalmers, R. P. (2012). mirt: A multidimensional item response theory package for the R environment. *Journal of Statistical Software*, 48(6). <https://doi.org/10.18637/jss.v048.i06>. `personfit()` gives person outfit, infit and $l_z$.
+- Wright, B. D., & Masters, G. N. (1982). *Rating scale analysis*. MESA Press. <https://www.rasch.org/rsa.htm>. Infit and outfit, for items and persons.
 
 ```{r}
 #| output: asis
@@ -28,3 +500,9 @@ data_sources("person-fit")
 ```
 
 ## For instructors
+
+- **Source:** new to the course; not in EDUC 252. The scope follows Glas and Khalid's handbook chapter (Vol. 3, ch. 6), with the null-distribution argument from Snijders (2001) and Magis, Raîche and Béland (2012).
+- **Timing:** the core ideas and widgets take about 60 minutes; the real-data section works as a 30-minute lab (the licensure fit takes under a minute in local R).
+- **Code:** the page computes $l_z$ and $l_z^*$ by hand, in the browser and in the downloadable code, because PerFit's dependencies are heavy for webR. The downloadable `person-fit-irw.R` ends with a PerFit check of the licensure statistics.
+- **Held back:** screening for careless responding with person fit alongside other screens; inattentive respondents as a latent class ([Mixture models](mixture-models.qmd)); person fit for polytomous items and Bayesian person fit (*Going further*); response-time person fit (van der Linden & Guo, 2008).
+- **Solutions:** held back in `solutions/person-fit.qmd` (not published).

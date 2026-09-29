@@ -474,7 +474,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [credentialform_lnirt, psychtools_epi, test_taking_much_2025_mr]
     reuses: [credentialform_lnirt]
-    status: stub
+    status: draft
     tranche: extension
 
   - id: missing-responses
