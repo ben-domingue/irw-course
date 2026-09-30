@@ -92,3 +92,15 @@ Module: irt · Prereqs: fit-prediction, ability-estimation · Extension · Statu
 - **Deep dive.** Default: none. The across-IRW question is problem 6 and a candidate for later.
 - **webR.** PerFit is on the webR repository, but its dependencies (Hmisc, fda, irtoys, ltm) are heavy. Default: compute $l_z^*$ by hand in the browser and use PerFit in the downloadable `-irw.R`.
 - **Sébastien Béland** to be tagged on this outline (Ben adds the handle). Magis, Raîche & Béland (2012) is cited in idea 3.
+
+## Drafting notes (09-28)
+
+What the draft changed from this outline:
+
+- **Numbers.** The drafted code (`lessons/code/person-fit-irw.R`) differs slightly from the scratch analysis: licensure $l_z^*$ SD 1.14 (not 1.10), 7.8% below and 7.6% above ±1.645; flagged mean 0.39. EPI: 3,232 respondents complete on the neuroticism *and* Lie items, 3,216 with a score strictly between 0 and 24, 8.8% flagged (not 3,269 and 8.9%). The Lie gradient (5.4%, 10.6%, 19.2%) holds within every neuroticism band above 6 and reverses in the lowest band, which the lesson says.
+- **Overfit tail (licensure).** The draft no longer suggests that the items discriminate more sharply for India- and Philippines-educated respondents. A check for the solutions (problem 5) found that with group-specific 2PLs the non-USA tail above +1.645 falls to 6.4%, but with USA-only parameters 44% of non-USA respondents fall *below* −1.645. The lesson now says only that some items may work differently in these groups (DIF), so the pooled parameters don't describe them.
+- **Matrix reasoning.** Kept as the failure case. The 58 respondents who reported not understanding the task have a *higher* mean $l_z^*$ (0.39) than those with no issues (0.13).
+- **Widgets.** Four: Guttman errors; same score, different likelihoods (the outline's second widget, now plotting $l_z$ against Guttman errors for every same-score pattern, Rasch or 2PL); $l_z$ at the true θ vs at $\hat\theta$ vs $l_z^*$ by test length; the aberrance generator, with cutoffs set by simulating clean respondents.
+- **Both Go deeper candidates** are in: Snijders's correction, and exact person fit under the Rasch model.
+- **Dropped:** the "if you've done `guessing-priors`" Recall (the two-class safety valve) for length; `careless-responding` is not in `lessons.yml`, so *For instructors* mentions careless-responding screens without a link.
+- **PerFit** appears only in the downloadable `-irw.R` (last chunk, not shown on the page); the page and webR compute $l_z$, $l_z^*$ and $G^*$ by hand, checked against `mirt::personfit` (`Zh`, exact) and PerFit (to 1e-4).
