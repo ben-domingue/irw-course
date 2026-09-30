@@ -199,6 +199,7 @@ lessons:
     origin: {slides: [c4], ps: ["PS4#3", "PS4#4"], code: [ps4/guessing.R, ps4/priors.R]}
     tables: [roar_lexical, vocabulary_iq]
     status: draft
+    thanks: [Doria Xiao]
     tranche: extension
 
   - id: dimensionality
@@ -361,7 +362,7 @@ lessons:
     tables: [Forthmann-2024-cleverness_ratings, teacherjudgements_lohmann_2026_essayratings]
     status: draft
     tranche: core
-    thanks: [Rich Shavelson]   # optional credit line in the lesson header (lesson_header)
+    thanks: [Rich Shavelson, Mike Hardy]   # optional credit line in the lesson header (lesson_header)
 
   - id: fa-exploratory
     title: "Factor analysis I: exploring dimensionality"
@@ -379,6 +380,7 @@ lessons:
     origin: {slides: [], ps: [], code: []}
     tables: [grit, neurodegenerative_huizinga_2019_dass]
     status: draft
+    thanks: [Lijin Zhang]
     tranche: core
 
   # 2026-09-25: split from fa-confirmatory (Ben, #58, on a colleague's suggestion):
@@ -391,6 +393,7 @@ lessons:
     tables: [neurodegenerative_huizinga_2019_dass, alexandrowicz_2018_cesd]
     reuses: [neurodegenerative_huizinga_2019_dass, alexandrowicz_2018_cesd]  # the DASS from fa-confirmatory, now by sex (measurement-invariance thread); the CES-D, a problem in dif, here the worked case where the ladder fails
     status: draft
+    thanks: [Lijin Zhang]
     tranche: core
 
   - id: validity-evidence
@@ -609,6 +612,7 @@ threads:
       - {lesson: scale-properties, how: asks what it licenses about the scale}
       - {lesson: rater-models, how: keeps it in the many-facet Rasch model}
       - {lesson: mixture-models, how: loses sufficiency across classes}
+      - {lesson: person-fit, how: conditions on r for exact person fit (Go deeper)}
   - id: specific-objectivity
     idea: Item comparisons don't depend on who took the items
     introduced: rasch
@@ -631,6 +635,7 @@ threads:
       - {lesson: item-estimation, how: compares conditional, joint and marginal ML}
       - {lesson: fit-prediction, how: uses Andersen's likelihood-ratio test}
       - {lesson: parameter-invariance, how: splits on the sum score, which bends the 2PL difficulties but leaves the Rasch ones intact}
+      - {lesson: person-fit, how: conditions on r for exact person fit (Go deeper)}
   - id: overfit-underfit
     idea: Misfit as overfit or underfit (outfit and infit)
     introduced: rasch
@@ -639,6 +644,7 @@ threads:
       - {lesson: item-banks-cat, how: screens bank items with it}
       - {lesson: scale-properties, how: asks how much misfit a scale can bear}
       - {lesson: mixture-models, how: finds same-option respondents overfitting}
+      - {lesson: person-fit, how: turns outfit and infit to respondents}
   - id: local-independence
     idea: Responses are independent given θ
     introduced: rasch
@@ -777,6 +783,7 @@ threads:
       - {lesson: item-banks-cat, how: stops a CAT on the posterior SD}
       - {lesson: guessing-priors, how: puts priors on items as well}
       - {lesson: missing-responses, how: shows omitters pulled toward the mean when omits are left missing}
+      - {lesson: person-fit, how: shows estimated abilities narrowing a fit statistic's null}
   - id: perfect-patterns
     idea: "No maximum-likelihood estimate for all-right or all-wrong patterns"
     introduced: ability-estimation
@@ -784,6 +791,7 @@ threads:
       - {lesson: item-banks-cat, how: starts a CAT without an estimate}
       - {lesson: item-estimation, how: meets perfect patterns in joint estimation}
       - {lesson: missing-responses, how: gets a perfect pattern by leaving omits missing}
+      - {lesson: person-fit, how: gives perfect patterns no person-fit statistic either}
   - id: wording-direction
     idea: "Wording direction can act as a second dimension"
     introduced: instrument-building
@@ -873,3 +881,9 @@ threads:
     introduced: instrument-building
     returns:
       - {lesson: mixture-models, how: fits response styles as classes with a mixed partial credit model}
+  # 09-30: from person-fit (#192).
+  - id: misfit-many-causes
+    idea: "A misfitting pattern says the model doesn't describe this respondent, not why"
+    introduced: person-fit
+    returns:
+      - {lesson: mixture-models, how: proposes a class that follows another model}
