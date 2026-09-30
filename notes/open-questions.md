@@ -55,7 +55,7 @@ the course map and PROTOCOL.md is the next PR.
   summative data that isn't in the IRW. Keep the exercise ("you work at the state
   agency; build a bank; what can't you do? no DIF screens") as a design problem
   without the data.
-- **F27, F32** (verdicts in `cdm`, `unfolding`): on hold.
+- **F27** (`cdm`): settled 09-30, skills vs continuum (#203). **F32** (`unfolding`): on hold.
 - **F31** (`unfolding`): the licence check for the eight statements is against
   Andrich (1988), not the IRW table's GPL.
 - **C16:** already settled (first person only where Ben gives a verdict).
