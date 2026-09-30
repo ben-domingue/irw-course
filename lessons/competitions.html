@@ -2457,7 +2457,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>At 0.4 the schedule is a balanced round robin, and win percentage orders the teams correctly. Push the slider up: the Bears, weakest of the strong division, lose more; the Wolves, best of the weak division, win more. From about 0.6 the Wolves have the better record, and at 0.9 they win 61% of their games to the Bears’ 39%. The Bradley-Terry estimates recover the true strengths at every setting, because the model knows whom each team played.</p>
-<p>Win percentage is a reasonable summary when the schedule is balanced, and it needs no model; in the simulation below it does as well as Bradley-Terry on a near-random schedule. Bradley-Terry earns its keep when the schedule is lopsided, as in leagues with divisions or a comparative-judgment study where some essays meet only weak ones.</p>
+<p>Win percentage assumes, in effect, that every agent faced the same opponents. When the schedule is balanced that holds, and it needs no model; in the simulation below it does as well as Bradley-Terry on a near-random schedule. When the schedule is lopsided, as in leagues with divisions or a comparative-judgment study where some essays meet only weak ones, the assumption fails and the adjustment is what separates the two.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2661,56 +2661,56 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">LAL</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">CHA</td>
-<td style="text-align: right;">100</td>
-<td style="text-align: right;">1355817600</td>
-<td style="text-align: left;">agent_a</td>
-<td style="text-align: left;">agent_a</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">SA</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">DAL</td>
+<td style="text-align: right;">102</td>
+<td style="text-align: left;">ATL</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">1414479600</td>
-<td style="text-align: left;">agent_a</td>
-<td style="text-align: left;">agent_a</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PHI</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">POR</td>
-<td style="text-align: right;">100</td>
-<td style="text-align: right;">1363590000</td>
+<td style="text-align: right;">1385971200</td>
 <td style="text-align: left;">agent_a</td>
 <td style="text-align: left;">agent_a</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">POR</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">LAC</td>
+<td style="text-align: left;">WAS</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: left;">ATL</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">1359187200</td>
+<td style="text-align: right;">1490166000</td>
 <td style="text-align: left;">agent_a</td>
 <td style="text-align: left;">agent_a</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">DEN</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">PHI</td>
+<td style="text-align: left;">WAS</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: left;">ATL</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">1363849200</td>
+<td style="text-align: right;">1490166000</td>
 <td style="text-align: left;">agent_a</td>
 <td style="text-align: left;">agent_a</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">MEM</td>
-<td style="text-align: right;">101</td>
-<td style="text-align: left;">POR</td>
+<td style="text-align: left;">GS</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: left;">ATL</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">1447401600</td>
+<td style="text-align: right;">1480320000</td>
+<td style="text-align: left;">agent_a</td>
+<td style="text-align: left;">agent_a</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NO</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: left;">ATL</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">1391587200</td>
+<td style="text-align: left;">agent_a</td>
+<td style="text-align: left;">agent_a</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GS</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: left;">ATL</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">1480320000</td>
 <td style="text-align: left;">agent_a</td>
 <td style="text-align: left;">agent_a</td>
 </tr>
@@ -2987,7 +2987,7 @@ CLE    268      268</code></pre>
 </div>
 </div>
 <p>The step size was chosen on the training seasons only: <span class="math inline">\(K = 0.1\)</span> logits (about 17 FIDE points) predicted the 2013-14 to 2016-17 games best. On 2017-18, Elo’s mean log likelihood is −0.622 per game, against −0.658 for Bradley-Terry on 2016-17 alone, −0.681 for the constant and −0.697 for the pooled fit. Elo’s edge over the pooled fit is 0.075 per game (standard error 0.010). The last line says why: the pooled strengths correlate only 0.33 with the strengths 2017-18 alone produces. <a href="https://doi.org/10.1146/annurev-statistics-040722-061813">Glickman &amp; Jones (2025)</a> analyse NBA outcomes with dynamic models in more depth.</p>
-<p>Where does that leave the choice? When the data span a period over which agents plausibly change, a rating that forgets, such as Elo with <span class="math inline">\(K\)</span> chosen by prediction, may be sufficient for some purposes where a pooled fit is not. Over a short, fixed window, such as one tournament or one survey, the Bradley-Terry fit, with its standard errors and explicit terms for home advantage or order, may be the more useful summary. The first question to ask of the data is whether strength stayed put.</p>
+<p>Where does that leave the choice? It turns on whether strength stayed put over the period the data cover, and held-out games answer that directly: over these six seasons, a rating that forgets predicted 2017-18 better than the pooled fit, by 0.075 per game. Over a short, fixed window, such as one tournament or one survey, the same comparison may come out the other way, and the Bradley-Terry fit brings standard errors and explicit terms for home advantage or order. Fitting on the past and scoring predictions of what came next is a comparison you can run on any competition table, and its result is a sound basis for choosing.</p>
 </section>
 <section id="one-hundred-risks" class="level3">
 <h3 class="anchored" data-anchor-id="one-hundred-risks">One hundred risks</h3>

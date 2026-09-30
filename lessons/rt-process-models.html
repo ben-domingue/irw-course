@@ -2141,7 +2141,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>predict what a harder stimulus and a speed instruction do, and estimate the parameters with EZ-diffusion;</li>
 <li>derive the 2PL from the diffusion model and say what discrimination means as a process;</li>
 <li>explain why errors can be slower than correct responses, and why that has to be checked within a condition;</li>
-<li>say when a diffusion model, or a race model, suits the data in hand.</li>
+<li>say what a diffusion model, or a race model, assumes about the data in hand.</li>
 </ul>
 </section>
 <section id="core-ideas" class="level2">
@@ -2359,7 +2359,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>Lower α and the dot slides down the blue curve, toward faster and less accurate responses. Lower the drift and it slides down the orange curve, toward slower <em>and</em> less accurate ones. The two leave different marks on time and accuracy together, which is how a model tells them apart.</p>
-<p>The closed forms can be run backwards. <strong>EZ-diffusion</strong> (<a href="https://doi.org/10.3758/BF03194023">Wagenmakers, van der Maas &amp; Grasman, 2007</a>) takes three numbers from a set of trials (the proportion correct and the mean and variance of the correct response times) and returns <span class="math inline">\(v\)</span>, <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(T_{er}\)</span> in closed form. It assumes the simple model (an unbiased start, no variability across trials) and ignores the error times. <a href="https://doi.org/10.3758/PBR.15.6.1218">Ratcliff (2008)</a> shows that it is sensitive to outlying times and can mislead when its assumptions don’t hold, and suggests it for exploration rather than final estimates. EZ is a reasonable choice for a first look at many respondents with many trials each, and it is a few lines of base R; full fits are in <em>Going further</em>.</p>
+<p>The closed forms can be run backwards. <strong>EZ-diffusion</strong> (<a href="https://doi.org/10.3758/BF03194023">Wagenmakers, van der Maas &amp; Grasman, 2007</a>) takes three numbers from a set of trials (the proportion correct and the mean and variance of the correct response times) and returns <span class="math inline">\(v\)</span>, <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(T_{er}\)</span> in closed form. It assumes the simple model (an unbiased start, no variability across trials) and ignores the error times. <a href="https://doi.org/10.3758/PBR.15.6.1218">Ratcliff (2008)</a> shows that it is sensitive to outlying times and can mislead when its assumptions don’t hold, and suggests it for exploration rather than final estimates. Where the simple model roughly holds and there are many respondents with many trials each, EZ gives a first look in a few lines of base R; full fits are in <em>Going further</em>.</p>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -2534,7 +2534,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>The simple model predicts no gap within a condition, as the first widget showed. Data can have one (the motion task below does), and <a href="https://doi.org/10.1111/1467-9280.00067">Ratcliff and Rouder (1998)</a> account for it with variability <em>across</em> trials. If the drift varies from trial to trial (SD <span class="math inline">\(\eta\)</span>), errors come mostly from trials whose drift happened to be low, and those trials are slow however they end: errors are slower. If the starting point varies, errors come mostly from trials that began near the wrong boundary, and those end quickly: errors are faster (<a href="https://doi.org/10.1162/neco.2008.12-06-420">Ratcliff &amp; McKoon, 2008</a>).</p>
-<p>The pooled <code>rr98_accuracy</code> gap is the same mechanism one level up, with conditions of different difficulty playing the part of trials with different drift. So before reading slow errors as drift variability, compare error and correct times <em>within</em> a condition, and within a respondent.</p>
+<p>The pooled <code>rr98_accuracy</code> gap is the same mechanism one level up, with conditions of different difficulty playing the part of trials with different drift. So slow errors say something about drift variability only once error and correct times are compared <em>within</em> a condition, and within a respondent.</p>
 <section id="try-it-variability-across-trials" class="level4">
 <h4 class="anchored" data-anchor-id="try-it-variability-across-trials">Try it: variability across trials</h4>
 <p>3,000 trials with drift 1.5 and boundary 2 on average.</p>
@@ -3020,7 +3020,7 @@ cells        106.00 99.00 61.00 44.00 64.00</code></pre>
 </div>
 </div>
 <p>The numbers come out, but not with the model’s meaning. The median non-decision time is 12.8 s, and it is negative, which is impossible, for 6.7% of respondents; five respondents at exactly half right get no estimate at all. On 95% of items errors are slower than correct responses, by a median 19 s. A 54-second item is not one accumulation of evidence toward two boundaries but reading, working and choosing among several options. The failure is in the model’s assumptions for these items, not in the data.</p>
-<p>So when would I reach for a diffusion model? When each response is a single fast decision between two options and each respondent gives many trials, as in lexical decision, motion and brightness judgements. There it separates what accuracy alone mixes, ability and caution, and in the lexical data the mixing is substantial (ability and boundary correlate 0.50). For test items that take most of a minute I wouldn’t: the licensure exam gives parameters with no process to belong to. A model of the decision needs data made of decisions.</p>
+<p>What does the diffusion model need, then? It assumes each response is a single fast decision between two options, and EZ that each respondent gives many trials, as in lexical decision, motion and brightness judgements. Where that holds it separates what accuracy alone mixes, ability and caution, and in the lexical data the mixing is substantial (ability and boundary correlate 0.50). On items that take most of a minute the assumption fails, and the licensure exam gives parameters with no process to belong to. A model of the decision needs data made of decisions.</p>
 </section>
 </section>
 <section id="problems" class="level2">

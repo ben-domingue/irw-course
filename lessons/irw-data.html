@@ -2582,7 +2582,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">irw_csv_url</span>(<span class="st">"verbagg"</span>)        <span class="co"># the version-pinned link on the landing page</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v64_0.verbagg/rows?format=csv"</code></pre>
+<pre><code>[1] "https://redivis.com/api/v1/tables/datapages.item_response_warehouse:v65_0.verbagg/rows?format=csv"</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2984,7 +2984,7 @@ IPIP_06R  IPIP_04 IPIP_18R  IPIP_01  IPIP_11  IPIP_05  IPIP_13 IPIP_20R
 </div>
 </div>
 <p>Every within-trait correlation is positive (0.18 to 0.59), as is every within-trait item-rest correlation. The ten <code>R</code> items arrive <strong>already reverse-scored</strong>: higher means more of the trait on all 20, and <code>IPIP_17R</code>’s 4.5 means most respondents <em>disagreed</em>. (The IRW’s <a href="https://github.com/ben-domingue/irw/blob/main/itemtext/itemtables/batch_342/notes.csv">item-text notes</a> agree, and record that respondents answered a Greek translation.) Keying: higher means more Extraversion, Agreeableness, Conscientiousness, Neuroticism (not emotional stability) or Intellect.</p>
-<p>How should an analyst decide which way items run? One route trusts the documentation, the scoring key and codebook; the other reads the direction off the data, from signs like these. My rule: before summing a scale, I find out from the documentation which way each item should run, and then I check it in the data, because neither is enough alone. Here the codebook would have had us reverse ten items twice; <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a> meets an item the data can’t settle.</p>
+<p>How should an analyst decide which way items run? One route trusts the documentation, the scoring key and codebook; the other reads the direction off the data, from signs like these. The documentation says which way each item was meant to run; the data say which way it runs as stored, and the two can disagree. Here the codebook would have had us reverse ten items twice; <a href="../lessons/ctt-reliability.html">Classical test theory and reliability</a> meets an item the data can’t settle.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>

@@ -3046,7 +3046,7 @@ $untimed$caf$se
 </div>
 </div>
 <p>Back to the two questions. One speed per respondent held across the item sets we could compare; these tables can’t test it across time. Conditional independence fails in all four, in different shapes, least in the untimed Raven’s. How speed and accuracy go together is a property of the task, not a constant of nature.</p>
-<p>So when would I model response time? When the question is about how people take the test: rapid guessing, speededness, whether a time limit changes what is measured, or unusual timing (<a href="https://doi.org/10.1007/s11336-007-9046-8">van der Linden &amp; Guo, 2008</a>). There the hierarchical model is a reasonable starting point, with the conditional accuracy function as the first check on it. I wouldn’t model response time to sharpen <span class="math inline">\(\theta\)</span>. The IRW’s <a href="https://itemresponsewarehouse.org/vignettes/rt_imv.html">response time and accuracy vignette</a> added log time, centred within items, to a Rasch model for 18 tables: the median gain in out-of-sample prediction (IMV) was 0.0054, positive in 78% of tables; with a flexible curve, 0.0091 (94%).</p>
+<p>Whether to model response time depends on the question. When it is about how people take the test (rapid guessing, speededness, whether a time limit changes what is measured, or unusual timing; <a href="https://doi.org/10.1007/s11336-007-9046-8">van der Linden &amp; Guo, 2008</a>), the hierarchical model is one starting point, with the conditional accuracy function as the first check on it. When it is whether times sharpen <span class="math inline">\(\theta\)</span>, held-out prediction answers it table by table. The IRW’s <a href="https://itemresponsewarehouse.org/vignettes/rt_imv.html">response time and accuracy vignette</a> added log time, centred within items, to a Rasch model for 18 tables: the median gain in out-of-sample prediction (IMV) was 0.0054, positive in 78% of tables; with a flexible curve, 0.0091 (94%).</p>
 <div class="callout callout-style-simple callout-tip no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -3143,7 +3143,7 @@ $untimed$caf$se
 </div>
 </div>
 <p>Run on 25 September 2026: 4 tables fitted, 0 failed. The correlation of ability and speed runs from -0.29 to 0.50; the linear IMV of log time from 0.0071 to 0.0199 (median 0.0127).</p>
-<p>The licensure row reproduces the lesson’s numbers. Its IMV (0.0199) is well above the median of 0.0054 in the IRW’s <a href="https://itemresponsewarehouse.org/vignettes/rt_imv.html">response time and accuracy vignette</a>, which reports the whole set and has 0.0188 for this table: the verdict is about the typical table, not every one.</p>
+<p>The licensure row reproduces the lesson’s numbers. Its IMV (0.0199) is well above the median of 0.0054 in the IRW’s <a href="https://itemresponsewarehouse.org/vignettes/rt_imv.html">response time and accuracy vignette</a>, which reports the whole set and has 0.0188 for this table: the median describes the typical table, not every one.</p>
 </section>
 <section id="going-further" class="level2">
 <h2 class="anchored" data-anchor-id="going-further">Going further</h2>

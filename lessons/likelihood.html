@@ -2733,7 +2733,7 @@ glm        -0.144   0.498</code></pre>
                 0.50                 0.83 </code></pre>
 </div>
 </div>
-<p>The slope rises from 0.50 to 0.83. In a linear regression, adding a predictor that is unrelated to <span class="math inline">\(x\)</span> leaves the slope on <span class="math inline">\(x\)</span> alone; in a logistic regression it doesn’t. The pooled slope answers a different question, the effect of Elo averaged over problems, and it understates how steeply success rises with skill on any particular problem. My rule, for this reason: never pool item responses into one logistic regression without giving the items their own intercepts. The items are not interchangeable, and the model should say so.</p>
+<p>The slope rises from 0.50 to 0.83. In a linear regression, adding a predictor that is unrelated to <span class="math inline">\(x\)</span> leaves the slope on <span class="math inline">\(x\)</span> alone; in a logistic regression it doesn’t. The pooled slope answers a different question, the effect of Elo averaged over problems, and it understates how steeply success rises with skill on any particular problem. A pooled regression treats the items as interchangeable; item intercepts drop that assumption. Which slope we want, the effect averaged over problems or the effect on a given problem, depends on the question being asked.</p>
 </section>
 <section id="items-differ-in-more-than-difficulty" class="level3">
 <h3 class="anchored" data-anchor-id="items-differ-in-more-than-difficulty">Items differ in more than difficulty</h3>

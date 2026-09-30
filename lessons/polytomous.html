@@ -2161,7 +2161,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <ul>
 <li><strong>Cumulative</strong> splits ask “is <span class="math inline">\(x\)</span> at least <span class="math inline">\(k\)</span>?” for each <span class="math inline">\(k\)</span>. The <strong>graded response model</strong> (GRM; <a href="https://doi.org/10.1007/BF03372160">Samejima, 1969</a>) gives each a 2PL with the item’s slope: <span class="math display">\[\Pr(x \ge k) = \frac{\exp\big(a(\theta - b_k)\big)}{1 + \exp\big(a(\theta - b_k)\big)}, \qquad \Pr(x = k) = \Pr(x \ge k) - \Pr(x \ge k + 1).\]</span> <span class="math inline">\(b_k\)</span> is the <span class="math inline">\(\theta\)</span> at which half of respondents reach category <span class="math inline">\(k\)</span> or above. The boundaries must be ordered, <span class="math inline">\(b_1 &lt; b_2 &lt; \dots\)</span>, or some probabilities would be negative.</li>
 <li><strong>Adjacent-category</strong> splits ask “is <span class="math inline">\(x\)</span> equal to <span class="math inline">\(k\)</span> rather than <span class="math inline">\(k-1\)</span>?”, among responses in one of the two. The <strong>generalized partial credit model</strong> (GPCM; <a href="https://doi.org/10.1177/014662169201600206">Muraki, 1992</a>) gives each a 2PL, <span class="math inline">\(\Pr(x = k \mid x \in \{k-1, k\}) = \text{logit}^{-1}\big(a(\theta - b_k)\big)\)</span>, which works out to <span class="math display">\[\Pr(x = k) \propto \exp\Big(\sum_{v=1}^{k} a(\theta - b_v)\Big).\]</span> <span class="math inline">\(b_k\)</span>, the <strong>step difficulty</strong>, is the <span class="math inline">\(\theta\)</span> at which categories <span class="math inline">\(k-1\)</span> and <span class="math inline">\(k\)</span> are equally likely. With <span class="math inline">\(a = 1\)</span> for every item this is the <strong>partial credit model</strong> (PCM; <a href="https://doi.org/10.1007/BF02296272">Masters, 1982</a>).</li>
-<li><strong>Sequential</strong> splits ask “having reached category <span class="math inline">\(k - 1\)</span>, does the respondent go on to <span class="math inline">\(k\)</span>?” The <strong>sequential model</strong> (<a href="https://doi.org/10.1111/j.2044-8317.1990.tb00925.x">Tutz, 1990</a>) gives each step a 2PL, <span class="math inline">\(\Pr(x \ge k \mid x \ge k-1) = \text{logit}^{-1}\big(a(\theta - b_k)\big)\)</span>, and the respondent stops at the first step failed. It suits a problem solved in stages.</li>
+<li><strong>Sequential</strong> splits ask “having reached category <span class="math inline">\(k - 1\)</span>, does the respondent go on to <span class="math inline">\(k\)</span>?” The <strong>sequential model</strong> (<a href="https://doi.org/10.1111/j.2044-8317.1990.tb00925.x">Tutz, 1990</a>) gives each step a 2PL, <span class="math inline">\(\Pr(x \ge k \mid x \ge k-1) = \text{logit}^{-1}\big(a(\theta - b_k)\big)\)</span>, and the respondent stops at the first step failed. Its steps assume a process in stages, as in a problem solved step by step.</li>
 </ul>
 <p>In <a href="https://doi.org/10.1007/BF02295596">Thissen and Steinberg’s (1986)</a> terms, the GRM is a <em>difference</em> model and the partial credit family <em>divide-by-total</em> models (the <span class="math inline">\(\propto\)</span> hides a division by the sum over categories).</p>
 <div class="callout callout-style-simple callout-tip no-icon">
@@ -2707,7 +2707,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>At the defaults the full item gives about 1 from <span class="math inline">\(\theta = -1\)</span> to 2 (1.04, 1.09, 1.04). Collapsed at <span class="math inline">\(x \ge 1\)</span> it keeps 1.00 at <span class="math inline">\(\theta = -1\)</span> and has 0.01 at <span class="math inline">\(\theta = 2\)</span>. Each cut does well near its own boundary only, and no cut beats the full item anywhere; the second Go deeper callout proves that merging categories can’t add information. <a href="https://doi.org/10.1037/1082-989X.7.1.19">MacCallum, Zhang, Preacher and Rucker (2002)</a> make the parallel case for continuous variables. Collapsing is a reasonable choice when a category is nearly empty, or when the only decision sits at one boundary.</p>
+<p>At the defaults the full item gives about 1 from <span class="math inline">\(\theta = -1\)</span> to 2 (1.04, 1.09, 1.04). Collapsed at <span class="math inline">\(x \ge 1\)</span> it keeps 1.00 at <span class="math inline">\(\theta = -1\)</span> and has 0.01 at <span class="math inline">\(\theta = 2\)</span>. Each cut does well near its own boundary only, and no cut beats the full item anywhere; the second Go deeper callout proves that merging categories can’t add information. <a href="https://doi.org/10.1037/1082-989X.7.1.19">MacCallum, Zhang, Preacher and Rucker (2002)</a> make the parallel case for continuous variables. In the case that a category is nearly empty, or the only decision sits at one boundary, collapsing may cost little for that purpose.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2745,7 +2745,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>The choice among these models is a small decision; the choice to keep the categories is a large one.</p>
+<p>In the data below, the choice among these models changes respondents’ scores little; the choice to keep the categories changes a great deal.</p>
 </section>
 </section>
 </section>
@@ -2993,7 +2993,7 @@ PAININ42 FALSE FALSE</code></pre>
 </div>
 </div>
 <p>Sufficiency, in data: under the PCM, equal sum scores get equal estimates (largest spread 0.00); under the GRM they spread by up to 0.91.</p>
-<p>So which model would I fit to these items? The PCM offers a sufficient sum score and asks for equal slopes in return. The GRM and GPCM let slopes vary, which these items need (2.71 to 5.17), and the GRM fits best by AIC and BIC. Yet all four give scores that correlate at 0.994 or above. I’d fit the GRM and report its scores, and not spend long choosing between it and the GPCM. I’d spend the time on the next question: what would we lose by not using the categories at all?</p>
+<p>So which model? The PCM offers a sufficient sum score and asks for equal slopes in return. The GRM and GPCM let slopes vary, and these items’ slopes vary (2.71 to 5.17); the GRM fits best by AIC and BIC. Yet all four give scores that correlate at 0.994 or above. AIC and BIC say which model is preferred, not by how much; held-out responses would put the gaps on one scale, and the scores’ agreement says how much is at stake for respondents. The larger question is what we would lose by not using the categories at all.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>

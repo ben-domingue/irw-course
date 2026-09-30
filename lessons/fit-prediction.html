@@ -2290,7 +2290,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>With 50 respondents, a fifth of the outfits fall outside 0.8–1.2 although the model is right; with 5,000, 1.08 sits several SDs out. Move the difficulty away from 0 and the spread grows (a strong respondent missing an easy item gives a huge <span class="math inline">\(z^2\)</span>), so <span class="math inline">\(\sqrt{2/n}\)</span> is only a rough anchor. A fixed band says little about chance in small samples, and a <span class="math inline">\(z\)</span> says little about size in large ones. I read both: the <span class="math inline">\(z\)</span> says whether a misfit could be chance, the size whether it is worth anyone’s time.</p>
+<p>With 50 respondents, a fifth of the outfits fall outside 0.8–1.2 although the model is right; with 5,000, 1.08 sits several SDs out. Move the difficulty away from 0 and the spread grows (a strong respondent missing an easy item gives a huge <span class="math inline">\(z^2\)</span>), so <span class="math inline">\(\sqrt{2/n}\)</span> is only a rough anchor. A fixed band says little about chance in small samples, and a <span class="math inline">\(z\)</span> says little about size in large ones. The two answer different questions: the <span class="math inline">\(z\)</span> says whether a misfit could be chance, the size whether it is large enough to matter for a given use.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2344,7 +2344,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p><strong>Andersen’s test</strong> splits respondents by sum score, estimates the difficulties by conditional ML within each group, and compares with one set of difficulties for everyone, with no assumption about how <span class="math inline">\(\theta\)</span> is distributed.</p>
-<p>Each asks whether the data are consistent with a model (or with the smaller of two) up to sampling error. For that question the tests are the right tool, and the criteria a reasonable way to choose among models in modest samples. But sampling error shrinks as <span class="math inline">\(n\)</span> grows while a model’s small departures from the data don’t, so with thousands of respondents every test rejects, and none says how much better the preferred model predicts.</p>
+<p>Each asks whether the data are consistent with a model (or with the smaller of two) up to sampling error. That is the question the tests are built for, and the criteria compare models on it in modest samples. But sampling error shrinks as <span class="math inline">\(n\)</span> grows while a model’s small departures from the data don’t, so with thousands of respondents every test rejects, and none says how much better the preferred model predicts.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2617,7 +2617,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>With the paper’s values the coins are 0.67 and 0.83 and the IMV is 0.24, as in the paper. Push the second enhanced prediction to 0.99 and the IMV falls: the one tail in those 20 tosses is now punished hard. Set both enhanced values to the baseline’s and the IMV is 0.</p>
-<p>The IMV always compares two sets of predictions (for an absolute statement, use a simple baseline such as item proportions). In-sample it favours the more complex model, so it is computed on held-out responses (<a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al., 2024, §2.1</a>). As an expected return on a fair bet, it compares across datasets, which makes it a reasonable choice whenever the question is <em>how much</em>. Benchmarks from simulations with 50 items and 1,000 respondents (<a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al., 2024, Table 1</a>): 0.1 for the Rasch model over item proportions, 0.01 for the 2PL over the Rasch model when slopes vary substantially (log slopes with SD 0.5), and 0.0005 for the 3PL over the 2PL even when a 3PL generated the data.</p>
+<p>The IMV always compares two sets of predictions (for an absolute statement, use a simple baseline such as item proportions). In-sample it favours the more complex model, so it is computed on held-out responses (<a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al., 2024, §2.1</a>). As an expected return on a fair bet, it compares across datasets, which suits it to the question <em>how much</em>. Benchmarks from simulations with 50 items and 1,000 respondents (<a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al., 2024, Table 1</a>): 0.1 for the Rasch model over item proportions, 0.01 for the 2PL over the Rasch model when slopes vary substantially (log slopes with SD 0.5), and 0.0005 for the 3PL over the 2PL even when a 3PL generated the data.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -3595,7 +3595,7 @@ item12  item4 item17  item9  item5 item11  item6  item3  item2
 </div>
 </div>
 <p>The 2PL’s IMV is 0.0088, smaller than in <code>gilbert_meta_2</code> despite the wider slopes: 0.0015 on items with fewer than 10% correct, 0.0154 on the rest. So “for which test does the 2PL help more?” depends on which responses we ask about. The IMV puts both gains on one scale, but no scale makes a test’s items less extreme.</p>
-<p>So which model would I fit to a test like <code>gilbert_meta_2</code>? The 2PL. The tests said the Rasch model misfits, which at this sample size they would say of almost any test. What decides it for me is that the 2PL’s out-of-sample gain, 0.012, is the size the benchmarks associate with substantial slope variation, while the 3PL’s shrank to almost nothing on new responses. I’d spend a parameter per item for a gain of 0.01; I wouldn’t for 0.0001.</p>
+<p>What does this say about <code>gilbert_meta_2</code>? The tests said the Rasch model misfits, which at this sample size they would say of almost any test. The held-out responses say more: the 2PL’s gain over the Rasch model, 0.012, is the size the benchmarks associate with substantial slope variation, while the 3PL’s gain over the 2PL, 0.0035 in-sample, shrank to 0.0001 on new responses. Whether a gain is worth a parameter per item depends on what the scores are for, but the comparison puts the two gains on one scale, more than a hundredfold apart, and a choice between the models can rest on it.</p>
 </section>
 </section>
 <section id="problems" class="level2">

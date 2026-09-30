@@ -2145,7 +2145,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>write the Rasch model as a mixed logistic regression and fit it with <code>glmer()</code>;</li>
 <li>say what distinguishes a descriptive model from an explanatory one, and fit the linear logistic test model (LLTM);</li>
 <li>explain why item features can account for most of the variation in difficulty and still be rejected by a likelihood-ratio test, and what an item residual does about it;</li>
-<li>decide whether items should be fixed or random effects, and read the variance between and within item families;</li>
+<li>say what treating items as fixed or random effects assumes, and read the variance between and within item families;</li>
 <li>add respondent covariates to the same model, and treat a trial’s context as a feature of the item.</li>
 </ul>
 </section>
@@ -2458,7 +2458,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </section>
 <section id="person-predictors" class="level3">
 <h3 class="anchored" data-anchor-id="person-predictors">Person predictors</h3>
-<p>Add a respondent covariate and the random intercept becomes a residual around a regression: <span class="math display">\[\theta_j = \sum_m \gamma_m z_{jm} + \delta_j, \qquad \delta_j \sim N(0, \sigma^2_\delta).\]</span> The <span class="math inline">\(\gamma_m\)</span> are differences in <span class="math inline">\(\theta\)</span>, estimated inside the measurement model rather than by scoring everyone and then regressing the scores, which carries each score’s error into the regression (a reasonable shortcut when scores are precise, as on a long test). This is <strong>latent regression</strong> (<a href="https://doi.org/10.1177/014662168701100106">Mislevy, 1987</a>; <a href="https://doi.org/10.1007/BF02294492">Zwinderman, 1991</a>); in <code>glmer</code>, <code>resp ~ 0 + item + grade + (1 | id)</code>.</p>
+<p>Add a respondent covariate and the random intercept becomes a residual around a regression: <span class="math display">\[\theta_j = \sum_m \gamma_m z_{jm} + \delta_j, \qquad \delta_j \sim N(0, \sigma^2_\delta).\]</span> The <span class="math inline">\(\gamma_m\)</span> are differences in <span class="math inline">\(\theta\)</span>, estimated inside the measurement model rather than by scoring everyone and then regressing the scores, which carries each score’s error into the regression (a cost that shrinks as scores become precise, as on a long test). This is <strong>latent regression</strong> (<a href="https://doi.org/10.1177/014662168701100106">Mislevy, 1987</a>; <a href="https://doi.org/10.1007/BF02294492">Zwinderman, 1991</a>); in <code>glmer</code>, <code>resp ~ 0 + item + grade + (1 | id)</code>.</p>
 </section>
 <section id="what-is-an-item-trials-and-local-dependence" class="level3">
 <h3 class="anchored" data-anchor-id="what-is-an-item-trials-and-local-dependence">What is an item? Trials and local dependence</h3>
@@ -2919,7 +2919,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>The residual SD is 0.34, against 1.37 for <span class="math inline">\(\theta\)</span>: items scatter around the design’s prediction by about a quarter of the spread of respondents. The feature effects barely move, and the AIC (8,164, with 7 parameters) falls between the LLTM’s and the Rasch model’s.</p>
-<p>So which would I fit? It turns on one assumption: that the features are all there is to an item, which holds only when items were generated from the features by rule. Otherwise I’d fit the LLTM with an item residual, not without it: real items always leave something over, and the residual SD says how much. The Rasch model describes these 24 items best; the LLTM with a residual says what makes them differ, and how far that account falls short.</p>
+<p>Which of the three to fit turns on one assumption: that the features are all there is to an item, which holds only when items were generated from the features by rule. Here it doesn’t (χ² = 159 on 19 df), and the residual SD, 0.34, says how much is left over. The Rasch model describes these 24 items best by AIC; the LLTM with a residual says what makes them differ, and how far that account falls short. How well each predicts held-out responses, including responses to items the model hasn’t seen, would say how much the features buy (<a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a>).</p>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">

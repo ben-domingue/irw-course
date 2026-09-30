@@ -2155,7 +2155,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>fit the model with <code>TAM</code>, read a Wright map with a rater column, and adjust scores for the raters a respondent drew;</li>
 <li>tell severity, centrality and halo apart, and say what data would show each;</li>
 <li>explain why the hierarchical rater model gives extra ratings of one response less credit than the many-facet model does;</li>
-<li>say when a rater is better treated as a fixed parameter, a random effect or a variance component.</li>
+<li>say what treating a rater as a fixed parameter, a random effect or a variance component assumes, and what each answers.</li>
 </ul>
 </section>
 <section id="core-ideas" class="level2">
@@ -2266,7 +2266,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>Should you adjust? That rests on three assumptions: the design is linked, severities differ by more than their standard errors, and a rater’s severity is the same for every respondent. When scores go to individuals, raters vary across respondents, and those assumptions hold, I adjust for severity and say in the report that I did. When every respondent had the same raters, I report the raw mean, since the adjustment can’t change the order.</p>
+<p>Should you adjust? That rests on three assumptions: the design is linked, severities differ by more than their standard errors, and a rater’s severity is the same for every respondent. In the case that scores go to individuals, raters vary across respondents, and those assumptions hold, the adjusted score estimates what an average rater would have given; the essays below come with an expert benchmark that lets us check how much closer it gets. When every respondent had the same raters, the adjustment can’t change the order, so for ranking the raw mean may be sufficient.</p>
 </section>
 </section>
 <section id="beyond-severity-centrality-and-halo" class="level3">
@@ -2439,7 +2439,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>The hierarchical model’s item response layer can be multidimensional (<a href="https://doi.org/10.1111/jedm.12225">Nieto &amp; Casabianca, 2019</a>) or longitudinal (<a href="https://doi.org/10.1080/00273171.2017.1342202">Casabianca, Junker, Nieto &amp; Bond, 2017</a>). The many-facet model is a reasonable choice when each response gets one rating, or when the raters are the object of study (monitoring a scoring session), since its parameters are simple to read and it fits in seconds.</p>
+<p>The hierarchical model’s item response layer can be multidimensional (<a href="https://doi.org/10.1111/jedm.12225">Nieto &amp; Casabianca, 2019</a>) or longitudinal (<a href="https://doi.org/10.1080/00273171.2017.1342202">Casabianca, Junker, Nieto &amp; Bond, 2017</a>). With one rating per response the two models agree (the widget above); with several, they rest on different assumptions about whether ratings of one response are independent given <span class="math inline">\(\theta\)</span>, and that is something the data can speak to, as in the cleverness ratings below. The many-facet model’s parameters are simple to read and it fits in seconds, which matters when the raters are the object of study (monitoring a scoring session).</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2524,7 +2524,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>A shared drift moves the dark line and leaves the spread alone. Raters’ own drift fans the lines out: at the starting values the SD across raters grows from 0.36 to 0.54, the pattern Casabianca et al.&nbsp;found, and a severity estimated on day 1 is out of date by day 30.</p>
-<p>Two design points follow. First, raters must stay linked over time. A <strong>linkage set</strong>, responses scored by most or all raters, helps: <a href="https://doi.org/10.1111/jedm.12360">Casabianca, Donoghue, Shin, Chao and Choi (2023)</a> found that a large one spanning the score scale improved connectedness, that two human ratings connected raters better than one human plus an automated engine, and that engine scores alone did not connect raters adequately. Second, with hundreds of raters rating a handful each, severities are better treated as <strong>random effects</strong>, shrunk toward the mean in proportion to how little each rater rated (<a href="https://doi.org/10.1007/s11336-008-9092-x">De Boeck, 2008</a>, does the same for items; fitted with <code>lme4</code>, <a href="https://doi.org/10.18637/jss.v067.i01">Bates, Mächler, Bolker &amp; Walker, 2015</a>). The random-effect variance is G theory’s <span class="math inline">\(\sigma^2_r\)</span> again. <a href="../lessons/explanatory-irt.html">What is an item?</a> develops random effects in item response models, and <a href="../lessons/ai-psychometrics.html">AI and psychometrics</a> treats an automated scoring engine as one more rater.</p>
+<p>Two design points follow. First, raters must stay linked over time. A <strong>linkage set</strong>, responses scored by most or all raters, helps: <a href="https://doi.org/10.1111/jedm.12360">Casabianca, Donoghue, Shin, Chao and Choi (2023)</a> found that a large one spanning the score scale improved connectedness, that two human ratings connected raters better than one human plus an automated engine, and that engine scores alone did not connect raters adequately. Second, with hundreds of raters rating a handful each, severities can be treated as <strong>random effects</strong>, which assumes raters come from a common distribution and shrinks each severity toward the mean in proportion to how little each rater rated (<a href="https://doi.org/10.1007/s11336-008-9092-x">De Boeck, 2008</a>, does the same for items; fitted with <code>lme4</code>, <a href="https://doi.org/10.18637/jss.v067.i01">Bates, Mächler, Bolker &amp; Walker, 2015</a>). The random-effect variance is G theory’s <span class="math inline">\(\sigma^2_r\)</span> again. <a href="../lessons/explanatory-irt.html">What is an item?</a> develops random effects in item response models, and <a href="../lessons/ai-psychometrics.html">AI and psychometrics</a> treats an automated scoring engine as one more rater.</p>
 </section>
 </section>
 </section>

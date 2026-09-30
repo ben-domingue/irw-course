@@ -2145,7 +2145,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>explain why two groups’ estimates sit on different scales, and derive how 2PL slopes and difficulties change with a group’s mean and SD of ability;</li>
 <li>explain why a group drawn from a narrow range of ability gives imprecise item estimates;</li>
 <li>explain why selecting respondents on the sum score of the same items distorts 2PL estimates, and why the Rasch model fitted by conditional maximum likelihood is not affected;</li>
-<li>check invariance in real data with <code>mirt</code>, and choose a split that tests it.</li>
+<li>check invariance in real data with <code>mirt</code>, and say what each way of splitting a sample assumes.</li>
 </ul>
 </section>
 <section id="core-ideas" class="level2">
@@ -2924,7 +2924,7 @@ low  -0.43  0.01  0.19 0.43 1.18</code></pre>
 </div>
 </div>
 <p>The conditional ML difficulties from the two halves correlate 0.963, and the likelihood-ratio statistic is 1,588 on 36 degrees of freedom, far beyond what the Rasch model allows. Which items move? The shift in each item’s difficulty between the halves correlates −0.98 with its 2PL slope in the full sample. Items that discriminate well look relatively easier to high scorers and harder to low scorers, which is what crossing curves do. Specific objectivity fails here in the way <a href="../lessons/1pl-to-4pl.html">From the 1PL to the 4PL</a> anticipated: the MRMET’s items differ in slope.</p>
-<p>So how would I split a sample to check invariance? The assumptions first. A 2PL fit in each group assumes the responses are independent given <span class="math inline">\(\theta\)</span> within the group; the Rasch model fitted by conditional ML needs that only given the sum score. A split on the sum score of the calibrated items keeps the second and breaks the first. My choice is random halves for a baseline, then a background variable (gender, age, country) or a score on other items. I wouldn’t split a 2PL calibration on the sum score of the items being calibrated. If the model is Rasch and the estimator is conditional ML, that split is Andersen’s test, and I’d use it.</p>
+<p>So which split checks invariance? The assumptions first. A 2PL fit in each group assumes the responses are independent given <span class="math inline">\(\theta\)</span> within the group; the Rasch model fitted by conditional ML needs that only given the sum score. A split on the sum score of the calibrated items keeps the second and breaks the first, which is why the MRMET’s 2PL slopes collapsed on that split and its Rasch difficulties did not. Random halves give a baseline for estimation error; a background variable (gender, age, country) or a score on other items tests invariance without selecting on the calibrated responses. If the model is Rasch and the estimator is conditional ML, the sum-score split is Andersen’s test.</p>
 </section>
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>

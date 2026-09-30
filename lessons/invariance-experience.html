@@ -2145,7 +2145,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>use randomization to read treatment DIF as caused by the treatment, and a pretest as a placebo check on the whole analysis;</li>
 <li>write down and fit the item-level heterogeneous treatment effects (IL-HTE) model with <code>lme4</code>, and interpret <span class="math inline">\(\sigma_\zeta\)</span> and <span class="math inline">\(\rho\)</span>;</li>
 <li>explain what item-level effects do to the precision and generalizability of an average effect, and how they can produce a treatment-by-pretest interaction that no respondent has;</li>
-<li>decide, for a given use of the scores, whether the items that move most are a threat or the signal.</li>
+<li>say, for a given use of the scores, what would make the items that move most a threat or the signal.</li>
 </ul>
 </section>
 <section id="core-ideas" class="level2">
@@ -3196,7 +3196,7 @@ ilhte             0.020      0.066</code></pre>
 </div>
 </div>
 <p>Does IL-HTE change the answer to “who gained most?” here? Barely: the treatment-by-baseline interaction is 0.024 logits with a constant effect for every item and 0.020 with IL-HTE, both well inside their standard errors. With a spread of 0.28 SD, against 0.70 in the fractions trial, and a moderate <span class="math inline">\(\rho\)</span>, there is little for the constant-effect model to misread.</p>
-<p>What should a trialist take from this? Two positions rest on different assumptions. If the outcome’s items <em>are</em> the target (the state test a program will be judged on), the average over these items is the estimand, and the sum score answers it. If the items stand for a domain (fractions, health knowledge), the effect on the domain is the estimand, and the spread of item effects is part of its uncertainty. My practice, when a trial’s outcome comes with item-level data, is to fit the IL-HTE model beside the sum-score analysis, report <span class="math inline">\(\sigma_\zeta\)</span> next to the average effect, and use the pretest as a placebo when there is one. In the fractions trial that means reporting an effect of about 1.1 SD together with the fact that items on the same test moved by amounts more than a standard deviation apart. An average effect is a claim about items as well as people.</p>
+<p>What should a trialist take from this? Two positions rest on different assumptions. If the outcome’s items <em>are</em> the target (the state test a program will be judged on), the average over these items is the estimand, and the sum score answers it. If the items stand for a domain (fractions, health knowledge), the effect on the domain is the estimand, and the spread of item effects is part of its uncertainty. Fitting the IL-HTE model beside the sum-score analysis shows what the data can support under each. In the fractions trial the three analyses agree on the average (1.08, 1.11 and 1.13 SD), the pretest placebo passes, and items on the same test moved by amounts more than a standard deviation apart. Whether item-specific effects are worth their parameters can also be put to held-out responses, with the IMV of <a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a>. An average effect is a claim about items as well as people.</p>
 </section>
 </section>
 <section id="problems" class="level2">

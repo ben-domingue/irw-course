@@ -2136,7 +2136,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 <section id="what-this-is-for" class="level2">
 <h2 class="anchored" data-anchor-id="what-this-is-for">What this is for</h2>
-<p>The Rasch model gives every item the same slope, and the chess data have already turned up an item that doesn’t go along: problem Y15, about as hard as Y29, whose success barely moves with skill. What happens when each item gets its own slope, and then its own floor and ceiling? This lesson builds that family, from the 1PL to the 4PL, asks what each new parameter costs and what the data can say about it, and fits all four to the Reading the Mind in the Eyes Test. For that test my choice is the 2PL, and most of the lesson is the case for it.</p>
+<p>The Rasch model gives every item the same slope, and the chess data have already turned up an item that doesn’t go along: problem Y15, about as hard as Y29, whose success barely moves with skill. What happens when each item gets its own slope, and then its own floor and ceiling? This lesson builds that family, from the 1PL to the 4PL, asks what each new parameter costs and what the data can say about it, and fits all four to the Reading the Mind in the Eyes Test. On that test the evidence here points to the 2PL, and most of the lesson is that evidence.</p>
 </section>
 <section id="goals" class="level2">
 <h2 class="anchored" data-anchor-id="goals">Goals</h2>
@@ -2145,7 +2145,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>write down the 4PL, say what <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, <span class="math inline">\(c\)</span> and <span class="math inline">\(u\)</span> do to a curve, and which constraints give the 3PL, 2PL and Rasch model;</li>
 <li>explain why the weighted score <span class="math inline">\(\sum_i a_i x_i\)</span> replaces the sum score under the 2PL, and why crossing curves give up specific objectivity;</li>
 <li>convert <code>mirt</code>’s intercept to a difficulty, and say how each model fixes the unit of the scale;</li>
-<li>explain why a lower asymptote is hard to estimate, and when a 3PL is a reasonable choice;</li>
+<li>explain why a lower asymptote is hard to estimate, and what data would let one be estimated;</li>
 <li>fit all four models with <code>mirt</code> and compare them by BIC and by what they say about respondents.</li>
 </ul>
 </section>
@@ -2592,7 +2592,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 <p>As the widget loads, mean ability is 1.5, so the item is easy for most respondents. The curves differ by at most about 0.01 where respondents are, parting only to the left, where almost nobody is. Slide the mean ability down to −2 and the largest difference grows eight-fold, to 0.08: now many respondents sit near the floor, and the floor matters.</p>
-<p><a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al.&nbsp;(2024)</a> looked at this through prediction. They simulated data from the 3PL and asked how much better a fitted 3PL predicted new responses than a fitted 2PL, using the IMV, a measure of predictive gain that <a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a> teaches. The average gain never exceeded 0.001, even with pronounced guessing in the generating model, and across 89 IRW datasets it averaged 0.00016. They connect this to the difficulty of identifying the 3PL’s parameters (<a href="https://doi.org/10.1080/15366360903070385">Maris &amp; Bechger, 2009</a>; <a href="https://doi.org/10.1002/j.2333-8504.2005.tb02001.x">Haberman, 2005</a>; <a href="https://doi.org/10.1080/15366360903117079">von Davier, 2009</a>), noting that 3PL estimates may still flag items with guessing problems. A 3PL is a reasonable choice when the items are multiple choice, when a good share of respondents sits near chance, when the sample is large, or when <span class="math inline">\(c\)</span> is fixed or given a prior, as in <a href="../lessons/guessing-priors.html">Guessing and priors</a>.</p>
+<p><a href="https://doi.org/10.1007/s11336-024-09977-2">Domingue et al.&nbsp;(2024)</a> looked at this through prediction. They simulated data from the 3PL and asked how much better a fitted 3PL predicted new responses than a fitted 2PL, using the IMV, a measure of predictive gain that <a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a> teaches. The average gain never exceeded 0.001, even with pronounced guessing in the generating model, and across 89 IRW datasets it averaged 0.00016. They connect this to the difficulty of identifying the 3PL’s parameters (<a href="https://doi.org/10.1080/15366360903070385">Maris &amp; Bechger, 2009</a>; <a href="https://doi.org/10.1002/j.2333-8504.2005.tb02001.x">Haberman, 2005</a>; <a href="https://doi.org/10.1080/15366360903117079">von Davier, 2009</a>), noting that 3PL estimates may still flag items with guessing problems. The data have more to say about <span class="math inline">\(c\)</span> when the items are multiple choice and a good share of respondents sits near chance, when the sample is large, or when <span class="math inline">\(c\)</span> is fixed or given a prior, as in <a href="../lessons/guessing-priors.html">Guessing and priors</a>; whether the 3PL then predicts held-out responses better is a comparison the data can make.</p>
 </section>
 </section>
 <section id="the-upper-asymptote-ceilings-and-slips" class="level3">
@@ -2655,21 +2655,21 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">41</td>
-<td style="text-align: left;">item_20</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">guilty</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">41</td>
 <td style="text-align: left;">item_28</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">affectionate</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: right;">41</td>
 <td style="text-align: left;">item_8</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">despondent</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">41</td>
+<td style="text-align: left;">item_25</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">interested</td>
 </tr>
 </tbody>
 </table>
@@ -2869,7 +2869,7 @@ Rasch 1.000 0.983 0.982 0.972
 </div>
 </div>
 <p>The four models’ abilities correlate from 0.972 to 0.999, and the three with free slopes at 0.987 or above. The choice matters little for ranking respondents, more for what we say about items.</p>
-<p>So which model would I fit to a test like the RMET? The 2PL. The slopes differ six-fold, BIC prefers it to the Rasch model by 855 points, the lower asymptote can’t be estimated from a sample with almost no one near chance, and the richer models’ abilities correlate with the 2PL’s at 0.987 or above. If the RMET were being revised, the Rasch tradition’s question (which items to rewrite so that one slope fits them all) would be a fair one; for the test as it stands, the 2PL describes it.</p>
+<p>What does the evidence say about the RMET? The slopes differ six-fold, BIC prefers the 2PL to the Rasch model by 855 points, the lower asymptote can’t be estimated from a sample with almost no one near chance, and the richer models’ abilities correlate with the 2PL’s at 0.987 or above. On this evidence the 2PL describes the test as it stands; how much better it predicts held-out responses is the comparison <a href="../lessons/fit-prediction.html">Model fit and out-of-sample prediction</a> makes. If the RMET were being revised, the Rasch tradition’s question (which items to rewrite so that one slope fits them all) would be a fair one.</p>
 <section id="chess-again" class="level3">
 <h3 class="anchored" data-anchor-id="chess-again">Chess, again</h3>
 <div class="callout callout-style-simple callout-tip no-icon">

@@ -2146,7 +2146,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <li>estimate variance components for a persons × tasks × raters design with <code>lme4</code>, and say which ones are error for which decision;</li>
 <li>compute relative and absolute G coefficients, and show that the one-facet relative coefficient is alpha;</li>
 <li>use a D study to decide whether to add tasks or raters;</li>
-<li>compute consistency and agreement intraclass correlations, and say when each is the one to report.</li>
+<li>compute consistency and agreement intraclass correlations, and say what each counts as error.</li>
 </ul>
 </section>
 <section id="core-ideas" class="level2">
@@ -2276,7 +2276,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>The coefficients agree when raters and tasks don’t differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). The interrater section takes up which to report.</p>
+<p>The coefficients agree when raters and tasks don’t differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). The interrater section takes up which design each one describes.</p>
 <div class="cell">
 <details class="code-fold hidden">
 <summary>Code</summary>
@@ -2479,7 +2479,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 </div>
 </div>
-<p>Which should you report? If every respondent has the same raters and only the order matters, severity cancels. If scores are compared with a fixed standard, or respondents have different raters (each essay its own teachers, a nested design), a harsh rater lowers some scores and not others, and rater variance is error even for ranking (<a href="https://doi.org/10.1007/978-1-4757-3456-0">Brennan, 2001</a>). In the case that raters vary across respondents or a cut is involved, the absolute coefficient, <span class="math inline">\(\Phi\)</span> or the agreement ICC, may be the one to report; for a fully crossed design whose scores are used only to rank, the consistency coefficient may be sufficient for some purposes.</p>
+<p>Which coefficient describes the scores depends on the design and the use. If every respondent has the same raters and only the order matters, severity cancels. If scores are compared with a fixed standard, or respondents have different raters (each essay its own teachers, a nested design), a harsh rater lowers some scores and not others, and rater variance is error even for ranking (<a href="https://doi.org/10.1007/978-1-4757-3456-0">Brennan, 2001</a>). In the case that raters vary across respondents or a cut is involved, the absolute coefficient, <span class="math inline">\(\Phi\)</span> or the agreement ICC, may be the one to report; for a fully crossed design whose scores are used only to rank, the consistency coefficient may be sufficient for some purposes.</p>
 </section>
 </section>
 </section>
@@ -2703,7 +2703,7 @@ ML   0.0000 0.0163</code></pre>
 </div>
 </div>
 </div>
-<p>The design as run, 3 tasks and 5 raters, has a relative G coefficient of 0.71. One rater gives 0.56, but one rater with 6 tasks gives 0.68: 6 ratings per respondent instead of 15, for nearly the same coefficient. No number of raters takes 3 tasks past 0.77, the ceiling set by person × task. For this construct and these raters, the money goes on tasks. The absolute coefficient equals the relative one to two decimals (0.71), since the task and rater components are small.</p>
+<p>The design as run, 3 tasks and 5 raters, has a relative G coefficient of 0.71. One rater gives 0.56, but one rater with 6 tasks gives 0.68: 6 ratings per respondent instead of 15, for nearly the same coefficient. No number of raters takes 3 tasks past 0.77, the ceiling set by person × task. For this construct and these raters, adding tasks buys more than adding raters. The absolute coefficient equals the relative one to two decimals (0.71), since the task and rater components are small.</p>
 <p>If the tasks are fixed instead, as in the interrater coefficient of <a href="https://doi.org/10.1007/978-1-4757-3456-0">Brennan (2001)</a>, person × task joins the universe score:</p>
 <div class="cell">
 <details open="" class="code-fold">
