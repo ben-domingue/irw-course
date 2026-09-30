@@ -39,7 +39,7 @@ By the end of this lesson you should be able to:
 - use randomization to read treatment DIF as caused by the treatment, and a pretest as a placebo check on the whole analysis;
 - write down and fit the item-level heterogeneous treatment effects (IL-HTE) model with `lme4`, and interpret $\sigma_\zeta$ and $\rho$;
 - explain what item-level effects do to the precision and generalizability of an average effect, and how they can produce a treatment-by-pretest interaction that no respondent has;
-- decide, for a given use of the scores, whether the items that move most are a threat or the signal.
+- say, for a given use of the scores, what would make the items that move most a threat or the signal.
 
 ## Core ideas
 
@@ -364,7 +364,7 @@ The average effect is 0.48 SD and $\sigma_\zeta$ is 0.28 SD ($p$ = 0.00019), a m
 
 Does IL-HTE change the answer to "who gained most?" here? Barely: the treatment-by-baseline interaction is 0.024 logits with a constant effect for every item and 0.020 with IL-HTE, both well inside their standard errors. With a spread of 0.28 SD, against 0.70 in the fractions trial, and a moderate $\rho$, there is little for the constant-effect model to misread.
 
-What should a trialist take from this? Two positions rest on different assumptions. If the outcome's items *are* the target (the state test a program will be judged on), the average over these items is the estimand, and the sum score answers it. If the items stand for a domain (fractions, health knowledge), the effect on the domain is the estimand, and the spread of item effects is part of its uncertainty. My practice, when a trial's outcome comes with item-level data, is to fit the IL-HTE model beside the sum-score analysis, report $\sigma_\zeta$ next to the average effect, and use the pretest as a placebo when there is one. In the fractions trial that means reporting an effect of about 1.1 SD together with the fact that items on the same test moved by amounts more than a standard deviation apart. An average effect is a claim about items as well as people.
+What should a trialist take from this? Two positions rest on different assumptions. If the outcome's items *are* the target (the state test a program will be judged on), the average over these items is the estimand, and the sum score answers it. If the items stand for a domain (fractions, health knowledge), the effect on the domain is the estimand, and the spread of item effects is part of its uncertainty. Fitting the IL-HTE model beside the sum-score analysis shows what the data can support under each. In the fractions trial the three analyses agree on the average (1.08, 1.11 and 1.13 SD), the pretest placebo passes, and items on the same test moved by amounts more than a standard deviation apart. Whether item-specific effects are worth their parameters can also be put to held-out responses, with the IMV of [Model fit and out-of-sample prediction](fit-prediction.qmd). An average effect is a claim about items as well as people.
 
 ## Problems
 

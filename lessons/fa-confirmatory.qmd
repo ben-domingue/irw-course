@@ -41,7 +41,7 @@ By the end of this lesson you should be able to:
 - read χ², CFI, TLI, RMSEA and SRMR, say what each responds to, and compare nested models;
 - compute omega and omega hierarchical, and say when omega equals alpha;
 - convert an ordinal factor loading and threshold into a slope and a difficulty, and check the conversion against `mirt`;
-- choose an estimator (ML, MLR or WLSMV) and a treatment of missing responses from what the data look like.
+- say what each estimator (ML, MLR, WLSMV) and each treatment of missing responses assumes, and what in the data bears on those assumptions.
 
 ## Core ideas
 
@@ -81,7 +81,7 @@ quiz({
 
 Every fit index compares the covariance matrix the model implies with the one the data supply. The likelihood-ratio **χ²** tests exact fit: it is $N - 1$ times the discrepancy, so a large sample rejects any model that is slightly wrong, and every model is. The other indices ask how wrong. **RMSEA** is the misfit per degree of freedom ([Steiger, 1990](https://doi.org/10.1207/s15327906mbr2502_4)). **CFI** ([Bentler, 1990](https://doi.org/10.1037/0033-2909.107.2.238)) and **TLI** ([Tucker & Lewis, 1973](https://doi.org/10.1007/BF02291170)) compare the model's misfit with that of a baseline in which the items are uncorrelated. **SRMR** is the root mean square residual correlation.
 
-[Hu and Bentler (1999)](https://doi.org/10.1080/10705519909540118) found, in simulations of maximum-likelihood estimation, that cutoffs near 0.95 for CFI and TLI, 0.06 for RMSEA and 0.08 for SRMR were needed to call a fit good. [Marsh, Hau and Wen (2004)](https://doi.org/10.1207/s15328007sem1103_2) argue against reading them as fixed rules, and with ordinal estimators the same indices tell a different story ([Xia & Yang, 2019](https://doi.org/10.3758/s13428-018-1055-2)). They describe how far off a model is; the residuals show where.
+[Hu and Bentler (1999)](https://doi.org/10.1080/10705519909540118) proposed, from simulations of maximum-likelihood estimation, cutoffs near 0.95 for CFI and TLI, 0.06 for RMSEA and 0.08 for SRMR for calling a fit good. [Marsh, Hau and Wen (2004)](https://doi.org/10.1207/s15328007sem1103_2) argue against reading them as fixed rules, and with ordinal estimators the same indices tell a different story ([Xia & Yang, 2019](https://doi.org/10.3758/s13428-018-1055-2)). They describe how far off a model is; the residuals show where.
 
 #### Try it: what misfit does to fit indices
 
@@ -257,9 +257,9 @@ Which estimator should a fit use? That depends on the categories and how they ar
 
 `lavaan` drops incomplete respondents by default; with ML or MLR, `missing = "ml"` gives **full-information ML** (FIML), which uses every observed response. With responses missing at random ([Rubin, 1976](https://doi.org/10.1093/biomet/63.3.581)), FIML was unbiased and more efficient than listwise or pairwise deletion in the simulations of [Enders and Bandalos (2001)](https://doi.org/10.1207/S15328007SEM0803_5). WLSMV has no FIML in `lavaan`; for ordered items, the full-information route is the same model as a graded response model in `mirt` ([Bock & Aitkin, 1981](https://doi.org/10.1007/BF02293801)).
 
-When do they part ways? In simulations by [Rhemtulla, Brosseau-Liard and Savalei (2012)](https://doi.org/10.1037/a0029315), the categorical estimator recovered loadings and standard errors better, especially with fewer than five categories, and robust ML did as well on factor correlations and fit; ML was the more sensitive to asymmetric thresholds, the categorical estimator to small samples and non-normal latent responses. With two or three categories, WLSMV's χ² held its nominal rejection rate better ([Beauducel & Herzberg, 2006](https://doi.org/10.1207/s15328007sem1302_2)). [Li (2016)](https://doi.org/10.3758/s13428-015-0619-7) found WLSMV's loadings less biased almost everywhere, but MLR's standard errors better in small samples with non-normal latent responses. As a guide:
+When do they part ways? In simulations by [Rhemtulla, Brosseau-Liard and Savalei (2012)](https://doi.org/10.1037/a0029315), the categorical estimator recovered loadings and standard errors better, especially with fewer than five categories, and robust ML did as well on factor correlations and fit; ML was the more sensitive to asymmetric thresholds, the categorical estimator to small samples and non-normal latent responses. With two or three categories, WLSMV's χ² held its nominal rejection rate better ([Beauducel & Herzberg, 2006](https://doi.org/10.1207/s15328007sem1302_2)). [Li (2016)](https://doi.org/10.3758/s13428-015-0619-7) found WLSMV's loadings less biased almost everywhere, but MLR's standard errors better in small samples with non-normal latent responses. Summarized, with the caveat that each study speaks only for the conditions it simulated:
 
-| The responses | A reasonable first choice | In `lavaan` |
+| The responses | Where the simulations leaned | In `lavaan` |
 |---|---|---|
 | Continuous, roughly normal | ML | the default |
 | Continuous but skewed, or five or more categories used fairly evenly | MLR | `estimator = "MLR"` |
@@ -267,16 +267,16 @@ When do they part ways? In simulations by [Rhemtulla, Brosseau-Liard and Savalei
 | Some responses missing | FIML with ML or MLR; with WLSMV, pairwise deletion or the graded model in `mirt` | `missing = "ml"` or `"pairwise"` |
 | A few hundred respondents or fewer | MLR with five or more categories; else WLSMV, checked against MLR | |
 
-The target matters too: omega is about the sum of the scored responses, so it needs a model of those responses even when the structure is fitted to polychorics. Fit a second reasonable estimator as a check; where two defensible choices disagree, the choice matters for these data.
+The target matters too: omega is about the sum of the scored responses, so it needs a model of those responses even when the structure is fitted to polychorics. A second defensible estimator is a check on the first: where the two disagree, the choice matters for these data.
 
 ```{ojs}
 //| echo: false
 quiz({
-  q: "A three-category scale is answered by 800 respondents. Most choose the lowest category, and 5% of the responses are missing completely at random. Which fit is the reasonable first choice?",
+  q: "A three-category scale is answered by 800 respondents. Most choose the lowest category, and 5% of the responses are missing completely at random. Which statement about the options is right?",
   options: [
-    {text: "ML on the complete cases", correct: false, why: "ML treats three piled-up categories as normal numbers, which is where it was most sensitive in the simulations, and listwise deletion throws away every respondent with a single gap."},
-    {text: "MLR with full-information ML", correct: false, why: "FIML handles the missing responses well, but the items are still treated as numbers. With three categories piled at one end, the categorical estimator recovered loadings better."},
-    {text: "WLSMV (items declared ordered) with pairwise deletion, or the graded model in mirt", correct: true, why: "Fewer than five categories and asymmetric thresholds point to the categorical model. With data missing completely at random, pairwise deletion is a reasonable companion; the graded model in mirt uses every response."}
+    {text: "ML on the complete cases makes no assumption these data could strain", correct: false, why: "ML treats three piled-up categories as normal numbers, which is where it was most sensitive in the simulations, and listwise deletion throws away every respondent with a single gap."},
+    {text: "MLR with full-information ML uses every response, but still treats the three categories as numbers", correct: true, why: "FIML handles the missing responses, and MLR's standard errors are robust to non-normality, but the loadings come from treating the categories as numbers. With three categories piled at one end, the categorical estimator recovered loadings better in the simulations; fitting both shows whether that matters here."},
+    {text: "WLSMV (items declared ordered) makes no distributional assumption", correct: false, why: "It assumes normal latent responses behind the categories, and in lavaan it has no FIML: with data missing completely at random, pairwise deletion is a reasonable companion, and the graded model in mirt uses every response."}
   ]
 })
 ```
@@ -376,7 +376,7 @@ Our contrast table is [neurodegenerative_huizinga_2019_dass](https://itemrespons
 #| code-fold: show
 ```
 
-Which estimator this time? The 215 respondents without DASS responses skipped all 21 items and the rest answered all 21, so FIML has nothing to recover: we keep 1,246 complete cases. Four categories, most responses 0, only 181 of 26,166 at 3, every item skewed right (skewness 1.24 to 3.38): by the guide, WLSMV, except for omega (MLR).
+Which estimator this time? The 215 respondents without DASS responses skipped all 21 items and the rest answered all 21, so FIML has nothing to recover: we keep 1,246 complete cases. Four categories, most responses 0, only 181 of 26,166 at 3, every item skewed right (skewness 1.24 to 3.38): the conditions where the simulations leaned toward WLSMV. We use it, except for omega (MLR).
 
 ```{ojs}
 //| echo: false

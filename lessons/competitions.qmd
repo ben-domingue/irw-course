@@ -186,7 +186,7 @@ Plot.plot({
 
 At 0.4 the schedule is a balanced round robin, and win percentage orders the teams correctly. Push the slider up: the Bears, weakest of the strong division, lose more; the Wolves, best of the weak division, win more. From about 0.6 the Wolves have the better record, and at 0.9 they win 61% of their games to the Bears' 39%. The Bradley-Terry estimates recover the true strengths at every setting, because the model knows whom each team played.
 
-Win percentage is a reasonable summary when the schedule is balanced, and it needs no model; in the simulation below it does as well as Bradley-Terry on a near-random schedule. Bradley-Terry earns its keep when the schedule is lopsided, as in leagues with divisions or a comparative-judgment study where some essays meet only weak ones.
+Win percentage assumes, in effect, that every agent faced the same opponents. When the schedule is balanced that holds, and it needs no model; in the simulation below it does as well as Bradley-Terry on a near-random schedule. When the schedule is lopsided, as in leagues with divisions or a comparative-judgment study where some essays meet only weak ones, the assumption fails and the adjustment is what separates the two.
 
 ```{ojs}
 //| echo: false
@@ -358,7 +358,7 @@ predict({
 
 The step size was chosen on the training seasons only: $K = 0.1$ logits (about 17 FIDE points) predicted the 2013-14 to 2016-17 games best. On 2017-18, Elo's mean log likelihood is −0.622 per game, against −0.658 for Bradley-Terry on 2016-17 alone, −0.681 for the constant and −0.697 for the pooled fit. Elo's edge over the pooled fit is 0.075 per game (standard error 0.010). The last line says why: the pooled strengths correlate only 0.33 with the strengths 2017-18 alone produces. [Glickman & Jones (2025)](https://doi.org/10.1146/annurev-statistics-040722-061813) analyse NBA outcomes with dynamic models in more depth.
 
-Where does that leave the choice? When the data span a period over which agents plausibly change, a rating that forgets, such as Elo with $K$ chosen by prediction, may be sufficient for some purposes where a pooled fit is not. Over a short, fixed window, such as one tournament or one survey, the Bradley-Terry fit, with its standard errors and explicit terms for home advantage or order, may be the more useful summary. The first question to ask of the data is whether strength stayed put.
+Where does that leave the choice? It turns on whether strength stayed put over the period the data cover, and held-out games answer that directly: over these six seasons, a rating that forgets predicted 2017-18 better than the pooled fit, by 0.075 per game. Over a short, fixed window, such as one tournament or one survey, the same comparison may come out the other way, and the Bradley-Terry fit brings standard errors and explicit terms for home advantage or order. Fitting on the past and scoring predictions of what came next is a comparison you can run on any competition table, and its result is a sound basis for choosing.
 
 ### One hundred risks
 

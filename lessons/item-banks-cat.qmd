@@ -430,7 +430,7 @@ if (!is.null(cat600)) {
 
 Students below $\theta = -1$ need 12.6 items on average; between 1 and 2 they need 75.8, with 22% at the cap, and all 20 above 2 stop at 100 items with a posterior SD of 0.37. [Choi et al. (2025)](https://doi.org/10.3352/jeehp.2025.22.29) saw the same in their live CAT, where students at the extremes reached its 50-item maximum, and they call for more hard items. The post-hoc CAT finds this before anyone is tested. (Their bank pooled six sittings whose IRW tables share no items; how those were put on one scale is a question for [Linking and equating](equating.qmd).)
 
-So how should a CAT stop? That rests on two assumptions: whether scores must be compared at equal precision, and whether everyone must get the same testing time. When scores go to individuals who act on them, I stop on a target standard error with a cap on length, and I set both from a post-hoc CAT on real responses, as here: it shows where the bank runs out before any respondent does. For this bank, new hard items would buy more than a higher cap.
+What does the choice of stopping rule rest on? Two assumptions: whether scores must be compared at equal precision, and whether everyone must get the same testing time. A target standard error with a cap takes the first and gives up the second; a fixed length does the reverse. A post-hoc CAT on real responses, as here, shows what each rule costs for a given bank, and where the bank runs out before any respondent does. For this bank, the students above $\theta = 2$ reach the 100-item cap with a posterior SD of 0.37, which says that new hard items would buy more than a higher cap.
 
 ### PROMIS depression: a bank built for symptoms
 

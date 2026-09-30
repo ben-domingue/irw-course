@@ -114,7 +114,7 @@ quiz({
 
 What form should the response take? In a **selected-response** item the respondent picks from a list: multiple-choice options, or the steps of a Likert scale from "strongly disagree" to "strongly agree". In a **constructed-response** item the respondent produces the answer: a typed number (the number-series items in [Constructs and construct maps](constructs.qmd)), a short answer, an essay.
 
-Every model in this course needs each response to fall in exactly one of a fixed set of categories, usually ordered. A selected response arrives that way; a constructed response has to be put there by **scoring**, with a key or with a rubric and a rater. Scoring is where constructed responses get expensive, and the rater is a new source of error; [Many sources of error](g-theory.qmd) treats raters as a facet of measurement. Selected response is a reasonable choice when recognition or judgment reaches the construct and many items are needed cheaply. Constructed response is a reasonable choice when producing the answer is the construct: writing, explaining a proof, carrying out a procedure.
+Every model in this course needs each response to fall in exactly one of a fixed set of categories, usually ordered. A selected response arrives that way; a constructed response has to be put there by **scoring**, with a key or with a rubric and a rater. Scoring is where constructed responses get expensive, and the rater is a new source of error; [Many sources of error](g-theory.qmd) treats raters as a facet of measurement. Selected response assumes that recognizing or judging among options reaches the construct, and in return it gives many items cheaply. Constructed response doesn't need that assumption, which matters when producing the answer is the construct: writing, explaining a proof, carrying out a procedure.
 
 ### Writing items
 
@@ -161,11 +161,11 @@ Each fault puts something between the respondent and the construct, and none nee
 ```{ojs}
 //| echo: false
 quiz({
-  q: "A job-satisfaction scale includes \"My manager is supportive and I am paid fairly.\" In the pilot its item-rest correlation is 0.55, in line with the others. Keep it as is?",
+  q: "A job-satisfaction scale includes \"My manager is supportive and I am paid fairly.\" In the pilot its item-rest correlation is 0.55, in line with the others. What does the 0.55 tell you?",
   options: [
-    {text: "No: split it into two items, even though the statistics look fine", correct: true, why: "The item is double-barrelled. A respondent with a supportive manager and low pay can't answer it cleanly, and the score can't say which half they were answering. Good statistics don't repair the item's meaning."},
-    {text: "Yes: an item-rest correlation of 0.55 shows the item works", correct: false, why: "It shows the item goes along with the total. Support and pay are both parts of job satisfaction, so the item correlates with the rest whichever half a respondent answers."},
-    {text: "Drop it: double-barrelled items always have low item-rest correlations", correct: false, why: "They needn't. This one doesn't, which is why the fault has to be caught by reading the item."}
+    {text: "That the item goes along with the total, not which half a respondent was answering", correct: true, why: "The item is double-barrelled. A respondent with a supportive manager and low pay can't answer it cleanly, and the score can't say which half they were answering. The statistic says nothing about that; reading the item does."},
+    {text: "That the item works, so its wording doesn't matter", correct: false, why: "It shows the item goes along with the total. Support and pay are both parts of job satisfaction, so the item correlates with the rest whichever half a respondent answers."},
+    {text: "Nothing: double-barrelled items always have low item-rest correlations, so this one must be fine", correct: false, why: "They needn't have low correlations. This one doesn't, which is why the fault has to be caught by reading the item."}
   ]
 })
 ```
@@ -254,7 +254,7 @@ quiz({
 })
 ```
 
-Should a scale include reversed items, then? Including them assumes acquiescence is a large enough source of variance, for this population and format, to guard against; the first widget shows its cost. Treating them as plain opposites of the forward items assumes respondents read them that way; the second widget shows what happens when they don't. [Suárez-Álvarez et al. (2018)](https://doi.org/10.7334/psicothema2018.33), giving a self-efficacy test in forward, reversed and mixed forms, found lower reliability and extra variance in the mixed form. [Weijters and Baumgartner (2012)](https://doi.org/10.1509/jmr.11.0368) review both sides, distinguish items reversed in meaning from items reversed by a negation, and recommend using reversed items with care. My own practice is this: I include reversed items when acquiescence is a real risk, as with agree–disagree formats and respondents who may answer quickly; I write them as opposites in meaning ("I am often bored") rather than negations ("I am not often interested"); and I plan the analysis expecting a wording factor rather than hoping it away.
+Should a scale include reversed items, then? Including them assumes acquiescence is a large enough source of variance, for this population and format, to guard against; the first widget shows its cost. Treating them as plain opposites of the forward items assumes respondents read them that way; the second widget shows what happens when they don't. [Suárez-Álvarez et al. (2018)](https://doi.org/10.7334/psicothema2018.33), giving a self-efficacy test in forward, reversed and mixed forms, found lower reliability and extra variance in the mixed form. [Weijters and Baumgartner (2012)](https://doi.org/10.1509/jmr.11.0368) review both sides, distinguish items reversed in meaning from items reversed by a negation, and recommend using reversed items with care. The choice turns on how large a risk acquiescence is (larger with agree–disagree formats and respondents who may answer quickly), on whether the reversals are opposites in meaning ("I am often bored") or negations ("I am not often interested"), and on whether the analysis plans for a wording factor or assumes there is none; the RSES below shows what that last assumption can miss.
 
 ### The pilot, and reading the items
 

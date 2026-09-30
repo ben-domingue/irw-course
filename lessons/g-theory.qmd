@@ -33,7 +33,7 @@ By the end of this lesson you should be able to:
 - estimate variance components for a persons × tasks × raters design with `lme4`, and say which ones are error for which decision;
 - compute relative and absolute G coefficients, and show that the one-facet relative coefficient is alpha;
 - use a D study to decide whether to add tasks or raters;
-- compute consistency and agreement intraclass correlations, and say when each is the one to report.
+- compute consistency and agreement intraclass correlations, and say what each counts as error.
 
 ## Core ideas
 
@@ -124,7 +124,7 @@ Plot.plot({
 md`Averaged over ${wn.nt} task${wn.nt > 1 ? "s" : ""} and ${wn.nr} rater${wn.nr > 1 ? "s" : ""}: relative error **${cb.g.rel.toFixed(3)}**, absolute error **${cb.g.abs.toFixed(3)}**; Eρ² **${cb.g.erho2.toFixed(2)}**, Φ **${cb.g.phi.toFixed(2)}**.`
 ```
 
-The coefficients agree when raters and tasks don't differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). The interrater section takes up which to report.
+The coefficients agree when raters and tasks don't differ in harshness or difficulty (cleverness: 0.71 and 0.71) and part when they do (essays, one teacher: 0.47 and 0.40). The interrater section takes up which design each one describes.
 
 ```{ojs}
 //| echo: false
@@ -252,7 +252,7 @@ quiz({
 })
 ```
 
-Which should you report? If every respondent has the same raters and only the order matters, severity cancels. If scores are compared with a fixed standard, or respondents have different raters (each essay its own teachers, a nested design), a harsh rater lowers some scores and not others, and rater variance is error even for ranking ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). In the case that raters vary across respondents or a cut is involved, the absolute coefficient, $\Phi$ or the agreement ICC, may be the one to report; for a fully crossed design whose scores are used only to rank, the consistency coefficient may be sufficient for some purposes.
+Which coefficient describes the scores depends on the design and the use. If every respondent has the same raters and only the order matters, severity cancels. If scores are compared with a fixed standard, or respondents have different raters (each essay its own teachers, a nested design), a harsh rater lowers some scores and not others, and rater variance is error even for ranking ([Brennan, 2001](https://doi.org/10.1007/978-1-4757-3456-0)). In the case that raters vary across respondents or a cut is involved, the absolute coefficient, $\Phi$ or the agreement ICC, may be the one to report; for a fully crossed design whose scores are used only to rank, the consistency coefficient may be sufficient for some purposes.
 
 ## Simulate
 
@@ -326,7 +326,7 @@ predict({
 #| fig-height: 4.5
 ```
 
-The design as run, 3 tasks and 5 raters, has a relative G coefficient of 0.71. One rater gives 0.56, but one rater with 6 tasks gives 0.68: 6 ratings per respondent instead of 15, for nearly the same coefficient. No number of raters takes 3 tasks past 0.77, the ceiling set by person × task. For this construct and these raters, the money goes on tasks. The absolute coefficient equals the relative one to two decimals (0.71), since the task and rater components are small.
+The design as run, 3 tasks and 5 raters, has a relative G coefficient of 0.71. One rater gives 0.56, but one rater with 6 tasks gives 0.68: 6 ratings per respondent instead of 15, for nearly the same coefficient. No number of raters takes 3 tasks past 0.77, the ceiling set by person × task. For this construct and these raters, adding tasks buys more than adding raters. The absolute coefficient equals the relative one to two decimals (0.71), since the task and rater components are small.
 
 If the tasks are fixed instead, as in the interrater coefficient of [Brennan (2001)](https://doi.org/10.1007/978-1-4757-3456-0), person × task joins the universe score:
 

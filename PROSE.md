@@ -62,8 +62,8 @@ existing rules on data ("Gentle about the data") and on other researchers' model
 CTT as a whole.
 
 - **Allowed:** "The Kaiser rule keeps more factors than the simulation built in", shown
-  with the widget. "I report alpha, but I wouldn't make a decision on it alone" (a
-  first-person verdict on the practitioner's choice, PROTOCOL §6 rule A). Stating a
+  with the widget. "In the case that a decision rests on the score, alpha alone may not be
+  sufficient" (a judgement on the practitioner's choice, not a rule; PROTOCOL §6 rule A). Stating a
   limitation plainly, with its evidence.
 - **Not allowed:** evaluative adjectives about a method (*flawed, naive, crude,
   outdated, obsolete, useless, misguided, strange, dangerous, bad*); "should never";
@@ -112,11 +112,12 @@ group, which sits badly with rule 3 and with PROTOCOL §2.
 **Rule.** Where the field disagrees (Rasch vs. 2PL, alpha vs. omega, how many factors),
 set out what each side assumes and let the data answer the question the lesson can
 answer. Don't name sides by who holds them, and don't narrate the dispute's history
-for its own sake. The lesson's own verdict (PROTOCOL §6 rule A) comes after the
-assumptions are on the table.
+for its own sake. The lesson's own judgement (PROTOCOL §6 rule A) comes after the
+assumptions are on the table, and names the evidence that would decide rather than a
+rule.
 
-**Screen.** Read every first-person verdict and check that the assumptions it rests
-on are stated before it.
+**Screen.** Read every judgement and check that the assumptions it rests on are
+stated before it, and that it doesn't read as a rule.
 
 ---
 

@@ -32,7 +32,7 @@ By the end of this lesson you should be able to:
 - write the Rasch model as a mixed logistic regression and fit it with `glmer()`;
 - say what distinguishes a descriptive model from an explanatory one, and fit the linear logistic test model (LLTM);
 - explain why item features can account for most of the variation in difficulty and still be rejected by a likelihood-ratio test, and what an item residual does about it;
-- decide whether items should be fixed or random effects, and read the variance between and within item families;
+- say what treating items as fixed or random effects assumes, and read the variance between and within item families;
 - add respondent covariates to the same model, and treat a trial's context as a feature of the item.
 
 ## Core ideas
@@ -225,7 +225,7 @@ quiz({
 
 Add a respondent covariate and the random intercept becomes a residual around a regression:
 $$\theta_j = \sum_m \gamma_m z_{jm} + \delta_j, \qquad \delta_j \sim N(0, \sigma^2_\delta).$$
-The $\gamma_m$ are differences in $\theta$, estimated inside the measurement model rather than by scoring everyone and then regressing the scores, which carries each score's error into the regression (a reasonable shortcut when scores are precise, as on a long test). This is **latent regression** ([Mislevy, 1987](https://doi.org/10.1177/014662168701100106); [Zwinderman, 1991](https://doi.org/10.1007/BF02294492)); in `glmer`, `resp ~ 0 + item + grade + (1 | id)`.
+The $\gamma_m$ are differences in $\theta$, estimated inside the measurement model rather than by scoring everyone and then regressing the scores, which carries each score's error into the regression (a cost that shrinks as scores become precise, as on a long test). This is **latent regression** ([Mislevy, 1987](https://doi.org/10.1177/014662168701100106); [Zwinderman, 1991](https://doi.org/10.1007/BF02294492)); in `glmer`, `resp ~ 0 + item + grade + (1 | id)`.
 
 ### What is an item? Trials and local dependence
 
@@ -377,7 +377,7 @@ predict({
 
 The residual SD is 0.34, against 1.37 for $\theta$: items scatter around the design's prediction by about a quarter of the spread of respondents. The feature effects barely move, and the AIC (8,164, with 7 parameters) falls between the LLTM's and the Rasch model's.
 
-So which would I fit? It turns on one assumption: that the features are all there is to an item, which holds only when items were generated from the features by rule. Otherwise I'd fit the LLTM with an item residual, not without it: real items always leave something over, and the residual SD says how much. The Rasch model describes these 24 items best; the LLTM with a residual says what makes them differ, and how far that account falls short.
+Which of the three to fit turns on one assumption: that the features are all there is to an item, which holds only when items were generated from the features by rule. Here it doesn't (χ² = 159 on 19 df), and the residual SD, 0.34, says how much is left over. The Rasch model describes these 24 items best by AIC; the LLTM with a residual says what makes them differ, and how far that account falls short. How well each predicts held-out responses, including responses to items the model hasn't seen, would say how much the features buy ([Model fit and out-of-sample prediction](fit-prediction.qmd)).
 
 ::: {.callout-note collapse="true"}
 ## Wanting, doing and inhibition: an interaction

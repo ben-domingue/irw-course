@@ -281,7 +281,7 @@ Held-out responses are the other route: a real class should predict them. Two pr
 **Recall** from [What is a construct?](constructs.qmd): ordered latent classes close together look very much like a continuum cut into pieces.
 :::
 
-The converse holds too. A skewed continuum, or an item model wrong for everyone, can be fitted better by two classes than one, and the classes then describe the model's shortfall, not kinds of people ([Bauer & Curran, 2003](https://doi.org/10.1037/1082-989X.8.3.338); [Lubke & Muthén, 2005](https://doi.org/10.1037/1082-989X.10.1.21)). So a class needs outside evidence before it gets a name.
+The converse holds too. A skewed continuum, or an item model wrong for everyone, can be fitted better by two classes than one, and the classes then describe the model's shortfall, not kinds of people ([Bauer & Curran, 2003](https://doi.org/10.1037/1082-989X.8.3.338); [Lubke & Muthén, 2005](https://doi.org/10.1037/1082-989X.10.1.21)). So naming a class assumes more than the fit shows, and outside evidence is what backs the name.
 
 ```{ojs}
 //| echo: false
@@ -412,7 +412,7 @@ Our last table is [test_taking_much_2025_mr](https://itemresponsewarehouse.org/t
 
 Of 1,243 respondents, 231 got every item wrong. From responses alone, the second class is simply the zero scorers (226, with a success rate of 0.000). Adding times moves 81 slow zero scorers to the engaged class and 14 fast non-zero scorers out: 164 respondents are disengaged ($\hat\pi$ = 0.87), at a median of 17 seconds per item against 37. A quarter of that class reported not understanding the task, partly or at all, against 7% of the rest; the attention checks barely separate them (13% of those passing all three are in the class, 15% of those passing two).
 
-So what should an analyst do with a class? The assumptions are on the table: the classes are kinds of respondent, not a continuum the model gets wrong; the cuts and $K$ were fixed before the substantive analysis; outside evidence agrees. In the case that a survey is balanced, or a test has a known chance rate, a two-class mixture fitted beside the one-class model may be sufficient for some purposes as a first look at inattentive responding. Where a score feeds a decision about a person, as in a campus screening, a high posterior may serve better as a reason to follow up than to delete. A class is a hypothesis about how someone answered, not a verdict on who they are.
+So what does a class license? The assumptions are on the table: the classes are kinds of respondent, not a continuum the model gets wrong; the cuts and $K$ were fixed before the substantive analysis; outside evidence agrees. The two kinds of evidence answer different questions. Held-out responses say whether a class predicts: on the Kay data two classes gained 0.17 over the Rasch model, but the 2PL gained 0.16 on its own and the mixture only 0.0088 more, so comparing the mixture with its rivals, not only with one class, is what tells you how much the class adds. The platform, the nonsense items and the times say what the class is. Where a score feeds a decision about a person, as in a campus screening, a high posterior is a probability about how someone answered, and a class is a hypothesis about that, not a verdict on who they are.
 
 ## Problems
 

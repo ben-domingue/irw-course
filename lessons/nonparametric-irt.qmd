@@ -38,7 +38,7 @@ By the end of this lesson you should be able to:
 - compute Loevinger's $H$ from Guttman errors, and read item and scale $H$;
 - check monotonicity in rest-score groups, and say why the rest score is used;
 - explain invariant item ordering and its link to crossing curves and specific objectivity;
-- draw a kernel-smoothed item curve, choose a bandwidth, and compare it with a logistic curve;
+- draw a kernel-smoothed item curve, say what the bandwidth trades off, and compare it with a logistic curve;
 - say which claims about a scale a Mokken analysis in `mokken` supports.
 
 ## Core ideas
@@ -124,7 +124,7 @@ quiz({
 
 ### Building scales from the bottom up: automated item selection
 
-Which items in a pool form a scale? Mokken's **automated item selection procedure** (AISP) starts with the most scalable pair, adds items while every $H_i$ stays above the bound $c$, and starts a second scale from the leftovers ([Mokken, 1971](https://doi.org/10.1515/9783110813203); [van der Ark, 2012](https://doi.org/10.18637/jss.v048.i05)). Raising $c$ splits scales into smaller ones; a genetic algorithm that searches whole partitions sometimes does better than adding one item at a time ([Straat, van der Ark & Sijtsma, 2013](https://doi.org/10.1007/s00357-013-9122-y)). AISP is a reasonable first look at a pool whose structure isn't known ([Sijtsma & van der Ark, 2017](https://doi.org/10.1111/bmsp.12078)): it groups items and says nothing about why they belong together.
+Which items in a pool form a scale? Mokken's **automated item selection procedure** (AISP) starts with the most scalable pair, adds items while every $H_i$ stays above the bound $c$, and starts a second scale from the leftovers ([Mokken, 1971](https://doi.org/10.1515/9783110813203); [van der Ark, 2012](https://doi.org/10.18637/jss.v048.i05)). Raising $c$ splits scales into smaller ones; a genetic algorithm that searches whole partitions sometimes does better than adding one item at a time ([Straat, van der Ark & Sijtsma, 2013](https://doi.org/10.1007/s00357-013-9122-y)). [Sijtsma and van der Ark (2017)](https://doi.org/10.1111/bmsp.12078) describe AISP as a first look at a pool whose structure isn't known: it groups items and says nothing about why they belong together.
 
 ### Checking monotonicity in rest-score groups
 
@@ -287,7 +287,7 @@ md`Bandwidth **${ks_h.toFixed(2)}** (the default for 1,000 respondents is 1.06 Ã
 
 With the default bandwidth the kernel curve rises to about 0.8 and falls back to about 0.2 (a little below the true peak, since the rank-based abilities are noisy), while the logistic fit, which can only rise or fall, draws a gentle line through it. Shrink $h$ toward 0.05 and the curve turns jagged; push it past 1 and the peak flattens, as each point averages over respondents far away. Switch to the logistic item and the kernel and the logistic fit nearly coincide. A kernel curve is a check on a parametric curve, not a replacement for one: where the two agree, the parametric model's extra assumptions cost little; where they part, the kernel shows how ([Douglas & Cohen, 2001](https://doi.org/10.1177/01466210122032046)).
 
-Where does this leave us? The models differ in what they assume about each curve: that it rises (MHM); that it rises and crosses no other (double monotonicity); that it has a particular shape (Rasch, 2PL). In the case that the claim is only that the sum score orders respondents, a Mokken scale (every $H_i$ of at least 0.3 and no significant monotonicity violations) may be sufficient for some purposes, and it asks less of the data than a parametric model. A parametric model earns its place when items are compared across forms or groups, or when precision at a point on the scale matters. A claim that the items come in a fixed order is a third claim, and it needs its own check.
+Where does this leave us? The models differ in what they assume about each curve: that it rises (MHM); that it rises and crosses no other (double monotonicity); that it has a particular shape (Rasch, 2PL). Each claim about a scale leans on a different one. That the sum score orders respondents leans only on the MHM, which $H$ and the rest-score checks test while asking little of the data. That the items come in a fixed order leans on double monotonicity, and needs its own check. Comparing items across forms or groups, or stating precision at a point on the scale, leans on a parametric curve: the kernel curves show where that curve departs from the data, and held-out responses show how much its extra structure buys in prediction ([Model fit and out-of-sample prediction](fit-prediction.qmd)).
 
 ## Simulate
 

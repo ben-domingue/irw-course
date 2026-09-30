@@ -368,7 +368,7 @@ The effect is 0.05 SD, and the curves cross near the top: at 9 correct, the trea
 
 About 4.2% of treated children scored 9 or 10, against 4.7% of control children. Making the step from 8 to 9 correct worth 21 ordinary steps ($M = 20$) puts the control group ahead; the vocabulary test needed about 38,000. The smooth rescalings never reverse this effect (it stays between 0.012 and 0.052), because none puts its weight on that one step. The crossing, a difference of 0.005 with a standard error of 0.007, is well within sampling noise, and so is the effect itself.
 
-Both effects are positive on the sum score, but they are not equally robust. So what should you report? My rule: whenever I report a group difference on a test score, I check dominance first. If one group sits above the other everywhere (up to noise), I report the sign with confidence and the size as one member of a family. If the curves cross, I say that the sign depends on the scale's spacing and give the shares at or above the scores that matter. Only an argument for the unit earns more.
+Both effects are positive on the sum score, but they are not equally robust. What does each license? When one group sits above the other everywhere (up to noise), as on the vocabulary test, the sign of the difference doesn't depend on the scale's spacing, and the size is one member of a family. When the curves cross, as on the Raven's items, the sign itself depends on the spacing, and the shares at or above the scores that matter say what the data can. Only an argument for the unit earns more.
 
 ## Problems
 
