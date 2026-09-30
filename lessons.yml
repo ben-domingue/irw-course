@@ -477,6 +477,7 @@ lessons:
     reuses: [credentialform_lnirt]
     status: draft
     tranche: extension
+    thanks: [Sébastien Béland]
 
   - id: missing-responses
     title: "Missing responses: omitted, not reached, and ignorable"
