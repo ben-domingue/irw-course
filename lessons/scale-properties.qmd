@@ -474,7 +474,7 @@ Finally, a comparison that needs almost no unit. Four of the studies randomized 
 
 ISI's effect on the gain is 0.06 fall SDs on $\theta$, between 0.04 and 0.07 for $k$ from −1 to 0.5, 0.02 at $k = 1$ and −0.004 at $k = 1.5$ (a unit at +2 SDs worth about 400 at −2 SDs). The sign holds over a far wider range than the comparison of quarters did. (These standard errors ignore clustering; the sign is the point.)
 
-So what would I report from these data? That the ISI arms gained more, by an amount that depends somewhat on the scale; and that children who started lower gained more, as a hypothesis whose sign turns on the spacing of a scale the Rasch model describes only partly. In general I report what survives every rescaling with confidence, I treat $\theta$ from a Rasch model that fits and passes the cancellation checks as the best interval scale we have, and I treat comparisons of gains across distant parts of any scale as hypotheses, not findings. A scale earns its unit one fit at a time.
+What do these data support? That the ISI arms gained more, by an amount that depends somewhat on the scale; and that children who started lower gained more, as a hypothesis whose sign turns on the spacing of a scale the Rasch model describes only partly. The same line runs through any such analysis: what survives every rescaling needs no assumption about the unit, while a comparison of gains across distant parts of a scale rests on that assumption, and so on the evidence for it from fit and the cancellation checks. A scale earns its unit one fit at a time.
 
 ## Problems
 

@@ -45,7 +45,7 @@ Where does that desideratum live? In the argument for a use. The *Standards* cal
 
 Is validity, then, a property of the test or of what we do with its scores? The answer rests on an assumption. If the attribute exists and differences in it produce differences in responses, validity can be read as a fact about the test, whatever the scores are used for; [Borsboom, Mellenbergh and van Heerden (2004)](https://doi.org/10.1037/0033-295X.111.4.1061) develop that view, and [Validity as causation](validity-causal.qmd) takes it up. If instead what we can check is always a claim made with the scores, for particular respondents and a particular purpose, then evidence for one use need not carry over to another. The *Standards* take the second view, and advise against speaking of a test's validity without saying which interpretation and use are meant (p. 11).
 
-Whichever view you hold about what validity is, I don't describe a measure as "validated". I say which interpretation, for which use and which respondents, the evidence supports. The label travels further than the evidence: a scale studied in one population for one purpose is soon used in another, and "validated" doesn't say whether the evidence came along.
+Whichever view you hold about what validity is, calling a measure "validated" leaves out which interpretation, for which use and which respondents, the evidence supports. The label travels further than the evidence: a scale studied in one population for one purpose is soon used in another, and "validated" doesn't say whether the evidence came along.
 
 ```{ojs}
 //| echo: false

@@ -132,7 +132,7 @@ nc_at = t => catProbsTree(nc_th(t), nc_b)
 md`P(x = 3) at content θ = −2, 0 and 2: **${[-2, 0, 2].map(t => nc_at(t)[2].toFixed(2)).join(", ")}**. P(x = 1 or 5) at the same points: **${[-2, 0, 2].map(t => (nc_at(t)[0] + nc_at(t)[4]).toFixed(2)).join(", ")}**.${nc_mode === "One θ for all nodes" ? " (The side and extreme sliders are ignored: every node uses the content θ.)" : ""}`
 ```
 
-With a $\theta$ per node, the curve for 3 is flat (0.23 at the defaults): choosing the middle depends only on the side node. Lower that $\theta$ and the curve rises everywhere; raise the extreme node's and the 1s and 5s take over from the 2s and 4s. Now tie the nodes together: the respondents lowest on the trait choose 3 most (0.69 at $\theta = -2$), because the $\theta$ that pushes them toward disagreeing also keeps them from taking a side. A shared $\theta$ suits a linear tree, whose steps all move up the scale; in a nested tree it forces different questions onto one dimension.
+With a $\theta$ per node, the curve for 3 is flat (0.23 at the defaults): choosing the middle depends only on the side node. Lower that $\theta$ and the curve rises everywhere; raise the extreme node's and the 1s and 5s take over from the 2s and 4s. Now tie the nodes together: the respondents lowest on the trait choose 3 most (0.69 at $\theta = -2$), because the $\theta$ that pushes them toward disagreeing also keeps them from taking a side. A shared $\theta$ assumes every node moves along one scale, as a linear tree's steps do; in a nested tree it forces different questions onto one dimension.
 
 ```{ojs}
 //| echo: false
@@ -374,7 +374,7 @@ Can the tree's AIC be compared with the graded response model's? Only when both 
 
 The per-node tree's log likelihood is $-41{,}263$ from `glmer` and $-41{,}144$ from `mirt`: 119 apart from the approximation alone. Within `mirt`, that tree beats the GRM (AIC 82,361 against 83,242, with 36 parameters against 50), and the tree with one $\theta$ falls far behind both (85,699). The tree wins because it has style dimensions the GRM lacks (problem 3 gives a rival the same advantage).
 
-So when would I fit a tree? The case rests on an assumption about the response process: that choosing the middle, a side and the end are separate decisions. When I have such a process in mind (midpoint avoidance, extreme responding, speed, skipping), I'd fit the tree, because it gives the process a parameter and estimates the content net of it. As a general replacement for the graded response model, with one $\theta$, I wouldn't: here it is the worst of the three. 
+What does the choice rest on? An assumption about the response process: that choosing the middle, a side and the end are separate decisions. When such a process is in view (midpoint avoidance, extreme responding, speed, skipping), the tree gives it a parameter and estimates the content net of it; the one-$\theta$ tree, which drops that, was the worst of the three here. AIC says which model is preferred, not how much better each predicts. Comparing the trees and their rivals on held-out responses with the IMV ([Model fit and out-of-sample prediction](fit-prediction.qmd)) puts that on a common scale, and it is a comparison you can run for any set of trees on any rating scale.
 
 ### Extraversion and fast responses
 

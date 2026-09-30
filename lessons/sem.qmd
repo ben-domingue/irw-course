@@ -61,7 +61,7 @@ Our model has four factors: two facets of grit (perseverance of effort, consiste
 
 With one predictor, the standardized regression slope is the correlation, so it shrinks by the same factor. Error in the outcome and error in the predictor act differently on the unstandardized slope, though: error in $Y$ adds noise around the line without tilting it, while error in $X$ flattens it by the factor $\rho_{XX'}$ (problem 1).
 
-With two correlated predictors the damage is no longer a simple shrinkage. Controlling for a predictor measured with error controls for it only in part, so what is left of it leaks into the other predictor's coefficient ([Cole & Preacher, 2014](https://doi.org/10.1037/a0033805); [Westfall & Yarkoni, 2016](https://doi.org/10.1371/journal.pone.0152719)). An SEM avoids both problems when its model holds: the paths run between the factors, which carry no measurement error, and the correction for attenuation is built into the model rather than applied by hand. A regression on sum scores remains a reasonable choice when the scores are highly reliable, or when the score itself, not the construct, is what will be used, as with a cut score.
+With two correlated predictors the damage is no longer a simple shrinkage. Controlling for a predictor measured with error controls for it only in part, so what is left of it leaks into the other predictor's coefficient ([Cole & Preacher, 2014](https://doi.org/10.1037/a0033805); [Westfall & Yarkoni, 2016](https://doi.org/10.1371/journal.pone.0152719)). An SEM avoids both problems when its model holds: the paths run between the factors, which carry no measurement error, and the correction for attenuation is built into the model rather than applied by hand. A regression on sum scores rests on different assumptions: that the scores are reliable enough for the shrinkage and the leak to be small, or that the score itself, not the construct, is what will be used, as with a cut score.
 
 #### Try it: two predictors, measured with error
 
@@ -201,15 +201,15 @@ quiz({
 
 A global fit index compares the whole implied covariance matrix with the data. In an SEM most of that matrix is the measurement model: in ours, 32 items supply 528 variances and covariances, and the structural claims concern at most six factor correlations. Misfit among the items can swamp the structure, and a structural part with few degrees of freedom of its own can be wrong without the global indices showing it. [Anderson and Gerbing (1988)](https://doi.org/10.1037/0033-2909.103.3.411) proposed two steps: fit the measurement model alone, with every factor correlated, and settle it; then fit the structural model and test its constraints against the measurement model. The cutoffs of [Hu and Bentler (1999)](https://doi.org/10.1080/10705519909540118) come from simulations of factor models, and a structural model inherits whatever misfit its measurement model carries.
 
-Fitting everything in one step gives the same estimates. It is a reasonable choice when the measurement model is well established in similar samples; what it can't do is say which part a misfit belongs to.
+Fitting everything in one step gives the same estimates. In the case that the measurement model is well established in similar samples, one step may be sufficient for some purposes; what it can't do is say which part a misfit belongs to.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [Factor analysis II](fa-confirmatory.qmd): fit indices say how far off a model is, and the residuals and modification indices show where. [Zhang et al. (2026)](https://doi.org/10.1080/00273171.2026.2645212) add prediction on held-out respondents, measured by the IMV, as a complement to fit for CFA with binary items.
 :::
 
-So which comes first? I fit and inspect the measurement model before I read a single structural path. A path between factors that the items don't measure well is an estimate of something, but not of the relation the diagram names, and the structural fit indices won't say so.
+Fitting and inspecting the measurement model first says how well the items measure each factor before any structural path is read. A path between factors that the items don't measure well is an estimate of something, but not of the relation the diagram names, and the structural fit indices won't say so.
 
-**Factors or composites?** Everything here models a construct as a common factor, the source of what its items share. Composite-based SEM (partial least squares, consistent PLS, generalized structured component analysis) models a construct as a weighted sum of its items instead. It is a different model with different assumptions, and a reasonable choice when a construct is defined by its indicators, as an index of socioeconomic status is. In R it is fitted by `cSEM` ([Rademaker & Schuberth, 2020](https://doi.org/10.32614/cran.package.csem); on the model, [Schuberth, Henseler & Dijkstra, 2018](https://doi.org/10.3389/fpsyg.2018.02541)), and in jamovi by the [Composite-SEM module](https://github.com/AbdullahAlarfaj101/Composite-SEM), a small project without a licence file as of September 2026. For point-and-click factor-based SEM, jamovi's [SEMLj](https://semlj.github.io/) module builds `lavaan` models from menus.
+**Factors or composites?** Everything here models a construct as a common factor, the source of what its items share. Composite-based SEM (partial least squares, consistent PLS, generalized structured component analysis) models a construct as a weighted sum of its items instead. It is a different model with different assumptions, closer to a construct that is defined by its indicators, as an index of socioeconomic status is. In R it is fitted by `cSEM` ([Rademaker & Schuberth, 2020](https://doi.org/10.32614/cran.package.csem); on the model, [Schuberth, Henseler & Dijkstra, 2018](https://doi.org/10.3389/fpsyg.2018.02541)), and in jamovi by the [Composite-SEM module](https://github.com/AbdullahAlarfaj101/Composite-SEM), a small project without a licence file as of September 2026. For point-and-click factor-based SEM, jamovi's [SEMLj](https://semlj.github.io/) module builds `lavaan` models from menus.
 
 ### What a path can't tell you
 
@@ -303,7 +303,7 @@ Twins share a family, and the IRW ids come in pairs (31700 and 31701), so we tak
 #| code-fold: show
 ```
 
-The fit is modest: CFI 0.842, short of the 0.95 that [Hu and Bentler (1999)](https://doi.org/10.1080/10705519909540118) found was needed, while RMSEA (0.059) and SRMR (0.064) are inside their cutoffs. The other loadings run from 0.42 to 0.76; consistency items 3 and 11 load 0.35 and 0.16.
+The fit is modest: CFI 0.842, short of the 0.95 cutoff that [Hu and Bentler (1999)](https://doi.org/10.1080/10705519909540118) suggested, while RMSEA (0.059) and SRMR (0.064) are inside their cutoffs. The other loadings run from 0.42 to 0.76; consistency items 3 and 11 load 0.35 and 0.16.
 
 ```{r misfit}
 #| echo: true

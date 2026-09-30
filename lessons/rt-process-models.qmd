@@ -27,7 +27,7 @@ By the end of this lesson you should be able to:
 - predict what a harder stimulus and a speed instruction do, and estimate the parameters with EZ-diffusion;
 - derive the 2PL from the diffusion model and say what discrimination means as a process;
 - explain why errors can be slower than correct responses, and why that has to be checked within a condition;
-- say when a diffusion model, or a race model, suits the data in hand.
+- say what a diffusion model, or a race model, assumes about the data in hand.
 
 ## Core ideas
 
@@ -132,7 +132,7 @@ md`Accuracy **${sa.point.p.toFixed(3)}**, mean response time **${sa.point.rt.toF
 
 Lower α and the dot slides down the blue curve, toward faster and less accurate responses. Lower the drift and it slides down the orange curve, toward slower *and* less accurate ones. The two leave different marks on time and accuracy together, which is how a model tells them apart.
 
-The closed forms can be run backwards. **EZ-diffusion** ([Wagenmakers, van der Maas & Grasman, 2007](https://doi.org/10.3758/BF03194023)) takes three numbers from a set of trials (the proportion correct and the mean and variance of the correct response times) and returns $v$, $\alpha$ and $T_{er}$ in closed form. It assumes the simple model (an unbiased start, no variability across trials) and ignores the error times. [Ratcliff (2008)](https://doi.org/10.3758/PBR.15.6.1218) shows that it is sensitive to outlying times and can mislead when its assumptions don't hold, and suggests it for exploration rather than final estimates. EZ is a reasonable choice for a first look at many respondents with many trials each, and it is a few lines of base R; full fits are in *Going further*.
+The closed forms can be run backwards. **EZ-diffusion** ([Wagenmakers, van der Maas & Grasman, 2007](https://doi.org/10.3758/BF03194023)) takes three numbers from a set of trials (the proportion correct and the mean and variance of the correct response times) and returns $v$, $\alpha$ and $T_{er}$ in closed form. It assumes the simple model (an unbiased start, no variability across trials) and ignores the error times. [Ratcliff (2008)](https://doi.org/10.3758/PBR.15.6.1218) shows that it is sensitive to outlying times and can mislead when its assumptions don't hold, and suggests it for exploration rather than final estimates. Where the simple model roughly holds and there are many respondents with many trials each, EZ gives a first look in a few lines of base R; full fits are in *Going further*.
 
 ::: {.callout-note collapse="true"}
 ## Go deeper: the EZ equations
@@ -231,7 +231,7 @@ With $v = \theta_j - b_i$ this is a 2PL with slope $\alpha/s^2$ ([Tuerlinckx & D
 
 The simple model predicts no gap within a condition, as the first widget showed. Data can have one (the motion task below does), and [Ratcliff and Rouder (1998)](https://doi.org/10.1111/1467-9280.00067) account for it with variability *across* trials. If the drift varies from trial to trial (SD $\eta$), errors come mostly from trials whose drift happened to be low, and those trials are slow however they end: errors are slower. If the starting point varies, errors come mostly from trials that began near the wrong boundary, and those end quickly: errors are faster ([Ratcliff & McKoon, 2008](https://doi.org/10.1162/neco.2008.12-06-420)).
 
-The pooled `rr98_accuracy` gap is the same mechanism one level up, with conditions of different difficulty playing the part of trials with different drift. So before reading slow errors as drift variability, compare error and correct times *within* a condition, and within a respondent.
+The pooled `rr98_accuracy` gap is the same mechanism one level up, with conditions of different difficulty playing the part of trials with different drift. So slow errors say something about drift variability only once error and correct times are compared *within* a condition, and within a respondent.
 
 #### Try it: variability across trials
 
@@ -394,7 +394,7 @@ Nothing in the EZ equations refuses seconds:
 
 The numbers come out, but not with the model's meaning. The median non-decision time is 12.8 s, and it is negative, which is impossible, for 6.7% of respondents; five respondents at exactly half right get no estimate at all. On 95% of items errors are slower than correct responses, by a median 19 s. A 54-second item is not one accumulation of evidence toward two boundaries but reading, working and choosing among several options. The failure is in the model's assumptions for these items, not in the data.
 
-So when would I reach for a diffusion model? When each response is a single fast decision between two options and each respondent gives many trials, as in lexical decision, motion and brightness judgements. There it separates what accuracy alone mixes, ability and caution, and in the lexical data the mixing is substantial (ability and boundary correlate 0.50). For test items that take most of a minute I wouldn't: the licensure exam gives parameters with no process to belong to. A model of the decision needs data made of decisions.
+What does the diffusion model need, then? It assumes each response is a single fast decision between two options, and EZ that each respondent gives many trials, as in lexical decision, motion and brightness judgements. Where that holds it separates what accuracy alone mixes, ability and caution, and in the lexical data the mixing is substantial (ability and boundary correlate 0.50). On items that take most of a minute the assumption fails, and the licensure exam gives parameters with no process to belong to. A model of the decision needs data made of decisions.
 
 ## Problems
 

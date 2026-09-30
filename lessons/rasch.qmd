@@ -244,7 +244,7 @@ Inputs.table(suf_same.map(d => ({pattern: d.pattern, "MLE of θ": Number.isFinit
 
 Under the Rasch model the column is constant. Switch to the 2PL and it no longer is: getting a highly discriminating item right now counts for more. The relationship between sum scores and Rasch abilities is one-to-one but not linear. On these five items the step from 3 to 4 correct moves the estimate from 0.50 to 1.67, and 5 of 5 has no finite estimate at all.
 
-So which should you report, the sum score or $\hat\theta$? If the Rasch model fits and everyone took the same items, I'd report the sum score. It carries everything the model knows about the respondent, it orders people exactly as $\hat\theta$ does, and nobody needs it explained. $\hat\theta$ earns its keep when respondents take different items, as in [Linking and equating](equating.qmd): there the sum scores are no longer comparable and $\theta$ is.
+So which to report, the sum score or $\hat\theta$? It rests on two assumptions. In the case that the Rasch model fits and everyone took the same items, the sum score carries everything the model knows about the respondent, it orders people exactly as $\hat\theta$ does, and nobody needs it explained, so it may be sufficient for many purposes. When respondents take different items, as in [Linking and equating](equating.qmd), the sum scores are no longer comparable and $\theta$ is. Whether the Rasch model fits well enough is itself something the data can answer, by setting it against its rivals on held-out responses ([Model fit and out-of-sample prediction](fit-prediction.qmd)).
 
 ```{ojs}
 //| echo: false
@@ -295,7 +295,7 @@ md`${so_cross === null ? "With equal slopes the curves never cross: whoever you 
 ```
 
 This is why advocates of the Rasch model hold to it so firmly: specific objectivity and sufficiency are what classical measurement in the physical sciences looks like ([Wright, 1997](https://doi.org/10.1111/j.1745-3992.1997.tb00606.x)). The catch is that the model has to fit.
-Consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
+In that tradition, consistency with the Rasch model comes from hard work—iterative item development and pruning of items that don't behave—not from applying it to whatever data you have. Whether equal slopes are plausible for typical test data is an empirical question, and the [2PL discrimination vignette](https://itemresponsewarehouse.org/vignettes/2pl_across_datasets.html) looks at it across many IRW datasets.
 
 ```{ojs}
 //| echo: false

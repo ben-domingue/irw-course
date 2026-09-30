@@ -50,7 +50,7 @@ $b_k$ is the $\theta$ at which half of respondents reach category $k$ or above. 
 - **Adjacent-category** splits ask "is $x$ equal to $k$ rather than $k-1$?", among responses in one of the two. The **generalized partial credit model** (GPCM; [Muraki, 1992](https://doi.org/10.1177/014662169201600206)) gives each a 2PL, $\Pr(x = k \mid x \in \{k-1, k\}) = \text{logit}^{-1}\big(a(\theta - b_k)\big)$, which works out to
 $$\Pr(x = k) \propto \exp\Big(\sum_{v=1}^{k} a(\theta - b_v)\Big).$$
 $b_k$, the **step difficulty**, is the $\theta$ at which categories $k-1$ and $k$ are equally likely. With $a = 1$ for every item this is the **partial credit model** (PCM; [Masters, 1982](https://doi.org/10.1007/BF02296272)).
-- **Sequential** splits ask "having reached category $k - 1$, does the respondent go on to $k$?" The **sequential model** ([Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)) gives each step a 2PL, $\Pr(x \ge k \mid x \ge k-1) = \text{logit}^{-1}\big(a(\theta - b_k)\big)$, and the respondent stops at the first step failed. It suits a problem solved in stages.
+- **Sequential** splits ask "having reached category $k - 1$, does the respondent go on to $k$?" The **sequential model** ([Tutz, 1990](https://doi.org/10.1111/j.2044-8317.1990.tb00925.x)) gives each step a 2PL, $\Pr(x \ge k \mid x \ge k-1) = \text{logit}^{-1}\big(a(\theta - b_k)\big)$, and the respondent stops at the first step failed. Its steps assume a process in stages, as in a problem solved step by step.
 
 In [Thissen and Steinberg's (1986)](https://doi.org/10.1007/BF02295596) terms, the GRM is a *difference* model and the partial credit family *divide-by-total* models (the $\propto$ hides a division by the sum over categories).
 
@@ -280,7 +280,7 @@ Plot.plot({
 md`Information at θ = −1, 0.5 and 2: four categories **${[-1, 0.5, 2].map(t => polyInfo("GRM", t, co_a, co_bs).toFixed(2)).join(", ")}**; collapsed at ${co_cut}, **${[-1, 0.5, 2].map(t => co_bin(t).toFixed(2)).join(", ")}**.`
 ```
 
-At the defaults the full item gives about 1 from $\theta = -1$ to 2 (1.04, 1.09, 1.04). Collapsed at $x \ge 1$ it keeps 1.00 at $\theta = -1$ and has 0.01 at $\theta = 2$. Each cut does well near its own boundary only, and no cut beats the full item anywhere; the second Go deeper callout proves that merging categories can't add information. [MacCallum, Zhang, Preacher and Rucker (2002)](https://doi.org/10.1037/1082-989X.7.1.19) make the parallel case for continuous variables. Collapsing is a reasonable choice when a category is nearly empty, or when the only decision sits at one boundary.
+At the defaults the full item gives about 1 from $\theta = -1$ to 2 (1.04, 1.09, 1.04). Collapsed at $x \ge 1$ it keeps 1.00 at $\theta = -1$ and has 0.01 at $\theta = 2$. Each cut does well near its own boundary only, and no cut beats the full item anywhere; the second Go deeper callout proves that merging categories can't add information. [MacCallum, Zhang, Preacher and Rucker (2002)](https://doi.org/10.1037/1082-989X.7.1.19) make the parallel case for continuous variables. In the case that a category is nearly empty, or the only decision sits at one boundary, collapsing may cost little for that purpose.
 
 ```{ojs}
 //| echo: false
@@ -311,7 +311,7 @@ $$(P_j' + P_k')^2 = \left(\sqrt{P_j}\,\frac{P_j'}{\sqrt{P_j}} + \sqrt{P_k}\,\fra
 so the merged term is never larger than the two separate terms, and equals them only where $P_j'/P_j = P_k'/P_k$, where the two categories respond to $\theta$ identically. Collapsing to 0/1 is a sequence of such merges.
 :::
 
-The choice among these models is a small decision; the choice to keep the categories is a large one.
+In the data below, the choice among these models changes respondents' scores little; the choice to keep the categories changes a great deal.
 
 ## Simulate
 
@@ -395,7 +395,7 @@ Three items have disordered GPCM steps ($b_2 < b_1$): PAININ40, 41 and 42 (walki
 
 Sufficiency, in data: under the PCM, equal sum scores get equal estimates (largest spread 0.00); under the GRM they spread by up to 0.91.
 
-So which model would I fit to these items? The PCM offers a sufficient sum score and asks for equal slopes in return. The GRM and GPCM let slopes vary, which these items need (2.71 to 5.17), and the GRM fits best by AIC and BIC. Yet all four give scores that correlate at 0.994 or above. I'd fit the GRM and report its scores, and not spend long choosing between it and the GPCM. I'd spend the time on the next question: what would we lose by not using the categories at all?
+So which model? The PCM offers a sufficient sum score and asks for equal slopes in return. The GRM and GPCM let slopes vary, and these items' slopes vary (2.71 to 5.17); the GRM fits best by AIC and BIC. Yet all four give scores that correlate at 0.994 or above. AIC and BIC say which model is preferred, not by how much; held-out responses would put the gaps on one scale, and the scores' agreement says how much is at stake for respondents. The larger question is what we would lose by not using the categories at all.
 
 ```{r info-pain}
 #| echo: true

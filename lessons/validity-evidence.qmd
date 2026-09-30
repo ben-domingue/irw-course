@@ -37,7 +37,7 @@ By the end of this lesson you should be able to:
 **Recall** from [Validity as an argument](validity-argument.qmd): the *Standards* list five sources of validity evidence, and each tends to back one link of the interpretation/use argument: test content and response processes back scoring, internal structure backs generalization, relations to other variables back extrapolation, and consequences back the decision.
 :::
 
-The sources are described in chapter 1 of the *Standards* ([AERA, APA & NCME, 2014, pp. 13–21](https://www.testingstandards.net/open-access-files.html); open access). Evidence goes where the inference is most in doubt.
+The sources are described in chapter 1 of the *Standards* ([AERA, APA & NCME, 2014, pp. 13–21](https://www.testingstandards.net/open-access-files.html); open access). Evidence does the most where the inference is most in doubt.
 
 ::: {.callout-tip appearance="simple"}
 **Recall** from [From construct map to items](instrument-building.qmd): review by content experts and cognitive interviews come before any pilot, and they catch what an item analysis can't, such as an item that everyone misreads in the same way.
@@ -432,7 +432,7 @@ Among the 202 students above the median SAT, the correlation is 0.27, down from 
 
 Case II assumes the same line, with the same scatter, in both halves. The slope is 0.38 grade points per 100 SAT points in the bottom half and 0.25 in the top, and the residual SD falls from 1.13 to 0.91. Grades stop at 4.0, and 48% of the top half got one (15% of the bottom half): the widget's ceiling.
 
-Both corrections rest on assumptions the data can question. The correction for attenuation assumes the reliability estimate counts as error exactly what two measures don't share; alpha doesn't when raters carry an impression across traits. Case II assumes direct selection and a straight, evenly scattered regression; grades have a ceiling. When I correct a validity coefficient, for unreliability or for range restriction, I report the observed value first and the corrected one beside it, with the assumption the correction rests on; I don't report the corrected value alone. Standard 1.21 asks for both values and the method ([AERA, APA & NCME, 2014, p. 29](https://www.testingstandards.net/open-access-files.html)). A correction is a model, and it comes with a model's assumptions.
+Both corrections rest on assumptions the data can question. The correction for attenuation assumes the reliability estimate counts as error exactly what two measures don't share; alpha doesn't when raters carry an impression across traits. Case II assumes direct selection and a straight, evenly scattered regression; grades have a ceiling. A corrected value reported beside the observed one, with the assumption the correction rests on, lets a reader judge whether that assumption holds; the corrected value alone doesn't. Standard 1.21 asks for both values and the method ([AERA, APA & NCME, 2014, p. 29](https://www.testingstandards.net/open-access-files.html)). A correction is a model, and it comes with a model's assumptions.
 
 ## Problems
 

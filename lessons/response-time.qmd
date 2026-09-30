@@ -385,7 +385,7 @@ Here abler respondents are *slower*: $r = -0.36$ timed and $-0.45$ untimed, much
 
 Back to the two questions. One speed per respondent held across the item sets we could compare; these tables can't test it across time. Conditional independence fails in all four, in different shapes, least in the untimed Raven's. How speed and accuracy go together is a property of the task, not a constant of nature.
 
-So when would I model response time? When the question is about how people take the test: rapid guessing, speededness, whether a time limit changes what is measured, or unusual timing ([van der Linden & Guo, 2008](https://doi.org/10.1007/s11336-007-9046-8)). There the hierarchical model is a reasonable starting point, with the conditional accuracy function as the first check on it. I wouldn't model response time to sharpen $\theta$. The IRW's [response time and accuracy vignette](https://itemresponsewarehouse.org/vignettes/rt_imv.html) added log time, centred within items, to a Rasch model for 18 tables: the median gain in out-of-sample prediction (IMV) was 0.0054, positive in 78% of tables; with a flexible curve, 0.0091 (94%).
+Whether to model response time depends on the question. When it is about how people take the test (rapid guessing, speededness, whether a time limit changes what is measured, or unusual timing; [van der Linden & Guo, 2008](https://doi.org/10.1007/s11336-007-9046-8)), the hierarchical model is one starting point, with the conditional accuracy function as the first check on it. When it is whether times sharpen $\theta$, held-out prediction answers it table by table. The IRW's [response time and accuracy vignette](https://itemresponsewarehouse.org/vignettes/rt_imv.html) added log time, centred within items, to a Rasch model for 18 tables: the median gain in out-of-sample prediction (IMV) was 0.0054, positive in 78% of tables; with a flexible curve, 0.0091 (94%).
 
 ::: {.callout-tip appearance="simple"}
 **If you've done** [Model fit and out-of-sample prediction](fit-prediction.qmd): the IMV is the expected gain from betting on one model's predictions against another's. For the 2PL over the Rasch model when slopes vary substantially, it is about 0.01 ([Domingue et al., 2024](https://doi.org/10.1007/s11336-024-09977-2)).
@@ -455,7 +455,7 @@ if (is.null(dd)) {
 }
 ```
 
-The licensure row reproduces the lesson's numbers. Its IMV (0.0199) is well above the median of 0.0054 in the IRW's [response time and accuracy vignette](https://itemresponsewarehouse.org/vignettes/rt_imv.html), which reports the whole set and has 0.0188 for this table: the verdict is about the typical table, not every one.
+The licensure row reproduces the lesson's numbers. Its IMV (0.0199) is well above the median of 0.0054 in the IRW's [response time and accuracy vignette](https://itemresponsewarehouse.org/vignettes/rt_imv.html), which reports the whole set and has 0.0188 for this table: the median describes the typical table, not every one.
 
 ## Going further
 

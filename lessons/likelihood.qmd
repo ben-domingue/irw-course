@@ -331,7 +331,7 @@ predict({
 #| code-fold: show
 ```
 
-The slope rises from 0.50 to 0.83. In a linear regression, adding a predictor that is unrelated to $x$ leaves the slope on $x$ alone; in a logistic regression it doesn't. The pooled slope answers a different question, the effect of Elo averaged over problems, and it understates how steeply success rises with skill on any particular problem. My rule, for this reason: never pool item responses into one logistic regression without giving the items their own intercepts. The items are not interchangeable, and the model should say so.
+The slope rises from 0.50 to 0.83. In a linear regression, adding a predictor that is unrelated to $x$ leaves the slope on $x$ alone; in a logistic regression it doesn't. The pooled slope answers a different question, the effect of Elo averaged over problems, and it understates how steeply success rises with skill on any particular problem. A pooled regression treats the items as interchangeable; item intercepts drop that assumption. Which slope we want, the effect averaged over problems or the effect on a given problem, depends on the question being asked.
 
 ### Items differ in more than difficulty
 

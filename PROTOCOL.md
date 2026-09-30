@@ -252,9 +252,14 @@ Seed threads from the pilots are in `notes/protocol-decisions.md`; the cross-che
 Write as Ben (see the `domingue-voice` skill). The six rules below come from
 `notes/voice-audit-2026-09-24.md`; Ben adopted all six on 2026-09-24.
 
-- **A. First-person verdicts.** Every lesson gives at least one first-person verdict
-  on the choice a practitioner actually faces (which model, which coefficient, which
-  rotation). Verdict first, then the rationale.
+- **A. Judgements, not rules** (revised by Ben, 09-30). Lessons don't hand out hard
+  rules, in the closing judgement or anywhere else: it is hard to know which model
+  works best. Where a lesson weighs in on a practitioner's choice (which model, which
+  coefficient, which rotation), it sets out what each option assumes and what evidence
+  would decide, in a conditional register ("in the case that ..., X may be sufficient
+  for some purposes"), not "I do X". For choices between models, the acid test is
+  prediction of held-out responses (the IMV, from `fit-prediction`); the reader should
+  leave able to run that comparison and confident deciding from it.
 - **B. Graded adverbs, not enthusiasm.** No *remarkable, beautiful, magic, special,
   striking, vivid*. Size claims with *fairly, quite, rather, somewhat, not especially*.
 - **C. Question pivots.** A section turns on a short question the text then answers.
@@ -413,7 +418,8 @@ A lesson moves to `status: done` only when every box is ticked.
       been verified (none from memory).
 
 **Voice**
-- [ ] At least one first-person verdict; none of the banned words; every size word
+- [ ] No hard rules: choices framed by assumptions and evidence (held-out comparison
+      for models), not prescriptions; none of the banned words; every size word
       has its baseline.
 
 **Prose** (`PROSE.md`)

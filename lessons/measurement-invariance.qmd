@@ -41,7 +41,7 @@ By the end of this lesson you should be able to:
 - climb the ladder (configural, metric, scalar) with scaled difference tests and changes in CFI, and say which comparison each step supports;
 - find the constraint that fails with score tests, and fit and report a partial invariance model;
 - say what one unequal intercept does to a comparison of sum scores and of factor means;
-- choose an estimator for a multigroup fit, and say what ordered categories change.
+- say what the choice of estimator for a multigroup fit assumes, and what ordered categories change.
 
 ## Core ideas
 
@@ -112,7 +112,7 @@ md`Here ${inv.level}. Sum-score gap, B minus A: **${inv.gap.toFixed(2)}** SDs of
 
 With both item-4 controls at 0 the lines coincide, and the sum-score gap (0.45 SD) is the latent 0.5 SD shrunk by unreliability. Set the true gap to 0 and item 4's intercept to 0.3: the sum scores differ by 0.10 SD between groups that don't differ at all. A loading difference makes the lines cross, so the item favours one group at low factor levels and the other at high ones.
 
-What does the factor model make of the same item? If we impose scalar invariance anyway, the model has to explain item 4's higher mean in group B with the one thing it has left free, group B's factor mean. The shift is spread over every item, and the factor mean absorbs part of it. The remedy is **partial invariance** ([Byrne, Shavelson & Muthén, 1989](https://doi.org/10.1037/0033-2909.105.3.456)): free the offending item's intercept and keep the others equal, so that the comparison of means rests on the items that do work alike.
+What does the factor model make of the same item? If we impose scalar invariance anyway, the model has to explain item 4's higher mean in group B with the one thing it has left free, group B's factor mean. The shift is spread over every item, and the factor mean absorbs part of it. One response is **partial invariance** ([Byrne, Shavelson & Muthén, 1989](https://doi.org/10.1037/0033-2909.105.3.456)): free the offending item's intercept and keep the others equal, so that the comparison of means rests on the items that do work alike.
 
 #### Try it: what the scalar constraint does to the factor mean
 
@@ -202,12 +202,12 @@ At 39 constraints and α = 0.01, a flag turns up by chance about a third of the 
 ### Choosing an estimator for multigroup fits
 
 ::: {.callout-tip appearance="simple"}
-**Recall** from [Factor analysis II](fa-confirmatory.qmd): choose the estimator from the data. ML for continuous, roughly normal items; MLR for skewed items or five or more categories used fairly evenly; WLSMV, on thresholds and polychorics, for fewer than five categories or responses piled at one end; FIML, or the graded model, when responses are missing.
+**Recall** from [Factor analysis II](fa-confirmatory.qmd): each estimator rests on its own assumptions about the responses. ML treats items as continuous and roughly normal; MLR keeps that model but makes standard errors and tests robust to skew; WLSMV treats items as ordered categories, through thresholds and polychoric correlations; FIML, or the graded model, uses every observed response when some are missing.
 :::
 
-In a multigroup fit the guide applies group by group, and three things change. With ordered items each group gets its own thresholds, so every category of every item needs responses in each group; a category that is nearly empty in one group is a problem even when it isn't in the pooled data ([Rutkowski, Svetina & Liaw, 2019](https://doi.org/10.1080/10705511.2018.1547640), who also show that collapsing categories changes fit). Which parameters must be fixed at each step to keep ordinal models identified and nested is subtler than with continuous items ([Wu & Estabrook, 2016](https://doi.org/10.1007/s11336-016-9506-0)). And the difference tests behave differently across estimators: in simulations by [Sass, Schmitt and Marsh (2014)](https://doi.org/10.1080/10705511.2014.882658), their Type I error rates varied across ML, MLR and WLSMV, and changes in fit indices under WLSMV needed caution in misspecified models. With missing ordinal responses, WLSMV with pairwise deletion was the one method in the simulations of [Chen, Wu, Garnier-Villarreal, Kite and Jia (2020)](https://doi.org/10.1080/00273171.2019.1608799) whose difference tests did not reasonably control their Type I error rate; the full-information ordinal models recovered loadings best.
+In a multigroup fit those assumptions apply group by group, and three things change. With ordered items each group gets its own thresholds, so every category of every item needs responses in each group; a category that is nearly empty in one group is a problem even when it isn't in the pooled data ([Rutkowski, Svetina & Liaw, 2019](https://doi.org/10.1080/10705511.2018.1547640), who also show that collapsing categories changes fit). Which parameters must be fixed at each step to keep ordinal models identified and nested is subtler than with continuous items ([Wu & Estabrook, 2016](https://doi.org/10.1007/s11336-016-9506-0)). And the difference tests behave differently across estimators: in simulations by [Sass, Schmitt and Marsh (2014)](https://doi.org/10.1080/10705511.2014.882658), their Type I error rates varied across ML, MLR and WLSMV, and changes in fit indices under WLSMV needed caution in misspecified models. With missing ordinal responses, WLSMV with pairwise deletion was the one method in the simulations of [Chen, Wu, Garnier-Villarreal, Kite and Jia (2020)](https://doi.org/10.1080/00273171.2019.1608799) whose difference tests did not reasonably control their Type I error rate; the full-information ordinal models recovered loadings best.
 
-So a reasonable plan with sparse categories is MLR for the ladder, items as numbers, with an ordinal fit as the check, on collapsed categories if need be.
+With sparse categories, then, one option is MLR for the ladder, items as numbers, with an ordinal fit (on collapsed categories if need be) as a check. The two rest on different assumptions about the responses; where they agree, less rests on the choice.
 
 ```{ojs}
 //| echo: false
@@ -215,7 +215,7 @@ quiz({
   q: "A four-category item has 40 responses in its top category among men and none among women. You want to test scalar invariance with WLSMV. What happens?",
   options: [
     {text: "Nothing changes: WLSMV handles skewed items", correct: false, why: "Skew is fine; an empty category isn't. With ordered items each group gets thresholds, and no top-category threshold can be estimated for women, so the two groups' thresholds can't even be set equal as they stand."},
-    {text: "The top threshold can't be estimated for women, so you collapse the top two categories (in both groups), or treat the items as numbers", correct: true, why: "Collapsing keeps the ordinal model but changes the item, and it can change fit (Rutkowski et al., 2019); MLR sidesteps thresholds altogether. Either way, say which you did."},
+    {text: "The top threshold can't be estimated for women, so the ordinal model can't be fitted as it stands; collapsing the top two categories (in both groups) or treating the items as numbers are ways round it", correct: true, why: "Collapsing keeps the ordinal model but changes the item, and it can change fit (Rutkowski et al., 2019); MLR sidesteps thresholds altogether. Either way, say which you did."},
     {text: "Use MLR with FIML, because the missing category is missing data", correct: false, why: "No response is missing: every woman answered the item. An empty category is a fact about the responses, not a missing value."}
   ]
 })
@@ -252,7 +252,7 @@ Our main example returns to [neurodegenerative_huizinga_2019_dass](https://itemr
 
 The table's `cov_sex` codes are unlabelled in the processing script. The paper reports 785 women among its 1,461 participants (its Table 1), and code 2 holds exactly 785 of the table's 1,461 respondents, so we read 2 as women: a match of counts, not a codebook.
 
-Which estimator? For the single-group structure the guide pointed to WLSMV: four categories, piled at zero. Group by group, the top category is thin.
+Which estimator? For the single-group structure we used WLSMV: four categories, piled at zero. Group by group, the top category is thin.
 
 ```{r dass-categories}
 #| echo: true
@@ -347,7 +347,7 @@ Does freeing the item change the comparison? Under full scalar invariance group 
 
 As a check with an ordinal estimator, on items scored as any symptom against none, the crying loading again has the largest score test (33.7).
 
-So what should a report say? One view drops the crying item, so that the scale is invariant as it stands. Another keeps it and frees its parameters, so that the comparison rests on the other 19 items while the item still counts toward each respondent's score. A third ignores the failure because it is one item in twenty. The first changes the instrument, and its scores no longer match published norms; the third lets one item push the comparison, by 0.03 SD here; the second needs enough invariant items to carry the comparison. When enough items hold, freeing the item and reporting the comparison both ways, with the item and the reason named, may be sufficient for some purposes: a reader can see how much rests on the one item. Here the two give 0.21 and 0.18 SD, and the conclusion doesn't change.
+What might a report say? One view drops the crying item, so that the scale is invariant as it stands. Another keeps it and frees its parameters, so that the comparison rests on the other 19 items while the item still counts toward each respondent's score. A third ignores the failure because it is one item in twenty. The first changes the instrument, and its scores no longer match published norms; the third lets one item push the comparison, by 0.03 SD here; the second needs enough invariant items to carry the comparison. Which cost matters depends on what the comparison is for. Reporting it both ways, with the item and the reason named, lets a reader see how much rests on the one item: here the two give 0.21 and 0.18 SD, and the conclusion doesn't change.
 
 ## Problems
 

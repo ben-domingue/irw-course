@@ -22,7 +22,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-The Rasch model gives every item the same slope, and the chess data have already turned up an item that doesn't go along: problem Y15, about as hard as Y29, whose success barely moves with skill. What happens when each item gets its own slope, and then its own floor and ceiling? This lesson builds that family, from the 1PL to the 4PL, asks what each new parameter costs and what the data can say about it, and fits all four to the Reading the Mind in the Eyes Test. For that test my choice is the 2PL, and most of the lesson is the case for it.
+The Rasch model gives every item the same slope, and the chess data have already turned up an item that doesn't go along: problem Y15, about as hard as Y29, whose success barely moves with skill. What happens when each item gets its own slope, and then its own floor and ceiling? This lesson builds that family, from the 1PL to the 4PL, asks what each new parameter costs and what the data can say about it, and fits all four to the Reading the Mind in the Eyes Test. On that test the evidence here points to the 2PL, and most of the lesson is that evidence.
 
 ## Goals
 
@@ -31,7 +31,7 @@ By the end of this lesson you should be able to:
 - write down the 4PL, say what $a$, $b$, $c$ and $u$ do to a curve, and which constraints give the 3PL, 2PL and Rasch model;
 - explain why the weighted score $\sum_i a_i x_i$ replaces the sum score under the 2PL, and why crossing curves give up specific objectivity;
 - convert `mirt`'s intercept to a difficulty, and say how each model fixes the unit of the scale;
-- explain why a lower asymptote is hard to estimate, and when a 3PL is a reasonable choice;
+- explain why a lower asymptote is hard to estimate, and what data would let one be estimated;
 - fit all four models with `mirt` and compare them by BIC and by what they say about respondents.
 
 ## Core ideas
@@ -244,7 +244,7 @@ md`Closest 2PL, weighting by where respondents are (shaded): a = ${la_fit.a.toFi
 
 As the widget loads, mean ability is 1.5, so the item is easy for most respondents. The curves differ by at most about 0.01 where respondents are, parting only to the left, where almost nobody is. Slide the mean ability down to −2 and the largest difference grows eight-fold, to 0.08: now many respondents sit near the floor, and the floor matters.
 
-[Domingue et al. (2024)](https://doi.org/10.1007/s11336-024-09977-2) looked at this through prediction. They simulated data from the 3PL and asked how much better a fitted 3PL predicted new responses than a fitted 2PL, using the IMV, a measure of predictive gain that [Model fit and out-of-sample prediction](fit-prediction.qmd) teaches. The average gain never exceeded 0.001, even with pronounced guessing in the generating model, and across 89 IRW datasets it averaged 0.00016. They connect this to the difficulty of identifying the 3PL's parameters ([Maris & Bechger, 2009](https://doi.org/10.1080/15366360903070385); [Haberman, 2005](https://doi.org/10.1002/j.2333-8504.2005.tb02001.x); [von Davier, 2009](https://doi.org/10.1080/15366360903117079)), noting that 3PL estimates may still flag items with guessing problems. A 3PL is a reasonable choice when the items are multiple choice, when a good share of respondents sits near chance, when the sample is large, or when $c$ is fixed or given a prior, as in [Guessing and priors](guessing-priors.qmd).
+[Domingue et al. (2024)](https://doi.org/10.1007/s11336-024-09977-2) looked at this through prediction. They simulated data from the 3PL and asked how much better a fitted 3PL predicted new responses than a fitted 2PL, using the IMV, a measure of predictive gain that [Model fit and out-of-sample prediction](fit-prediction.qmd) teaches. The average gain never exceeded 0.001, even with pronounced guessing in the generating model, and across 89 IRW datasets it averaged 0.00016. They connect this to the difficulty of identifying the 3PL's parameters ([Maris & Bechger, 2009](https://doi.org/10.1080/15366360903070385); [Haberman, 2005](https://doi.org/10.1002/j.2333-8504.2005.tb02001.x); [von Davier, 2009](https://doi.org/10.1080/15366360903117079)), noting that 3PL estimates may still flag items with guessing problems. The data have more to say about $c$ when the items are multiple choice and a good share of respondents sits near chance, when the sample is large, or when $c$ is fixed or given a prior, as in [Guessing and priors](guessing-priors.qmd); whether the 3PL then predicts held-out responses better is a comparison the data can make.
 
 ### The upper asymptote: ceilings and slips
 
@@ -343,7 +343,7 @@ The median estimate of $c$ is 0.01. Why so far from 0.25? Only 84 of the 17,680 
 
 The four models' abilities correlate from 0.972 to 0.999, and the three with free slopes at 0.987 or above. The choice matters little for ranking respondents, more for what we say about items.
 
-So which model would I fit to a test like the RMET? The 2PL. The slopes differ six-fold, BIC prefers it to the Rasch model by 855 points, the lower asymptote can't be estimated from a sample with almost no one near chance, and the richer models' abilities correlate with the 2PL's at 0.987 or above. If the RMET were being revised, the Rasch tradition's question (which items to rewrite so that one slope fits them all) would be a fair one; for the test as it stands, the 2PL describes it.
+What does the evidence say about the RMET? The slopes differ six-fold, BIC prefers the 2PL to the Rasch model by 855 points, the lower asymptote can't be estimated from a sample with almost no one near chance, and the richer models' abilities correlate with the 2PL's at 0.987 or above. On this evidence the 2PL describes the test as it stands; how much better it predicts held-out responses is the comparison [Model fit and out-of-sample prediction](fit-prediction.qmd) makes. If the RMET were being revised, the Rasch tradition's question (which items to rewrite so that one slope fits them all) would be a fair one.
 
 ### Chess, again
 

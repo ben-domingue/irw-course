@@ -17,7 +17,7 @@ import {quiz, predict} from "./widgets/quiz.js"
 
 ## What this is for
 
-Language models now score essays, write items, predict item difficulty, and answer questionnaires in place of people. Each is a claim about measurement that the tools of this course can check. The lesson starts from the question [What is an item?](explanatory-irt.qmd) handed on: that lesson explained difficulty with features that people coded, so can an item's text alone predict it? My answer depends on the yardstick. I judge a difficulty prediction by how many respondents it is worth, and on the general-knowledge items below the best text features are worth about three.
+Language models now score essays, write items, predict item difficulty, and answer questionnaires in place of people. Each is a claim about measurement that the tools of this course can check. The lesson starts from the question [What is an item?](explanatory-irt.qmd) handed on: that lesson explained difficulty with features that people coded, so can an item's text alone predict it? The answer depends on the yardstick. Judged by how many respondents a difficulty prediction is worth, the best text features for the general-knowledge items below are worth about three.
 
 ## Goals
 
@@ -123,7 +123,7 @@ Is a correlation of 0.77 good? Two yardsticks assume different uses. **Accuracy*
 $$n^* = \frac{1}{\sigma^2\,E[p(1-p)]}$$
 respondents.
 
-I use the second yardstick. The prize in predicting difficulty is skipping or shrinking the field test, so I want to know how many respondents a prediction is worth; accuracy statistics don't say.
+This lesson uses the second yardstick, because the use it has in mind is skipping or shrinking the field test, and for that use the question is how many respondents a prediction is worth; accuracy statistics don't say. Where the prediction itself is the product, the first yardstick answers the question asked.
 
 #### Try it: what a prediction is worth
 
@@ -330,7 +330,7 @@ Items differ far more than respondents (SD 1.71 against 0.47 for $\theta$). Word
 #| code-fold: show
 ```
 
-Knowing only that an item belongs to this test is worth about 1.7 respondents: that is the prior. Word count adds nothing; with the impossible flag, the prediction is worth 2.7. By my yardstick, what the text says about these items is worth about one respondent. Questions of the same kind still differ by 1.42 logits for reasons these features don't see.
+Knowing only that an item belongs to this test is worth about 1.7 respondents: that is the prior. Word count adds nothing; with the impossible flag, the prediction is worth 2.7. On the respondents yardstick, what the text says about these items is worth about one respondent. Questions of the same kind still differ by 1.42 logits for reasons these features don't see.
 
 The table holds one more check. Twelve of the impossible questions, on the two generated forms, were written by ChatGPT for this study; the six on the anchor form come from the original bank ([Himmelstein et al., 2025](https://doi.org/10.31234/osf.io/a7kdx_v8)).
 

@@ -27,7 +27,7 @@ By the end of this lesson you should be able to:
 - draw item curves (proportion correct against the sum score) and read an item's difficulty and discrimination from them;
 - fit a logistic regression of one item on the sum score and interpret its intercept and slope;
 - recognize an item whose curve doesn't rise with the score, and say what it means for keying and for the sum score;
-- say when the sum score and CTT are a reasonable choice.
+- say what the sum score and CTT assume, and what in the data would show whether those assumptions hold.
 
 ## Core ideas
 
@@ -260,9 +260,9 @@ So far, more of the construct has meant a higher chance of a positive response. 
 
 ### When is CTT enough?
 
-The sum score and alpha each rest on assumptions; the question is whether they hold for the job at hand. The sum score treats items as interchangeable, a reasonable summary when everyone takes the same items, when every item's curve rises with the construct, and when what we need is one number per respondent. Alpha estimates reliability well when the items' errors are unrelated and the items measure the true score about equally well. When respondents take different items, when we want to say something about an item rather than the total, or when precision has to vary from one score to another ([Information, precision, and short forms](information.qmd)), those assumptions carry more weight than CTT can check.
+The sum score and alpha each rest on assumptions; the question is whether they hold for the job at hand. The sum score treats items as interchangeable, which assumes that everyone takes the same items, that every item's curve rises with the construct, and that what we need is one number per respondent. Alpha estimates reliability well when the items' errors are unrelated and the items measure the true score about equally well. When respondents take different items, when we want to say something about an item rather than the total, or when precision has to vary from one score to another ([Information, precision, and short forms](information.qmd)), those assumptions carry more weight than CTT can check.
 
-Where does that leave us? When we have a fixed form, taken by everyone, whose item curves all rise, the sum score and reliability may be sufficient for some purposes. Even then, the item curves are worth a look: they take a few lines of code, and they are where an item that doesn't rise, or rises only at the very top, shows itself. An item response model earns its keep when the design stops being a fixed form or the question stops being about the total.
+Where does that leave us? Some of these assumptions can be checked directly. The item curves take a few lines of code, and they are where an item that doesn't rise, or rises only at the very top, shows itself. Whether an item response model adds anything beyond the sum score can be checked too, by comparing how well each predicts held-out responses ([Model fit and out-of-sample prediction](fit-prediction.qmd)). And the design matters: once respondents take different items, a sum score no longer places them on one scale.
 
 ## Simulate
 

@@ -29,7 +29,7 @@ In 2011, Austrian fourth graders sitting TIMSS each took one of 14 mathematics b
 By the end of this lesson you should be able to:
 
 - say what equating requires (symmetry, equity, population invariance) and which data-collection designs make it possible;
-- equate two forms by mean, linear and equipercentile equating, and say when each is a reasonable choice;
+- equate two forms by mean, linear and equipercentile equating, and say what each assumes about the forms;
 - put two IRT calibrations on one scale with mean-mean, mean-sigma, Haebara or Stocking–Lord linking, or with one concurrent fit, and convert raw scores by IRT true-score equating;
 - say what linking assumes about the common items, and check it in data (position effects, items that behave differently across groups);
 - tell equating from the looser kinds of linking: vertical scaling and concordance.
@@ -121,9 +121,9 @@ quiz({
 
 With random groups, the two score distributions estimate how one population would score on each form, so matching the distributions matches the forms.
 
-- **Mean equating** adds a constant: $y = x - \mu_X + \mu_Y$. Reasonable when the forms differ only in overall difficulty.
-- **Linear equating** matches means and SDs: $y = \mu_Y + \frac{\sigma_Y}{\sigma_X}(x - \mu_X)$, the black line in the widget above. Reasonable when the forms differ in spread too and the distributions have similar shapes.
-- **Equipercentile equating** sends a score on X to the score on Y with the same **percentile rank** ([Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7), ch. 2). It is the one to reach for when the shapes differ, for instance when one form has a ceiling. Small samples give bumpy distributions, so they are usually smoothed first, for instance by log-linear models that keep their first few moments ([Holland & Thayer, 2000](https://doi.org/10.3102/10769986025002133)).
+- **Mean equating** adds a constant: $y = x - \mu_X + \mu_Y$. It assumes the forms differ only in overall difficulty.
+- **Linear equating** matches means and SDs: $y = \mu_Y + \frac{\sigma_Y}{\sigma_X}(x - \mu_X)$, the black line in the widget above. It allows the forms to differ in spread too, and assumes the distributions have similar shapes.
+- **Equipercentile equating** sends a score on X to the score on Y with the same **percentile rank** ([Kolen & Brennan, 2014](https://doi.org/10.1007/978-1-4939-0317-7), ch. 2). It doesn't assume similar shapes, which matters when they differ, for instance when one form has a ceiling. Small samples give bumpy distributions, so they are usually smoothed first, for instance by log-linear models that keep their first few moments ([Holland & Thayer, 2000](https://doi.org/10.3102/10769986025002133)).
 
 The `equate` package ([Albano, 2016](https://doi.org/10.18637/jss.v074.i08)) does all three.
 
@@ -265,7 +265,7 @@ md`Stocking–Lord criterion at your A and B: **${slLoss(sl_cal.base, sl_cal.oth
 
 The small panels show nine of the items: each one's second-calibration curve before (light) and after (blue) your $A$ and $B$, and its first-calibration curve (dashed), the target. Move one slider and every item moves at once: a link transforms the whole scale, not one item. Close the shaded gap and you have done Stocking–Lord by eye. With no estimation error all three methods recover 1.2 and 0.5. With error they part: at the default SD of 0.15, Stocking–Lord gives 1.23 and 0.55, mean-sigma 1.28 and 0.57. Mean-sigma rests on the difficulties' spread, which estimation error inflates.
 
-**Or skip the linking.** IRT handles responses missing by design, so we can stack every form's data, leave each respondent's unseen items empty and fit once: **concurrent calibration**. In the TIMSS booklets most pairs of items are never answered by the same student ([Item response data and the IRW](irw-data.qmd) counted them), and one fit copes. In simulations it generally gave smaller errors than separate calibration and linking, though not always ([Kim & Cohen, 1998](https://doi.org/10.1177/01466216980222003); [Hanson & Béguin, 2002](https://doi.org/10.1177/0146621602026001001)). Both routes assume a common item's parameters are the same in every group; a concurrent fit builds that in, while separate calibrations let you compare. Concurrent calibration is a reasonable choice when the groups come from one population or differ only in their ability distributions; separate calibration, when you want to see how the common items behaved.
+**Or skip the linking.** IRT handles responses missing by design, so we can stack every form's data, leave each respondent's unseen items empty and fit once: **concurrent calibration**. In the TIMSS booklets most pairs of items are never answered by the same student ([Item response data and the IRW](irw-data.qmd) counted them), and one fit copes. In simulations it generally gave smaller errors than separate calibration and linking, though not always ([Kim & Cohen, 1998](https://doi.org/10.1177/01466216980222003); [Hanson & Béguin, 2002](https://doi.org/10.1177/0146621602026001001)). Both routes assume a common item's parameters are the same in every group; a concurrent fit builds that in, while separate calibrations let you compare. A concurrent fit assumes the groups come from one population or differ only in their ability distributions; separate calibrations let you see how the common items behaved.
 
 ::: {.callout-note collapse="true"}
 ## Go deeper: how the characteristic-curve methods weight items
@@ -280,7 +280,7 @@ Write $P^*_{iq}$ for the transformed curve, $\text{logit}^{-1}\big((\hat a_{iX}/
 $$\frac{\partial F}{\partial B} = 2\sum_q w(\theta_q)\, D_q \sum_i \frac{\hat a_{iX}}{A}\, P^*_{iq}(1 - P^*_{iq}),$$
 and $\partial F/\partial A$ has the same form, with a further factor $(\theta_q - B)/A$ inside the sum over items. An item enters in proportion to $a\,P(1-P)$, its information ([Information, precision, and short forms](information.qmd)), at the $\theta$ values that carry weight. A flat item, or one far from the respondents, barely moves the answer, however extreme its $\hat b$. Haebara's criterion squares each item's difference before summing over items, so each item's curve must match on its own; Stocking–Lord lets errors in different items cancel.
 
-**What follows.** The characteristic-curve methods match what the link is for, expected scores where the respondents are, and are less sensitive to poorly estimated items. Moment methods have closed forms and are a reasonable first look, and a large gap between the two families is itself a sign that some common items need a look. The same idea returns when choosing anchor items in [Differential item functioning](dif.qmd) and when adding items to a bank in [Item banks and adaptive testing](item-banks-cat.qmd).
+**What follows.** The characteristic-curve methods match what the link is for, expected scores where the respondents are, and are less sensitive to poorly estimated items. Moment methods have closed forms, and a large gap between the two families is itself a sign that some common items need a look. The same idea returns when choosing anchor items in [Differential item functioning](dif.qmd) and when adding items to a bank in [Item banks and adaptive testing](item-banks-cat.qmd).
 :::
 
 ```{ojs}
@@ -408,7 +408,7 @@ The ring misses by 1.08 logits. Why? Each link's common block is the second math
 
 An item is 0.077 logits harder in the second block (SE 0.014), and 14 × 0.077 = 1.08: the position effect accounts for the gap. Most of it is at the end. An item costs 0.12 logits more in position 4, the last block of the test, than in position 1 (SE 0.034); between positions 2 and 3, either side of the break, the difference is 0.035, within its error. Per item the effect is small; fourteen links make it large.
 
-So which would I use for booklets like these, concurrent calibration or separate calibration and linking? Both assume a common item has one set of parameters wherever it appears. The concurrent fit builds that in, giving each item one difficulty averaged over its two positions; separate calibrations show whether the common items agree. I'd report from the concurrent fit, which uses all the data at once, and run separate calibrations alongside it, because only they could have shown me this position effect.
+What does each route show for booklets like these? Both assume a common item has one set of parameters wherever it appears. The concurrent fit builds that in, giving each item one difficulty averaged over its two positions, and uses all the data at once; separate calibrations show whether the common items agree, and only they could have turned up this position effect. Once it is found, the assumption becomes a term in a model, as in the mixed model above, and the data can speak to it directly.
 
 ### PIRLS 2011: nonequivalent groups, three languages
 

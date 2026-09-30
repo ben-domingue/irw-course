@@ -426,7 +426,7 @@ On the raw-score scale the model's SEM is 2.36 at 10, 1.03 at 1 and 1.49 at 25, 
 #| code-fold: show
 ```
 
-With conditional-SEM bands on $\theta$, 56.2% of the positives reach the cut, against 42.0% with CTT's. Which should a report use? CTT's band assumes the same error at every score; the model's assumes its item curves and one $\theta$ describe the data. At the cut the model's SEM is about a third larger (2.36 points against 1.74). When a score will be read against a cut, I report the band from the conditional SEM at the cut, and give the one SEM only as a summary of the scale as a whole.
+With conditional-SEM bands on $\theta$, 56.2% of the positives reach the cut, against 42.0% with CTT's. Which should a report use? CTT's band assumes the same error at every score; the model's assumes its item curves and one $\theta$ describe the data. At the cut the model's SEM is about a third larger (2.36 points against 1.74). Whether the graded model's assumptions hold well enough is a question the data can take up, for instance by checking its predictions of held-out responses ([Model fit and out-of-sample prediction](fit-prediction.qmd)). Where they hold, the conditional SEM describes the error where the decision is made, and the one SEM summarizes the scale as a whole.
 
 ```{r ojs-items}
 #| echo: false
