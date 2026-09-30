@@ -461,7 +461,7 @@ Four profiles hold 95.6% of respondents, the other four under 2% each. The four 
 
 The chain matches the full G-DINA's AIC (85,639) with 13 fewer parameters, so its BIC is better (86,045 against 86,124). But the Rasch model (AIC 85,518) and the 2PL (85,205) beat every CDM on both criteria. A four-step chain is an ordinal scale, and here the continuum describes the responses better. Both routes through the ECPE, classes without a Q-matrix and profiles with one, arrive at ordered groups. In the fraction data the Q-matrix adds information, but the model that uses it best ties the attributes to one continuum.
 
-<!-- TODO (Ben, F27): first-person verdict goes here, on the practitioner's choice of whether to fit a CDM. Candidate from the outline: "a CDM earns its keep only when the Q-matrix was designed into the test, not retrofitted to it." On hold with Ben; nothing on the page until he decides. -->
+Whether a test's attributes behave as separate skills or collapse toward one continuum, as in both datasets here, is hard to know in advance, and AIC and BIC can disagree about it. Responses the models haven't seen are the acid test: fit a CDM and a unidimensional model, compare how well each predicts held-out responses (problem 3), and let that comparison guide the choice.
 
 ## Problems
 
@@ -505,5 +505,5 @@ data_sources("cdm")
 - **Timing:** the core ideas and widgets take about 50 minutes; the real-data section is a 30-minute lab. The latent class fits take a minute or two, so run them before class.
 - **Changed from 252:** latent class analysis now comes first, as the general model; the ECPE's unrestricted classes and its four-profile chain are new. The DINA fit to the fraction data follows `c7/3_cdm.R` (same data and Q-matrix, and the same log likelihood, −4,402.3), including its randomly redrawn Q-matrix. Attributes are classified by posterior probability above 0.5 rather than by the most probable profile, because `personparm(..., "MAP")` breaks ties at random.
 - **Held back:** longitudinal CDMs (the IRW's `hmcdm_spatialreasoning` table), mixture IRT (in *Going further*) and the classification accuracy of attribute profiles are not taken up in this course. The held-out comparison and the full PVAF analysis are problem 3. `cdm_timss07` (15 attributes) is too slow for class.
-- **Verdict:** on hold with Ben (F27).
+- **Verdict:** whether the attributes are separate skills or one continuum is hard to know in advance; compare a CDM and a unidimensional model on held-out responses and let that guide the choice (F27, Ben 09-30).
 - **Solutions:** held back in `solutions/cdm.qmd` (not published). Problem 6 is open.
