@@ -211,6 +211,12 @@ frac20:
   link: https://doi.org/10.1111/1467-9876.00272
   license: GPL-3.0
   irw_version: IRW v459
+fivethirtyeight_nba_1946_2023:
+  reference: FiveThirtyEight (2023). NBA Elo ratings and game results, 1946-2023 [Data
+    set]. GitHub. https://github.com/fivethirtyeight/data/tree/master/nba-forecasts
+  link: https://github.com/fivethirtyeight/data/tree/master/nba-forecasts
+  license: CC BY 4.0
+  irw_version: IRW v485
 friedman2019_risk_disaster:
   reference: 'Friedman, Jeffrey, 2018, "Replication Data for: Priorities for Preventive
     Action: Explaining Americans'' Divergent Reactions to 100 Public Risks", https://doi.org/10.7910/DVN/ZSJA25,
@@ -448,12 +454,6 @@ mturkddm_lexical:
     53, 2302–2325 (2021). https://doi.org/10.3758/s13428-021-01573-x
   link: https://doi.org/10.3758/s13428-021-01573-x
   license: CC BY 4.0
-  irw_version: IRW v459
-nba_2012-2018:
-  reference: Rossotti, P. (2018). NBA enhanced box score and standings (2012–2018)
-    (Version 27) [Data set]. Kaggle. https://www.kaggle.com/datasets/pablote/nba-enhanced-stats
-  link: https://www.kaggle.com/datasets/pablote/nba-enhanced-stats
-  license: CC BY-SA 4.0
   irw_version: IRW v459
 nbashots_sim:
   reference: Domingue, B. W. (2026). NBA shots simulation [R script]. Item Response

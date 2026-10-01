@@ -304,28 +304,28 @@ knitr::read_chunk("code/competitions-irw.R")
 
 ### Six NBA seasons
 
-Our main example is [nba_2012-2018](https://itemresponsewarehouse.org/tables/nba_2012-2018/), every regular-season NBA game from 2012-13 to 2017-18, from box scores compiled by [Rossotti (2018)](https://www.kaggle.com/datasets/pablote/nba-enhanced-stats). Its job is to show strengths that change over time. `agent_a` is always the home team, so the outcome is keyed as 1 when the home team wins. [Download the code](code/competitions-irw.R); it needs only base R.
+Our main example is [fivethirtyeight_nba_1946_2023](https://itemresponsewarehouse.org/tables/fivethirtyeight_nba_1946_2023/), every NBA game from 1946-47 to 2022-23, from the game results FiveThirtyEight published with its own Elo ratings. We use six regular seasons, 2012-13 to 2017-18. Their job is to show strengths that change over time. `agent_a` is the home team, so the outcome is keyed as 1 when the home team wins. [Download the code](code/competitions-irw.R); it needs only base R.
 
 ```{r fetch-nba}
 #| echo: true
 #| code-fold: show
 ```
 
-The 2016-17 and 2017-18 seasons appear twice, because two source files overlap; we keep one copy of each game.
+We keep those six regular seasons and drop the dozen games played at a neutral site, so that `agent_a` is always the home team.
 
-```{r dedupe}
+```{r subset}
 #| echo: true
 #| code-fold: show
 ```
 
-That leaves 7,379 games among 30 teams, 1,230 in each season but one. Home teams won 58.6% of them.
+That leaves 7,367 games among 30 teams, about 1,230 in each season. Home teams won 58.7% of them.
 
 ```{r bt-nba}
 #| echo: true
 #| code-fold: show
 ```
 
-The home advantage is 0.39 logits (standard error 0.025): between equal teams, the home team wins with probability $\text{logistic}(0.39) \approx 0.60$. Golden State (GS) and San Antonio (SA) are strongest over the six seasons. Does the schedule adjustment matter?
+The home advantage is 0.39 logits (standard error 0.025): between equal teams, the home team wins with probability $\text{logistic}(0.39) \approx 0.60$. Golden State (GSW) and San Antonio (SAS) are strongest over the six seasons. Does the schedule adjustment matter?
 
 ```{r winpct}
 #| echo: true
@@ -339,7 +339,7 @@ Hardly: win percentage and strength correlate 0.995. Each team's expected wins e
 #| code-fold: show
 ```
 
-The strongest team changes: Miami, then San Antonio, then Golden State for three seasons, then Houston. The spread of strengths (SD 0.63 to 0.89 logits) and the home advantage (0.38 to 0.57) move less. A pooled fit gives each team one strength for all six seasons; how much does that cost when we predict?
+The strongest team changes: Miami, then San Antonio, then Golden State for three seasons, then Houston. The spread of strengths (SD 0.63 to 0.88 logits) and the home advantage (0.38 to 0.57) move less. A pooled fit gives each team one strength for all six seasons; how much does that cost when we predict?
 
 ```{ojs}
 //| echo: false
@@ -347,7 +347,7 @@ predict({
   q: "Fit on the first five seasons, predict every game of 2017-18. Which predicts best: Bradley-Terry pooled over five seasons, Bradley-Terry on 2016-17 alone, or Elo run through all the games? And does the pooled fit beat a constant that knows only the home advantage?",
   choices: ["Pooled Bradley-Terry; yes", "Bradley-Terry on the last season; yes", "Elo; yes", "Elo; no"],
   answer: "Elo; no",
-  reveal: "Elo is best (mean log likelihood −0.622 per game), then the last season alone (−0.658). The pooled fit, at −0.697, does worse than the constant (−0.681): its strengths average over teams that are no longer the teams they were."
+  reveal: "Elo is best (mean log likelihood −0.622 per game), then the last season alone (−0.658). The pooled fit, at −0.698, does worse than the constant (−0.681): its strengths average over teams that are no longer the teams they were."
 })
 ```
 
@@ -356,9 +356,9 @@ predict({
 #| code-fold: show
 ```
 
-The step size was chosen on the training seasons only: $K = 0.1$ logits (about 17 FIDE points) predicted the 2013-14 to 2016-17 games best. On 2017-18, Elo's mean log likelihood is −0.622 per game, against −0.658 for Bradley-Terry on 2016-17 alone, −0.681 for the constant and −0.697 for the pooled fit. Elo's edge over the pooled fit is 0.075 per game (standard error 0.010). The last line says why: the pooled strengths correlate only 0.33 with the strengths 2017-18 alone produces. [Glickman & Jones (2025)](https://doi.org/10.1146/annurev-statistics-040722-061813) analyse NBA outcomes with dynamic models in more depth.
+The step size was chosen on the training seasons only: $K = 0.1$ logits (about 17 FIDE points) predicted the 2013-14 to 2016-17 games best. On 2017-18, Elo's mean log likelihood is −0.622 per game, against −0.658 for Bradley-Terry on 2016-17 alone, −0.681 for the constant and −0.698 for the pooled fit. Elo's edge over the pooled fit is 0.076 per game (standard error 0.010). The last line says why: the pooled strengths correlate only 0.33 with the strengths 2017-18 alone produces. [Glickman & Jones (2025)](https://doi.org/10.1146/annurev-statistics-040722-061813) analyse NBA outcomes with dynamic models in more depth.
 
-Where does that leave the choice? It turns on whether strength stayed put over the period the data cover, and held-out games answer that directly: over these six seasons, a rating that forgets predicted 2017-18 better than the pooled fit, by 0.075 per game. Over a short, fixed window, such as one tournament or one survey, the same comparison may come out the other way, and the Bradley-Terry fit brings standard errors and explicit terms for home advantage or order. Fitting on the past and scoring predictions of what came next is a comparison you can run on any competition table, and its result is a sound basis for choosing.
+Where does that leave the choice? It turns on whether strength stayed put over the period the data cover, and held-out games answer that directly: over these six seasons, a rating that forgets predicted 2017-18 better than the pooled fit, by 0.076 per game. Over a short, fixed window, such as one tournament or one survey, the same comparison may come out the other way, and the Bradley-Terry fit brings standard errors and explicit terms for home advantage or order. Fitting on the past and scoring predictions of what came next is a comparison you can run on any competition table, and its result is a sound basis for choosing.
 
 ### One hundred risks
 
@@ -441,6 +441,6 @@ data_sources("competitions")
 
 - **Source:** new for this course (issue #86); there is no EDUC 252 class behind it. It is built on the IRW competition standard.
 - **Timing:** the core ideas and widgets take about 50 minutes; the NBA and risk analyses work as a 30-minute lab. The real-data code runs in about ten seconds, most of it the download.
-- **Data notes:** in `nba_2012-2018`, `agent_a` is always the home team (the column is `hometeam` in this table, `homefield` in the standard), and two seasons appear twice because of overlapping source files, so the code removes exact duplicates; the 2012-13 season has 1,229 games. In the Friedman tables `agent_a` is always the chosen risk, which rules out an order effect; the survey module and the position of each pair aren't in the table. The two Friedman tables are one data source, used as main example and contrast.
+- **Data notes:** `fivethirtyeight_nba_1946_2023` covers every season since 1946-47, playoffs included (`playoff` is blank in the regular season), and labels each season by the year it ends; the code relabels by the year it starts. `agent_a` is the home team except at neutral sites, where `homefield` is blank; the code drops those 12 games. The table offers longer windows than the six seasons used here, for problem 2 or for asking how far back the pooled fit stops helping. In the Friedman tables `agent_a` is always the chosen risk, which rules out an order effect; the survey module and the position of each pair aren't in the table. The two Friedman tables are one data source, used as main example and contrast.
 - **Held back:** draws modelled properly (Davidson; ordinal models), intransitivity and multidimensional strength, rater-level covariates and mixtures (problem 6), Glicko-2 and TrueSkill (Going further). Elo in adaptive learning systems is picked up in [Item banks and adaptive testing](item-banks-cat.qmd).
 - **Solutions:** held back in `solutions/competitions.qmd` (not published). Problem 6 is open.

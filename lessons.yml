@@ -452,7 +452,7 @@ lessons:
     module: beyond
     prereqs: [rasch]
     origin: {slides: [], ps: [], code: []}
-    tables: [nba_2012-2018, friedman2019_risk_harm, friedman2019_risk_disaster]
+    tables: [fivethirtyeight_nba_1946_2023, friedman2019_risk_harm, friedman2019_risk_disaster]
     status: draft
     tranche: extension
 
