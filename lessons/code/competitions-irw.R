@@ -1,23 +1,24 @@
-# Bradley-Terry and Elo with real data: nba_2012-2018, friedman2019_risk_harm and
-# friedman2019_risk_disaster from the Item Response Warehouse (competition tables,
-# irw_competitions v3.2). Runs as-is in base R; no packages, login or token needed.
-# New for this course.
+# Bradley-Terry and Elo with real data: fivethirtyeight_nba_1946_2023,
+# friedman2019_risk_harm and friedman2019_risk_disaster from the Item Response
+# Warehouse (competition tables, irw_competitions v5.0). Runs as-is in base R; no
+# packages, login or token needed. New for this course.
 
 ## ---- fetch-nba
 # Competition tables have no items. Each row is one game: agent_a, agent_b, the
-# winner ("agent_a", "agent_b" or "draw"), the date (seconds since 1970) and the
-# scores. In this table agent_a is always the home team (hometeam == "agent_a").
-nba_url <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v3_2.nba_2012-2018/rows?format=csv"
+# winner ("agent_a", "agent_b" or "draw"), the date (seconds since 1970), the scores,
+# which side was at home (homefield) and, in this table, the season (by the year it
+# ends) and the playoff round (blank in the regular season).
+nba_url <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v5_0.fivethirtyeight_nba_1946_2023/rows?format=csv"
 nba <- read.csv(nba_url)
 head(nba)
 nrow(nba)
 
-## ---- dedupe
-# The 2016-17 and 2017-18 seasons appear twice (the source files overlap), so we
-# keep one copy of each game. A season runs from October to April.
-nba <- nba[!duplicated(nba), ]
-nba$day <- as.Date(as.POSIXct(nba$date, origin = "1970-01-01", tz = "UTC"))
-nba$season <- as.integer(format(nba$day, "%Y")) - (as.integer(format(nba$day, "%m")) < 8)
+## ---- subset
+# Keep the regular seasons 2012-13 to 2017-18, and label each season by the year it
+# starts. A handful of games each season were played at a neutral site (London,
+# Mexico City); we drop them, so that agent_a is always the home team.
+nba$season <- nba$season - 1
+nba <- nba[nba$season %in% 2012:2017 & nba$playoff == "" & nba$homefield == "agent_a", ]
 nba <- nba[order(nba$date), ]
 nba$y <- as.integer(nba$winner == "agent_a")     # 1 if the home team won; no draws
 table(season = nba$season)
@@ -118,8 +119,8 @@ round(cor(bt5$theta, fit_bt(test)$theta), 2)
 # 100 public risks. Each rater saw pairs and picked one: for harm, the risk that
 # caused more harm in the past year; for disaster, the one with more potential for
 # disaster (Friedman, 2019, codebook). agent_a is always the risk the rater picked.
-harm_url <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v3_2.friedman2019_risk_harm/rows?format=csv"
-dis_url  <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v3_2.friedman2019_risk_disaster/rows?format=csv"
+harm_url <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v5_0.friedman2019_risk_harm/rows?format=csv"
+dis_url  <- "https://redivis.com/api/v1/tables/datapages.irw_competitions:v5_0.friedman2019_risk_disaster/rows?format=csv"
 harm <- read.csv(harm_url)
 disaster <- read.csv(dis_url)
 head(harm, 3)
